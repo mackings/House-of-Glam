@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/Auth/Views/signin.dart';
+import 'package:hog/Auth/Views/signup.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: Signin()
+      home: Signup()
     );
   }
 }
