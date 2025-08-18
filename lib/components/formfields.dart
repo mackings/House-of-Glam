@@ -7,12 +7,12 @@ final obscureTextProvider =
     StateProvider.family<bool, String>((ref, fieldKey) => true);
 
 class CustomTextField extends ConsumerWidget {
-  
+
   final String title;
   final String hintText;
   final IconData? prefixIcon;
   final bool isPassword;
-  final TextEditingController? controller;
+  final TextEditingController? controller; 
   final FormFieldValidator<String>? validator;
   final TextInputType keyboardType;
 
