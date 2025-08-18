@@ -37,7 +37,7 @@ class CustomTextField extends ConsumerWidget {
 
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: screenWidth * 0.05,
+        horizontal: screenWidth * 0.00,
         vertical: 10,
       ),
       child: Column(

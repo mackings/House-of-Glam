@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
+import 'package:hog/components/texts.dart';
 
 
 class Signin extends ConsumerStatefulWidget {
@@ -11,6 +13,8 @@ class Signin extends ConsumerStatefulWidget {
 }
 
 class _SigninState extends ConsumerState<Signin> {
+
+  bool rememberMe = false;
   late TextEditingController emailController;
   late TextEditingController passwordController;
 
@@ -39,7 +43,6 @@ class _SigninState extends ConsumerState<Signin> {
       return;
     }
 
-    // 🔑 Replace with Riverpod AuthProvider or API call later
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("Signing in as $email")),
     );
@@ -48,6 +51,7 @@ class _SigninState extends ConsumerState<Signin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -85,26 +89,47 @@ class _SigninState extends ConsumerState<Signin> {
                 fieldKey: "password",
                 controller: passwordController,
               ),
-              const SizedBox(height: 30),
 
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _handleSignin,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Checkbox(
+                      value: rememberMe,
+                      onChanged: (value) {
+                        setState(() {
+                          rememberMe = value ?? false;
+                        });
+                      },
+                      activeColor: Colors.black,
                     ),
-                  ),
-                  child: const Text(
-                    "Sign In",
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                    const CustomText("Remember me")
+                  ],
                 ),
-              ),
+
+                GestureDetector(
+                  onTap: () {
+                    print("Forgot Password tapped");
+            
+                  },
+                  child: CustomText("Forgot password")
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 50),
+
+       CustomButton(
+  title: "Login",
+  isOutlined: false,
+  onPressed: () {
+    print("Login pressed");
+  },
+),
+
+
+
             ],
           ),
         ),
