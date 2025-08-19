@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hog/App/Home/Views/dashboard.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
-
+import 'package:hog/constants/navcontroller.dart';
 
 class Signin extends ConsumerStatefulWidget {
   const Signin({super.key});
@@ -13,7 +14,6 @@ class Signin extends ConsumerStatefulWidget {
 }
 
 class _SigninState extends ConsumerState<Signin> {
-
   bool rememberMe = false;
   late TextEditingController emailController;
   late TextEditingController passwordController;
@@ -43,9 +43,9 @@ class _SigninState extends ConsumerState<Signin> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Signing in as $email")),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("Signing in as $email")));
   }
 
   @override
@@ -64,8 +64,8 @@ class _SigninState extends ConsumerState<Signin> {
               Text(
                 "Sign In",
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 30),
 
@@ -78,9 +78,7 @@ class _SigninState extends ConsumerState<Signin> {
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
               ),
-              const SizedBox(height: 20),
 
-   
               CustomTextField(
                 title: "Password",
                 hintText: "Enter your password",
@@ -90,46 +88,42 @@ class _SigninState extends ConsumerState<Signin> {
                 controller: passwordController,
               ),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Checkbox(
-                      value: rememberMe,
-                      onChanged: (value) {
-                        setState(() {
-                          rememberMe = value ?? false;
-                        });
-                      },
-                      activeColor: Colors.black,
-                    ),
-                    const CustomText("Remember me")
-                  ],
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: rememberMe,
+                        onChanged: (value) {
+                          setState(() {
+                            rememberMe = value ?? false;
+                          });
+                        },
+                        activeColor: Colors.black,
+                      ),
+                      const CustomText("Remember me"),
+                    ],
+                  ),
 
-                GestureDetector(
-                  onTap: () {
-                    print("Forgot Password tapped");
-            
-                  },
-                  child: CustomText("Forgot password")
-                ),
-              ],
-            ),
+                  GestureDetector(
+                    onTap: () {
+                      print("Forgot Password tapped");
+                    },
+                    child: CustomText("Forgot password"),
+                  ),
+                ],
+              ),
 
-            const SizedBox(height: 50),
+              const SizedBox(height: 50),
 
-       CustomButton(
-  title: "Login",
-  isOutlined: false,
-  onPressed: () {
-    print("Login pressed");
-  },
-),
-
-
-
+              CustomButton(
+                title: "Login",
+                isOutlined: false,
+                onPressed: () {
+                  NavigationController.push(Home());
+                },
+              ),
             ],
           ),
         ),

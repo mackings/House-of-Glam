@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hog/Auth/Views/signin.dart';
-import 'package:hog/Auth/Views/signup.dart';
+import 'package:hog/App/Auth/Views/signin.dart';
+import 'package:hog/App/Auth/Views/signup.dart';
+import 'package:hog/constants/navcontroller.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -33,7 +34,8 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: Signup()
+      home: Signup(),
+      navigatorKey: NavigationController.navigatorKey,
     );
   }
 }

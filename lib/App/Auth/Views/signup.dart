@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hog/Auth/Views/signin.dart';
+import 'package:hog/App/Auth/Views/signin.dart';
 import 'package:hog/components/alerts.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
@@ -157,13 +157,14 @@ const SizedBox(height: 20),
   TopAlert.show(
   context,
   title: "Heads up",
-  message: "Profile updated successfully.",
+  message: "Login successful",
   type: TopAlertType.info,
 );
-                      // Navigator.pushReplacement(
-                      //   context,
-                      //   MaterialPageRoute(builder: (_) => const Signin()),
-                      // );
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const Signin()),
+                      );
                     },
                     child: CustomText(
                       "Login",
