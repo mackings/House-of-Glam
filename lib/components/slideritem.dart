@@ -1,29 +1,28 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter/material.dart';
 
 class CarouselItemWidget extends StatelessWidget {
   final String title;
-  final String imageUrl; // new: image support
+  final String assetImage; // change: only asset images
   final double borderRadius;
 
   const CarouselItemWidget({
     Key? key,
     required this.title,
-    required this.imageUrl,
+    required this.assetImage,
     this.borderRadius = 16,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12),
+      margin: const EdgeInsets.symmetric(horizontal: 9),
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(borderRadius),
         image: DecorationImage(
-          image: NetworkImage(imageUrl),
-          fit: BoxFit.cover,
+          image: AssetImage(assetImage), // 👈 use AssetImage
+          fit: BoxFit.fill,
         ),
       ),
       child: Container(
@@ -32,7 +31,7 @@ class CarouselItemWidget extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(borderRadius),
           gradient: LinearGradient(
-            colors: [Colors.black.withOpacity(0.6), Colors.transparent],
+            colors: [Colors.black.withOpacity(0.7), Colors.transparent],
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
           ),
@@ -56,3 +55,4 @@ class CarouselItemWidget extends StatelessWidget {
     );
   }
 }
+
