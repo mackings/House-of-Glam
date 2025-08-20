@@ -4,6 +4,7 @@ import 'package:hog/App/Home/Views/dashboard.dart';
 import 'package:hog/components/alerts.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
+import 'package:hog/components/index.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/navcontroller.dart';
 
@@ -129,7 +130,7 @@ class _SigninState extends ConsumerState<Signin> {
   message: "Login successful",
   type: TopAlertType.info,
 );
-                  NavigationController.push(Home());
+                  NavigationController.push(MainPage());
                 },
               ),
             ],
