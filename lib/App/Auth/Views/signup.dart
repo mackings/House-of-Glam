@@ -154,13 +154,6 @@ const SizedBox(height: 20),
                   GestureDetector(
                     onTap: () {
 
-  TopAlert.show(
-  context,
-  title: "Heads up",
-  message: "Login successful",
-  type: TopAlertType.info,
-);
-
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (_) => const Signin()),

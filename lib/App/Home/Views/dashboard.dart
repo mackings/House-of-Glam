@@ -58,6 +58,7 @@ CustomSearchBar(
 
 const SizedBox(height: 30),
 
+
 CarouselSlider(
   height: 180,
   items: const [
@@ -83,8 +84,6 @@ CarouselItemWidget(
         ),
   ],
 ),
-
-
 
             const SizedBox(height: 30),
 
