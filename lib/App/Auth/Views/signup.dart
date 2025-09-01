@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
+import 'package:hog/App/Auth/Views/verify.dart';
+import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/alerts.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
@@ -59,15 +61,18 @@ class _SignupState extends ConsumerState<Signup> {
     }
 
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Passwords do not match")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Passwords do not match")));
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Creating account for $fullname")),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("Creating account for $fullname")));
+
+    Nav.push(context, Verify());
+    
   }
 
   @override
@@ -86,8 +91,8 @@ class _SignupState extends ConsumerState<Signup> {
               Text(
                 "Sign Up",
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 30),
 
@@ -137,7 +142,7 @@ class _SignupState extends ConsumerState<Signup> {
                 controller: confirmPasswordController,
               ),
 
-const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               CustomButton(
                 title: "Create Account",
@@ -153,16 +158,12 @@ const SizedBox(height: 20),
                   const CustomText("Existing user? "),
                   GestureDetector(
                     onTap: () {
-
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (_) => const Signin()),
                       );
                     },
-                    child: CustomText(
-                      "Login",
-                      fontWeight: FontWeight.bold,
-                    ),
+                    child: CustomText("Login", fontWeight: FontWeight.bold),
                   ),
                 ],
               ),

@@ -10,6 +10,8 @@ import 'package:hog/components/sliders.dart';
 import 'package:hog/components/texts.dart';
 
 
+
+
 class Home extends ConsumerStatefulWidget {
   const Home({super.key});
 
@@ -37,7 +39,7 @@ class _HomeState extends ConsumerState<Home> {
       {
         "name": "Mary Smith",
         "specialty": "Agbada",
-        "image": "https://i.pravatar.cc/150?img=6"
+        "image": "https://i.pravatar.cc/150?img=5"
       },
       {
         "name": "James Lee",
@@ -105,10 +107,7 @@ const SizedBox(height: 30),
 CarouselSlider(
   height: 150,
   items: const [
-CarouselItemWidget(
-          title: "",
-           assetImage: 'assets/Img/suits.png',
-        ),
+
         CarouselItemWidget(
           title: "",
           assetImage: 'assets/Img/agbada.png',
@@ -121,9 +120,9 @@ CarouselItemWidget(
           title: "",
           assetImage: 'assets/Img/kaftan.png',
         ),
-        CarouselItemWidget(
+CarouselItemWidget(
           title: "",
-          assetImage: 'assets/Img/corporate.png',
+           assetImage: 'assets/Img/suits.png',
         ),
   ],
 ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hog/App/Auth/Views/forgotpassword.dart';
 import 'package:hog/App/Home/Views/dashboard.dart';
+import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/alerts.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
@@ -110,7 +112,7 @@ class _SigninState extends ConsumerState<Signin> {
 
                   GestureDetector(
                     onTap: () {
-                      print("Forgot Password tapped");
+                      Nav.push(context, ForgotPassword());
                     },
                     child: CustomText("Forgot password"),
                   ),
@@ -123,13 +125,12 @@ class _SigninState extends ConsumerState<Signin> {
                 title: "Login",
                 isOutlined: false,
                 onPressed: () {
-
-  TopAlert.show(
-  context,
-  title: "Heads up",
-  message: "Login successful",
-  type: TopAlertType.info,
-);
+                  TopAlert.show(
+                    context,
+                    title: "Heads up",
+                    message: "Login successful",
+                    type: TopAlertType.info,
+                  );
                   NavigationController.push(MainPage());
                 },
               ),
