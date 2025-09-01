@@ -58,23 +58,22 @@ class _SigninState extends ConsumerState<Signin> {
 
     setState(() => isLoading = false);
 
-    if (response["success"]) {
-    
-      if (rememberMe) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("token", response["token"]);
-      }
+if (response["success"]) {
 
-      await showSuccessDialog(context, "Login successful!");
+  final token = response["token"] as String?; // safe cast
+  if (rememberMe && token != null) {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("token", token);
+  }
 
-  
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainPage()),
-      );
-    } else {
-      await showErrorDialog(context, response["error"]);
-    }
+  await showSuccessDialog(context, "Login successful!");
+
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (_) => const MainPage()),
+  );
+}
+
   }
 
   @override
