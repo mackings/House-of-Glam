@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hog/App/Auth/Api/authclass.dart';
 import 'package:hog/App/Auth/Views/forgotpassword.dart';
-import 'package:hog/App/Home/Views/dashboard.dart';
 import 'package:hog/components/Navigator.dart';
-import 'package:hog/components/alerts.dart';
 import 'package:hog/components/button.dart';
+import 'package:hog/components/dialogs.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/index.dart';
+import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
-import 'package:hog/constants/navcontroller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+
+
 
 class Signin extends ConsumerStatefulWidget {
   const Signin({super.key});
@@ -21,6 +25,7 @@ class _SigninState extends ConsumerState<Signin> {
   bool rememberMe = false;
   late TextEditingController emailController;
   late TextEditingController passwordController;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -36,7 +41,7 @@ class _SigninState extends ConsumerState<Signin> {
     super.dispose();
   }
 
-  void _handleSignin() {
+  Future<void> _handleSignin() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
@@ -47,94 +52,109 @@ class _SigninState extends ConsumerState<Signin> {
       return;
     }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text("Signing in as $email")));
+    setState(() => isLoading = true);
+
+    final response = await ApiService.login(email: email, password: password);
+
+    setState(() => isLoading = false);
+
+    if (response["success"]) {
+    
+      if (rememberMe) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("token", response["token"]);
+      }
+
+      await showSuccessDialog(context, "Login successful!");
+
+  
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainPage()),
+      );
+    } else {
+      await showErrorDialog(context, response["error"]);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
+    return LoadingOverlay(
+      isLoading: isLoading,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 40),
 
-              // Title
-              Text(
-                "Sign In",
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              // Email Field
-              CustomTextField(
-                title: "Email",
-                hintText: "Enter your email",
-                prefixIcon: Icons.email,
-                fieldKey: "email",
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-              ),
-
-              CustomTextField(
-                title: "Password",
-                hintText: "Enter your password",
-                prefixIcon: Icons.lock,
-                isPassword: true,
-                fieldKey: "password",
-                controller: passwordController,
-              ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: rememberMe,
-                        onChanged: (value) {
-                          setState(() {
-                            rememberMe = value ?? false;
-                          });
-                        },
-                        activeColor: Colors.black,
+                // Title
+                Text(
+                  "Sign In",
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                      const CustomText("Remember me"),
-                    ],
-                  ),
+                ),
+                const SizedBox(height: 30),
 
-                  GestureDetector(
-                    onTap: () {
-                      Nav.push(context, ForgotPassword());
-                    },
-                    child: CustomText("Forgot password"),
-                  ),
-                ],
-              ),
+                // Email Field
+                CustomTextField(
+                  title: "Email",
+                  hintText: "Enter your email",
+                  prefixIcon: Icons.email,
+                  fieldKey: "email",
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                ),
 
-              const SizedBox(height: 50),
+                CustomTextField(
+                  title: "Password",
+                  hintText: "Enter your password",
+                  prefixIcon: Icons.lock,
+                  isPassword: true,
+                  fieldKey: "password",
+                  controller: passwordController,
+                ),
 
-              CustomButton(
-                title: "Login",
-                isOutlined: false,
-                onPressed: () {
-                  TopAlert.show(
-                    context,
-                    title: "Heads up",
-                    message: "Login successful",
-                    type: TopAlertType.info,
-                  );
-                  NavigationController.push(MainPage());
-                },
-              ),
-            ],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: rememberMe,
+                          onChanged: (value) {
+                            setState(() {
+                              rememberMe = value ?? false;
+                            });
+                          },
+                          activeColor: Colors.black,
+                        ),
+                        const CustomText("Remember me"),
+                      ],
+                    ),
+
+                    GestureDetector(
+                      onTap: () {
+                        Nav.push(context, ForgotPassword());
+                      },
+                      child: const CustomText("Forgot password"),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 50),
+
+                CustomButton(
+                  title: "Login",
+                  isOutlined: false,
+                  onPressed: _handleSignin,
+                ),
+              ],
+            ),
           ),
         ),
       ),

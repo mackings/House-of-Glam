@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hog/App/Auth/Api/authclass.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
 import 'package:hog/App/Auth/Views/verify.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/alerts.dart';
 import 'package:hog/components/button.dart';
+import 'package:hog/components/dialogs.dart';
 import 'package:hog/components/formfields.dart';
+import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
+
 
 class Signup extends ConsumerStatefulWidget {
   const Signup({super.key});
@@ -20,7 +24,9 @@ class _SignupState extends ConsumerState<Signup> {
   late TextEditingController emailController;
   late TextEditingController phoneController;
   late TextEditingController passwordController;
-  late TextEditingController confirmPasswordController;
+  late TextEditingController addressController;
+
+  bool isLoading = false; // for loading overlay
 
   @override
   void initState() {
@@ -29,7 +35,7 @@ class _SignupState extends ConsumerState<Signup> {
     emailController = TextEditingController();
     phoneController = TextEditingController();
     passwordController = TextEditingController();
-    confirmPasswordController = TextEditingController();
+    addressController = TextEditingController();
   }
 
   @override
@@ -38,136 +44,147 @@ class _SignupState extends ConsumerState<Signup> {
     emailController.dispose();
     phoneController.dispose();
     passwordController.dispose();
-    confirmPasswordController.dispose();
+    addressController.dispose();
     super.dispose();
   }
 
-  void _handleSignup() {
+  Future<void> _handleSignup() async {
     final fullname = fullnameController.text.trim();
     final email = emailController.text.trim();
     final phone = phoneController.text.trim();
     final password = passwordController.text.trim();
-    final confirmPassword = confirmPasswordController.text.trim();
+    final address = addressController.text.trim();
 
     if (fullname.isEmpty ||
         email.isEmpty ||
         phone.isEmpty ||
         password.isEmpty ||
-        confirmPassword.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill in all fields")),
-      );
+        address.isEmpty) {
+      await showErrorDialog(context, "Please fill in all fields");
       return;
     }
 
-    if (password != confirmPassword) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Passwords do not match")));
-      return;
+    setState(() => isLoading = true);
+
+    final response = await ApiService.signup(
+      fullName: fullname,
+      email: email,
+      password: password,
+      phoneNumber: phone,
+      address: address,
+      role: "user", // or tailor
+    );
+
+    setState(() => isLoading = false);
+
+    if (response["success"]) {
+      await showSuccessDialog(context, "Account created successfully!");
+      Nav.push(context, Verify());
+    } else {
+      await showErrorDialog(context, response["error"]);
     }
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text("Creating account for $fullname")));
-
-    Nav.push(context, Verify());
-    
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 10),
+    return LoadingOverlay(
+      isLoading: isLoading,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 10),
 
-              // Title
-              Text(
-                "Sign Up",
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                // Title
+                Text(
+                  "Sign Up",
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
-              ),
-              const SizedBox(height: 30),
+                const SizedBox(height: 30),
 
-              // Full Name Field
-              CustomTextField(
-                title: "Full Name",
-                hintText: "Enter your full name",
-                prefixIcon: Icons.person,
-                fieldKey: "fullname",
-                controller: fullnameController,
-                keyboardType: TextInputType.name,
-              ),
+                // Full Name Field
+                CustomTextField(
+                  title: "Full Name",
+                  hintText: "Enter your full name",
+                  prefixIcon: Icons.person,
+                  fieldKey: "fullname",
+                  controller: fullnameController,
+                  keyboardType: TextInputType.name,
+                ),
 
-              CustomTextField(
-                title: "Email",
-                hintText: "Enter your email",
-                prefixIcon: Icons.email,
-                fieldKey: "email",
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-              ),
+                CustomTextField(
+                  title: "Email",
+                  hintText: "Enter your email",
+                  prefixIcon: Icons.email,
+                  fieldKey: "email",
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                ),
 
-              CustomTextField(
-                title: "Phone",
-                hintText: "Enter your phone number",
-                prefixIcon: Icons.phone,
-                fieldKey: "phone",
-                controller: phoneController,
-                keyboardType: TextInputType.phone,
-              ),
+                CustomTextField(
+                  title: "Phone",
+                  hintText: "Enter your phone number",
+                  prefixIcon: Icons.phone,
+                  fieldKey: "phone",
+                  controller: phoneController,
+                  keyboardType: TextInputType.phone,
+                ),
 
-              CustomTextField(
-                title: "Password",
-                hintText: "Enter your password",
-                prefixIcon: Icons.lock,
-                isPassword: true,
-                fieldKey: "password",
-                controller: passwordController,
-              ),
+                CustomTextField(
+                  title: "Address",
+                  hintText: "Enter your Address",
+                  prefixIcon: Icons.house,
+                  fieldKey: "address",
+                  controller: addressController,
+                ),
 
-              CustomTextField(
-                title: "Confirm Password",
-                hintText: "Re-enter your password",
-                prefixIcon: Icons.lock,
-                isPassword: true,
-                fieldKey: "confirm_password",
-                controller: confirmPasswordController,
-              ),
+                CustomTextField(
+                  title: "Password",
+                  hintText: "Enter your password",
+                  prefixIcon: Icons.lock,
+                  isPassword: true,
+                  fieldKey: "password",
+                  controller: passwordController,
+                ),
 
-              const SizedBox(height: 20),
 
-              CustomButton(
-                title: "Create Account",
-                isOutlined: false,
-                onPressed: _handleSignup,
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // Existing user? Login
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CustomText("Existing user? "),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const Signin()),
-                      );
-                    },
-                    child: CustomText("Login", fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ],
+                CustomButton(
+                  title: "Create Account",
+                  isOutlined: false,
+                  onPressed: _handleSignup,
+                ),
+                const SizedBox(height: 20),
+
+                // Existing user? Login
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CustomText("Existing user? "),
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const Signin()),
+                        );
+                      },
+                      child: CustomText(
+                        "Login",
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
