@@ -108,6 +108,8 @@ class _SignupState extends ConsumerState<Signup> {
                 ),
                 const SizedBox(height: 30),
 
+
+
                 // Full Name Field
                 CustomTextField(
                   title: "Full Name",
