@@ -60,8 +60,7 @@ class _SigninState extends ConsumerState<Signin> {
 
 
 if (response["success"]) {
-
-  final token = response["token"] as String?; // safe cast
+  final token = response["token"] as String?;
   if (rememberMe && token != null) {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString("token", token);
@@ -73,7 +72,10 @@ if (response["success"]) {
     context,
     MaterialPageRoute(builder: (_) => const MainPage()),
   );
+} else {
+  await showErrorDialog(context, response["error"] ?? "Something went wrong");
 }
+
 
   }
 
