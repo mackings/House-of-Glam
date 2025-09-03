@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:http/http.dart' as http;
 
 
@@ -33,12 +34,22 @@ class ApiService {
   }
 
   /// 🔹 Login
-  static Future<Map<String, dynamic>> login({
-    required String email,
-    required String password,
-  }) async {
-    return await postRequest("user/login", {"email": email, "password": password});
+static Future<Map<String, dynamic>> login({
+  required String email,
+  required String password,
+}) async {
+  final result = await postRequest("user/login", {
+    "email": email,
+    "password": password,
+  });
+
+  if (result["success"] == true) {
+    final token = result["data"]["token"];
+    await SecurePrefs.saveToken(token); 
   }
+
+  return result;
+}
 
   /// 🔹 Sign up
   static Future<Map<String, dynamic>> signup({
