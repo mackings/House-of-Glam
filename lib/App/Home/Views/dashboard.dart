@@ -151,59 +151,57 @@ Future<void> _fetchCategories() async {
               ),
 
               const SizedBox(height: 30),
-
-              SizedBox(
-                height: 120,
-                child: _isLoadingCategories
-                    ? const Center(child: CircularProgressIndicator())
-                    : ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _categories.length,
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
-                        itemBuilder: (context, index) {
-                          final cat = _categories[index];
-                          return GestureDetector(
-                            onTap: () {
-                              print("Tapped category ${cat.name}");
-                            },
-                            child: Column(
-                              children: [
-                                Container(
-                                  width: 80,
-                                  height: 80,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16),
-                                    image: DecorationImage(
-                                      image: NetworkImage(
-                                        cat.image?.isNotEmpty == true
-                                            ? cat.image!
-                                            : "https://via.placeholder.com/150",
-                                      ),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                SizedBox(
-                                  width: 80,
-                                  child: Text(
-                                    cat.name?.isNotEmpty == true ? cat.name! : "Unnamed",
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+SizedBox(
+  height: 120,
+  child: _isLoadingCategories
+      ? const Center(child: CircularProgressIndicator())
+      : ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: _categories.length,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          separatorBuilder: (_, __) => const SizedBox(width: 12),
+          itemBuilder: (context, index) {
+            final cat = _categories[index];
+            return GestureDetector(
+              onTap: () {
+                print("Tapped category ${cat.name}");
+              },
+              child: Column(
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      image: DecorationImage(
+                        image: NetworkImage(
+                          cat.image?.isNotEmpty == true
+                              ? cat.image!
+                              : "https://via.placeholder.com/150",
+                        ),
+                        fit: BoxFit.cover,
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: 80,
+                    child: CustomText(
+                      cat.name?.isNotEmpty == true ? cat.name! : "Unnamed",
+                      textAlign: TextAlign.center,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
+            );
+          },
+        ),
+),
+
 
               const SizedBox(height: 20),
 
@@ -249,7 +247,7 @@ Future<void> _fetchCategories() async {
                               "https://i.pravatar.cc/150?img=5",
                           onTap: () {
                             print("Tapped on ${tailor.user?.fullName}");
-                          },
+                          }, id: tailor.id,
                         );
                       },
                     ),
