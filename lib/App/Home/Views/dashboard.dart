@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Home/Api/home.dart';
 import 'package:hog/App/Home/Model/category.dart';
 import 'package:hog/App/Home/Model/tailor.dart';
+import 'package:hog/App/Home/Views/alltailors.dart';
 import 'package:hog/components/Tailors/tailorcard.dart';
-import 'package:hog/components/categoryslider.dart';
 import 'package:hog/components/header.dart';
 import 'package:hog/components/search.dart';
 import 'package:hog/components/slideritem.dart';
@@ -20,9 +20,9 @@ class Home extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _HomeState();
 }
 
+
 class _HomeState extends ConsumerState<Home> {
   TextEditingController searchController = TextEditingController();
-  int _selectedIndex = 0;
 
   List<Tailor> _tailors = [];
   List<Category> _categories = [];
@@ -32,7 +32,6 @@ class _HomeState extends ConsumerState<Home> {
 
   void _onNavTap(int index) {
     setState(() {
-      _selectedIndex = index;
     });
   }
 
@@ -58,6 +57,8 @@ class _HomeState extends ConsumerState<Home> {
     }
   }
 
+
+
 Future<void> _fetchCategories() async {
   try {
     final categories = await HomeApiService.getAllCategories();
@@ -77,6 +78,11 @@ Future<void> _fetchCategories() async {
     });
   }
 }
+
+
+
+
+
 
   @override
   void dispose() {
@@ -151,6 +157,7 @@ Future<void> _fetchCategories() async {
               ),
 
               const SizedBox(height: 30),
+
 SizedBox(
   height: 120,
   child: _isLoadingCategories
@@ -209,17 +216,32 @@ SizedBox(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   CustomText("Top rated Tailors", fontSize: 16, fontWeight: FontWeight.w500),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.purple,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                      child: CustomText("See all",
-                          fontSize: 15, fontWeight: FontWeight.w500, color: Colors.white),
-                    ),
-                  ),
+Container(
+  decoration: BoxDecoration(
+    color: Colors.purple,
+    borderRadius: BorderRadius.circular(8),
+  ),
+  child: InkWell(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => Alltailors(tailors: _tailors),
+        ),
+      );
+    },
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+      child: CustomText(
+        "See all",
+        fontSize: 15,
+        fontWeight: FontWeight.w500,
+        color: Colors.white,
+      ),
+    ),
+  ),
+)
+
                 ],
               ),
 

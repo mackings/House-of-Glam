@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Auth/Api/authclass.dart';
 import 'package:hog/App/Auth/Views/resetpassword.dart';
+import 'package:hog/App/Auth/Views/verify.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/customAppbar.dart';
@@ -9,9 +10,6 @@ import 'package:hog/components/dialogs.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
-
-
-
 
 class ForgotPassword extends ConsumerStatefulWidget {
   const ForgotPassword({super.key});
@@ -51,7 +49,10 @@ class _ForgotPasswordState extends ConsumerState<ForgotPassword> {
     setState(() => isLoading = false);
 
     if (response["success"]) {
-      await showSuccessDialog(context, "Password reset token sent to your email");
+      await showSuccessDialog(
+        context,
+        "Password reset token sent to your email",
+      );
       // Navigate to reset password page and pass email
       Nav.push(context, Resetpassword(email: email));
     } else {
@@ -71,10 +72,15 @@ class _ForgotPasswordState extends ConsumerState<ForgotPassword> {
             child: Column(
               children: [
                 const SizedBox(height: 30),
-                const CustomText(
-                  "Enter your email to receive a password reset token",
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
+                GestureDetector(
+                  onTap: () {
+                    Nav.push(context, Verify());
+                  },
+                  child: const CustomText(
+                    "Enter your email to receive a password reset token",
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 const SizedBox(height: 30),
                 CustomTextField(

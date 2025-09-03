@@ -6,6 +6,7 @@ import 'package:hog/App/Auth/Views/verify.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/alerts.dart';
 import 'package:hog/components/button.dart';
+import 'package:hog/components/customAppbar.dart';
 import 'package:hog/components/dialogs.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
