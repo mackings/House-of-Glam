@@ -6,6 +6,8 @@ import 'package:hog/components/texts.dart';
 
 
 
+
+
 class Alltailors extends ConsumerStatefulWidget {
   final List<Tailor> tailors;
 
