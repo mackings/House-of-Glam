@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Home/Model/category.dart';
 import 'package:hog/App/Home/Model/tailor.dart';
+import 'package:hog/App/Home/Model/vendor.dart';
 import 'package:http/http.dart' as http;
 
 
 
 class HomeApiService {
+
+
   static const String baseUrl = "https://hog-ymud.onrender.com/api/v1";
 
   static Future<List<Tailor>> getAllTailors() async {
@@ -62,5 +65,35 @@ class HomeApiService {
 
     return [];
   }
+
+
+  static Future<VendorDetailsResponse?> getVendorDetails(String vendorId) async {
+    try {
+      final token = await SecurePrefs.getToken(); // retrieve token
+      final url = Uri.parse("$baseUrl/material/getVendorDetails?vendorId=$vendorId");
+
+      final response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token", // pass token
+        },
+      );
+
+      print("➡️ GET Request: $url");
+      print("⬅️ Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return VendorDetailsResponse.fromJson(jsonDecode(response.body));
+      }
+    } catch (e) {
+      print("❌ Error fetching vendor details: $e");
+    }
+
+    return null;
+  }
+
+
+
 }
 

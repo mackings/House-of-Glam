@@ -4,6 +4,7 @@ import 'package:hog/App/Home/Api/home.dart';
 import 'package:hog/App/Home/Model/category.dart';
 import 'package:hog/App/Home/Model/tailor.dart';
 import 'package:hog/App/Home/Views/alltailors.dart';
+import 'package:hog/App/Tailors/details.dart';
 import 'package:hog/components/Tailors/tailorcard.dart';
 import 'package:hog/components/header.dart';
 import 'package:hog/components/search.dart';
@@ -267,9 +268,29 @@ Container(
                           imageUrl: tailor.user?.image ??
                               tailor.nepaBill ??
                               "https://i.pravatar.cc/150?img=5",
-                          onTap: () {
-                            print("Tapped on ${tailor.user?.fullName}");
-                          }, id: tailor.id,
+onTap: () async {
+  print("Tapped on ${tailor.id}");
+
+  // fetch vendor details from API
+  final vendorDetails = await HomeApiService.getVendorDetails(tailor.id);
+
+  if (vendorDetails != null) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Details(
+          vendor: vendorDetails.vendor,
+          userProfile: vendorDetails.userProfile,
+        ),
+      ),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Failed to load tailor details")),
+    );
+  }
+},
+id: tailor.id,
                         );
                       },
                     ),
