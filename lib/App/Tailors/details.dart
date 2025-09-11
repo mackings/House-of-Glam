@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Home/Model/vendor.dart';
+import 'package:hog/components/texts.dart';
 
 
 
@@ -47,9 +48,10 @@ class _DetailsState extends State<Details> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(vendor.businessName),
+        iconTheme: IconThemeData(color: Colors.white),
+        title: CustomText("${vendor.businessName}",color: Colors.white,fontSize: 20,),
         centerTitle: true,
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.purple,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -129,12 +131,9 @@ floatingActionButton: Padding(
         );
       },
       icon: const Icon(Icons.design_services, color: Colors.white),
-      label: const Text(
-        "Hire Designer",
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
+      label: const CustomText("Hire Designer",color: Colors.white,),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.purple,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),

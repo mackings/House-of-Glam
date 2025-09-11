@@ -15,7 +15,7 @@ class CustomBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = [
       {"icon": Icons.home, "label": "Home"},
-      {"icon": Icons.search, "label": "Search"},
+      {"icon": Icons.card_travel, "label": "Sew"},
       {"icon": Icons.favorite, "label": "Wishlist"},
       {"icon": Icons.person, "label": "Profile"},
     ];
