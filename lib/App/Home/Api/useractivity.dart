@@ -21,7 +21,7 @@ class UserActivityService {
   }) async {
     try {
       final token = await SecurePrefs.getToken();
-      final attireId = await SecurePrefs.getAttireId(); // store attireId in prefs
+      final attireId = await SecurePrefs.getAttireId(); 
 
       final url = Uri.parse("$baseUrl/material/createMaterial/$attireId");
 
