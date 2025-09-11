@@ -28,4 +28,16 @@ class Category {
       v: json["__v"] ?? 0,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "_id": id,
+      "name": name,
+      "description": description,
+      "image": image,
+      "createdAt": createdAt,
+      "updatedAt": updatedAt,
+      "__v": v,
+    };
+  }
 }

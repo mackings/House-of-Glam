@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hog/App/Home/Views/Sew.dart';
+import 'package:hog/App/Home/Views/Placeorder.dart';
 import 'package:hog/App/Home/Views/dashboard.dart';
 import 'package:hog/components/navbar.dart';
 
@@ -17,7 +17,7 @@ class _MainPageState extends State<MainPage> {
 
   final List<Widget> _pages = const [
     Home(), 
-    Sew()
+    PlaceOrder()
 
   ];
 

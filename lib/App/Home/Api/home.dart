@@ -39,32 +39,40 @@ class HomeApiService {
     return [];
   }
 
-  static Future<List<Category>> getAllCategories() async {
-    try {
-      final token = await SecurePrefs.getToken(); // retrieve token
-      final url = Uri.parse("$baseUrl/category/getAllCategories");
 
-      final response = await http.get(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token", // pass token
-        },
-      );
 
-      print("➡️ GET Request: $url");
-      print("⬅️ Response: ${response.body}");
+static Future<List<Category>> getAllCategories() async {
+  try {
+    final token = await SecurePrefs.getToken();
+    final url = Uri.parse("$baseUrl/category/getAllCategories");
 
-      if (response.statusCode == 200) {
-        final List<dynamic> categoriesJson = jsonDecode(response.body)["data"] ?? [];
-        return categoriesJson.map((c) => Category.fromJson(c)).toList();
-      }
-    } catch (e) {
-      print("❌ Error fetching categories: $e");
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    print("➡️ GET Request: $url");
+    print("⬅️ Response: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final List<dynamic> categoriesJson = jsonDecode(response.body)["data"] ?? [];
+      final categories = categoriesJson.map((c) => Category.fromJson(c)).toList();
+
+      // Save to prefs ✅
+      await SecurePrefs.saveCategories(categories);
+
+      return categories;
     }
-
-    return [];
+  } catch (e) {
+    print("❌ Error fetching categories: $e");
   }
+
+  return [];
+}
+
 
 
   static Future<VendorDetailsResponse?> getVendorDetails(String vendorId) async {
@@ -92,8 +100,6 @@ class HomeApiService {
 
     return null;
   }
-
-
 
 }
 
