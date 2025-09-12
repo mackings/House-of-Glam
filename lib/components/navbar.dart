@@ -16,8 +16,9 @@ class CustomBottomNavBar extends StatelessWidget {
     
     final items = [
       {"icon": Icons.home, "label": "Home"},
-      {"icon": Icons.card_travel, "label": "Place order"},
-      {"icon": Icons.category_rounded, "label": "Quotes"},
+      {"icon": Icons.card_travel, "label": "Order"},
+      {"icon": Icons.history, "label": "History"},
+      {"icon": Icons.messenger_outline_sharp, "label": "Quotes"},
       {"icon": Icons.person, "label": "Profile"},
     ];
 

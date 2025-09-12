@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hog/App/Home/Views/Placeorder.dart';
+import 'package:hog/App/Home/Views/Orders/OrderHistory.dart';
+import 'package:hog/App/Home/Views/Orders/Placeorder.dart';
 import 'package:hog/App/Home/Views/allreviews.dart';
 import 'package:hog/App/Home/Views/dashboard.dart';
 import 'package:hog/components/navbar.dart';
@@ -19,6 +20,7 @@ class _MainPageState extends State<MainPage> {
   final List<Widget> _pages = const [
     Home(), 
     PlaceOrder(),
+    OrderHistory(),
     AllReviews()
 
   ];

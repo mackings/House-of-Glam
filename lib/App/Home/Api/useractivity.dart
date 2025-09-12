@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:hog/App/Home/Model/historymodel.dart';
 import 'package:http/http.dart' as http;
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Home/Model/useractivitymodel.dart';
 
 class UserActivityService {
+
   static const String baseUrl = "https://hog-ymud.onrender.com/api/v1";
 
-  /// Create Material (upload with multipart)
   static Future<MaterialResponse?> createMaterial({
     required String clothMaterial,
     required String color,
@@ -61,4 +62,31 @@ class UserActivityService {
 
     return null;
   }
+
+  static Future<MaterialReviewResponse?> getAllMaterialsForReview() async {
+  try {
+    final token = await SecurePrefs.getToken();
+
+    final url = Uri.parse("$baseUrl/review/getAllMaterialsForReview");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    print("➡️ GET Request: $url");
+    print("⬅️ Response: ${response.body}");
+
+    if (response.statusCode == 200) {
+      return MaterialReviewResponse.fromJson(jsonDecode(response.body));
+    }
+  } catch (e) {
+    print("❌ Error fetching materials for review: $e");
+  }
+  return null;
+}
+
 }
