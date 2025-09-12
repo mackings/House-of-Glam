@@ -21,7 +21,7 @@ class _MainPageState extends State<MainPage> {
     Home(), 
     PlaceOrder(),
     OrderHistory(),
-    AllReviews()
+  
 
   ];
 

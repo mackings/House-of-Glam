@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:hog/App/Home/Model/historymodel.dart';
+import 'package:hog/App/Home/Model/reviewModel.dart';
 import 'package:http/http.dart' as http;
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Home/Model/useractivitymodel.dart';
+
+
 
 class UserActivityService {
 
@@ -88,5 +91,33 @@ class UserActivityService {
   }
   return null;
 }
+
+
+static Future<ReviewResponse?> getReviewsForMaterialById(String materialId) async {
+  try {
+    final token = await SecurePrefs.getToken();
+
+    final url = Uri.parse("$baseUrl/review/getReviewsForMaterialById/$materialId");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    print("➡️ GET Request: $url");
+    print("⬅️ Response: ${response.body}");
+
+    if (response.statusCode == 200) {
+      return ReviewResponse.fromJson(jsonDecode(response.body));
+    }
+  } catch (e) {
+    print("❌ Error fetching reviews: $e");
+  }
+  return null;
+}
+
 
 }
