@@ -12,10 +12,7 @@ class UserActivityService {
     required String clothMaterial,
     required String color,
     required String brand,
-    required double price,
     required List<File> images,
-    required String deliveryDate,
-    required String reminderDate,
     required String specialInstructions,
     required Map<String, dynamic> measurement,
   }) async {
@@ -36,12 +33,7 @@ class UserActivityService {
       request.fields["clothMaterial"] = clothMaterial;
       request.fields["color"] = color;
       request.fields["brand"] = brand;
-      request.fields["prices"] = price.toString();
-      request.fields["deliveryDate"] = deliveryDate;
-      request.fields["reminderDate"] = reminderDate;
       request.fields["specialinstructions"] = specialInstructions;
-
-      // 🧵 Measurement JSON
       request.fields["measurement"] = jsonEncode([measurement]);
 
       // 🖼️ Images

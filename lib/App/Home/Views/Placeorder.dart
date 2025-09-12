@@ -32,12 +32,9 @@ class _PlaceOrderState extends State<PlaceOrder> {
   String? selectedColor;
 
   final TextEditingController brandingController = TextEditingController();
-  final TextEditingController priceController = TextEditingController();
-  final TextEditingController deliveryDateController = TextEditingController();
-  final TextEditingController reminderDateController = TextEditingController();
   final TextEditingController specialInstructionsController = TextEditingController();
-
   final Map<String, TextEditingController> measurementControllers = {};
+
 
   final List<File> sampleImages = [];
   final ImagePicker _picker = ImagePicker();
@@ -152,10 +149,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
       clothMaterial: selectedMaterial!,
       color: selectedColor!,
       brand: brandingController.text,
-      price: double.tryParse(priceController.text) ?? 0,
       images: sampleImages,
-      deliveryDate: deliveryDateController.text,
-      reminderDate: reminderDateController.text,
       specialInstructions: specialInstructionsController.text,
       measurement: measurement,
     );
@@ -176,9 +170,6 @@ class _PlaceOrderState extends State<PlaceOrder> {
   @override
   void dispose() {
     brandingController.dispose();
-    priceController.dispose();
-    deliveryDateController.dispose();
-    reminderDateController.dispose();
     specialInstructionsController.dispose();
     measurementControllers.values.forEach((c) => c.dispose());
     super.dispose();
@@ -239,43 +230,8 @@ class _PlaceOrderState extends State<PlaceOrder> {
                 fieldKey: "branding",
                 controller: brandingController,
               ),
-              const SizedBox(height: 16),
-              CustomTextField(
-                title: "Budget (₦)",
-                hintText: "e.g. 10,000",
-                fieldKey: "price",
-                controller: priceController,
-                keyboardType: TextInputType.number,
-              ),
-
               const SizedBox(height: 20),
-              CustomText("Dates *", color: Colors.black, fontSize: 18,fontWeight: FontWeight.w500,),
-              const Divider(),
-              GestureDetector(
-                onTap: () => pickDate(deliveryDateController),
-                child: AbsorbPointer(
-                  child: CustomTextField(
-                    title: "Delivery Date",
-                    hintText: "YYYY-MM-DD",
-                    fieldKey: "deliveryDate",
-                    controller: deliveryDateController,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              GestureDetector(
-                onTap: () => pickDate(reminderDateController),
-                child: AbsorbPointer(
-                  child: CustomTextField(
-                    title: "Reminder Date",
-                    hintText: "YYYY-MM-DD",
-                    fieldKey: "reminderDate",
-                    controller: reminderDateController,
-                  ),
-                ),
-              ),
 
-              const SizedBox(height: 20),
               CustomText("Special Instructions *", color: Colors.black, fontSize: 18,fontWeight: FontWeight.w500,),
               const Divider(),
               CustomTextField(
