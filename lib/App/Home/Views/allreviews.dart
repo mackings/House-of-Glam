@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Home/Api/reviewService.dart';
 import 'package:hog/App/Home/Model/reviewModel.dart';
-import 'package:hog/components/button.dart';
-import 'package:hog/components/texts.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:intl/intl.dart' show NumberFormat;
 
@@ -42,132 +40,105 @@ class _AllReviewsState extends State<AllReviews> {
       isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (_) {
         return Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Close button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 28),
-                      onPressed: () => Navigator.pop(context),
+                // drag handle
+                Center(
+                  child: Container(
+                    height: 4,
+                    width: 40,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                  ],
-                ),
-                CustomText("Measurements & Details", fontSize: 18, fontWeight: FontWeight.bold),
-                const SizedBox(height: 12),
-
-                // Measurements
-                ...review.material.measurement.map((m) {
-                  return Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.straighten, size: 20),
-                              const SizedBox(width: 6),
-                              CustomText("Neck: ${m.neck}"),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              const Icon(Icons.straighten, size: 20),
-                              const SizedBox(width: 6),
-                              CustomText("Shoulder: ${m.shoulder}"),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.straighten, size: 20),
-                              const SizedBox(width: 6),
-                              CustomText("Chest: ${m.chest}"),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              const Icon(Icons.straighten, size: 20),
-                              const SizedBox(width: 6),
-                              CustomText("Waist: ${m.waist}"),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.straighten, size: 20),
-                              const SizedBox(width: 6),
-                              CustomText("Hip: ${m.hip}"),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              const Icon(Icons.straighten, size: 20),
-                              const SizedBox(width: 6),
-                              CustomText("Sleeve: ${m.sleeveLength}"),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const Divider(),
-                    ],
-                  );
-                }).toList(),
-
-                // Material chips
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 4),
-                      ...[
-                        review.material.attireType,
-                        review.material.clothMaterial,
-                        review.material.color,
-                        review.material.brand,
-                      ].map((label) => Padding(
-                            padding: const EdgeInsets.only(right: 6),
-                            child: Chip(
-                              avatar: const Icon(Icons.check, size: 12, color: Colors.white),
-                              label: CustomText(label, fontSize: 12, color: Colors.white),
-                              backgroundColor: Colors.purple,
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            ),
-                          )),
-                    ],
                   ),
                 ),
 
-                const SizedBox(height: 16),
-                CustomText("Comment:", fontWeight: FontWeight.bold),
-                const SizedBox(height: 6),
-                CustomText(review.comment),
-                const SizedBox(height: 16),
+                Text("Measurements & Details",
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        )),
+                const SizedBox(height: 12),
 
-                CustomButton(
-                  title: "Hire Designer",
-                  onPressed: () {
-                    // Add hire designer functionality
-                  },
+                // Measurements section (grid-like)
+                Wrap(
+                  runSpacing: 10,
+                  spacing: 20,
+                  children: review.material.measurement.map((m) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildMeasureRow("Neck", m.neck.toString()),
+                        _buildMeasureRow("Shoulder", m.shoulder.toString()),
+                        _buildMeasureRow("Chest", m.chest.toString()),
+                        _buildMeasureRow("Waist", m.waist.toString()),
+                        _buildMeasureRow("Hip", m.hip.toString()),
+                        _buildMeasureRow("Sleeve", m.sleeveLength.toString()),
+                      ],
+                    );
+                  }).toList(),
                 ),
-                const SizedBox(height: 16),
+
+                const SizedBox(height: 20),
+
+                // Material chips
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    review.material.attireType,
+                    review.material.clothMaterial,
+                    review.material.color,
+                    review.material.brand,
+                  ].map((label) {
+                    return Chip(
+                      label: Text(label,
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 13)),
+                      backgroundColor: Colors.purple,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
+                    );
+                  }).toList(),
+                ),
+
+                const SizedBox(height: 20),
+
+                Text("Comment",
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 6),
+                Text(review.comment,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.black87,
+                        )),
+                const SizedBox(height: 24),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.purple,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: () {},
+                    child: const Text("Hire Designer",
+                        style: TextStyle(color: Colors.white, fontSize: 16)),
+                  ),
+                ),
               ],
             ),
           ),
@@ -176,84 +147,146 @@ class _AllReviewsState extends State<AllReviews> {
     );
   }
 
-  Widget buildReviewCard(Review review) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.black12),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // User & vendor
-          Row(
-            children: [
-              const Icon(Icons.person, color: Colors.purple),
-              const SizedBox(width: 8),
-              Expanded(child: CustomText(review.user.fullName, fontWeight: FontWeight.bold)),
-              const Icon(Icons.store, color: Colors.purple),
-              const SizedBox(width: 8),
-              Expanded(child: CustomText(review.vendor.businessName, fontWeight: FontWeight.bold)),
-            ],
-          ),
-          const SizedBox(height: 16),
+  Widget _buildMeasureRow(String label, String value) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.straighten, size: 18, color: Colors.purple),
+        const SizedBox(width: 6),
+        Text("$label: $value",
+            style:
+                const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+      ],
+    );
+  }
 
-          // Carousel in container
-          if (review.material.sampleImage.isNotEmpty)
-            CarouselSlider(
+ Widget buildReviewCard(Review review) {
+  return Container(
+    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      border: Border.all(color: Colors.black, width: 0.1),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // User & Vendor row
+        Row(
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.person, color: Colors.purple, size: 18),
+                const SizedBox(width: 6),
+                Text(
+                  review.user.fullName,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Row(
+              children: [
+                const Icon(Icons.store, color: Colors.purple, size: 18),
+                const SizedBox(width: 6),
+                Text(
+                  review.vendor.businessName,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // Carousel (if images exist)
+        if (review.material.sampleImage.isNotEmpty)
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: CarouselSlider(
               options: CarouselOptions(
-                height: 100,
+                height: 120,
                 autoPlay: true,
-                enlargeCenterPage: true,
-                viewportFraction: 0.8,
+                enlargeCenterPage: false,
+                viewportFraction: 1,
               ),
               items: review.material.sampleImage
-                  .map((img) => ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(img, fit: BoxFit.cover, width: double.infinity),
+                  .map((img) => Image.network(
+                        img,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
                       ))
                   .toList(),
             ),
-          const SizedBox(height: 10),
-
-          // Status & total cost
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.check_circle, color: review.status == "approved" ? Colors.green : Colors.orange),
-                  const SizedBox(width: 6),
-                  CustomText(review.status.toUpperCase()),
-                ],
-              ),
-              CustomText("₦${currencyFormat.format(review.totalCost)}", fontWeight: FontWeight.bold),
-            ],
           ),
-          const SizedBox(height: 10),
+        if (review.material.sampleImage.isNotEmpty) const SizedBox(height: 12),
 
-          // View more button
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => showReviewDetails(review),
-              child: const Text("View More"),
+        // Status & Cost
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  review.status == "approved"
+                      ? Icons.check_circle
+                      : Icons.hourglass_bottom, // pending icon
+                  color: review.status == "approved"
+                      ? Colors.green
+                      : Colors.orange,
+                  size: 18,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  review.status.toUpperCase(),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 13),
+                ),
+              ],
+            ),
+            Text(
+              "₦${currencyFormat.format(review.totalCost)}",
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, fontSize: 15),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+
+        // View More button
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: () => showReviewDetails(review),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.purple,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+            ),
+            child: const Text(
+              "View More",
+              style: TextStyle(fontSize: 13),
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: const CustomText("All Reviews", color: Colors.white, fontSize: 20),
+        title: const Text("All Reviews",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.purple,
+        elevation: 0,
       ),
       body: RefreshIndicator(
         onRefresh: fetchReviews,
@@ -264,10 +297,12 @@ class _AllReviewsState extends State<AllReviews> {
                 : ListView.builder(
                     padding: const EdgeInsets.only(bottom: 16),
                     itemCount: reviews.length,
-                    itemBuilder: (context, index) => buildReviewCard(reviews[index]),
+                    itemBuilder: (context, index) =>
+                        buildReviewCard(reviews[index]),
                   ),
       ),
     );
   }
 }
+
 
