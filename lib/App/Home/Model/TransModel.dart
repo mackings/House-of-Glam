@@ -56,7 +56,6 @@ class TransactionResponse {
   }
 }
 
-
 class CartItem {
   final String attireType;
   final String clothMaterial;
@@ -80,42 +79,44 @@ class CartItem {
       clothMaterial: json["clothMaterial"],
       color: json["color"],
       brand: json["brand"],
-      measurement: (json["measurement"] as List)
+      measurement: (json["measurement"] as List? ?? [])
           .map((e) => Measurement.fromJson(e))
           .toList(),
-      sampleImage: List<String>.from(json["sampleImage"]),
+      sampleImage: List<String>.from(json["sampleImage"] ?? []),
     );
   }
 }
 
 class Measurement {
-  final int neck;
-  final int shoulder;
-  final int chest;
-  final int waist;
-  final int hip;
-  final int sleevelength;
-  final int armlength;
-  final int aroundarm;
-  final int wrist;
-  final int collarfront;
-  final int collarback;
-  final int length;
+  final int? neck;
+  final int? shoulder;
+  final int? chest;
+  final int? waist;
+  final int? hip;
+  final int? length;
+  final int? shoulderLength;
+  final int? armLength;
+  final int? aroundArm;
+  final int? wrist;
+  final int? collarFront;
+  final int? collarBack;
+  final int? sleeveLength;
   final String armType;
 
   Measurement({
-    required this.neck,
-    required this.shoulder,
-    required this.chest,
-    required this.waist,
-    required this.hip,
-    required this.sleevelength,
-    required this.armlength,
-    required this.aroundarm,
-    required this.wrist,
-    required this.collarfront,
-    required this.collarback,
-    required this.length,
+    this.neck,
+    this.shoulder,
+    this.chest,
+    this.waist,
+    this.hip,
+    this.length,
+    this.shoulderLength,
+    this.armLength,
+    this.aroundArm,
+    this.wrist,
+    this.collarFront,
+    this.collarBack,
+    this.sleeveLength,
     required this.armType,
   });
 
@@ -126,14 +127,15 @@ class Measurement {
       chest: json["chest"],
       waist: json["waist"],
       hip: json["hip"],
-      sleevelength: json["sleevelength"],
-      armlength: json["armlength"],
-      aroundarm: json["aroundarm"],
-      wrist: json["wrist"],
-      collarfront: json["collarfront"],
-      collarback: json["collarback"],
       length: json["length"],
-      armType: json["armType"],
+      shoulderLength: json["shoulder"],
+      armLength: json["armLength"] ?? json["armlength"],
+      aroundArm: json["aroundArm"] ?? json["aroundarm"],
+      wrist: json["wrist"],
+      collarFront: json["collarFront"] ?? json["collarfront"],
+      collarBack: json["collarBack"] ?? json["collarback"],
+      sleeveLength: json["sleeveLength"] ?? json["sleevelength"],
+      armType: json["armType"] ?? "",
     );
   }
 }

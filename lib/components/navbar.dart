@@ -50,20 +50,20 @@ class CustomBottomNavBar extends StatelessWidget {
                   height: 4,
                   width: 24,
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.blue : Colors.transparent,
+                    color: isSelected ? Colors.purple : Colors.transparent,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
                 const SizedBox(height: 6),
                 Icon(
                   item["icon"] as IconData,
-                  color: isSelected ? Colors.blue : Colors.grey,
+                  color: isSelected ? Colors.purple : Colors.grey,
                 ),
                 Text(
                   item["label"] as String,
                   style: TextStyle(
                     fontSize: 12,
-                    color: isSelected ? Colors.blue : Colors.grey,
+                    color: isSelected ? Colors.purple : Colors.grey,
                   ),
                 ),
               ],

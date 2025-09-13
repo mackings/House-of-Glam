@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/components/texts.dart';
 
@@ -7,16 +8,15 @@ final obscureTextProvider =
     StateProvider.family<bool, String>((ref, fieldKey) => true);
 
 class CustomTextField extends ConsumerWidget {
-
   final String title;
   final String hintText;
   final IconData? prefixIcon;
   final bool isPassword;
-  final TextEditingController? controller; 
+  final TextEditingController? controller;
   final FormFieldValidator<String>? validator;
   final TextInputType keyboardType;
-
   final String fieldKey;
+  final List<TextInputFormatter>? inputFormatters; // ✅ optional
 
   const CustomTextField({
     Key? key,
@@ -28,6 +28,7 @@ class CustomTextField extends ConsumerWidget {
     this.controller,
     this.validator,
     this.keyboardType = TextInputType.text,
+    this.inputFormatters, // optional
   }) : super(key: key);
 
   @override
@@ -36,27 +37,21 @@ class CustomTextField extends ConsumerWidget {
     final obscureText = ref.watch(obscureTextProvider(fieldKey));
 
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: screenWidth * 0.00,
-        vertical: 10,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-           CustomText(
+          CustomText(
             title,
             fontSize: screenWidth * 0.04,
             fontWeight: FontWeight.w600,
           ),
-
           const SizedBox(height: 8),
-
-          // TextFormField
           TextFormField(
             controller: controller,
             validator: validator,
             keyboardType: keyboardType,
+            inputFormatters: inputFormatters, // ✅ apply optional formatters
             obscureText: isPassword ? obscureText : false,
             decoration: InputDecoration(
               hintText: hintText,

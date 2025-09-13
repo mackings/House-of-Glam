@@ -27,8 +27,8 @@ class _TransactionsState extends State<Transactions> {
   Future<void> fetchTransactions() async {
     setState(() => isLoading = true);
     final response = await TransactionService.getTransactions();
-    if (response != null && response.transactions.isNotEmpty) {
-      setState(() => transactions = response.transactions);
+    if (response != null && response.transactions!.isNotEmpty) {
+      setState(() => transactions = response.transactions!);
     }
     setState(() => isLoading = false);
   }
@@ -49,7 +49,7 @@ class _TransactionsState extends State<Transactions> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
-        title: const CustomText("Transactions",color: Colors.white,fontSize: 18,),
+        title: const CustomText("Transactions",color: Colors.white,fontSize: 20,),
         backgroundColor: Colors.purple,
       ),
       body: RefreshIndicator(
