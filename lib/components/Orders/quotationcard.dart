@@ -66,12 +66,12 @@ class QuotationCard extends StatelessWidget {
               Icon(
                 review.status == "quote"
                     ? Icons.schedule
-                    : review.status == "approved"
+                    : review.status == "part payment"
                         ? Icons.check_circle_outline
                         : Icons.check_circle,
-                color: review.status == "quote"
-                    ? Colors.orange
-                    : review.status == "approved"
+                color: review.status == "part payment"
+                    ? Colors.grey
+                    : review.status == "full payment"
                         ? Colors.purple
                         : Colors.green,
                 size: 18,

@@ -27,7 +27,9 @@ class _QuotationState extends State<Quotation> {
 
   Future<void> fetchReviews() async {
     setState(() => isLoading = true);
-    final response = await UserActivityService.getReviewsForMaterialById(widget.materialId);
+    final response = await UserActivityService.getReviewsForMaterialById(
+      widget.materialId,
+    );
     if (response != null && response.success) {
       setState(() => reviews = response.reviews);
     }
@@ -39,25 +41,38 @@ class _QuotationState extends State<Quotation> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
-        title: const CustomText("Quotations", color: Colors.white, fontSize: 18),
+        title: const CustomText(
+          "Quotations",
+          color: Colors.white,
+          fontSize: 18,
+        ),
         backgroundColor: Colors.purple,
       ),
       body: RefreshIndicator(
         onRefresh: fetchReviews,
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : reviews.isEmpty
+        child:
+            isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : reviews.isEmpty
                 ? const Center(child: CustomText("No quotations found"))
                 : ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                    itemCount: reviews.length,
-                    itemBuilder: (context, index) {
-                      return QuotationCard(review: reviews[index], onHireDesigner: () {  },);
-                    },
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 12,
                   ),
+                  itemCount: reviews.length,
+                  itemBuilder: (context, index) {
+                    return QuotationCard(
+                      review: reviews[index],
+                      onHireDesigner: () {
+                        print(reviews[index].id);
+                        print(reviews[index].totalCost);
+                        print(reviews[index].status);
+                      },
+                    );
+                  },
+                ),
       ),
     );
   }
 }
-
-
