@@ -86,6 +86,8 @@ class _PlaceOrderState extends State<PlaceOrder> {
     }
   }
 
+  
+
   Future<void> pickDate(TextEditingController controller) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -181,7 +183,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
       isLoading: isLoading,
       child: Scaffold(
         appBar: AppBar(
-          title: const CustomText("Place Order", color: Colors.white, fontSize: 20),
+          title: const CustomText("Place Order", color: Colors.white, fontSize: 18),
           backgroundColor: Colors.purple,
         ),
         body: SingleChildScrollView(
