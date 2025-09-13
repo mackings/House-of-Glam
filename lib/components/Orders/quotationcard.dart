@@ -64,18 +64,19 @@ class QuotationCard extends StatelessWidget {
                 ),
               ),
               Icon(
-                review.status == "pending"
+                review.status == "quote"
                     ? Icons.schedule
-                    : review.status == "quote"
-                        ? Icons.request_quote
+                    : review.status == "approved"
+                        ? Icons.check_circle_outline
                         : Icons.check_circle,
-                color: review.status == "pending"
+                color: review.status == "quote"
                     ? Colors.orange
-                    : review.status == "quote"
+                    : review.status == "approved"
                         ? Colors.purple
                         : Colors.green,
                 size: 18,
               ),
+
             ],
           ),
           const SizedBox(height: 10),
@@ -103,15 +104,13 @@ class QuotationCard extends StatelessWidget {
 Row(
   crossAxisAlignment: CrossAxisAlignment.start,
   children: [
-    const Icon(Icons.comment, color: Colors.purple, size: 18),
-    const SizedBox(width: 8),
-    Expanded(
-      child: CustomText(
-        review.comment,
-        fontSize: 13,
-       // softWrap: true,
-        overflow: TextOverflow.visible,
-      ),
+   // const Icon(Icons.comment, color: Colors.purple, size: 18),
+   // const SizedBox(width: 8),
+    CustomText(
+      review.comment,
+      fontSize: 13,
+     // softWrap: true,
+      overflow: TextOverflow.visible,
     ),
   ],
 ),
