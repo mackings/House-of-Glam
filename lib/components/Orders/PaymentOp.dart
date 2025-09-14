@@ -22,7 +22,7 @@ class PaymentOptionsModal extends StatefulWidget {
 }
 
 class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
-  String paymentType = "full";
+  String paymentType = "part"; // 👈 Default is now part payment
   String shipment = "Regular";
   final TextEditingController amountController = TextEditingController();
   bool isLoading = false;
@@ -30,15 +30,26 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
   @override
   void initState() {
     super.initState();
-    amountController.text = widget.review.totalCost.toString();
+    amountController.clear(); // 👈 Start with empty field
   }
 
   Future<void> _makePayment() async {
     setState(() => isLoading = true);
 
-    String amountToSend = paymentType == "part"
-        ? amountController.text.replaceAll(",", "")
-        : widget.review.totalCost.toString();
+    String amountToSend;
+
+    if (paymentType == "part") {
+      if (amountController.text.trim().isEmpty) {
+        setState(() => isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please enter an amount for part payment")),
+        );
+        return;
+      }
+      amountToSend = amountController.text.replaceAll(",", "");
+    } else {
+      amountToSend = widget.review.totalCost.toString();
+    }
 
     Map<String, dynamic>? resp;
 
@@ -62,7 +73,6 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
       widget.onCheckout(resp["authorizationUrl"]);
       Navigator.pop(context);
     } else {
-      // handle error
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Payment initialization failed")),
       );
@@ -96,13 +106,27 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                   Radio(
                     value: "full",
                     groupValue: paymentType,
-                    onChanged: (val) => setState(() => paymentType = val!),
+                    onChanged: (val) {
+                      setState(() {
+                        paymentType = val!;
+                        if (paymentType == "part") {
+                          amountController.clear(); // 👈 reset when switching
+                        }
+                      });
+                    },
                   ),
                   const Text("Full Payment"),
                   Radio(
                     value: "part",
                     groupValue: paymentType,
-                    onChanged: (val) => setState(() => paymentType = val!),
+                    onChanged: (val) {
+                      setState(() {
+                        paymentType = val!;
+                        if (paymentType == "part") {
+                          amountController.clear(); // 👈 reset when switching
+                        }
+                      });
+                    },
                   ),
                   const Text("Part Payment"),
                 ],

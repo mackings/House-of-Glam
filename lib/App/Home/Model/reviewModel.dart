@@ -1,5 +1,3 @@
-
-
 class ReviewResponse {
   final bool success;
   final int count;
@@ -31,6 +29,8 @@ class Review {
   final int materialTotalCost;
   final int workmanshipTotalCost;
   final int totalCost;
+  final int amountPaid;      // ✅ new
+  final int amountToPay;     // ✅ new
   final DateTime deliveryDate;
   final DateTime reminderDate;
   final String comment;
@@ -46,6 +46,8 @@ class Review {
     required this.materialTotalCost,
     required this.workmanshipTotalCost,
     required this.totalCost,
+    required this.amountPaid,
+    required this.amountToPay,
     required this.deliveryDate,
     required this.reminderDate,
     required this.comment,
@@ -63,6 +65,8 @@ class Review {
       materialTotalCost: json['materialTotalCost'] ?? 0,
       workmanshipTotalCost: json['workmanshipTotalCost'] ?? 0,
       totalCost: json['totalCost'] ?? 0,
+      amountPaid: json['amountPaid'] ?? 0,      // ✅ now mapped
+      amountToPay: json['amountToPay'] ?? 0,    // ✅ now mapped
       deliveryDate: DateTime.tryParse(json['deliveryDate'] ?? '') ??
           DateTime.now(),
       reminderDate: DateTime.tryParse(json['reminderDate'] ?? '') ??
