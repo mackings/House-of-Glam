@@ -41,66 +41,73 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     super.dispose();
   }
 
-  Future<void> _makePayment() async {
-    setState(() => isLoading = true);
+Future<void> _makePayment() async {
+  setState(() => isLoading = true);
 
-    String amountToSend;
+  String amountToSend;
 
-    if (paymentType == "part") {
-      if (amountController.text.trim().isEmpty) {
-        setState(() => isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please enter an amount for part payment")),
-        );
-        return;
-      }
-      amountToSend = amountController.text.replaceAll(",", "");
-    } else {
-      if (widget.review.amountToPay <= 0) {
-        setState(() => isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("No balance left to pay")),
-        );
-        return;
-      }
-      amountToSend = widget.review.amountToPay.toString();
+  if (paymentType == "part") {
+    if (amountController.text.trim().isEmpty) {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter an amount for part payment")),
+      );
+      return;
+    }
+    amountToSend = amountController.text.replaceAll(",", "");
+  } else {
+    // ✅ Full payment logic
+    final int remaining = widget.review.totalCost - widget.review.amountPaid;
+
+    if (remaining <= 0) {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No balance left to pay")),
+      );
+      return;
     }
 
-    Map<String, dynamic>? resp;
+    amountToSend = remaining.toString();
+  }
 
-    if (paymentType == "part") {
-      resp = await PaymentService.createPartPayment(
-        reviewId: widget.review.id,
-        amount: amountToSend,
-        shipmentMethod: shipment,
-      );
-    } else {
-      resp = await PaymentService.createFullPayment(
-        reviewId: widget.review.id,
-        amount: amountToSend,
-        shipmentMethod: shipment,
-      );
-    }
+  Map<String, dynamic>? resp;
 
-    setState(() => isLoading = false);
+  if (paymentType == "part") {
+    resp = await PaymentService.createPartPayment(
+      reviewId: widget.review.id,
+      amount: amountToSend,
+      shipmentMethod: shipment,
+    );
+  } else {
+    resp = await PaymentService.createFullPayment(
+      reviewId: widget.review.id,
+      amount: amountToSend,
+      shipmentMethod: shipment,
+    );
+  }
 
-    if (resp != null && resp["success"]) {
-      final url = resp["authorizationUrl"];
-      if (url != null) {
-        // ✅ Close only THIS modal and call parent
-        Navigator.of(context).pop();
-        widget.onCheckout(url);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("No payment link received")),
-        );
-      }
+  setState(() => isLoading = false);
+
+  if (resp != null && resp["success"]) {
+    final url = resp["authorizationUrl"];
+    if (url != null) {
+      // ✅ Close only THIS modal and call parent
+      Navigator.of(context).pop();
+      widget.onCheckout(url);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Payment initialization failed")),
+        const SnackBar(content: Text("No payment link received")),
       );
     }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Payment initialization failed")),
+    );
   }
+}
+
+
+
 
   @override
   Widget build(BuildContext context) {

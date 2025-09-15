@@ -4,15 +4,16 @@ import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
 
-
 class QuotationCard extends StatelessWidget {
   final Review review;
-  final VoidCallback onHireDesigner;
+  final VoidCallback onHireDesigner;               // ✅ keep existing
+  final void Function(int amount) onCompletePayment; // ✅ new with amount
 
   const QuotationCard({
     super.key,
     required this.review,
     required this.onHireDesigner,
+    required this.onCompletePayment,
   });
 
   String formatAmount(int amount) {
@@ -24,6 +25,15 @@ class QuotationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isPartPayment = review.status == "part payment";
     final bool isFullPayment = review.status == "full payment";
+    final bool isQuote = review.status == "quote";
+
+    // 🔹 decide amount
+    int paymentAmount = 0;
+    if (isPartPayment) {
+      paymentAmount = review.amountToPay; // finishing balance
+    } else if (isQuote) {
+      paymentAmount = review.totalCost; // full cost
+    }
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -42,7 +52,7 @@ class QuotationCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top Row: Avatar + Name + Status
+          // 🔹 Avatar + Name + Status
           Row(
             children: [
               CircleAvatar(
@@ -64,14 +74,14 @@ class QuotationCard extends StatelessWidget {
                 ),
               ),
               Icon(
-                review.status == "quote"
+                isQuote
                     ? Icons.schedule
-                    : review.status == "part payment"
+                    : isPartPayment
                         ? Icons.check_circle_outline
                         : Icons.check_circle,
-                color: review.status == "part payment"
+                color: isPartPayment
                     ? Colors.grey
-                    : review.status == "full payment"
+                    : isFullPayment
                         ? Colors.purple
                         : Colors.green,
                 size: 18,
@@ -80,7 +90,7 @@ class QuotationCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
 
-          // Delivery & Reminder
+          // 🔹 Delivery & Reminder
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -98,22 +108,18 @@ class QuotationCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
 
-          // Comment
+          // 🔹 Comment
           if (review.comment.isNotEmpty)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText(
-                  review.comment,
-                  fontSize: 13,
-                  overflow: TextOverflow.visible,
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: CustomText(
+                review.comment,
+                fontSize: 13,
+                overflow: TextOverflow.visible,
+              ),
             ),
 
-          const SizedBox(height: 12),
-
-          // Costs with icons
+          // 🔹 Costs with icons
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -152,26 +158,34 @@ class QuotationCard extends StatelessWidget {
           ),
           const SizedBox(height: 25),
 
-          // Action Button
+          // 🔹 Action Button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: onHireDesigner,
+              onPressed: isFullPayment
+                  ? null // disabled
+                  : isQuote
+                      ? onHireDesigner // hire first if it's still a quote
+                      : () => onCompletePayment(paymentAmount), // pay balance / full
               style: ElevatedButton.styleFrom(
-                backgroundColor: isPartPayment
-                    ? Colors.black 
-                    : Colors.purple,
+                backgroundColor: isFullPayment
+                    ? Colors.grey
+                    : isPartPayment
+                        ? Colors.black
+                        : Colors.purple,
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
               child: CustomText(
-                isPartPayment
-                    ? "Finish Payment"
-                    : isFullPayment
-                        ? "Paid"
-                        : "Hire Designer",
+                isFullPayment
+                    ? "Paid"
+                    : isPartPayment
+                        ? "Finish Payment (₦${formatAmount(review.amountToPay)})"
+                        : isQuote
+                            ? "Hire Designer"
+                            : "Pay in Full (₦${formatAmount(review.totalCost)})",
                 fontSize: 14,
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -183,5 +197,7 @@ class QuotationCard extends StatelessWidget {
     );
   }
 }
+
+
 
 

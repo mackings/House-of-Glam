@@ -181,13 +181,33 @@ class _QuotationState extends State<Quotation> {
                   itemCount: reviews.length,
                   itemBuilder: (context, index) {
                     return QuotationCard(
-                      review: reviews[index],
-                      onHireDesigner:
-                          () => {
-                            print(reviews[index].id),
-                            _showHireDesignerConfirmation(reviews[index]),
-                          },
-                    );
+  review: reviews[index],
+  onHireDesigner: () {
+    print(reviews[index].id);
+    _showHireDesignerConfirmation(reviews[index]);
+  },
+onCompletePayment: (int amount) {
+  final review = reviews[index];
+
+  if (review.status == "part payment") {
+    // ✅ User already made a part payment → finish balance
+    _initiatePayment(review, "full");
+  } else if (review.status == "quote") {
+    // ✅ First payment (pay full cost)
+    _initiatePayment(review, "full");
+  } else if (review.status == "full payment") {
+    // ✅ Already fully paid, just ignore
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("This quotation is already fully paid.")),
+    );
+  } else {
+    // ✅ Default: treat as full payment
+    _initiatePayment(review, "full");
+  }
+},
+
+);
+
                   },
                 ),
       ),
