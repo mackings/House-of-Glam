@@ -15,7 +15,7 @@ class TailorCustomBottomNavBar extends StatelessWidget {
     
     final items = [
       {"icon": Icons.home, "label": "Home"},
-      {"icon": Icons.card_travel, "label": "Order"},
+      {"icon": Icons.card_travel, "label": "My Orders"},
       {"icon": Icons.history, "label": "History"},
       {"icon": Icons.wallet, "label": "Transactions"},
       {"icon": Icons.person, "label": "Profile"},

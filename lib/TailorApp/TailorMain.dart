@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hog/TailorApp/Home/Views/AssignedMaterials.dart';
 import 'package:hog/TailorApp/Home/Views/TailorDashboard.dart';
 import 'package:hog/TailorApp/TailorNav.dart';
 
@@ -17,6 +18,7 @@ class _TailorMainPageState extends State<TailorMainPage> {
 
   final List<Widget> _pages = const [
     Tailordashboard(),
+    AssignedMaterials(),
   ];
 
   @override
