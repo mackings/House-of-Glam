@@ -28,6 +28,7 @@ class _SignupState extends ConsumerState<Signup> {
   late TextEditingController addressController;
 
   bool isLoading = false; // for loading overlay
+  bool isTailor = false;  // 👈 checkbox state
 
   @override
   void initState() {
@@ -73,7 +74,7 @@ class _SignupState extends ConsumerState<Signup> {
       password: password,
       phoneNumber: phone,
       address: address,
-      role: "user", // or tailor
+      role: isTailor ? "tailor" : "user", // 👈 role depends on checkbox
     );
 
     setState(() => isLoading = false);
@@ -101,15 +102,8 @@ class _SignupState extends ConsumerState<Signup> {
                 const SizedBox(height: 10),
 
                 // Title
-                Text(
-                  "Sign Up",
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 30),
-
-
+CustomText("Sign Up",fontWeight: FontWeight.w700,fontSize: 25,),
+                const SizedBox(height: 20),
 
                 // Full Name Field
                 CustomTextField(
@@ -155,6 +149,30 @@ class _SignupState extends ConsumerState<Signup> {
                   fieldKey: "password",
                   controller: passwordController,
                 ),
+
+                // 👇 Checkbox for tailor role
+Row(
+  children: [
+    Checkbox(
+      value: isTailor,
+      onChanged: (val) {
+        setState(() {
+          isTailor = val ?? false;
+        });
+
+        if (val == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Leave blank if you are not a tailor"),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+    ),
+    const CustomText("I'm a Tailor"),
+  ],
+),
 
 
                 const SizedBox(height: 20),
