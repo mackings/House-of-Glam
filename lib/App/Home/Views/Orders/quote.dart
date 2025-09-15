@@ -8,6 +8,8 @@ import 'package:hog/components/Orders/quotationcard.dart';
 import 'package:hog/components/texts.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+
+
 class Quotation extends StatefulWidget {
   final String materialId;
 
@@ -50,29 +52,21 @@ class _QuotationState extends State<Quotation> {
   }
 
   // Show Payment Options Modal
-  // Show Payment Options Modal
+
   void _showPaymentOptions(Review review) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder:
-          (context) => PaymentOptionsModal(
-            review: review,
-            onCheckout: (String url) async {
-              // Close the modal first
-              Navigator.pop(context);
-
-              // Wait for the modal to fully animate out
-              await Future.delayed(const Duration(milliseconds: 350));
-
-              // Now open the WebView
-              if (mounted) {
-                _openCheckout(url);
-              }
-            },
-          ),
-    );
-  }
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => PaymentOptionsModal(
+      review: review,
+      onCheckout: (String url) async {
+        // wait until modal is closed before navigating
+        await Future.delayed(const Duration(milliseconds: 250));
+        if (mounted) _openCheckout(url);
+      },
+    ),
+  );
+}
 
   // Immediately call payment API, then go to WebView
   Future<void> _initiatePayment(
@@ -135,32 +129,30 @@ class _QuotationState extends State<Quotation> {
   }
 
   // Open Paystack checkout in WebView
-  void _openCheckout(String url) {
-    final controller =
-        WebViewController()
-          ..setJavaScriptMode(JavaScriptMode.unrestricted)
-          ..loadRequest(Uri.parse(url));
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (_) => Scaffold(
-              backgroundColor: Colors.purple,
-              appBar: AppBar(
-                backgroundColor: Colors.purple,
-                title: const CustomText(
-                  "Payments",
-                  color: Colors.white,
-                  fontSize: 18,
-                ),
-                iconTheme: IconThemeData(color: Colors.white),
-              ),
-              body: WebViewWidget(controller: controller),
-            ),
+  void _openCheckout(String url) {
+  final controller = WebViewController()
+    ..setJavaScriptMode(JavaScriptMode.unrestricted)
+    ..loadRequest(Uri.parse(url));
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.purple,
+          title: const CustomText("Payments", color: Colors.white, fontSize: 18),
+          iconTheme: const IconThemeData(color: Colors.white),
+        ),
+        body: WebViewWidget(controller: controller),
       ),
-    );
-  }
+    ),
+  ).then((_) {
+    // ✅ Dispose controller when leaving WebView
+    controller.clearCache();
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {

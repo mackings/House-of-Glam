@@ -24,7 +24,7 @@ class PaymentOptionsModal extends StatefulWidget {
 }
 
 class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
-  String paymentType = "part"; // 👈 Default is now part payment
+  String paymentType = "part";
   String shipment = "Regular";
   final TextEditingController amountController = TextEditingController();
   bool isLoading = false;
@@ -32,63 +32,75 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
   @override
   void initState() {
     super.initState();
-    amountController.clear(); // 👈 Start with empty field
+    amountController.clear();
   }
 
-Future<void> _makePayment() async {
-  setState(() => isLoading = true);
+  @override
+  void dispose() {
+    amountController.dispose();
+    super.dispose();
+  }
 
-  String amountToSend;
+  Future<void> _makePayment() async {
+    setState(() => isLoading = true);
 
-  if (paymentType == "part") {
-    if (amountController.text.trim().isEmpty) {
-      setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter an amount for part payment")),
-      );
-      return;
+    String amountToSend;
+
+    if (paymentType == "part") {
+      if (amountController.text.trim().isEmpty) {
+        setState(() => isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please enter an amount for part payment")),
+        );
+        return;
+      }
+      amountToSend = amountController.text.replaceAll(",", "");
+    } else {
+      if (widget.review.amountToPay <= 0) {
+        setState(() => isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No balance left to pay")),
+        );
+        return;
+      }
+      amountToSend = widget.review.amountToPay.toString();
     }
-    amountToSend = amountController.text.replaceAll(",", "");
-  } else {
-    // ✅ Use the balance coming from backend
-    if (widget.review.amountToPay <= 0) {
-      setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No balance left to pay")),
+
+    Map<String, dynamic>? resp;
+
+    if (paymentType == "part") {
+      resp = await PaymentService.createPartPayment(
+        reviewId: widget.review.id,
+        amount: amountToSend,
+        shipmentMethod: shipment,
       );
-      return;
+    } else {
+      resp = await PaymentService.createFullPayment(
+        reviewId: widget.review.id,
+        amount: amountToSend,
+        shipmentMethod: shipment,
+      );
     }
-    amountToSend = widget.review.amountToPay.toString();
+
+    setState(() => isLoading = false);
+
+    if (resp != null && resp["success"]) {
+      final url = resp["authorizationUrl"];
+      if (url != null) {
+        // ✅ Close only THIS modal and call parent
+        Navigator.of(context).pop();
+        widget.onCheckout(url);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No payment link received")),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Payment initialization failed")),
+      );
+    }
   }
-
-  Map<String, dynamic>? resp;
-
-  if (paymentType == "part") {
-    resp = await PaymentService.createPartPayment(
-      reviewId: widget.review.id,
-      amount: amountToSend,
-      shipmentMethod: shipment,
-    );
-  } else {
-    resp = await PaymentService.createFullPayment(
-      reviewId: widget.review.id,
-      amount: amountToSend,
-      shipmentMethod: shipment,
-    );
-  }
-
-  setState(() => isLoading = false);
-
-  if (resp != null && resp["success"]) {
-    widget.onCheckout(resp["authorizationUrl"]);
-    Navigator.pop(context);
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Payment initialization failed")),
-    );
-  }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -105,26 +117,19 @@ Future<void> _makePayment() async {
             mainAxisSize: MainAxisSize.min,
             children: [
               const CustomText(
-                "Choose Payment Option",
+                "Choose a Payment Option",
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
               const SizedBox(height: 12),
 
-              // Payment Type
+              // Payment Type Radios
               Row(
                 children: [
                   Radio(
                     value: "full",
                     groupValue: paymentType,
-                    onChanged: (val) {
-                      setState(() {
-                        paymentType = val!;
-                        if (paymentType == "part") {
-                          amountController.clear(); // 👈 reset when switching
-                        }
-                      });
-                    },
+                    onChanged: (val) => setState(() => paymentType = val!),
                   ),
                   const Text("Full Payment"),
                   Radio(
@@ -133,9 +138,7 @@ Future<void> _makePayment() async {
                     onChanged: (val) {
                       setState(() {
                         paymentType = val!;
-                        if (paymentType == "part") {
-                          amountController.clear(); // 👈 reset when switching
-                        }
+                        amountController.clear();
                       });
                     },
                   ),
@@ -159,15 +162,11 @@ Future<void> _makePayment() async {
 
               const SizedBox(height: 12),
 
-              // Shipment dropdown
+              // Shipment
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CustomText(
-                    "Shipment Method",
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  const CustomText("Shipment Method", fontSize: 16, fontWeight: FontWeight.w700),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -179,10 +178,7 @@ Future<void> _makePayment() async {
                       value: shipment,
                       decoration: const InputDecoration(border: InputBorder.none),
                       items: ["Regular", "Express", "Cargo"]
-                          .map((s) => DropdownMenuItem(
-                                value: s,
-                                child: Text(s),
-                              ))
+                          .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                           .toList(),
                       onChanged: (val) => setState(() => shipment = val!),
                     ),
@@ -191,16 +187,12 @@ Future<void> _makePayment() async {
               ),
               const SizedBox(height: 20),
 
-              CustomButton(
-                title: "Make Payment",
-                onPressed: _makePayment,
-              ),
+              CustomButton(title: "Make Payment", onPressed: _makePayment),
               const SizedBox(height: 40),
             ],
           ),
         ),
 
-        // Loading overlay
         if (isLoading)
           Container(
             color: Colors.black26,
@@ -210,3 +202,4 @@ Future<void> _makePayment() async {
     );
   }
 }
+
