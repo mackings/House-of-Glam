@@ -43,15 +43,15 @@ class CustomTextField extends ConsumerWidget {
         children: [
           CustomText(
             title,
-            fontSize: screenWidth * 0.04,
-            fontWeight: FontWeight.w600,
+            fontSize:15,
+            fontWeight: FontWeight.w500,
           ),
           const SizedBox(height: 8),
           TextFormField(
             controller: controller,
             validator: validator,
             keyboardType: keyboardType,
-            inputFormatters: inputFormatters, // ✅ apply optional formatters
+            inputFormatters: inputFormatters,
             obscureText: isPassword ? obscureText : false,
             decoration: InputDecoration(
               hintText: hintText,

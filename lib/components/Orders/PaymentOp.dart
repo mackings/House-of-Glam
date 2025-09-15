@@ -7,6 +7,8 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/components/thousandformat.dart';
 
+
+
 class PaymentOptionsModal extends StatefulWidget {
   final Review review;
   final Function(String url) onCheckout;
@@ -33,51 +35,60 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     amountController.clear(); // 👈 Start with empty field
   }
 
-  Future<void> _makePayment() async {
-    setState(() => isLoading = true);
+Future<void> _makePayment() async {
+  setState(() => isLoading = true);
 
-    String amountToSend;
+  String amountToSend;
 
-    if (paymentType == "part") {
-      if (amountController.text.trim().isEmpty) {
-        setState(() => isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please enter an amount for part payment")),
-        );
-        return;
-      }
-      amountToSend = amountController.text.replaceAll(",", "");
-    } else {
-      amountToSend = widget.review.totalCost.toString();
-    }
-
-    Map<String, dynamic>? resp;
-
-    if (paymentType == "part") {
-      resp = await PaymentService.createPartPayment(
-        reviewId: widget.review.id,
-        amount: amountToSend,
-        shipmentMethod: shipment,
-      );
-    } else {
-      resp = await PaymentService.createFullPayment(
-        reviewId: widget.review.id,
-        amount: amountToSend,
-        shipmentMethod: shipment,
-      );
-    }
-
-    setState(() => isLoading = false);
-
-    if (resp != null && resp["success"]) {
-      widget.onCheckout(resp["authorizationUrl"]);
-      Navigator.pop(context);
-    } else {
+  if (paymentType == "part") {
+    if (amountController.text.trim().isEmpty) {
+      setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Payment initialization failed")),
+        const SnackBar(content: Text("Please enter an amount for part payment")),
       );
+      return;
     }
+    amountToSend = amountController.text.replaceAll(",", "");
+  } else {
+    // ✅ Use the balance coming from backend
+    if (widget.review.amountToPay <= 0) {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No balance left to pay")),
+      );
+      return;
+    }
+    amountToSend = widget.review.amountToPay.toString();
   }
+
+  Map<String, dynamic>? resp;
+
+  if (paymentType == "part") {
+    resp = await PaymentService.createPartPayment(
+      reviewId: widget.review.id,
+      amount: amountToSend,
+      shipmentMethod: shipment,
+    );
+  } else {
+    resp = await PaymentService.createFullPayment(
+      reviewId: widget.review.id,
+      amount: amountToSend,
+      shipmentMethod: shipment,
+    );
+  }
+
+  setState(() => isLoading = false);
+
+  if (resp != null && resp["success"]) {
+    widget.onCheckout(resp["authorizationUrl"]);
+    Navigator.pop(context);
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Payment initialization failed")),
+    );
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {

@@ -8,8 +8,6 @@ import 'package:hog/components/Orders/quotationcard.dart';
 import 'package:hog/components/texts.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-
-
 class Quotation extends StatefulWidget {
   final String materialId;
 
@@ -52,88 +50,89 @@ class _QuotationState extends State<Quotation> {
   }
 
   // Show Payment Options Modal
-// Show Payment Options Modal
-void _showPaymentOptions(Review review) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (context) => PaymentOptionsModal(
-      review: review,
-      onCheckout: (String url) async {
-        // Close the modal first
-        Navigator.pop(context);
-        
-        // Wait for the modal to fully animate out
-        await Future.delayed(const Duration(milliseconds: 350));
-        
-        // Now open the WebView
-        if (mounted) {
-          _openCheckout(url);
-        }
-      },
-    ),
-  );
-}
+  // Show Payment Options Modal
+  void _showPaymentOptions(Review review) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder:
+          (context) => PaymentOptionsModal(
+            review: review,
+            onCheckout: (String url) async {
+              // Close the modal first
+              Navigator.pop(context);
 
+              // Wait for the modal to fully animate out
+              await Future.delayed(const Duration(milliseconds: 350));
+
+              // Now open the WebView
+              if (mounted) {
+                _openCheckout(url);
+              }
+            },
+          ),
+    );
+  }
 
   // Immediately call payment API, then go to WebView
-Future<void> _initiatePayment(
-  Review review,
-  String paymentType, {
-  String? partAmount,
-  String shipment = "Regular",
-}) async {
-  setState(() => isLoading = true);
+  Future<void> _initiatePayment(
+    Review review,
+    String paymentType, {
+    String? partAmount,
+    String shipment = "Regular",
+  }) async {
+    setState(() => isLoading = true);
 
-  try {
-    late String amountToSend;
+    try {
+      late String amountToSend;
 
-    if (paymentType == "part") {
-      // ✅ User chooses part payment
-      amountToSend = (partAmount?.replaceAll(",", "") ?? "0");
-    } else {
-      if (review.amountPaid > 0) {
-        // ✅ Already made a part payment → pay remaining balance
-        amountToSend = review.amountToPay.toString();
+      if (paymentType == "part") {
+        // ✅ User chooses part payment
+        amountToSend = (partAmount?.replaceAll(",", "") ?? "0");
       } else {
-        // ✅ First time full payment
-        amountToSend = review.totalCost.toString();
+        if (review.amountPaid > 0) {
+          // ✅ Already made a part payment → pay remaining balance
+          amountToSend = review.amountToPay.toString();
+          print(amountToSend);
+        } else {
+          // ✅ First time full payment
+          amountToSend = review.totalCost.toString();
+        }
       }
-    }
 
-    final resp = paymentType == "part"
-        ? await PaymentService.createPartPayment(
-            reviewId: review.id,
-            amount: amountToSend,
-            shipmentMethod: shipment,
-          )
-        : await PaymentService.createFullPayment(
-            reviewId: review.id,
-            amount: amountToSend,
-            shipmentMethod: shipment,
-          );
+      final resp =
+          paymentType == "part"
+              ? await PaymentService.createPartPayment(
+                reviewId: review.id,
+                amount: amountToSend,
+                shipmentMethod: shipment,
+              )
+              : await PaymentService.createFullPayment(
+                reviewId: review.id,
+                amount: amountToSend,
+                shipmentMethod: shipment,
+              );
 
-    if (resp != null && resp["success"] == true) {
-      final authUrl = resp["authorizationUrl"];
-      if (authUrl != null) {
-        Navigator.of(context, rootNavigator: true)
-            .popUntil((route) => route.isFirst);
-        _openCheckout(authUrl);
+      if (resp != null && resp["success"] == true) {
+        final authUrl = resp["authorizationUrl"];
+        if (authUrl != null) {
+          Navigator.of(
+            context,
+            rootNavigator: true,
+          ).popUntil((route) => route.isFirst);
+          _openCheckout(authUrl);
+        } else {
+          print("❌ No authorization URL returned");
+        }
       } else {
-        print("❌ No authorization URL returned");
+        print("❌ Payment failed: ${resp?["message"]}");
       }
-    } else {
-      print("❌ Payment failed: ${resp?["message"]}");
+    } catch (e) {
+      print("❌ Error during payment: $e");
+    } finally {
+      setState(() => isLoading = false);
     }
-  } catch (e) {
-    print("❌ Error during payment: $e");
-  } finally {
-    setState(() => isLoading = false);
   }
-}
-
-
-
 
   // Open Paystack checkout in WebView
   void _openCheckout(String url) {
@@ -149,16 +148,19 @@ Future<void> _initiatePayment(
             (_) => Scaffold(
               backgroundColor: Colors.purple,
               appBar: AppBar(
-                 backgroundColor: Colors.purple,
-                title: const CustomText("Payments",color: Colors.white,fontSize: 18,),
-              iconTheme: IconThemeData(color: Colors.white),
+                backgroundColor: Colors.purple,
+                title: const CustomText(
+                  "Payments",
+                  color: Colors.white,
+                  fontSize: 18,
+                ),
+                iconTheme: IconThemeData(color: Colors.white),
               ),
               body: WebViewWidget(controller: controller),
             ),
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -192,7 +194,7 @@ Future<void> _initiatePayment(
                           () => {
                             print(reviews[index].id),
                             _showHireDesignerConfirmation(reviews[index]),
-                          }
+                          },
                     );
                   },
                 ),

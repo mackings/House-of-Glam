@@ -231,6 +231,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
                 hintText: "Name / Logo embroidery",
                 fieldKey: "branding",
                 controller: brandingController,
+                
               ),
               const SizedBox(height: 20),
 

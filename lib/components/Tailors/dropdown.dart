@@ -22,7 +22,7 @@ class CustomDropdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CustomText(label, fontSize: 16, fontWeight: FontWeight.bold),
+        CustomText(label, fontSize: 16, fontWeight: FontWeight.w500),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: selectedValue,
@@ -51,7 +51,7 @@ class MeasurementField extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomTextField(
       title: label,
-      hintText: "Enter $label in inches",
+      hintText: "Enter $label",
       fieldKey: label.toLowerCase(),
       controller: controller,
       keyboardType: TextInputType.number,

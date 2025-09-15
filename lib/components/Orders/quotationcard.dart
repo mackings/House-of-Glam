@@ -22,6 +22,9 @@ class QuotationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isPartPayment = review.status == "part payment";
+    final bool isFullPayment = review.status == "full payment";
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       padding: const EdgeInsets.all(16),
@@ -42,18 +45,15 @@ class QuotationCard extends StatelessWidget {
           // Top Row: Avatar + Name + Status
           Row(
             children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.purple.shade100,
-                    child: Text(
-                      review.user.fullName.isNotEmpty
-                          ? review.user.fullName[0].toUpperCase()
-                          : "?",
-                      style: const TextStyle(color: Colors.purple, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
+              CircleAvatar(
+                backgroundColor: Colors.purple.shade100,
+                child: Text(
+                  review.user.fullName.isNotEmpty
+                      ? review.user.fullName[0].toUpperCase()
+                      : "?",
+                  style: const TextStyle(
+                      color: Colors.purple, fontWeight: FontWeight.bold),
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -76,7 +76,6 @@ class QuotationCard extends StatelessWidget {
                         : Colors.green,
                 size: 18,
               ),
-
             ],
           ),
           const SizedBox(height: 10),
@@ -99,21 +98,18 @@ class QuotationCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
 
-          // Comment in ListTile
+          // Comment
           if (review.comment.isNotEmpty)
-Row(
-  crossAxisAlignment: CrossAxisAlignment.start,
-  children: [
-   // const Icon(Icons.comment, color: Colors.purple, size: 18),
-   // const SizedBox(width: 8),
-    CustomText(
-      review.comment,
-      fontSize: 13,
-     // softWrap: true,
-      overflow: TextOverflow.visible,
-    ),
-  ],
-),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(
+                  review.comment,
+                  fontSize: 13,
+                  overflow: TextOverflow.visible,
+                ),
+              ],
+            ),
 
           const SizedBox(height: 12),
 
@@ -156,20 +152,26 @@ Row(
           ),
           const SizedBox(height: 25),
 
-          // Hire Designer Button
+          // Action Button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: onHireDesigner,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
+                backgroundColor: isPartPayment
+                    ? Colors.black 
+                    : Colors.purple,
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const CustomText(
-                "Hire Designer",
+              child: CustomText(
+                isPartPayment
+                    ? "Finish Payment"
+                    : isFullPayment
+                        ? "Paid"
+                        : "Hire Designer",
                 fontSize: 14,
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -181,4 +183,5 @@ Row(
     );
   }
 }
+
 

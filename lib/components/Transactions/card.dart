@@ -65,7 +65,7 @@ class TransactionCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 CustomText(
-  "₦${formatAmount(txn.totalAmount!.toInt())}",
+  "₦${formatAmount(txn.amountPaid!.toInt())}",
   fontSize: 16,
   fontWeight: FontWeight.bold,
 ),
@@ -73,7 +73,7 @@ CustomText(
 
                   const SizedBox(height: 6),
                   CustomText(
-                    txn.paymentMethod.toString(),
+                    txn.orderStatus.toString(),
                     color: Colors.black87,
                     fontSize: 13,
                   ),
