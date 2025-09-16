@@ -5,6 +5,8 @@ import 'package:hog/TailorApp/Home/Model/materialModel.dart';
 import 'package:hog/TailorApp/Widgets/DetailsTaiioesheet.dart';
 import 'package:hog/TailorApp/Widgets/MaterialCard.dart';
 import 'package:hog/TailorApp/Widgets/tailorAppBar.dart';
+import 'package:hog/components/button.dart';
+import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 
 
@@ -58,7 +60,9 @@ class _TailordashboardState extends State<Tailordashboard> {
                 child: CustomText("❌ Error: ${snapshot.error}"),
               );
             } else if (!snapshot.hasData || snapshot.data!.data.isEmpty) {
-              return const Center(child: CustomText("No materials found"));
+              return const Center(
+                child: CustomText("No materials found"),
+              );
             }
 
             final materials = snapshot.data!.data;
@@ -68,7 +72,7 @@ class _TailordashboardState extends State<Tailordashboard> {
               color: Colors.purple,
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  bool isWide = constraints.maxWidth > 600;
+                  final isWide = constraints.maxWidth > 600;
 
                   return isWide
                       ? GridView.builder(
@@ -83,8 +87,10 @@ class _TailordashboardState extends State<Tailordashboard> {
                           itemCount: materials.length,
                           itemBuilder: (context, index) => TailorMaterialCard(
                             material: materials[index],
-                            onTap: () =>
-                                _showMaterialDetails(context, materials[index]),
+                            onTap: () => _showMaterialDetails(
+                              context,
+                              materials[index],
+                            ),
                           ),
                         )
                       : ListView.builder(
@@ -94,8 +100,10 @@ class _TailordashboardState extends State<Tailordashboard> {
                             padding: const EdgeInsets.all(8.0),
                             child: TailorMaterialCard(
                               material: materials[index],
-                              onTap: () =>
-                                  _showMaterialDetails(context, materials[index]),
+                              onTap: () => _showMaterialDetails(
+                                context,
+                                materials[index],
+                              ),
                             ),
                           ),
                         );
@@ -108,7 +116,7 @@ class _TailordashboardState extends State<Tailordashboard> {
     );
   }
 
-    /// Modal bottom sheet for details
+  /// Bottom sheet for details (widgetized in its own file)
   void _showMaterialDetails(BuildContext context, TailorMaterialItem material) {
     showModalBottomSheet(
       context: context,

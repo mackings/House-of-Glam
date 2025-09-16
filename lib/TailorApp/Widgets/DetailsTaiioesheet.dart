@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:hog/TailorApp/Home/Model/materialModel.dart';
+import 'package:hog/TailorApp/Widgets/Quotationmodal.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
@@ -121,14 +122,22 @@ class TailorMaterialDetailSheet extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // Submit Quotation Button
-                CustomButton(
-                  title: "Submit Quotation",
-                  isOutlined: false,
-                  onPressed: () {
-                    Navigator.pop(context); // close sheet
-                    // TODO: handle submit quotation logic here
-                  },
-                ),
+CustomButton(
+  title: "Submit Quotation",
+  isOutlined: false,
+  onPressed: () {
+    Navigator.pop(context); // close current sheet first
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => QuotationBottomSheet(materialId: material.id),
+    );
+  },
+),
+
               ],
             ),
           ),

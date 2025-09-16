@@ -6,6 +6,8 @@ import 'package:hog/TailorApp/Widgets/tailorModalsheetdetails.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
+
+
 class AssignedMaterials extends StatefulWidget {
   const AssignedMaterials({super.key});
 
@@ -20,7 +22,13 @@ class _AssignedMaterialsState extends State<AssignedMaterials> {
   @override
   void initState() {
     super.initState();
-    _futureAssignedMaterials = _service.fetchAssignedMaterials();
+    _loadMaterials();
+  }
+
+  Future<void> _loadMaterials() async {
+    setState(() {
+      _futureAssignedMaterials = _service.fetchAssignedMaterials();
+    });
   }
 
   @override
@@ -51,28 +59,39 @@ class _AssignedMaterialsState extends State<AssignedMaterials> {
                 ),
               );
             } else if (!snapshot.hasData || snapshot.data!.reviews.isEmpty) {
-              return const Center(
-                child: CustomText(
-                  "No assigned materials found",
-                  fontSize: 16,
-                  color: Colors.grey,
+              return RefreshIndicator(
+                onRefresh: _loadMaterials,
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(height: 200),
+                    Center(
+                      child: CustomText(
+                        "No assigned materials found",
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ),
               );
             }
 
             final materials = snapshot.data!.reviews;
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: materials.length,
-              itemBuilder: (context, index) {
-                final item = materials[index];
-
-                return TailorAssignedCard(
-                  item: item,
-                  onTap: () => showTailorMaterialDetails(context, item),
-                );
-              },
+            return RefreshIndicator(
+              onRefresh: _loadMaterials,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(12),
+                itemCount: materials.length,
+                itemBuilder: (context, index) {
+                  final item = materials[index];
+                  return TailorAssignedCard(
+                    item: item,
+                    onTap: () => showTailorMaterialDetails(context, item),
+                  );
+                },
+              ),
             );
           },
         ),

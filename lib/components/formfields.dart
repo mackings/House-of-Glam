@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/components/texts.dart';
 
 
+
 final obscureTextProvider =
     StateProvider.family<bool, String>((ref, fieldKey) => true);
 
@@ -16,7 +17,8 @@ class CustomTextField extends ConsumerWidget {
   final FormFieldValidator<String>? validator;
   final TextInputType keyboardType;
   final String fieldKey;
-  final List<TextInputFormatter>? inputFormatters; // ✅ optional
+  final List<TextInputFormatter>? inputFormatters; 
+  final ValueChanged<String>? onChanged; // ✅ optional callback
 
   const CustomTextField({
     Key? key,
@@ -28,7 +30,8 @@ class CustomTextField extends ConsumerWidget {
     this.controller,
     this.validator,
     this.keyboardType = TextInputType.text,
-    this.inputFormatters, // optional
+    this.inputFormatters,
+    this.onChanged, // ✅ new
   }) : super(key: key);
 
   @override
@@ -43,7 +46,7 @@ class CustomTextField extends ConsumerWidget {
         children: [
           CustomText(
             title,
-            fontSize:15,
+            fontSize: 15,
             fontWeight: FontWeight.w500,
           ),
           const SizedBox(height: 8),
@@ -53,6 +56,7 @@ class CustomTextField extends ConsumerWidget {
             keyboardType: keyboardType,
             inputFormatters: inputFormatters,
             obscureText: isPassword ? obscureText : false,
+            onChanged: onChanged, // ✅ wire it up here
             decoration: InputDecoration(
               hintText: hintText,
               prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,

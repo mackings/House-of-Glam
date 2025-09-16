@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hog/TailorApp/Home/Views/AssignedMaterials.dart';
 import 'package:hog/TailorApp/Home/Views/TailorDashboard.dart';
+import 'package:hog/TailorApp/Home/Views/Tailorbusiness.dart';
 import 'package:hog/TailorApp/TailorNav.dart';
+
+
 
 class TailorMainPage extends StatefulWidget {
   final bool isVendorEnabled;
@@ -33,24 +36,34 @@ class _TailorMainPageState extends State<TailorMainPage> {
     }
   }
 
-  void _showVendorDisabledDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false, // force user to acknowledge
-      builder: (context) => AlertDialog(
-        title: const Text("Account Pending"),
-        content: const Text(
-          "Your vendor account is not yet enabled. Please wait for admin approval.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
-          ),
-        ],
+
+void _showVendorDisabledDialog() {
+  showDialog(
+    context: context,
+   // barrierDismissible: false,
+    builder: (context) => AlertDialog(
+      title: const Text("Account Pending"),
+      content: const Text(
+        "Your vendor account is not yet enabled. Please complete your registration form.",
       ),
-    );
-  }
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context); // close dialog
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => TailorRegistrationPage(),
+              ),
+            );
+          },
+          child: const Text("Go to Form"),
+        ),
+      ],
+    ),
+  );
+}
+
 
 
 

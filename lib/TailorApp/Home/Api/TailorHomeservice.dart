@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/TailorApp/Home/Model/AssignedMaterial.dart';
 import 'package:hog/TailorApp/Home/Model/materialModel.dart';
-import 'package:http/http.dart' as http show get;
+import 'package:http/http.dart' as http ;
 
 class TailorHomeService {
   final String baseUrl = "https://hog-ymud.onrender.com/api/v1";
@@ -34,6 +34,46 @@ class TailorHomeService {
       rethrow;
     }
   }
+
+
+  // Submit quotation
+Future<void> submitQuotation({
+  required String materialId,
+  required String comment,
+  required String materialTotalCost,
+  required String workmanshipTotalCost,
+  required String deliveryDate,
+  required String reminderDate,
+}) async {
+  final token = await SecurePrefs.getToken();
+
+  final url = Uri.parse("$baseUrl/review/createReview/$materialId");
+
+  final body = json.encode({
+    "comment": comment,
+    "materialTotalCost": materialTotalCost,
+    "workmanshipTotalCost": workmanshipTotalCost,
+    "deliveryDate": deliveryDate,
+    "reminderDate": reminderDate,
+  });
+
+  final response = await http.post(
+    url,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $token",
+    },
+    body: body,
+  );
+
+  print("➡️ POST Request: $url");
+  print("⬅️ Response [${response.statusCode}]: ${response.body}");
+
+  if (response.statusCode != 200 && response.statusCode != 201) {
+    throw Exception("Failed to submit quotation: ${response.body}");
+  }
+}
+
 
 
   // 🆕 Assigned Materials API
