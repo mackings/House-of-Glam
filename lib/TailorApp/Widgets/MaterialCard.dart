@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hog/TailorApp/Home/Model/materialModel.dart';
 import 'package:hog/components/texts.dart';
+import 'package:timeago/timeago.dart' as timeago;
+
+
 
 class TailorMaterialCard extends StatelessWidget {
   final TailorMaterialItem material;
@@ -14,6 +17,7 @@ class TailorMaterialCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final createdAt = DateTime.parse(material.createdAt);
     final imgUrl = material.sampleImage.isNotEmpty
         ? material.sampleImage.first
         : "https://via.placeholder.com/150";
@@ -68,12 +72,20 @@ class TailorMaterialCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  CustomText(
-                    material.price != null ? "₦${material.price}" : "No price",
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.purple,
-                  ),
+
+
+CustomText(
+  timeago.format(createdAt),
+  fontSize: 14,
+)
+
+
+                  // CustomText(
+                  //   material.price != null ? "₦${material.price}" : "No price",
+                  //   fontSize: 15,
+                  //   fontWeight: FontWeight.bold,
+                  //   color: Colors.purple,
+                  // ),
                 ],
               ),
             ),
