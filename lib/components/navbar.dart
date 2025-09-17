@@ -19,7 +19,7 @@ class CustomBottomNavBar extends StatelessWidget {
       {"icon": Icons.card_travel, "label": "Order"},
       {"icon": Icons.history, "label": "History"},
       {"icon": Icons.wallet, "label": "Transactions"},
-      {"icon": Icons.person, "label": "Profile"},
+      {"icon": Icons.dashboard_customize, "label": "Designs"},
     ];
 
     return Container(
