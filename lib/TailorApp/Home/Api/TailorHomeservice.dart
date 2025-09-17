@@ -98,4 +98,29 @@ Future<void> submitQuotation({
       throw Exception("Failed to fetch assigned materials: ${response.body}");
     }
   }
+
+
+
+  // 🆕 Deliver Attire (Create Tracking)
+Future<void> deliverAttire(String materialId) async {
+  final token = await SecurePrefs.getToken();
+
+  final url = Uri.parse("$baseUrl/tracking/createTracking?materialId=$materialId");
+
+  final response = await http.post(
+    url,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $token",
+    },
+  );
+
+  print("➡️ POST Request: $url");
+  print("⬅️ Response [${response.statusCode}]: ${response.body}");
+
+  if (response.statusCode != 200 && response.statusCode != 201) {
+    throw Exception("Failed to deliver attire: ${response.body}");
+  }
+}
+
 }
