@@ -10,6 +10,22 @@ class WorkCard extends StatelessWidget {
 
   const WorkCard({super.key, required this.work});
 
+  void _showFullImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.black,
+        insetPadding: const EdgeInsets.all(10),
+        child: InteractiveViewer(
+          clipBehavior: Clip.none,
+          minScale: 0.8,
+          maxScale: 4.0,
+          child: Image.network(imageUrl, fit: BoxFit.contain),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // ✅ Format published date
@@ -35,15 +51,19 @@ class WorkCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 📸 Material Image with tap-to-view
           if (work.sampleImage.isNotEmpty)
-            ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
-              child: Image.network(
-                work.sampleImage.first,
-                height: 140,
-                width: double.infinity,
-                fit: BoxFit.cover,
+            GestureDetector(
+              onTap: () => _showFullImage(context, work.sampleImage.first),
+              child: ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
+                child: Image.network(
+                  work.sampleImage.first,
+                  height: 160,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
 
@@ -92,8 +112,16 @@ class WorkCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
 
-                // 👤 User info
-                if (work.user != null) UserInfo(user: work.user!),
+                // 👤 User info with tap-to-view avatar
+                if (work.user != null)
+                  GestureDetector(
+                    onTap: () {
+                      if (work.user!.image.toString().isNotEmpty) {
+                        _showFullImage(context, work.user!.image.toString());
+                      }
+                    },
+                    child: UserInfo(user: work.user!),
+                  ),
               ],
             ),
           ),
