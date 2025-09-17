@@ -6,8 +6,6 @@ import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 void showDeliveryDetails(
   BuildContext context,
   TailorTracking tracking, {
@@ -239,7 +237,6 @@ void showDeliveryDetails(
                           //             }
                           //           },
                           //   ),
-                          
                         ],
                       ),
                     ),

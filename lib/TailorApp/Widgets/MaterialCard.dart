@@ -3,8 +3,6 @@ import 'package:hog/TailorApp/Home/Model/materialModel.dart';
 import 'package:hog/components/texts.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-
-
 class TailorMaterialCard extends StatelessWidget {
   final TailorMaterialItem material;
   final VoidCallback onTap;
@@ -18,9 +16,10 @@ class TailorMaterialCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final createdAt = DateTime.parse(material.createdAt);
-    final imgUrl = material.sampleImage.isNotEmpty
-        ? material.sampleImage.first
-        : "https://via.placeholder.com/150";
+    final imgUrl =
+        material.sampleImage.isNotEmpty
+            ? material.sampleImage.first
+            : "https://via.placeholder.com/150";
 
     return GestureDetector(
       onTap: onTap,
@@ -35,8 +34,9 @@ class TailorMaterialCard extends StatelessWidget {
           children: [
             // Material Image
             ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
               child: Image.network(
                 imgUrl,
                 height: 120,
@@ -51,15 +51,21 @@ class TailorMaterialCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomText(material.attireType,
-                      fontSize: 16, fontWeight: FontWeight.bold),
+                  CustomText(
+                    material.attireType,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       const Icon(Icons.checkroom, size: 16, color: Colors.grey),
                       const SizedBox(width: 4),
-                      CustomText("${material.brand} • ${material.color}",
-                          fontSize: 13, color: Colors.grey),
+                      CustomText(
+                        "${material.brand} • ${material.color}",
+                        fontSize: 13,
+                        color: Colors.grey,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -67,18 +73,16 @@ class TailorMaterialCard extends StatelessWidget {
                     children: [
                       const Icon(Icons.person, size: 16, color: Colors.black54),
                       const SizedBox(width: 4),
-                      CustomText(material.userId.fullName,
-                          fontSize: 13, color: Colors.black87),
+                      CustomText(
+                        material.userId.fullName,
+                        fontSize: 13,
+                        color: Colors.black87,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
 
-
-CustomText(
-  timeago.format(createdAt),
-  fontSize: 14,
-)
-
+                  CustomText(timeago.format(createdAt), fontSize: 14),
 
                   // CustomText(
                   //   material.price != null ? "₦${material.price}" : "No price",

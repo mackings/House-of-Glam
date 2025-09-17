@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-
 class MultiImagePicker extends StatelessWidget {
   final List<File> images;
   final VoidCallback onAddImage;
@@ -43,10 +42,7 @@ class MultiImagePicker extends StatelessWidget {
             margin: const EdgeInsets.only(right: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              image: DecorationImage(
-                image: FileImage(file),
-                fit: BoxFit.cover,
-              ),
+              image: DecorationImage(image: FileImage(file), fit: BoxFit.cover),
             ),
           );
         },

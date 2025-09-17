@@ -1,5 +1,4 @@
 class TailorPublishedResponse {
-  
   final bool success;
   final String message;
   final List<TailorPublished> data;
@@ -17,7 +16,8 @@ class TailorPublishedResponse {
       success: json['success'] ?? false,
       message: json['message'] ?? '',
       count: json['count'] ?? 0,
-      data: (json['data'] as List<dynamic>?)
+      data:
+          (json['data'] as List<dynamic>?)
               ?.map((e) => TailorPublished.fromJson(e))
               .toList() ??
           [],
@@ -59,7 +59,8 @@ class TailorPublished {
       clothPublished: json['clothPublished'] ?? '',
       color: json['color'] ?? '',
       brand: json['brand'] ?? '',
-      sampleImage: (json['sampleImage'] as List<dynamic>?)
+      sampleImage:
+          (json['sampleImage'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],

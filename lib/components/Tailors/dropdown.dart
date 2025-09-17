@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 
-
 class CustomDropdown extends StatelessWidget {
   final String label;
   final List<String> options;
@@ -26,13 +25,17 @@ class CustomDropdown extends StatelessWidget {
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: selectedValue,
-          items: options
-              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-              .toList(),
+          items:
+              options
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
           onChanged: onChanged,
           decoration: InputDecoration(
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -45,7 +48,11 @@ class MeasurementField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
 
-  const MeasurementField({super.key, required this.label, required this.controller});
+  const MeasurementField({
+    super.key,
+    required this.label,
+    required this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {

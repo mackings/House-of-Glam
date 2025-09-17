@@ -12,7 +12,6 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
 
-
 class Signup extends ConsumerStatefulWidget {
   const Signup({super.key});
 
@@ -28,7 +27,7 @@ class _SignupState extends ConsumerState<Signup> {
   late TextEditingController addressController;
 
   bool isLoading = false; // for loading overlay
-  bool isTailor = false;  // 👈 checkbox state
+  bool isTailor = false; // 👈 checkbox state
 
   @override
   void initState() {
@@ -102,7 +101,11 @@ class _SignupState extends ConsumerState<Signup> {
                 const SizedBox(height: 10),
 
                 // Title
-CustomText("Sign Up",fontWeight: FontWeight.w700,fontSize: 25,),
+                CustomText(
+                  "Sign Up",
+                  fontWeight: FontWeight.w700,
+                  fontSize: 25,
+                ),
                 const SizedBox(height: 20),
 
                 // Full Name Field
@@ -151,29 +154,30 @@ CustomText("Sign Up",fontWeight: FontWeight.w700,fontSize: 25,),
                 ),
 
                 // 👇 Checkbox for tailor role
-Row(
-  children: [
-    Checkbox(
-      value: isTailor,
-      onChanged: (val) {
-        setState(() {
-          isTailor = val ?? false;
-        });
+                Row(
+                  children: [
+                    Checkbox(
+                      value: isTailor,
+                      onChanged: (val) {
+                        setState(() {
+                          isTailor = val ?? false;
+                        });
 
-        if (val == true) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Leave blank if you are not a tailor"),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
-      },
-    ),
-    const CustomText("I'm a Tailor"),
-  ],
-),
-
+                        if (val == true) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "Leave blank if you are not a tailor",
+                              ),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                    const CustomText("I'm a Tailor"),
+                  ],
+                ),
 
                 const SizedBox(height: 20),
 
@@ -197,10 +201,7 @@ Row(
                           MaterialPageRoute(builder: (_) => const Signin()),
                         );
                       },
-                      child: CustomText(
-                        "Login",
-                        fontWeight: FontWeight.bold,
-                      ),
+                      child: CustomText("Login", fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),

@@ -1,7 +1,4 @@
-
 import 'package:flutter/material.dart';
-
-
 
 class FourDigitInput extends StatefulWidget {
   final void Function(String) onCompleted;
@@ -91,4 +88,3 @@ class _FourDigitInputState extends State<FourDigitInput> {
     );
   }
 }
-

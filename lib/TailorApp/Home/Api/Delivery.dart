@@ -34,11 +34,13 @@ class TailorTrackingService {
     }
   }
 
-    // 🆕 Deliver Attire API
+  // 🆕 Deliver Attire API
   Future<String> deliverAttire(String materialId) async {
     final token = await SecurePrefs.getToken();
 
-    final url = Uri.parse("$baseUrl/tracking/createTracking?materialId=$materialId");
+    final url = Uri.parse(
+      "$baseUrl/tracking/createTracking?materialId=$materialId",
+    );
 
     final response = await http.post(
       url,
@@ -59,5 +61,4 @@ class TailorTrackingService {
       throw Exception(responseData["message"] ?? "Failed to deliver attire");
     }
   }
-  
 }

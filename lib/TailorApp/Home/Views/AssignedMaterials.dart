@@ -6,8 +6,6 @@ import 'package:hog/TailorApp/Widgets/tailorModalsheetdetails.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
-
-
 class AssignedMaterials extends StatefulWidget {
   const AssignedMaterials({super.key});
 
@@ -99,4 +97,3 @@ class _AssignedMaterialsState extends State<AssignedMaterials> {
     );
   }
 }
-

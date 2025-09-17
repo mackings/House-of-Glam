@@ -38,7 +38,11 @@ class OrderDetailsSheet extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const CustomText("Order Details", fontSize: 18, fontWeight: FontWeight.bold),
+                  const CustomText(
+                    "Order Details",
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                   IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () => Navigator.pop(context),
@@ -55,12 +59,15 @@ class OrderDetailsSheet extends StatelessWidget {
                     enlargeCenterPage: true,
                     autoPlay: true,
                   ),
-                  items: material.sampleImage
-                      .map((img) => ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Image.network(img, fit: BoxFit.cover),
-                          ))
-                      .toList(),
+                  items:
+                      material.sampleImage
+                          .map(
+                            (img) => ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.network(img, fit: BoxFit.cover),
+                            ),
+                          )
+                          .toList(),
                 ),
               const SizedBox(height: 20),
 
@@ -79,39 +86,46 @@ class OrderDetailsSheet extends StatelessWidget {
               // Measurements
               const CustomText("Measurements", fontWeight: FontWeight.bold),
               const SizedBox(height: 8),
-              ...material.measurement.map((m) => Card(
-                    color: Colors.grey[100],
-                    margin: const EdgeInsets.only(bottom: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              CustomText("Chest: ${m.chest ?? "-"}"),
-                              CustomText("Waist: ${m.waist ?? "-"}"),
-                              CustomText("Hip: ${m.hip ?? "-"}"),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              CustomText("Shoulder: ${m.shoulder ?? "-"}"),
-                              CustomText("Arm: ${m.armLength ?? "-"}"),
-                              CustomText("Sleeve: ${m.sleeveLength ?? "-"}"),
-                            ],
-                          ),
-                        ],
-                      ),
+              ...material.measurement.map(
+                (m) => Card(
+                  color: Colors.grey[100],
+                  margin: const EdgeInsets.only(bottom: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            CustomText("Chest: ${m.chest ?? "-"}"),
+                            CustomText("Waist: ${m.waist ?? "-"}"),
+                            CustomText("Hip: ${m.hip ?? "-"}"),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            CustomText("Shoulder: ${m.shoulder ?? "-"}"),
+                            CustomText("Arm: ${m.armLength ?? "-"}"),
+                            CustomText("Sleeve: ${m.sleeveLength ?? "-"}"),
+                          ],
+                        ),
+                      ],
                     ),
-                  )),
+                  ),
+                ),
+              ),
 
               if (material.specialInstructions != null) ...[
                 const SizedBox(height: 16),
-                const CustomText("Special Instructions", fontWeight: FontWeight.bold),
+                const CustomText(
+                  "Special Instructions",
+                  fontWeight: FontWeight.bold,
+                ),
                 const SizedBox(height: 6),
                 CustomText(material.specialInstructions ?? ""),
               ],
@@ -121,7 +135,9 @@ class OrderDetailsSheet extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.purple,
                   minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 onPressed: () {},
                 icon: const Icon(Icons.check_circle, color: Colors.white),

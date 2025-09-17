@@ -1,5 +1,3 @@
-
-
 class TailorTrackingResponse {
   final bool success;
   final String message;
@@ -84,9 +82,10 @@ class MaterialDetails {
       clothMaterial: json['clothMaterial'] ?? '',
       color: json['color'] ?? '',
       brand: json['brand'] ?? '',
-      sampleImage: (json['sampleImage'] as List<dynamic>? ?? [])
-          .map((e) => e.toString())
-          .toList(),
+      sampleImage:
+          (json['sampleImage'] as List<dynamic>? ?? [])
+              .map((e) => e.toString())
+              .toList(),
     );
   }
 }

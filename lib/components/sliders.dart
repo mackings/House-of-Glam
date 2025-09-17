@@ -4,11 +4,8 @@ class CarouselSlider extends StatefulWidget {
   final List<Widget> items;
   final double height;
 
-  const CarouselSlider({
-    Key? key,
-    required this.items,
-    this.height = 200,
-  }) : super(key: key);
+  const CarouselSlider({Key? key, required this.items, this.height = 200})
+    : super(key: key);
 
   @override
   State<CarouselSlider> createState() => _CarouselSliderState();

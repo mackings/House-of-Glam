@@ -12,7 +12,6 @@ class TailorCustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     final items = [
       {"icon": Icons.home, "label": "Home"},
       {"icon": Icons.card_travel, "label": "My Orders"},
@@ -30,7 +29,7 @@ class TailorCustomBottomNavBar extends StatelessWidget {
             blurRadius: 6,
             offset: Offset(0, -2),
             color: Colors.black12,
-          )
+          ),
         ],
       ),
       child: Row(
@@ -73,4 +72,3 @@ class TailorCustomBottomNavBar extends StatelessWidget {
     );
   }
 }
-

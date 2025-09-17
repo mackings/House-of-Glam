@@ -13,7 +13,8 @@ class ReviewResponse {
     return ReviewResponse(
       success: json['success'] ?? false,
       count: json['count'] ?? 0,
-      reviews: (json['reviews'] as List<dynamic>?)
+      reviews:
+          (json['reviews'] as List<dynamic>?)
               ?.map((e) => Review.fromJson(e))
               .toList() ??
           [],
@@ -29,8 +30,8 @@ class Review {
   final int materialTotalCost;
   final int workmanshipTotalCost;
   final int totalCost;
-  final int amountPaid;      // ✅ new
-  final int amountToPay;     // ✅ new
+  final int amountPaid; // ✅ new
+  final int amountToPay; // ✅ new
   final DateTime deliveryDate;
   final DateTime reminderDate;
   final String comment;
@@ -65,12 +66,12 @@ class Review {
       materialTotalCost: json['materialTotalCost'] ?? 0,
       workmanshipTotalCost: json['workmanshipTotalCost'] ?? 0,
       totalCost: json['totalCost'] ?? 0,
-      amountPaid: json['amountPaid'] ?? 0,      // ✅ now mapped
-      amountToPay: json['amountToPay'] ?? 0,    // ✅ now mapped
-      deliveryDate: DateTime.tryParse(json['deliveryDate'] ?? '') ??
-          DateTime.now(),
-      reminderDate: DateTime.tryParse(json['reminderDate'] ?? '') ??
-          DateTime.now(),
+      amountPaid: json['amountPaid'] ?? 0, // ✅ now mapped
+      amountToPay: json['amountToPay'] ?? 0, // ✅ now mapped
+      deliveryDate:
+          DateTime.tryParse(json['deliveryDate'] ?? '') ?? DateTime.now(),
+      reminderDate:
+          DateTime.tryParse(json['reminderDate'] ?? '') ?? DateTime.now(),
       comment: json['comment'] ?? '',
       status: json['status'] ?? '',
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
@@ -84,11 +85,7 @@ class ReviewUser {
   final String fullName;
   final String email;
 
-  ReviewUser({
-    required this.id,
-    required this.fullName,
-    required this.email,
-  });
+  ReviewUser({required this.id, required this.fullName, required this.email});
 
   factory ReviewUser.fromJson(Map<String, dynamic> json) {
     return ReviewUser(

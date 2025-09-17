@@ -6,7 +6,6 @@ import 'package:hog/components/Transactions/modal.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
-
 class Transactions extends StatefulWidget {
   const Transactions({super.key});
 
@@ -49,26 +48,31 @@ class _TransactionsState extends State<Transactions> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
-        title: const CustomText("Transactions",color: Colors.white,fontSize: 20,),
+        title: const CustomText(
+          "Transactions",
+          color: Colors.white,
+          fontSize: 20,
+        ),
         backgroundColor: Colors.purple,
       ),
       body: RefreshIndicator(
         onRefresh: fetchTransactions,
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : transactions.isEmpty
+        child:
+            isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : transactions.isEmpty
                 ? const Center(child: Text("No transactions found"))
                 : ListView.builder(
-                    padding: const EdgeInsets.all(12),
-                    itemCount: transactions.length,
-                    itemBuilder: (context, index) {
-                      final txn = transactions[index];
-                      return TransactionCard(
-                        txn: txn,
-                        onTap: () => showTransactionDetails(txn),
-                      );
-                    },
-                  ),
+                  padding: const EdgeInsets.all(12),
+                  itemCount: transactions.length,
+                  itemBuilder: (context, index) {
+                    final txn = transactions[index];
+                    return TransactionCard(
+                      txn: txn,
+                      onTap: () => showTransactionDetails(txn),
+                    );
+                  },
+                ),
       ),
     );
   }

@@ -5,11 +5,7 @@ import 'package:hog/App/Home/Model/tailor.dart';
 import 'package:hog/App/Home/Model/vendor.dart';
 import 'package:http/http.dart' as http;
 
-
-
 class HomeApiService {
-
-
   static const String baseUrl = "https://hog-ymud.onrender.com/api/v1";
 
   static Future<List<Tailor>> getAllTailors() async {
@@ -29,7 +25,8 @@ class HomeApiService {
       print("⬅️ Response: ${response.body}");
 
       if (response.statusCode == 200) {
-        final List<dynamic> tailorsJson = jsonDecode(response.body)["data"] ?? [];
+        final List<dynamic> tailorsJson =
+            jsonDecode(response.body)["data"] ?? [];
         return tailorsJson.map((t) => Tailor.fromJson(t)).toList();
       }
     } catch (e) {
@@ -39,46 +36,48 @@ class HomeApiService {
     return [];
   }
 
+  static Future<List<Category>> getAllCategories() async {
+    try {
+      final token = await SecurePrefs.getToken();
+      final url = Uri.parse("$baseUrl/category/getAllCategories");
 
+      final response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
 
-static Future<List<Category>> getAllCategories() async {
-  try {
-    final token = await SecurePrefs.getToken();
-    final url = Uri.parse("$baseUrl/category/getAllCategories");
+      print("➡️ GET Request: $url");
+      print("⬅️ Response: ${response.body}");
 
-    final response = await http.get(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-    );
+      if (response.statusCode == 200) {
+        final List<dynamic> categoriesJson =
+            jsonDecode(response.body)["data"] ?? [];
+        final categories =
+            categoriesJson.map((c) => Category.fromJson(c)).toList();
 
-    print("➡️ GET Request: $url");
-    print("⬅️ Response: ${response.body}");
+        // Save to prefs ✅
+        await SecurePrefs.saveCategories(categories);
 
-    if (response.statusCode == 200) {
-      final List<dynamic> categoriesJson = jsonDecode(response.body)["data"] ?? [];
-      final categories = categoriesJson.map((c) => Category.fromJson(c)).toList();
-
-      // Save to prefs ✅
-      await SecurePrefs.saveCategories(categories);
-
-      return categories;
+        return categories;
+      }
+    } catch (e) {
+      print("❌ Error fetching categories: $e");
     }
-  } catch (e) {
-    print("❌ Error fetching categories: $e");
+
+    return [];
   }
 
-  return [];
-}
-
-
-
-  static Future<VendorDetailsResponse?> getVendorDetails(String vendorId) async {
+  static Future<VendorDetailsResponse?> getVendorDetails(
+    String vendorId,
+  ) async {
     try {
       final token = await SecurePrefs.getToken(); // retrieve token
-      final url = Uri.parse("$baseUrl/material/getVendorDetails?vendorId=$vendorId");
+      final url = Uri.parse(
+        "$baseUrl/material/getVendorDetails?vendorId=$vendorId",
+      );
 
       final response = await http.get(
         url,
@@ -100,6 +99,4 @@ static Future<List<Category>> getAllCategories() async {
 
     return null;
   }
-
 }
-

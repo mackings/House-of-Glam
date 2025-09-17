@@ -13,9 +13,10 @@ class MaterialReviewResponse {
     return MaterialReviewResponse(
       success: json['success'] ?? false,
       count: json['count'] ?? 0,
-      materials: (json['materials'] as List<dynamic>)
-          .map((m) => MaterialReview.fromJson(m))
-          .toList(),
+      materials:
+          (json['materials'] as List<dynamic>)
+              .map((m) => MaterialReview.fromJson(m))
+              .toList(),
     );
   }
 }
@@ -62,11 +63,14 @@ class MaterialReview {
       clothMaterial: json['clothMaterial'] ?? '',
       color: json['color'] ?? '',
       brand: json['brand'] ?? '',
-      measurement: (json['measurement'] as List<dynamic>)
-          .map((m) => Measurement.fromJson(m))
-          .toList(),
+      measurement:
+          (json['measurement'] as List<dynamic>)
+              .map((m) => Measurement.fromJson(m))
+              .toList(),
       sampleImage:
-          (json['sampleImage'] as List<dynamic>).map((i) => i.toString()).toList(),
+          (json['sampleImage'] as List<dynamic>)
+              .map((i) => i.toString())
+              .toList(),
       settlement: json['settlement'] ?? 0,
       isDelivered: json['isDelivered'] ?? false,
       specialInstructions: json['specialInstructions'],

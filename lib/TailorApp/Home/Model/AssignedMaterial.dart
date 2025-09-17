@@ -15,9 +15,10 @@ class TailorAssignedMaterialsResponse {
     return TailorAssignedMaterialsResponse(
       success: json['success'] ?? false,
       count: json['count'] ?? 0,
-      reviews: (json['reviews'] as List<dynamic>? ?? [])
-          .map((item) => TailorAssignedMaterial.fromJson(item))
-          .toList(),
+      reviews:
+          (json['reviews'] as List<dynamic>? ?? [])
+              .map((item) => TailorAssignedMaterial.fromJson(item))
+              .toList(),
     );
   }
 }
@@ -68,12 +69,14 @@ class TailorAssignedMaterial {
       totalCost: json['totalCost'] ?? 0,
       amountPaid: json['amountPaid'],
       amountToPay: json['amountToPay'],
-      deliveryDate: json['deliveryDate'] != null
-          ? DateTime.tryParse(json['deliveryDate'])
-          : null,
-      reminderDate: json['reminderDate'] != null
-          ? DateTime.tryParse(json['reminderDate'])
-          : null,
+      deliveryDate:
+          json['deliveryDate'] != null
+              ? DateTime.tryParse(json['deliveryDate'])
+              : null,
+      reminderDate:
+          json['reminderDate'] != null
+              ? DateTime.tryParse(json['reminderDate'])
+              : null,
       comment: json['comment'],
       status: json['status'] ?? '',
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),

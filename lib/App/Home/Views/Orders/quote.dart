@@ -8,8 +8,6 @@ import 'package:hog/components/Orders/quotationcard.dart';
 import 'package:hog/components/texts.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-
-
 class Quotation extends StatefulWidget {
   final String materialId;
 
@@ -54,19 +52,20 @@ class _QuotationState extends State<Quotation> {
   // Show Payment Options Modal
 
   void _showPaymentOptions(Review review) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (context) => PaymentOptionsModal(
-      review: review,
-      onCheckout: (String url) async {
-        // wait until modal is closed before navigating
-        await Future.delayed(const Duration(milliseconds: 250));
-        if (mounted) _openCheckout(url);
-      },
-    ),
-  );
-}
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder:
+          (context) => PaymentOptionsModal(
+            review: review,
+            onCheckout: (String url) async {
+              // wait until modal is closed before navigating
+              await Future.delayed(const Duration(milliseconds: 250));
+              if (mounted) _openCheckout(url);
+            },
+          ),
+    );
+  }
 
   // Immediately call payment API, then go to WebView
   Future<void> _initiatePayment(
@@ -131,28 +130,33 @@ class _QuotationState extends State<Quotation> {
   // Open Paystack checkout in WebView
 
   void _openCheckout(String url) {
-  final controller = WebViewController()
-    ..setJavaScriptMode(JavaScriptMode.unrestricted)
-    ..loadRequest(Uri.parse(url));
+    final controller =
+        WebViewController()
+          ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..loadRequest(Uri.parse(url));
 
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.purple,
-          title: const CustomText("Payments", color: Colors.white, fontSize: 18),
-          iconTheme: const IconThemeData(color: Colors.white),
-        ),
-        body: WebViewWidget(controller: controller),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (_) => Scaffold(
+              appBar: AppBar(
+                backgroundColor: Colors.purple,
+                title: const CustomText(
+                  "Payments",
+                  color: Colors.white,
+                  fontSize: 18,
+                ),
+                iconTheme: const IconThemeData(color: Colors.white),
+              ),
+              body: WebViewWidget(controller: controller),
+            ),
       ),
-    ),
-  ).then((_) {
-    // ✅ Dispose controller when leaving WebView
-    controller.clearCache();
-  });
-}
-
+    ).then((_) {
+      // ✅ Dispose controller when leaving WebView
+      controller.clearCache();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -181,33 +185,35 @@ class _QuotationState extends State<Quotation> {
                   itemCount: reviews.length,
                   itemBuilder: (context, index) {
                     return QuotationCard(
-  review: reviews[index],
-  onHireDesigner: () {
-    print(reviews[index].id);
-    _showHireDesignerConfirmation(reviews[index]);
-  },
-onCompletePayment: (int amount) {
-  final review = reviews[index];
+                      review: reviews[index],
+                      onHireDesigner: () {
+                        print(reviews[index].id);
+                        _showHireDesignerConfirmation(reviews[index]);
+                      },
+                      onCompletePayment: (int amount) {
+                        final review = reviews[index];
 
-  if (review.status == "part payment") {
-    // ✅ User already made a part payment → finish balance
-    _initiatePayment(review, "full");
-  } else if (review.status == "quote") {
-    // ✅ First payment (pay full cost)
-    _initiatePayment(review, "full");
-  } else if (review.status == "full payment") {
-    // ✅ Already fully paid, just ignore
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("This quotation is already fully paid.")),
-    );
-  } else {
-    // ✅ Default: treat as full payment
-    _initiatePayment(review, "full");
-  }
-},
-
-);
-
+                        if (review.status == "part payment") {
+                          // ✅ User already made a part payment → finish balance
+                          _initiatePayment(review, "full");
+                        } else if (review.status == "quote") {
+                          // ✅ First payment (pay full cost)
+                          _initiatePayment(review, "full");
+                        } else if (review.status == "full payment") {
+                          // ✅ Already fully paid, just ignore
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "This quotation is already fully paid.",
+                              ),
+                            ),
+                          );
+                        } else {
+                          // ✅ Default: treat as full payment
+                          _initiatePayment(review, "full");
+                        }
+                      },
+                    );
                   },
                 ),
       ),

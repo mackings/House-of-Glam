@@ -23,11 +23,7 @@ class WorkDetailRow extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: Colors.black54),
         const SizedBox(width: 6),
-        CustomText(
-          label,
-          color: Colors.black87,
-          fontSize: smallText ? 12 : 14,
-        ),
+        CustomText(label, color: Colors.black87, fontSize: smallText ? 12 : 14),
         if (trailingIcon != null && trailingText != null) ...[
           const Spacer(),
           Icon(trailingIcon, size: 16, color: Colors.black54),

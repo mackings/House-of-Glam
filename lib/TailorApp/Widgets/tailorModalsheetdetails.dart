@@ -36,7 +36,7 @@ void showTailorMaterialDetails(
                   try {
                     setState(() => isLoading = true);
                     await service.deliverAttire(material.id);
-                    Navigator.pop(context); 
+                    Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text("Attire delivered successfully!"),

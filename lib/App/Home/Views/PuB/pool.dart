@@ -4,8 +4,6 @@ import 'package:hog/TailorApp/Home/Api/publishservice.dart';
 import 'package:hog/TailorApp/Home/Model/PublishedModel.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 class Pool extends StatefulWidget {
   const Pool({super.key});
 
@@ -29,8 +27,11 @@ class _PoolState extends State<Pool> {
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: Colors.purple,
-        title:
-            const CustomText("Design Boards", color: Colors.white, fontSize: 18),
+        title: const CustomText(
+          "Design Boards",
+          color: Colors.white,
+          fontSize: 18,
+        ),
       ),
       body: SafeArea(
         child: FutureBuilder<TailorPublishedResponse>(
@@ -42,12 +43,17 @@ class _PoolState extends State<Pool> {
               );
             } else if (snapshot.hasError) {
               return Center(
-                child: CustomText("Error: ${snapshot.error}", color: Colors.red),
+                child: CustomText(
+                  "Error: ${snapshot.error}",
+                  color: Colors.red,
+                ),
               );
             } else if (!snapshot.hasData || snapshot.data!.data.isEmpty) {
               return const Center(
-                child:
-                    CustomText("No published works yet", color: Colors.black),
+                child: CustomText(
+                  "No published works yet",
+                  color: Colors.black,
+                ),
               );
             }
 

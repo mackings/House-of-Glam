@@ -33,11 +33,7 @@ class _TailorDeliveriesState extends State<TailorDeliveries> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.purple,
-        title: CustomText(
-          "Deliverables",
-          color: Colors.white,
-          fontSize: 18,
-        ),
+        title: CustomText("Deliverables", color: Colors.white, fontSize: 18),
       ),
       body: SafeArea(
         child: FutureBuilder<TailorTrackingResponse>(
@@ -45,10 +41,14 @@ class _TailorDeliveriesState extends State<TailorDeliveries> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
-                  child: CircularProgressIndicator(color: Colors.purple));
+                child: CircularProgressIndicator(color: Colors.purple),
+              );
             } else if (snapshot.hasError) {
               return Center(
-                child: CustomText("Error: ${snapshot.error}", color: Colors.red),
+                child: CustomText(
+                  "Error: ${snapshot.error}",
+                  color: Colors.red,
+                ),
               );
             } else if (!snapshot.hasData || snapshot.data!.data.isEmpty) {
               return Center(
@@ -66,12 +66,14 @@ class _TailorDeliveriesState extends State<TailorDeliveries> {
                   padding: const EdgeInsets.all(8.0),
                   child: DeliveryCard(
                     tracking: tracking,
-                    onTap: () => showDeliveryDetails(
-                      context,
-                      tracking,
-                      service: _service,
-                      onRefresh: _fetchDeliveries, // refresh list after delivery
-                    ),
+                    onTap:
+                        () => showDeliveryDetails(
+                          context,
+                          tracking,
+                          service: _service,
+                          onRefresh:
+                              _fetchDeliveries, // refresh list after delivery
+                        ),
                   ),
                 );
               },
@@ -82,4 +84,3 @@ class _TailorDeliveriesState extends State<TailorDeliveries> {
     );
   }
 }
-

@@ -9,10 +9,7 @@ import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/components/tokenfields.dart';
 
-
-
 class Verify extends ConsumerStatefulWidget {
-
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _VerifyState();
 }
@@ -21,30 +18,29 @@ class _VerifyState extends ConsumerState<Verify> {
   String? enteredCode;
   bool isLoading = false;
 
-Future<void> _handleVerification() async {
-  if (enteredCode == null || enteredCode!.isEmpty) {
-    await showErrorDialog(context, "Please enter the 4-digit code");
-    return;
+  Future<void> _handleVerification() async {
+    if (enteredCode == null || enteredCode!.isEmpty) {
+      await showErrorDialog(context, "Please enter the 4-digit code");
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    final response = await ApiService.verifyEmail(token: enteredCode!);
+
+    setState(() => isLoading = false);
+
+    if (response["success"]) {
+      await showSuccessDialog(context, "Account verified successfully!");
+      // Navigate to Signin page
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const Signin()),
+      );
+    } else {
+      await showErrorDialog(context, response["error"]);
+    }
   }
-
-  setState(() => isLoading = true);
-
-  final response = await ApiService.verifyEmail(token: enteredCode!);
-
-  setState(() => isLoading = false);
-
-  if (response["success"]) {
-    await showSuccessDialog(context, "Account verified successfully!");
-    // Navigate to Signin page
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const Signin()),
-    );
-  } else {
-    await showErrorDialog(context, response["error"]);
-  }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -89,4 +85,3 @@ Future<void> _handleVerification() async {
     );
   }
 }
-

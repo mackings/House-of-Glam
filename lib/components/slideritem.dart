@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
-
 class CarouselItemWidget extends StatelessWidget {
   final String title;
-  final String assetImage; 
+  final String assetImage;
   final double borderRadius;
 
   const CarouselItemWidget({
@@ -20,21 +19,15 @@ class CarouselItemWidget extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
         child: Stack(
-          fit: StackFit.expand, 
+          fit: StackFit.expand,
           children: [
-            Image.asset(
-              assetImage,
-              fit: BoxFit.cover, 
-            ),
+            Image.asset(assetImage, fit: BoxFit.cover),
             Container(
               alignment: Alignment.bottomCenter,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Colors.black.withOpacity(0.5),
-                    Colors.transparent
-                  ],
+                  colors: [Colors.black.withOpacity(0.5), Colors.transparent],
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                 ),
@@ -58,9 +51,7 @@ class CarouselItemWidget extends StatelessWidget {
           ],
         ),
       ),
-      color: Colors.white
+      color: Colors.white,
     );
   }
 }
-
-

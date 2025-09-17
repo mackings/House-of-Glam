@@ -3,10 +3,9 @@ import 'package:hog/App/Home/Model/reviewModel.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
-
 class QuotationCard extends StatelessWidget {
   final Review review;
-  final VoidCallback onHireDesigner;               // ✅ keep existing
+  final VoidCallback onHireDesigner; // ✅ keep existing
   final void Function(int amount) onCompletePayment; // ✅ new with amount
 
   const QuotationCard({
@@ -62,7 +61,9 @@ class QuotationCard extends StatelessWidget {
                       ? review.user.fullName[0].toUpperCase()
                       : "?",
                   style: const TextStyle(
-                      color: Colors.purple, fontWeight: FontWeight.bold),
+                    color: Colors.purple,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -77,11 +78,12 @@ class QuotationCard extends StatelessWidget {
                 isQuote
                     ? Icons.schedule
                     : isPartPayment
-                        ? Icons.check_circle_outline
-                        : Icons.check_circle,
-                color: isPartPayment
-                    ? Colors.grey
-                    : isFullPayment
+                    ? Icons.check_circle_outline
+                    : Icons.check_circle,
+                color:
+                    isPartPayment
+                        ? Colors.grey
+                        : isFullPayment
                         ? Colors.purple
                         : Colors.green,
                 size: 18,
@@ -145,7 +147,11 @@ class QuotationCard extends StatelessWidget {
               ),
               Row(
                 children: [
-                  const Icon(Icons.attach_money, size: 16, color: Colors.purple),
+                  const Icon(
+                    Icons.attach_money,
+                    size: 16,
+                    color: Colors.purple,
+                  ),
                   const SizedBox(width: 4),
                   CustomText(
                     "Total: ₦${formatAmount(review.totalCost)}",
@@ -162,15 +168,19 @@ class QuotationCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: isFullPayment
-                  ? null // disabled
-                  : isQuote
+              onPressed:
+                  isFullPayment
+                      ? null // disabled
+                      : isQuote
                       ? onHireDesigner // hire first if it's still a quote
-                      : () => onCompletePayment(paymentAmount), // pay balance / full
+                      : () => onCompletePayment(
+                        paymentAmount,
+                      ), // pay balance / full
               style: ElevatedButton.styleFrom(
-                backgroundColor: isFullPayment
-                    ? Colors.grey
-                    : isPartPayment
+                backgroundColor:
+                    isFullPayment
+                        ? Colors.grey
+                        : isPartPayment
                         ? Colors.black
                         : Colors.purple,
                 padding: const EdgeInsets.symmetric(vertical: 10),
@@ -182,10 +192,10 @@ class QuotationCard extends StatelessWidget {
                 isFullPayment
                     ? "Paid"
                     : isPartPayment
-                        ? "Finish Payment (₦${formatAmount(review.amountToPay)})"
-                        : isQuote
-                            ? "Hire Designer"
-                            : "Pay in Full (₦${formatAmount(review.totalCost)})",
+                    ? "Finish Payment (₦${formatAmount(review.amountToPay)})"
+                    : isQuote
+                    ? "Hire Designer"
+                    : "Pay in Full (₦${formatAmount(review.totalCost)})",
                 fontSize: 14,
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -197,7 +207,3 @@ class QuotationCard extends StatelessWidget {
     );
   }
 }
-
-
-
-

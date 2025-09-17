@@ -3,8 +3,6 @@ import 'package:hog/App/Home/Views/PuB/widgets/imageEnlarge.dart';
 import 'package:hog/TailorApp/Home/Model/PublishedModel.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 class UserInfo extends StatelessWidget {
   final TailorUser user;
 
@@ -20,10 +18,11 @@ class UserInfo extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => FullScreenImage(
-                    imageUrl: user.image!,
-                    tag: "user_${user.id}",
-                  ),
+                  builder:
+                      (_) => FullScreenImage(
+                        imageUrl: user.image!,
+                        tag: "user_${user.id}",
+                      ),
                 ),
               );
             }
@@ -35,9 +34,10 @@ class UserInfo extends StatelessWidget {
               backgroundImage:
                   user.image != null ? NetworkImage(user.image!) : null,
               backgroundColor: Colors.purple[100],
-              child: user.image == null
-                  ? const Icon(Icons.person, color: Colors.white)
-                  : null,
+              child:
+                  user.image == null
+                      ? const Icon(Icons.person, color: Colors.white)
+                      : null,
             ),
           ),
         ),
@@ -51,11 +51,7 @@ class UserInfo extends StatelessWidget {
               color: Colors.black,
             ),
             if (user.address != null)
-              CustomText(
-                user.address!,
-                fontSize: 12,
-                color: Colors.black54,
-              ),
+              CustomText(user.address!, fontSize: 12, color: Colors.black54),
           ],
         ),
       ],

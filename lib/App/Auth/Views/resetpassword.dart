@@ -10,9 +10,6 @@ import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/components/tokenfields.dart';
 
-
-
-
 class Resetpassword extends ConsumerStatefulWidget {
   final String email;
 

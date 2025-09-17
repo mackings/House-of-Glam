@@ -42,13 +42,12 @@ class OrderCard extends StatelessWidget {
                 Row(
                   children: [
                     const Icon(Icons.checkroom, color: Colors.purple, size: 20),
-                    SizedBox(width: 5,),
+                    SizedBox(width: 5),
                     CustomText(
-                    "${material.attireType} - ${material.clothMaterial}",
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                    
+                      "${material.attireType} - ${material.clothMaterial}",
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ],
                 ),
 
@@ -76,8 +75,9 @@ class OrderCard extends StatelessWidget {
 
             // Date
             CustomText(
-              DateFormat("dd MMM yyyy • h:mm a")
-                  .format(DateTime.parse(material.createdAt)),
+              DateFormat(
+                "dd MMM yyyy • h:mm a",
+              ).format(DateTime.parse(material.createdAt)),
               fontSize: 12,
               color: Colors.black54,
             ),
@@ -95,8 +95,9 @@ class OrderCard extends StatelessWidget {
                       isScrollControlled: true,
                       backgroundColor: Colors.white,
                       shape: const RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(20)),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(20),
+                        ),
                       ),
                       builder: (_) => OrderDetailsSheet(material: material),
                     );
@@ -117,7 +118,9 @@ class OrderCard extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.purple,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 6),
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -136,4 +139,3 @@ class OrderCard extends StatelessWidget {
     );
   }
 }
-

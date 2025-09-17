@@ -13,7 +13,8 @@ class TailorMaterialResponse {
     return TailorMaterialResponse(
       success: json['success'] ?? false,
       message: json['message'] ?? '',
-      data: (json['data'] as List<dynamic>?)
+      data:
+          (json['data'] as List<dynamic>?)
               ?.map((item) => TailorMaterialItem.fromJson(item))
               .toList() ??
           [],
@@ -71,11 +72,13 @@ class TailorMaterialItem {
       clothMaterial: json['clothMaterial'] ?? '',
       color: json['color'] ?? '',
       brand: json['brand'] ?? '',
-      measurement: (json['measurement'] as List<dynamic>?)
+      measurement:
+          (json['measurement'] as List<dynamic>?)
               ?.map((m) => Measurement.fromJson(m))
               .toList() ??
           [],
-      sampleImage: (json['sampleImage'] as List<dynamic>?)
+      sampleImage:
+          (json['sampleImage'] as List<dynamic>?)
               ?.map((img) => img.toString())
               .toList() ??
           [],
@@ -97,11 +100,7 @@ class UserInfo {
   final String fullName;
   final String email;
 
-  UserInfo({
-    required this.id,
-    required this.fullName,
-    required this.email,
-  });
+  UserInfo({required this.id, required this.fullName, required this.email});
 
   factory UserInfo.fromJson(Map<String, dynamic> json) {
     return UserInfo(

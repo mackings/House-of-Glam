@@ -7,8 +7,6 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/components/thousandformat.dart';
 
-
-
 class PaymentOptionsModal extends StatefulWidget {
   final Review review;
   final Function(String url) onCheckout;
@@ -41,73 +39,72 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     super.dispose();
   }
 
-Future<void> _makePayment() async {
-  setState(() => isLoading = true);
+  Future<void> _makePayment() async {
+    setState(() => isLoading = true);
 
-  String amountToSend;
+    String amountToSend;
 
-  if (paymentType == "part") {
-    if (amountController.text.trim().isEmpty) {
-      setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter an amount for part payment")),
-      );
-      return;
+    if (paymentType == "part") {
+      if (amountController.text.trim().isEmpty) {
+        setState(() => isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Please enter an amount for part payment"),
+          ),
+        );
+        return;
+      }
+      amountToSend = amountController.text.replaceAll(",", "");
+    } else {
+      // ✅ Full payment logic
+      final int remaining = widget.review.totalCost - widget.review.amountPaid;
+
+      if (remaining <= 0) {
+        setState(() => isLoading = false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("No balance left to pay")));
+        return;
+      }
+
+      amountToSend = remaining.toString();
     }
-    amountToSend = amountController.text.replaceAll(",", "");
-  } else {
-    // ✅ Full payment logic
-    final int remaining = widget.review.totalCost - widget.review.amountPaid;
 
-    if (remaining <= 0) {
-      setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No balance left to pay")),
+    Map<String, dynamic>? resp;
+
+    if (paymentType == "part") {
+      resp = await PaymentService.createPartPayment(
+        reviewId: widget.review.id,
+        amount: amountToSend,
+        shipmentMethod: shipment,
       );
-      return;
+    } else {
+      resp = await PaymentService.createFullPayment(
+        reviewId: widget.review.id,
+        amount: amountToSend,
+        shipmentMethod: shipment,
+      );
     }
 
-    amountToSend = remaining.toString();
-  }
+    setState(() => isLoading = false);
 
-  Map<String, dynamic>? resp;
-
-  if (paymentType == "part") {
-    resp = await PaymentService.createPartPayment(
-      reviewId: widget.review.id,
-      amount: amountToSend,
-      shipmentMethod: shipment,
-    );
-  } else {
-    resp = await PaymentService.createFullPayment(
-      reviewId: widget.review.id,
-      amount: amountToSend,
-      shipmentMethod: shipment,
-    );
-  }
-
-  setState(() => isLoading = false);
-
-  if (resp != null && resp["success"]) {
-    final url = resp["authorizationUrl"];
-    if (url != null) {
-      // ✅ Close only THIS modal and call parent
-      Navigator.of(context).pop();
-      widget.onCheckout(url);
+    if (resp != null && resp["success"]) {
+      final url = resp["authorizationUrl"];
+      if (url != null) {
+        // ✅ Close only THIS modal and call parent
+        Navigator.of(context).pop();
+        widget.onCheckout(url);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No payment link received")),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No payment link received")),
+        const SnackBar(content: Text("Payment initialization failed")),
       );
     }
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Payment initialization failed")),
-    );
   }
-}
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -173,7 +170,11 @@ Future<void> _makePayment() async {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CustomText("Shipment Method", fontSize: 16, fontWeight: FontWeight.w700),
+                  const CustomText(
+                    "Shipment Method",
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -183,10 +184,16 @@ Future<void> _makePayment() async {
                     ),
                     child: DropdownButtonFormField<String>(
                       value: shipment,
-                      decoration: const InputDecoration(border: InputBorder.none),
-                      items: ["Regular", "Express", "Cargo"]
-                          .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                          .toList(),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                      ),
+                      items:
+                          ["Regular", "Express", "Cargo"]
+                              .map(
+                                (s) =>
+                                    DropdownMenuItem(value: s, child: Text(s)),
+                              )
+                              .toList(),
                       onChanged: (val) => setState(() => shipment = val!),
                     ),
                   ),
@@ -209,4 +216,3 @@ Future<void> _makePayment() async {
     );
   }
 }
-

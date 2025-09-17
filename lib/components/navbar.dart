@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
@@ -13,7 +12,6 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     final items = [
       {"icon": Icons.home, "label": "Home"},
       {"icon": Icons.card_travel, "label": "Order"},
@@ -31,7 +29,7 @@ class CustomBottomNavBar extends StatelessWidget {
             blurRadius: 6,
             offset: Offset(0, -2),
             color: Colors.black12,
-          )
+          ),
         ],
       ),
       child: Row(
@@ -74,4 +72,3 @@ class CustomBottomNavBar extends StatelessWidget {
     );
   }
 }
-

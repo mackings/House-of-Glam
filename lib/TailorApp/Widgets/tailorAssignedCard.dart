@@ -4,16 +4,11 @@ import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-
 class TailorAssignedCard extends StatelessWidget {
   final TailorAssignedMaterial item;
   final VoidCallback onTap;
 
-   TailorAssignedCard({
-    super.key,
-    required this.item,
-    required this.onTap,
-  });
+  TailorAssignedCard({super.key, required this.item, required this.onTap});
 
   Color _statusColor(String status) {
     switch (status.toLowerCase()) {
@@ -28,15 +23,16 @@ class TailorAssignedCard extends StatelessWidget {
     }
   }
 
-final formatter = NumberFormat("#,##0", "en_US");
+  final formatter = NumberFormat("#,##0", "en_US");
 
   @override
   Widget build(BuildContext context) {
     final material = item.material;
     final createdAgo = timeago.format(item.createdAt);
-    final deliveryDate = item.deliveryDate != null
-        ? DateFormat("dd MMM").format(item.deliveryDate!)
-        : "N/A";
+    final deliveryDate =
+        item.deliveryDate != null
+            ? DateFormat("dd MMM").format(item.deliveryDate!)
+            : "N/A";
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),
@@ -81,7 +77,11 @@ final formatter = NumberFormat("#,##0", "en_US");
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.person, size: 16, color: Colors.grey),
+                          const Icon(
+                            Icons.person,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: CustomText(
@@ -94,8 +94,11 @@ final formatter = NumberFormat("#,##0", "en_US");
                       ),
                       Row(
                         children: [
-                          const Icon(Icons.business,
-                              size: 16, color: Colors.grey),
+                          const Icon(
+                            Icons.business,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: CustomText(
@@ -122,22 +125,21 @@ final formatter = NumberFormat("#,##0", "en_US");
             const Divider(height: 20),
 
             // Payment info
-Row(
-  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  children: [
-    CustomText(
-      "💰 Paid: ₦${formatter.format(item.amountPaid ?? 0)}",
-      fontSize: 13,
-      color: Colors.black,
-    ),
-    CustomText(
-      "Balance: ₦${formatter.format(item.amountToPay ?? 0)}",
-      fontSize: 13,
-      color: Colors.purple,
-    ),
-  ],
-),
-
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CustomText(
+                  "💰 Paid: ₦${formatter.format(item.amountPaid ?? 0)}",
+                  fontSize: 13,
+                  color: Colors.black,
+                ),
+                CustomText(
+                  "Balance: ₦${formatter.format(item.amountToPay ?? 0)}",
+                  fontSize: 13,
+                  color: Colors.purple,
+                ),
+              ],
+            ),
 
             const SizedBox(height: 8),
 
@@ -145,10 +147,16 @@ Row(
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CustomText("📦 Delivery: $deliveryDate",
-                    fontSize: 13, color: Colors.black),
-                CustomText("⏳ $createdAgo",
-                    fontSize: 13, color: Colors.black54),
+                CustomText(
+                  "📦 Delivery: $deliveryDate",
+                  fontSize: 13,
+                  color: Colors.black,
+                ),
+                CustomText(
+                  "⏳ $createdAgo",
+                  fontSize: 13,
+                  color: Colors.black54,
+                ),
               ],
             ),
           ],
@@ -157,4 +165,3 @@ Row(
     );
   }
 }
-

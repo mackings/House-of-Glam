@@ -8,16 +8,12 @@ class NavigationController {
 
   /// Push a new page
   static Future<T?> push<T>(Widget page) {
-    return _navigator!.push(
-      MaterialPageRoute(builder: (_) => page),
-    );
+    return _navigator!.push(MaterialPageRoute(builder: (_) => page));
   }
 
   /// Push and remove all previous
   static Future<T?> pushReplacement<T>(Widget page) {
-    return _navigator!.pushReplacement(
-      MaterialPageRoute(builder: (_) => page),
-    );
+    return _navigator!.pushReplacement(MaterialPageRoute(builder: (_) => page));
   }
 
   /// Pop current page

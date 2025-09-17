@@ -31,7 +31,7 @@ class _PatronizeFormState extends State<PatronizeForm> {
     "Wrist",
     "Collar Front",
     "Collar Back",
-    "Arm Type"
+    "Arm Type",
   ];
 
   bool isLoading = false;
@@ -71,9 +71,9 @@ class _PatronizeFormState extends State<PatronizeForm> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("❌ Failed: $e")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("❌ Failed: $e")));
       }
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -83,29 +83,32 @@ class _PatronizeFormState extends State<PatronizeForm> {
   Widget buildMeasurementFields() {
     List<Widget> rows = [];
     for (var i = 0; i < measurementFields.length; i += 2) {
-      rows.add(Row(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: MeasurementField(
-                label: measurementFields[i],
-                controller: measurementControllers[measurementFields[i]]!,
-              ),
-            ),
-          ),
-          if (i + 1 < measurementFields.length)
+      rows.add(
+        Row(
+          children: [
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(left: 8.0),
+                padding: const EdgeInsets.only(right: 8.0),
                 child: MeasurementField(
-                  label: measurementFields[i + 1],
-                  controller: measurementControllers[measurementFields[i + 1]]!,
+                  label: measurementFields[i],
+                  controller: measurementControllers[measurementFields[i]]!,
                 ),
               ),
             ),
-        ],
-      ));
+            if (i + 1 < measurementFields.length)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: MeasurementField(
+                    label: measurementFields[i + 1],
+                    controller:
+                        measurementControllers[measurementFields[i + 1]]!,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
       rows.add(const SizedBox(height: 10));
     }
     return Column(children: rows);
@@ -123,11 +126,14 @@ class _PatronizeFormState extends State<PatronizeForm> {
     return LoadingOverlay(
       isLoading: isLoading,
       child: Scaffold(
-        
         appBar: AppBar(
           iconTheme: IconThemeData(color: Colors.white),
           backgroundColor: Colors.purple,
-          title: const CustomText("Patronize Work", color: Colors.white, fontSize: 18),
+          title: const CustomText(
+            "Patronize Work",
+            color: Colors.white,
+            fontSize: 18,
+          ),
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -136,7 +142,7 @@ class _PatronizeFormState extends State<PatronizeForm> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // CustomText("Special Instructions *", 
+                // CustomText("Special Instructions *",
                 //   color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
                 // const Divider(),
                 CustomTextField(
@@ -147,8 +153,12 @@ class _PatronizeFormState extends State<PatronizeForm> {
                 ),
 
                 const SizedBox(height: 20),
-                CustomText("Measurements *", 
-                  color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
+                CustomText(
+                  "Measurements *",
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
                 const Divider(),
                 buildMeasurementFields(),
 
@@ -163,4 +173,3 @@ class _PatronizeFormState extends State<PatronizeForm> {
     );
   }
 }
-

@@ -78,7 +78,8 @@ class Vendor {
       updatedAt: json['updatedAt'] ?? '',
       ratingSum: json['ratingSum'] ?? 0,
       totalRatings: json['totalRatings'] ?? 0,
-      ratings: (json['ratings'] as List<dynamic>?)
+      ratings:
+          (json['ratings'] as List<dynamic>?)
               ?.map((r) => r['_id'] as String)
               .toList() ??
           [],

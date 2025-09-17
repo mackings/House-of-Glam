@@ -4,11 +4,8 @@ class CategorySlider extends StatelessWidget {
   final List<Map<String, String>> categories; // title + imageUrl
   final Function(int index)? onCategoryTap;
 
-  const CategorySlider({
-    Key? key,
-    required this.categories,
-    this.onCategoryTap,
-  }) : super(key: key);
+  const CategorySlider({Key? key, required this.categories, this.onCategoryTap})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {

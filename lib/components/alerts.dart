@@ -29,7 +29,11 @@ class TopAlert {
       reverseDuration: const Duration(milliseconds: 220),
     );
 
-    final animation = CurvedAnimation(parent: controller, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
+    final animation = CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
 
     _entry = OverlayEntry(
       builder: (ctx) {
@@ -74,7 +78,10 @@ class TopAlert {
                         ),
                       ],
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -86,11 +93,9 @@ class TopAlert {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               if (title != null && title.isNotEmpty)
-
-                              CustomText(title),
+                                CustomText(title),
 
                               CustomText(message),
-                              
                             ],
                           ),
                         ),
@@ -141,14 +146,25 @@ class _AlertPalette {
 _AlertPalette _colorsForType(TopAlertType type) {
   switch (type) {
     case TopAlertType.success:
-      return _AlertPalette(const Color(0xFF12B886), Colors.white, Icons.check_circle_rounded);
+      return _AlertPalette(
+        const Color(0xFF12B886),
+        Colors.white,
+        Icons.check_circle_rounded,
+      );
     case TopAlertType.error:
-      return _AlertPalette(const Color(0xFFE03131), Colors.white, Icons.error_rounded);
+      return _AlertPalette(
+        const Color(0xFFE03131),
+        Colors.white,
+        Icons.error_rounded,
+      );
     case TopAlertType.info:
     default:
-      return _AlertPalette(const Color(0xFF1C7ED6), Colors.white, Icons.info_rounded);
+      return _AlertPalette(
+        const Color(0xFF1C7ED6),
+        Colors.white,
+        Icons.info_rounded,
+      );
   }
 }
-
 
 extension _NavigatorTicker on NavigatorState {}

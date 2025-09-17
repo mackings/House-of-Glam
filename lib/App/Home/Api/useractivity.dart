@@ -6,10 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Home/Model/useractivitymodel.dart';
 
-
-
 class UserActivityService {
-
   static const String baseUrl = "https://hog-ymud.onrender.com/api/v1";
 
   static Future<MaterialResponse?> createMaterial({
@@ -22,16 +19,14 @@ class UserActivityService {
   }) async {
     try {
       final token = await SecurePrefs.getToken();
-      final attireId = await SecurePrefs.getAttireId(); 
+      final attireId = await SecurePrefs.getAttireId();
 
       final url = Uri.parse("$baseUrl/material/createMaterial/$attireId");
 
       var request = http.MultipartRequest("POST", url);
 
       // 🔑 Headers
-      request.headers.addAll({
-        "Authorization": "Bearer $token",
-      });
+      request.headers.addAll({"Authorization": "Bearer $token"});
 
       // 📝 Text fields
       request.fields["clothMaterial"] = clothMaterial;
@@ -67,57 +62,58 @@ class UserActivityService {
   }
 
   static Future<MaterialReviewResponse?> getAllMaterialsForReview() async {
-  try {
-    final token = await SecurePrefs.getToken();
+    try {
+      final token = await SecurePrefs.getToken();
 
-    final url = Uri.parse("$baseUrl/review/getAllMaterialsForReview");
+      final url = Uri.parse("$baseUrl/review/getAllMaterialsForReview");
 
-    final response = await http.get(
-      url,
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-    );
+      final response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
 
-    print("➡️ GET Request: $url");
-    print("⬅️ Response: ${response.body}");
+      print("➡️ GET Request: $url");
+      print("⬅️ Response: ${response.body}");
 
-    if (response.statusCode == 200) {
-      return MaterialReviewResponse.fromJson(jsonDecode(response.body));
+      if (response.statusCode == 200) {
+        return MaterialReviewResponse.fromJson(jsonDecode(response.body));
+      }
+    } catch (e) {
+      print("❌ Error fetching materials for review: $e");
     }
-  } catch (e) {
-    print("❌ Error fetching materials for review: $e");
+    return null;
   }
-  return null;
-}
 
+  static Future<ReviewResponse?> getReviewsForMaterialById(
+    String materialId,
+  ) async {
+    try {
+      final token = await SecurePrefs.getToken();
 
-static Future<ReviewResponse?> getReviewsForMaterialById(String materialId) async {
-  try {
-    final token = await SecurePrefs.getToken();
+      final url = Uri.parse(
+        "$baseUrl/review/getReviewsForMaterialById/$materialId",
+      );
 
-    final url = Uri.parse("$baseUrl/review/getReviewsForMaterialById/$materialId");
+      final response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
 
-    final response = await http.get(
-      url,
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-    );
+      print("➡️ GET Request: $url");
+      print("⬅️ Response: ${response.body}");
 
-    print("➡️ GET Request: $url");
-    print("⬅️ Response: ${response.body}");
-
-    if (response.statusCode == 200) {
-      return ReviewResponse.fromJson(jsonDecode(response.body));
+      if (response.statusCode == 200) {
+        return ReviewResponse.fromJson(jsonDecode(response.body));
+      }
+    } catch (e) {
+      print("❌ Error fetching reviews: $e");
     }
-  } catch (e) {
-    print("❌ Error fetching reviews: $e");
+    return null;
   }
-  return null;
-}
-
-
 }

@@ -45,10 +45,7 @@ class Header extends StatelessWidget {
               children: [
                 Text(
                   greeting,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
                 Text(
                   userName,

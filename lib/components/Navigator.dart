@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 class Nav {
   // Push to a new screen
   static Future<T?> push<T>(BuildContext context, Widget page) {
-    return Navigator.push<T>(
-      context,
-      MaterialPageRoute(builder: (_) => page),
-    );
+    return Navigator.push<T>(context, MaterialPageRoute(builder: (_) => page));
   }
 
   // Push and remove all previous routes (useful for login -> home)

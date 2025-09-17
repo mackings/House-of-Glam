@@ -4,8 +4,6 @@ import 'package:hog/App/Home/Model/tailor.dart';
 import 'package:hog/components/Tailors/tailorcard.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 class Alltailors extends ConsumerStatefulWidget {
   final List<Tailor> tailors;
 
@@ -21,38 +19,43 @@ class _AlltailorsState extends ConsumerState<Alltailors> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const CustomText("All tailors",fontSize: 20,color: Colors.black,),
+        title: const CustomText(
+          "All tailors",
+          fontSize: 20,
+          color: Colors.black,
+        ),
         backgroundColor: Colors.white,
       ),
       body: SafeArea(
-        child: widget.tailors.isEmpty
-            ? const Center(child: Text("No tailors available"))
-            : GridView.builder(
-                padding: const EdgeInsets.all(20),
-                itemCount: widget.tailors.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 3 / 4,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
+        child:
+            widget.tailors.isEmpty
+                ? const Center(child: Text("No tailors available"))
+                : GridView.builder(
+                  padding: const EdgeInsets.all(20),
+                  itemCount: widget.tailors.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 3 / 4,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                  ),
+                  itemBuilder: (context, index) {
+                    final tailor = widget.tailors[index];
+                    return TailorCard(
+                      name: tailor.user?.fullName ?? "Unknown",
+                      specialty: tailor.businessName ?? "N/A",
+                      imageUrl:
+                          tailor.user?.image ??
+                          tailor.nepaBill ??
+                          "https://i.pravatar.cc/150?img=5",
+                      onTap: () {
+                        print("Tapped on ${tailor.user?.fullName}");
+                      },
+                      id: tailor.id,
+                    );
+                  },
                 ),
-                itemBuilder: (context, index) {
-                  final tailor = widget.tailors[index];
-                  return TailorCard(
-                    name: tailor.user?.fullName ?? "Unknown",
-                    specialty: tailor.businessName ?? "N/A",
-                    imageUrl: tailor.user?.image ??
-                        tailor.nepaBill ??
-                        "https://i.pravatar.cc/150?img=5",
-                    onTap: () {
-                      print("Tapped on ${tailor.user?.fullName}");
-                    },
-                    id: tailor.id,
-                  );
-                },
-              ),
       ),
     );
   }
 }
-

@@ -6,8 +6,6 @@ import 'package:hog/components/button.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
-
-
 class TailorMaterialDetailSheet extends StatelessWidget {
   final TailorMaterialItem material;
 
@@ -15,10 +13,9 @@ class TailorMaterialDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String formattedDate = DateFormat("dd MMM, yyyy").format(
-  DateTime.parse(material.createdAt),
-);
-
+    String formattedDate = DateFormat(
+      "dd MMM, yyyy",
+    ).format(DateTime.parse(material.createdAt));
 
     return DraggableScrollableSheet(
       expand: false,
@@ -59,16 +56,17 @@ class TailorMaterialDetailSheet extends StatelessWidget {
                       enableInfiniteScroll: false,
                       viewportFraction: 0.9,
                     ),
-                    items: material.sampleImage.map((img) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          img,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                        ),
-                      );
-                    }).toList(),
+                    items:
+                        material.sampleImage.map((img) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              img,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                            ),
+                          );
+                        }).toList(),
                   )
                 else
                   ClipRRect(
@@ -95,49 +93,72 @@ class TailorMaterialDetailSheet extends StatelessWidget {
                 // Details with icons
                 _buildDetailRow(Icons.store, "Brand", material.brand),
                 _buildDetailRow(Icons.color_lens, "Color", material.color),
-                _buildDetailRow(Icons.texture, "Material", material.clothMaterial),
+                _buildDetailRow(
+                  Icons.texture,
+                  "Material",
+                  material.clothMaterial,
+                ),
 
                 Divider(height: 24, thickness: 1, color: Colors.grey[300]),
 
-                _buildDetailRow(Icons.person, "Customer", material.userId.fullName),
+                _buildDetailRow(
+                  Icons.person,
+                  "Customer",
+                  material.userId.fullName,
+                ),
                 _buildDetailRow(Icons.email, "Email", material.userId.email),
 
                 Divider(height: 24, thickness: 1, color: Colors.grey[300]),
 
-                _buildDetailRow(Icons.attach_money, "Price", "₦${material.price ?? 'N/A'}",
-                    valueColor: Colors.purple, isBold: true),
+                _buildDetailRow(
+                  Icons.attach_money,
+                  "Price",
+                  "₦${material.price ?? 'N/A'}",
+                  valueColor: Colors.purple,
+                  isBold: true,
+                ),
                 _buildDetailRow(
                   Icons.local_shipping,
                   "Delivered",
                   material.isDelivered ? "Yes" : "No",
                 ),
-                _buildDetailRow(Icons.calendar_today, "Posted On", formattedDate),
+                _buildDetailRow(
+                  Icons.calendar_today,
+                  "Posted On",
+                  formattedDate,
+                ),
 
                 if (material.specialInstructions != null &&
                     material.specialInstructions!.isNotEmpty) ...[
                   Divider(height: 24, thickness: 1, color: Colors.grey[300]),
-                  _buildDetailRow(Icons.note, "Notes", material.specialInstructions!),
+                  _buildDetailRow(
+                    Icons.note,
+                    "Notes",
+                    material.specialInstructions!,
+                  ),
                 ],
 
                 const SizedBox(height: 24),
 
                 // Submit Quotation Button
-CustomButton(
-  title: "Submit Quotation",
-  isOutlined: false,
-  onPressed: () {
-    Navigator.pop(context); // close current sheet first
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => QuotationBottomSheet(materialId: material.id),
-    );
-  },
-),
-
+                CustomButton(
+                  title: "Submit Quotation",
+                  isOutlined: false,
+                  onPressed: () {
+                    Navigator.pop(context); // close current sheet first
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(20),
+                        ),
+                      ),
+                      builder:
+                          (_) => QuotationBottomSheet(materialId: material.id),
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -146,15 +167,19 @@ CustomButton(
     );
   }
 
-
-  Widget _buildDetailRow(IconData icon, String label, String? value,
-      {Color? valueColor, bool isBold = false}) {
+  Widget _buildDetailRow(
+    IconData icon,
+    String label,
+    String? value, {
+    Color? valueColor,
+    bool isBold = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
           Icon(icon, size: 18, color: Colors.purple),
-         // const SizedBox(width: 10),
+          // const SizedBox(width: 10),
           Expanded(
             child: CustomText(
               "$label: ${value ?? 'N/A'}",

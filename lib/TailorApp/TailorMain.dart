@@ -7,13 +7,11 @@ import 'package:hog/TailorApp/Home/Views/TailorDashboard.dart';
 import 'package:hog/TailorApp/Home/Views/Tailorbusiness.dart';
 import 'package:hog/TailorApp/TailorNav.dart';
 
-
-
 class TailorMainPage extends StatefulWidget {
   final bool isVendorEnabled;
 
   const TailorMainPage({Key? key, required this.isVendorEnabled})
-      : super(key: key);
+    : super(key: key);
 
   @override
   State<TailorMainPage> createState() => _TailorMainPageState();
@@ -23,12 +21,10 @@ class _TailorMainPageState extends State<TailorMainPage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = const [
-
     Tailordashboard(),
     AssignedMaterials(),
     TailorDeliveries(),
     Myworks(),
-    
   ];
 
   @override
@@ -43,36 +39,31 @@ class _TailorMainPageState extends State<TailorMainPage> {
     }
   }
 
-
-void _showVendorDisabledDialog() {
-  showDialog(
-    context: context,
-   // barrierDismissible: false,
-    builder: (context) => AlertDialog(
-      title: const Text("Account Pending"),
-      content: const Text(
-        "Your vendor account is not yet enabled. Please complete your registration form.",
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context); // close dialog
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => TailorRegistrationPage(),
+  void _showVendorDisabledDialog() {
+    showDialog(
+      context: context,
+      // barrierDismissible: false,
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Account Pending"),
+            content: const Text(
+              "Your vendor account is not yet enabled. Please complete your registration form.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // close dialog
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => TailorRegistrationPage()),
+                  );
+                },
+                child: const Text("Go to Form"),
               ),
-            );
-          },
-          child: const Text("Go to Form"),
-        ),
-      ],
-    ),
-  );
-}
-
-
-
+            ],
+          ),
+    );
+  }
 
   void _onNavTap(int index) {
     setState(() => _currentIndex = index);

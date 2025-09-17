@@ -9,8 +9,6 @@ import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 class Tailordashboard extends StatefulWidget {
   const Tailordashboard({super.key});
 
@@ -56,13 +54,9 @@ class _TailordashboardState extends State<Tailordashboard> {
                 child: CircularProgressIndicator(color: Colors.purple),
               );
             } else if (snapshot.hasError) {
-              return Center(
-                child: CustomText("❌ Error: ${snapshot.error}"),
-              );
+              return Center(child: CustomText("❌ Error: ${snapshot.error}"));
             } else if (!snapshot.hasData || snapshot.data!.data.isEmpty) {
-              return const Center(
-                child: CustomText("No materials found"),
-              );
+              return const Center(child: CustomText("No materials found"));
             }
 
             final materials = snapshot.data!.data;
@@ -76,37 +70,41 @@ class _TailordashboardState extends State<Tailordashboard> {
 
                   return isWide
                       ? GridView.builder(
-                          padding: const EdgeInsets.all(16),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: 4 / 3,
-                          ),
-                          itemCount: materials.length,
-                          itemBuilder: (context, index) => TailorMaterialCard(
-                            material: materials[index],
-                            onTap: () => _showMaterialDetails(
-                              context,
-                              materials[index],
+                        padding: const EdgeInsets.all(16),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 4 / 3,
                             ),
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: materials.length,
-                          itemBuilder: (context, index) => Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TailorMaterialCard(
+                        itemCount: materials.length,
+                        itemBuilder:
+                            (context, index) => TailorMaterialCard(
                               material: materials[index],
-                              onTap: () => _showMaterialDetails(
-                                context,
-                                materials[index],
+                              onTap:
+                                  () => _showMaterialDetails(
+                                    context,
+                                    materials[index],
+                                  ),
+                            ),
+                      )
+                      : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: materials.length,
+                        itemBuilder:
+                            (context, index) => Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TailorMaterialCard(
+                                material: materials[index],
+                                onTap:
+                                    () => _showMaterialDetails(
+                                      context,
+                                      materials[index],
+                                    ),
                               ),
                             ),
-                          ),
-                        );
+                      );
                 },
               ),
             );

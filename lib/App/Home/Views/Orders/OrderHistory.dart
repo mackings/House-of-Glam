@@ -58,8 +58,7 @@ class _OrderHistoryState extends State<OrderHistory> {
                     return OrderCard(
                       material: material,
                       onViewQuotations: () {
-                        Nav.push(context, Quotation(materialId: material.id,));
-
+                        Nav.push(context, Quotation(materialId: material.id));
                       },
                     );
                   },

@@ -32,30 +32,31 @@ class CustomButton extends StatelessWidget {
           elevation: 0,
           backgroundColor: isOutlined ? Colors.transparent : Colors.purple,
           foregroundColor: isOutlined ? Colors.purple : Colors.white,
-          side: isOutlined
-              ? const BorderSide(color: Colors.purple, width: 2)
-              : BorderSide.none,
+          side:
+              isOutlined
+                  ? const BorderSide(color: Colors.purple, width: 2)
+                  : BorderSide.none,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: isLoading
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
+        child:
+            isLoading
+                ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+                : CustomText(
+                  title,
+                  fontSize: screenWidth * 0.04,
+                  fontWeight: FontWeight.w600,
+                  color: isOutlined ? Colors.purple : Colors.white,
                 ),
-              )
-            : CustomText(
-                title,
-                fontSize: screenWidth * 0.04,
-                fontWeight: FontWeight.w600,
-                color: isOutlined ? Colors.purple : Colors.white,
-              ),
       ),
     );
   }
 }
-

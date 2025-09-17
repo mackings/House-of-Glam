@@ -11,10 +11,13 @@ class TransactionService {
       final token = await SecurePrefs.getToken();
       final url = Uri.parse("$baseUrl/transaction/transactions");
 
-      final response = await http.get(url, headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      });
+      final response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
 
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
@@ -28,4 +31,3 @@ class TransactionService {
     return null;
   }
 }
-

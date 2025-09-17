@@ -6,11 +6,6 @@ import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
-
-
-
-
-
 class Myworks extends StatefulWidget {
   const Myworks({super.key});
 
@@ -57,11 +52,17 @@ class _MyworksState extends State<Myworks> {
               );
             } else if (snapshot.hasError) {
               return Center(
-                child: CustomText("Error: ${snapshot.error}", color: Colors.red),
+                child: CustomText(
+                  "Error: ${snapshot.error}",
+                  color: Colors.red,
+                ),
               );
             } else if (!snapshot.hasData || snapshot.data!.data.isEmpty) {
               return const Center(
-                child: CustomText("No published works yet", color: Colors.black),
+                child: CustomText(
+                  "No published works yet",
+                  color: Colors.black,
+                ),
               );
             }
 
@@ -73,14 +74,15 @@ class _MyworksState extends State<Myworks> {
               itemBuilder: (_, index) {
                 final work = works[index];
 
-// ✅ Format published date
-String formattedDate = "Unknown date";
-try {
-  formattedDate = DateFormat("d MMMM y • h:mma").format(work.createdAt);
-} catch (e) {
-  debugPrint("Date format error: $e");
-}
-
+                // ✅ Format published date
+                String formattedDate = "Unknown date";
+                try {
+                  formattedDate = DateFormat(
+                    "d MMMM y • h:mma",
+                  ).format(work.createdAt);
+                } catch (e) {
+                  debugPrint("Date format error: $e");
+                }
 
                 return Container(
                   margin: const EdgeInsets.symmetric(vertical: 8),
@@ -103,7 +105,8 @@ try {
                       if (work.sampleImage.isNotEmpty)
                         ClipRRect(
                           borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(16)),
+                            top: Radius.circular(16),
+                          ),
                           child: Image.network(
                             work.sampleImage.first,
                             height: 140,
@@ -127,8 +130,11 @@ try {
                                   fontWeight: FontWeight.bold,
                                   color: Colors.purple,
                                 ),
-                                const Icon(Icons.check_circle,
-                                    color: Colors.purple, size: 20),
+                                const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.purple,
+                                  size: 20,
+                                ),
                               ],
                             ),
                             const SizedBox(height: 6),
@@ -136,14 +142,22 @@ try {
                             // Attire type & brand
                             Row(
                               children: [
-                                const Icon(Icons.category,
-                                    size: 16, color: Colors.black54),
+                                const Icon(
+                                  Icons.category,
+                                  size: 16,
+                                  color: Colors.black54,
+                                ),
                                 const SizedBox(width: 6),
-                                CustomText(work.attireType,
-                                    color: Colors.black87),
+                                CustomText(
+                                  work.attireType,
+                                  color: Colors.black87,
+                                ),
                                 const Spacer(),
-                                const Icon(Icons.shopping_bag,
-                                    size: 16, color: Colors.black54),
+                                const Icon(
+                                  Icons.shopping_bag,
+                                  size: 16,
+                                  color: Colors.black54,
+                                ),
                                 const SizedBox(width: 6),
                                 CustomText(work.brand, color: Colors.black87),
                               ],
@@ -153,8 +167,11 @@ try {
                             // Color
                             Row(
                               children: [
-                                const Icon(Icons.color_lens,
-                                    size: 16, color: Colors.black54),
+                                const Icon(
+                                  Icons.color_lens,
+                                  size: 16,
+                                  color: Colors.black54,
+                                ),
                                 const SizedBox(width: 6),
                                 CustomText(work.color, color: Colors.black87),
                               ],
@@ -164,8 +181,11 @@ try {
                             // 📅 Published date
                             Row(
                               children: [
-                                const Icon(Icons.calendar_today,
-                                    size: 16, color: Colors.black54),
+                                const Icon(
+                                  Icons.calendar_today,
+                                  size: 16,
+                                  color: Colors.black54,
+                                ),
                                 const SizedBox(width: 6),
                                 CustomText(
                                   formattedDate,
@@ -181,14 +201,18 @@ try {
                               Row(
                                 children: [
                                   CircleAvatar(
-                                    backgroundImage: work.user!.image != null
-                                        ? NetworkImage(work.user!.image!)
-                                        : null,
+                                    backgroundImage:
+                                        work.user!.image != null
+                                            ? NetworkImage(work.user!.image!)
+                                            : null,
                                     backgroundColor: Colors.purple[100],
-                                    child: work.user!.image == null
-                                        ? const Icon(Icons.person,
-                                            color: Colors.white)
-                                        : null,
+                                    child:
+                                        work.user!.image == null
+                                            ? const Icon(
+                                              Icons.person,
+                                              color: Colors.white,
+                                            )
+                                            : null,
                                   ),
                                   const SizedBox(width: 10),
                                   Column(
@@ -224,7 +248,3 @@ try {
     );
   }
 }
-
-
-
-

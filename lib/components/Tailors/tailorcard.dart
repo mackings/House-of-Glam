@@ -62,9 +62,7 @@ class _TailorCardState extends State<TailorCard> {
     return GestureDetector(
       onTap: widget.onTap,
       child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         elevation: 8,
         shadowColor: Colors.grey.withOpacity(0.4),
         color: Colors.white,
@@ -75,7 +73,9 @@ class _TailorCardState extends State<TailorCard> {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
                   child: Image.network(
                     widget.imageUrl,
                     height: 120,
@@ -125,11 +125,23 @@ class _TailorCardState extends State<TailorCard> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(5, (index) {
                       if (index < widget.rating.floor()) {
-                        return const Icon(Icons.star, size: 16, color: Colors.amber);
+                        return const Icon(
+                          Icons.star,
+                          size: 16,
+                          color: Colors.amber,
+                        );
                       } else if (index < widget.rating) {
-                        return const Icon(Icons.star_half, size: 16, color: Colors.amber);
+                        return const Icon(
+                          Icons.star_half,
+                          size: 16,
+                          color: Colors.amber,
+                        );
                       }
-                      return const Icon(Icons.star_border, size: 16, color: Colors.amber);
+                      return const Icon(
+                        Icons.star_border,
+                        size: 16,
+                        color: Colors.amber,
+                      );
                     }),
                   ),
                 ],
@@ -141,6 +153,3 @@ class _TailorCardState extends State<TailorCard> {
     );
   }
 }
-
-
-

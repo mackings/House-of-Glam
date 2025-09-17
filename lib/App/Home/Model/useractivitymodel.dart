@@ -3,11 +3,7 @@ class MaterialResponse {
   final String message;
   final MaterialData? data;
 
-  MaterialResponse({
-    required this.success,
-    required this.message,
-    this.data,
-  });
+  MaterialResponse({required this.success, required this.message, this.data});
 
   factory MaterialResponse.fromJson(Map<String, dynamic> json) {
     return MaterialResponse(
@@ -18,11 +14,7 @@ class MaterialResponse {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      "success": success,
-      "message": message,
-      "data": data?.toJson(),
-    };
+    return {"success": success, "message": message, "data": data?.toJson()};
   }
 }
 
@@ -68,7 +60,8 @@ class MaterialData {
       clothMaterial: json["clothMaterial"] ?? "",
       color: json["color"] ?? "",
       brand: json["brand"] ?? "",
-      measurement: (json["measurement"] as List<dynamic>?)
+      measurement:
+          (json["measurement"] as List<dynamic>?)
               ?.map((m) => Measurement.fromJson(m))
               .toList() ??
           [],

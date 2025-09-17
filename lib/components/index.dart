@@ -6,9 +6,6 @@ import 'package:hog/App/Home/Views/PuB/pool.dart';
 import 'package:hog/App/Home/Views/dashboard.dart';
 import 'package:hog/components/navbar.dart';
 
-
-
-
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
 
@@ -20,13 +17,11 @@ class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = const [
-    Home(), 
+    Home(),
     PlaceOrder(),
     OrderHistory(),
     Transactions(),
-    Pool()
-  
-
+    Pool(),
   ];
 
   void _onNavTap(int index) {
@@ -38,7 +33,7 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex], 
+      body: _pages[_currentIndex],
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: _currentIndex,
         onTap: _onNavTap,

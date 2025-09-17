@@ -5,8 +5,6 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
-
-
 class QuotationBottomSheet extends StatefulWidget {
   final String materialId;
 
@@ -60,24 +58,25 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
 
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Confirm Quotation"),
-        content: const Text(
-          "By submitting, you confirm that the prices are correct, "
-          "originality and authenticity of the quotation have been verified. "
-          "Do you wish to proceed?",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancel"),
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Confirm Quotation"),
+            content: const Text(
+              "By submitting, you confirm that the prices are correct, "
+              "originality and authenticity of the quotation have been verified. "
+              "Do you wish to proceed?",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text("Yes, Submit"),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text("Yes, Submit"),
-          ),
-        ],
-      ),
     );
 
     if (confirm != true) return;
@@ -94,13 +93,13 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
       );
 
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ Quotation submitted!")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("✅ Quotation submitted!")));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Error: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("❌ Error: $e")));
     } finally {
       setState(() => isLoading = false);
     }
@@ -138,7 +137,6 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
                 validator: (v) => v == null || v.isEmpty ? "Required" : null,
               ),
 
-
               CustomTextField(
                 title: "Material Cost",
                 controller: materialCostController,
@@ -150,34 +148,34 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
                   if (formatted != v) {
                     materialCostController.value = TextEditingValue(
                       text: formatted,
-                      selection: TextSelection.collapsed(offset: formatted.length),
+                      selection: TextSelection.collapsed(
+                        offset: formatted.length,
+                      ),
                     );
                   }
                 },
                 validator: (v) => v == null || v.isEmpty ? "Required" : null,
               ),
 
-
-
-CustomTextField(
-  title: "Workmanship Cost",
-  controller: workmanshipCostController,
-  hintText: "e.g. 23,000",
-  fieldKey: "workmanship_cost_field",
-  keyboardType: TextInputType.number,
-  onChanged: (v) {
-    final formatted = formatNumber(v);
-    if (formatted != v) {
-      workmanshipCostController.value = TextEditingValue(
-        text: formatted,
-        selection: TextSelection.collapsed(offset: formatted.length),
-      );
-    }
-  },
-  validator: (v) => v == null || v.isEmpty ? "Required" : null,
-),
-
-
+              CustomTextField(
+                title: "Workmanship Cost",
+                controller: workmanshipCostController,
+                hintText: "e.g. 23,000",
+                fieldKey: "workmanship_cost_field",
+                keyboardType: TextInputType.number,
+                onChanged: (v) {
+                  final formatted = formatNumber(v);
+                  if (formatted != v) {
+                    workmanshipCostController.value = TextEditingValue(
+                      text: formatted,
+                      selection: TextSelection.collapsed(
+                        offset: formatted.length,
+                      ),
+                    );
+                  }
+                },
+                validator: (v) => v == null || v.isEmpty ? "Required" : null,
+              ),
 
               GestureDetector(
                 onTap: () => pickDate(deliveryDateController),
@@ -187,12 +185,11 @@ CustomTextField(
                     controller: deliveryDateController,
                     hintText: "YYYY-MM-DD",
                     fieldKey: "delivery_date_field",
-                    validator: (v) => v == null || v.isEmpty ? "Required" : null,
+                    validator:
+                        (v) => v == null || v.isEmpty ? "Required" : null,
                   ),
                 ),
               ),
-
-
 
               GestureDetector(
                 onTap: () => pickDate(reminderDateController),
@@ -202,23 +199,23 @@ CustomTextField(
                     controller: reminderDateController,
                     hintText: "YYYY-MM-DD",
                     fieldKey: "reminder_date_field",
-                    validator: (v) => v == null || v.isEmpty ? "Required" : null,
+                    validator:
+                        (v) => v == null || v.isEmpty ? "Required" : null,
                   ),
                 ),
               ),
 
-
               const SizedBox(height: 20),
 
               isLoading
-                  ? const Center(child: CircularProgressIndicator(color: Colors.purple))
+                  ? const Center(
+                    child: CircularProgressIndicator(color: Colors.purple),
+                  )
                   : CustomButton(
-                      title: "Submit Quotation",
-                      isOutlined: false,
-                      onPressed: handleSubmit,
-                    ),
-
-
+                    title: "Submit Quotation",
+                    isOutlined: false,
+                    onPressed: handleSubmit,
+                  ),
             ],
           ),
         ),

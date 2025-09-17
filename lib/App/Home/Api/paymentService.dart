@@ -13,12 +13,11 @@ class PaymentService {
     required String shipmentMethod,
   }) async {
     final token = await SecurePrefs.getToken();
-    final url = Uri.parse("$localBaseURL/material/createPartPaymentOnline/$reviewId");
+    final url = Uri.parse(
+      "$localBaseURL/material/createPartPaymentOnline/$reviewId",
+    );
 
-    final payload = {
-      "amount": amount,
-      "shipmentMethod": shipmentMethod,
-    };
+    final payload = {"amount": amount, "shipmentMethod": shipmentMethod};
 
     print("➡️ Part Payment Request: $payload");
 
@@ -32,7 +31,9 @@ class PaymentService {
         body: jsonEncode(payload),
       );
 
-      print("⬅️ Part Payment Response [${response.statusCode}]: ${response.body}");
+      print(
+        "⬅️ Part Payment Response [${response.statusCode}]: ${response.body}",
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
@@ -55,12 +56,11 @@ class PaymentService {
     required String shipmentMethod,
   }) async {
     final token = await SecurePrefs.getToken();
-    final url = Uri.parse("$liveBaseURL/material/createPaymentOnline/$reviewId");
+    final url = Uri.parse(
+      "$liveBaseURL/material/createPaymentOnline/$reviewId",
+    );
 
-    final payload = {
-      "amount": amount,
-      "shipmentMethod": shipmentMethod,
-    };
+    final payload = {"amount": amount, "shipmentMethod": shipmentMethod};
 
     print("➡️ Full Payment Request: $payload");
 
@@ -74,7 +74,9 @@ class PaymentService {
         body: jsonEncode(payload),
       );
 
-      print("⬅️ Full Payment Response [${response.statusCode}]: ${response.body}");
+      print(
+        "⬅️ Full Payment Response [${response.statusCode}]: ${response.body}",
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);

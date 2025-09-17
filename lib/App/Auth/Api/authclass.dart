@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:http/http.dart' as http;
 
-
 class ApiService {
   static const String baseUrl = "https://hog-ymud.onrender.com/api/v1";
 
   /// Generic POST request with body
   static Future<Map<String, dynamic>> postRequest(
-      String endpoint, Map<String, dynamic> body) async {
+    String endpoint,
+    Map<String, dynamic> body,
+  ) async {
     final url = Uri.parse("$baseUrl/$endpoint");
 
     print("➡️ POST Request to: $url");
@@ -27,29 +28,30 @@ class ApiService {
     } else {
       return {
         "success": false,
-        "error": jsonDecode(response.body)["message"] ??
-            "Something went wrong (${response.statusCode})"
+        "error":
+            jsonDecode(response.body)["message"] ??
+            "Something went wrong (${response.statusCode})",
       };
     }
   }
 
   /// 🔹 Login
-static Future<Map<String, dynamic>> login({
-  required String email,
-  required String password,
-}) async {
-  final result = await postRequest("user/login", {
-    "email": email,
-    "password": password,
-  });
+  static Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+  }) async {
+    final result = await postRequest("user/login", {
+      "email": email,
+      "password": password,
+    });
 
-  if (result["success"] == true) {
-    final token = result["data"]["token"];
-    await SecurePrefs.saveToken(token); 
+    if (result["success"] == true) {
+      final token = result["data"]["token"];
+      await SecurePrefs.saveToken(token);
+    }
+
+    return result;
   }
-
-  return result;
-}
 
   /// 🔹 Sign up
   static Future<Map<String, dynamic>> signup({
@@ -66,12 +68,14 @@ static Future<Map<String, dynamic>> login({
       "password": password,
       "phoneNumber": phoneNumber,
       "role": role,
-      "address": address
+      "address": address,
     });
   }
 
   /// 🔹 Verify account with token (no body required)
-  static Future<Map<String, dynamic>> verifyEmail({required String token}) async {
+  static Future<Map<String, dynamic>> verifyEmail({
+    required String token,
+  }) async {
     final url = Uri.parse("$baseUrl/user/verifyToken?token=$token");
 
     print("➡️ POST Request to: $url");
@@ -88,14 +92,17 @@ static Future<Map<String, dynamic>> login({
     } else {
       return {
         "success": false,
-        "error": jsonDecode(response.body)["message"] ??
-            "Something went wrong (${response.statusCode})"
+        "error":
+            jsonDecode(response.body)["message"] ??
+            "Something went wrong (${response.statusCode})",
       };
     }
   }
 
   /// 🔹 Forgot Password
-  static Future<Map<String, dynamic>> forgotPassword({required String email}) async {
+  static Future<Map<String, dynamic>> forgotPassword({
+    required String email,
+  }) async {
     return await postRequest("user/forgotPassword", {"email": email});
   }
 
@@ -110,4 +117,3 @@ static Future<Map<String, dynamic>> login({
     });
   }
 }
-

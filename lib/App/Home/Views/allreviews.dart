@@ -4,8 +4,6 @@ import 'package:hog/App/Home/Model/reviewModel.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:intl/intl.dart' show NumberFormat;
 
-
-
 // class AllReviews extends StatefulWidget {
 //   const AllReviews({super.key});
 
@@ -277,7 +275,6 @@ import 'package:intl/intl.dart' show NumberFormat;
 //   );
 // }
 
-
 //   @override
 //   Widget build(BuildContext context) {
 //     return Scaffold(
@@ -304,5 +301,3 @@ import 'package:intl/intl.dart' show NumberFormat;
 //     );
 //   }
 // }
-
-

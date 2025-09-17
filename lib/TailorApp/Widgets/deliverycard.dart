@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hog/TailorApp/Home/Model/deliveryModel.dart';
 import 'package:hog/components/texts.dart';
 
-
 class DeliveryCard extends StatelessWidget {
   final TailorTracking tracking;
   final VoidCallback onTap;

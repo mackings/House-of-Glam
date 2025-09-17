@@ -3,10 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/components/texts.dart';
 
-
-
-final obscureTextProvider =
-    StateProvider.family<bool, String>((ref, fieldKey) => true);
+final obscureTextProvider = StateProvider.family<bool, String>(
+  (ref, fieldKey) => true,
+);
 
 class CustomTextField extends ConsumerWidget {
   final String title;
@@ -17,7 +16,7 @@ class CustomTextField extends ConsumerWidget {
   final FormFieldValidator<String>? validator;
   final TextInputType keyboardType;
   final String fieldKey;
-  final List<TextInputFormatter>? inputFormatters; 
+  final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onChanged; // ✅ optional callback
 
   const CustomTextField({
@@ -44,11 +43,7 @@ class CustomTextField extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CustomText(
-            title,
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-          ),
+          CustomText(title, fontSize: 15, fontWeight: FontWeight.w500),
           const SizedBox(height: 8),
           TextFormField(
             controller: controller,
@@ -60,18 +55,19 @@ class CustomTextField extends ConsumerWidget {
             decoration: InputDecoration(
               hintText: hintText,
               prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-              suffixIcon: isPassword
-                  ? IconButton(
-                      icon: Icon(
-                        obscureText ? Icons.visibility_off : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        ref
-                            .read(obscureTextProvider(fieldKey).notifier)
-                            .state = !obscureText;
-                      },
-                    )
-                  : null,
+              suffixIcon:
+                  isPassword
+                      ? IconButton(
+                        icon: Icon(
+                          obscureText ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          ref
+                              .read(obscureTextProvider(fieldKey).notifier)
+                              .state = !obscureText;
+                        },
+                      )
+                      : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -86,4 +82,3 @@ class CustomTextField extends ConsumerWidget {
     );
   }
 }
-

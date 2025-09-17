@@ -50,9 +50,10 @@ class Tailor {
       description: json["description"],
       totalRatings: json["totalRatings"] ?? 0,
       ratingSum: json["ratingSum"] ?? 0,
-      ratings: (json["ratings"] != null)
-          ? List<Map<String, dynamic>>.from(json["ratings"])
-          : [],
+      ratings:
+          (json["ratings"] != null)
+              ? List<Map<String, dynamic>>.from(json["ratings"])
+              : [],
       createdAt: json["createdAt"],
       updatedAt: json["updatedAt"],
     );
@@ -65,12 +66,7 @@ class User {
   final String? email;
   final String? image;
 
-  User({
-    required this.id,
-    this.fullName,
-    this.email,
-    this.image,
-  });
+  User({required this.id, this.fullName, this.email, this.image});
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(

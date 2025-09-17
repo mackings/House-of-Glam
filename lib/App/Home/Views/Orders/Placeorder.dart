@@ -12,8 +12,6 @@ import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
 import 'package:image_picker/image_picker.dart';
 
-
-
 class PlaceOrder extends StatefulWidget {
   const PlaceOrder({super.key});
 
@@ -25,16 +23,22 @@ class _PlaceOrderState extends State<PlaceOrder> {
   List<Category> categories = [];
   Category? selectedCategory;
 
-  final List<String> materials = ["Cotton", "Brocade", "Atiku", "Ankara", "Lace"];
+  final List<String> materials = [
+    "Cotton",
+    "Brocade",
+    "Atiku",
+    "Ankara",
+    "Lace",
+  ];
   final List<String> colors = ["Red", "Blue", "White", "Black", "Green"];
 
   String? selectedMaterial;
   String? selectedColor;
 
   final TextEditingController brandingController = TextEditingController();
-  final TextEditingController specialInstructionsController = TextEditingController();
+  final TextEditingController specialInstructionsController =
+      TextEditingController();
   final Map<String, TextEditingController> measurementControllers = {};
-
 
   final List<File> sampleImages = [];
   final ImagePicker _picker = ImagePicker();
@@ -53,7 +57,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
     "Collar Front",
     "Collar Back",
     "Length",
-    "Arm Type"
+    "Arm Type",
   ];
 
   @override
@@ -86,8 +90,6 @@ class _PlaceOrderState extends State<PlaceOrder> {
     }
   }
 
-  
-
   Future<void> pickDate(TextEditingController controller) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -96,45 +98,53 @@ class _PlaceOrderState extends State<PlaceOrder> {
       lastDate: DateTime(2100),
     );
     if (picked != null) {
-      controller.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      controller.text =
+          "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
     }
   }
 
   Widget buildMeasurementFields() {
     List<Widget> rows = [];
     for (var i = 0; i < measurementFields.length; i += 2) {
-      rows.add(Row(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: MeasurementField(
-                label: measurementFields[i],
-                controller: measurementControllers[measurementFields[i]]!,
-              ),
-            ),
-          ),
-          if (i + 1 < measurementFields.length)
+      rows.add(
+        Row(
+          children: [
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(left: 8.0),
+                padding: const EdgeInsets.only(right: 8.0),
                 child: MeasurementField(
-                  label: measurementFields[i + 1],
-                  controller: measurementControllers[measurementFields[i + 1]]!,
+                  label: measurementFields[i],
+                  controller: measurementControllers[measurementFields[i]]!,
                 ),
               ),
             ),
-        ],
-      ));
+            if (i + 1 < measurementFields.length)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: MeasurementField(
+                    label: measurementFields[i + 1],
+                    controller:
+                        measurementControllers[measurementFields[i + 1]]!,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
       rows.add(const SizedBox(height: 10));
     }
     return Column(children: rows);
   }
 
   Future<void> _submitOrder() async {
-    if (selectedCategory == null || selectedMaterial == null || selectedColor == null) {
+    if (selectedCategory == null ||
+        selectedMaterial == null ||
+        selectedColor == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select attire, material, and color")),
+        const SnackBar(
+          content: Text("Please select attire, material, and color"),
+        ),
       );
       return;
     }
@@ -144,7 +154,10 @@ class _PlaceOrderState extends State<PlaceOrder> {
 
     final measurement = measurementControllers.map((key, controller) {
       if (key == "Arm Type") return MapEntry("armType", controller.text);
-      return MapEntry(key.replaceAll(' ', '').toLowerCase(), double.tryParse(controller.text) ?? 0);
+      return MapEntry(
+        key.replaceAll(' ', '').toLowerCase(),
+        double.tryParse(controller.text) ?? 0,
+      );
     });
 
     final response = await UserActivityService.createMaterial(
@@ -159,13 +172,13 @@ class _PlaceOrderState extends State<PlaceOrder> {
     setState(() => isLoading = false);
 
     if (response != null && response.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("✅ ${response.message}")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("✅ ${response.message}")));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Failed to submit order")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("❌ Failed to submit order")));
     }
   }
 
@@ -183,7 +196,11 @@ class _PlaceOrderState extends State<PlaceOrder> {
       isLoading: isLoading,
       child: Scaffold(
         appBar: AppBar(
-          title: const CustomText("Place Order", color: Colors.white, fontSize: 18),
+          title: const CustomText(
+            "Place Order",
+            color: Colors.white,
+            fontSize: 18,
+          ),
           backgroundColor: Colors.purple,
         ),
         body: SingleChildScrollView(
@@ -191,20 +208,26 @@ class _PlaceOrderState extends State<PlaceOrder> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              SizedBox(height: 20,),
+              SizedBox(height: 20),
 
               // Attire Section
-              CustomText("Attire Details *", color: Colors.black, fontSize: 18,fontWeight: FontWeight.w500,),
+              CustomText(
+                "Attire Details *",
+                color: Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
               const Divider(),
-              SizedBox(height: 20,),
+              SizedBox(height: 20),
               CustomDropdown(
                 label: "Select Attire Type",
                 options: categories.map((c) => c.name).toList(),
                 selectedValue: selectedCategory?.name,
                 onChanged: (val) {
                   setState(() {
-                    selectedCategory = categories.firstWhere((c) => c.name == val);
+                    selectedCategory = categories.firstWhere(
+                      (c) => c.name == val,
+                    );
                   });
                 },
               ),
@@ -224,18 +247,27 @@ class _PlaceOrderState extends State<PlaceOrder> {
               ),
 
               const SizedBox(height: 20),
-              CustomText("Brand and Budget *", color: Colors.black, fontSize: 18,fontWeight: FontWeight.w500,),
+              CustomText(
+                "Brand and Budget *",
+                color: Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
               const Divider(),
               CustomTextField(
                 title: "Branding",
                 hintText: "Name / Logo embroidery",
                 fieldKey: "branding",
                 controller: brandingController,
-                
               ),
               const SizedBox(height: 20),
 
-              CustomText("Special Instructions *", color: Colors.black, fontSize: 18,fontWeight: FontWeight.w500,),
+              CustomText(
+                "Special Instructions *",
+                color: Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
               const Divider(),
               CustomTextField(
                 title: "Special Instructions",
@@ -245,15 +277,28 @@ class _PlaceOrderState extends State<PlaceOrder> {
               ),
 
               const SizedBox(height: 20),
-              CustomText("Measurements*", color: Colors.black, fontSize: 18,fontWeight: FontWeight.w500,),
+              CustomText(
+                "Measurements*",
+                color: Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
               const Divider(),
               buildMeasurementFields(),
 
               const SizedBox(height: 20),
-              CustomText("Design samples *", color: Colors.black, fontSize: 18,fontWeight: FontWeight.w500,),
+              CustomText(
+                "Design samples *",
+                color: Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
               const Divider(),
-              SizedBox(height: 20,),
-              MultiImagePicker(images: sampleImages, onAddImage: pickSampleImage),
+              SizedBox(height: 20),
+              MultiImagePicker(
+                images: sampleImages,
+                onAddImage: pickSampleImage,
+              ),
 
               const SizedBox(height: 40),
               CustomButton(title: "Submit Order", onPressed: _submitOrder),
@@ -265,7 +310,3 @@ class _PlaceOrderState extends State<PlaceOrder> {
     );
   }
 }
-
-
-
-

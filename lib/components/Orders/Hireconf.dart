@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 class HireDesignerConfirmation extends StatelessWidget {
   final VoidCallback onYes;
   const HireDesignerConfirmation({super.key, required this.onYes});

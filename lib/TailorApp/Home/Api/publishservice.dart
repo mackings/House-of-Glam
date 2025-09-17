@@ -6,7 +6,6 @@ import 'package:hog/TailorApp/Home/Model/PublishedModel.dart';
 import 'package:http/http.dart' as http;
 
 class PublishedService {
-
   final String baseUrl = "https://hog-ymud.onrender.com/api/v1";
 
   Future<void> createPublished({
@@ -21,12 +20,13 @@ class PublishedService {
       final token = await SecurePrefs.getToken();
 
       var uri = Uri.parse('$baseUrl/published/createPublished/$categoryId');
-      var request = http.MultipartRequest('POST', uri)
-        ..headers['Authorization'] = 'Bearer $token'
-        ..fields['attireType'] = attireType
-        ..fields['clothPublished'] = clothPublished
-        ..fields['color'] = color
-        ..fields['brand'] = brand;
+      var request =
+          http.MultipartRequest('POST', uri)
+            ..headers['Authorization'] = 'Bearer $token'
+            ..fields['attireType'] = attireType
+            ..fields['clothPublished'] = clothPublished
+            ..fields['color'] = color
+            ..fields['brand'] = brand;
 
       for (var img in images) {
         request.files.add(
@@ -49,9 +49,8 @@ class PublishedService {
     }
   }
 
+  // ✅ New getAllPublished
 
-    // ✅ New getAllPublished
-    
   Future<TailorPublishedResponse> getAllPublished() async {
     try {
       final token = await SecurePrefs.getToken();

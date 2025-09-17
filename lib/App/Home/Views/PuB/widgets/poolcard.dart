@@ -14,16 +14,17 @@ class WorkCard extends StatelessWidget {
   void _showFullImage(BuildContext context, String imageUrl) {
     showDialog(
       context: context,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.black,
-        insetPadding: const EdgeInsets.all(10),
-        child: InteractiveViewer(
-          clipBehavior: Clip.none,
-          minScale: 0.8,
-          maxScale: 4.0,
-          child: Image.network(imageUrl, fit: BoxFit.contain),
-        ),
-      ),
+      builder:
+          (_) => Dialog(
+            backgroundColor: Colors.black,
+            insetPadding: const EdgeInsets.all(10),
+            child: InteractiveViewer(
+              clipBehavior: Clip.none,
+              minScale: 0.8,
+              maxScale: 4.0,
+              child: Image.network(imageUrl, fit: BoxFit.contain),
+            ),
+          ),
     );
   }
 
@@ -68,7 +69,9 @@ class WorkCard extends StatelessWidget {
               GestureDetector(
                 onTap: () => _showFullImage(context, work.sampleImage.first),
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                   child: Image.network(
                     work.sampleImage.first,
                     height: 160,
@@ -91,8 +94,11 @@ class WorkCard extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color: Colors.purple,
                       ),
-                      const Icon(Icons.check_circle,
-                          color: Colors.purple, size: 20),
+                      const Icon(
+                        Icons.check_circle,
+                        color: Colors.purple,
+                        size: 20,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -103,10 +109,7 @@ class WorkCard extends StatelessWidget {
                     trailingText: work.brand,
                   ),
                   const SizedBox(height: 6),
-                  WorkDetailRow(
-                    icon: Icons.color_lens,
-                    label: work.color,
-                  ),
+                  WorkDetailRow(icon: Icons.color_lens, label: work.color),
                   const SizedBox(height: 6),
                   WorkDetailRow(
                     icon: Icons.calendar_today,
@@ -132,4 +135,3 @@ class WorkCard extends StatelessWidget {
     );
   }
 }
-

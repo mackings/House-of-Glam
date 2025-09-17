@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-
-
   final String title;
   final VoidCallback? onBack;
   final VoidCallback? onAction;
@@ -31,40 +27,40 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.titleStyle,
   }) : super(key: key);
 
-
-@override
-Widget build(BuildContext context) {
-  return SafeArea(
-    top: true, // make sure it doesn’t overlap status bar
-    child: AppBar(
-      backgroundColor: backgroundColor,
-      elevation: 0,
-      centerTitle: true,
-      leading: enableBack
-          ? IconButton(
-              icon: Icon(backIcon, color: iconColor),
-              onPressed: onBack ?? () => Navigator.pop(context),
-            )
-          : null,
-      title: CustomText(
-        title,
-        fontSize: titleStyle?.fontSize ?? 20,
-        fontWeight: FontWeight.bold,
-        color: titleStyle?.color ?? iconColor,
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: true, // make sure it doesn’t overlap status bar
+      child: AppBar(
+        backgroundColor: backgroundColor,
+        elevation: 0,
+        centerTitle: true,
+        leading:
+            enableBack
+                ? IconButton(
+                  icon: Icon(backIcon, color: iconColor),
+                  onPressed: onBack ?? () => Navigator.pop(context),
+                )
+                : null,
+        title: CustomText(
+          title,
+          fontSize: titleStyle?.fontSize ?? 20,
+          fontWeight: FontWeight.bold,
+          color: titleStyle?.color ?? iconColor,
+        ),
+        actions:
+            enableAction
+                ? [
+                  IconButton(
+                    icon: Icon(actionIcon, color: iconColor),
+                    onPressed: onAction,
+                  ),
+                ]
+                : null,
       ),
-      actions: enableAction
-          ? [
-              IconButton(
-                icon: Icon(actionIcon, color: iconColor),
-                onPressed: onAction,
-              ),
-            ]
-          : null,
-    ),
-  );
-}
+    );
+  }
 
-@override
-Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
-

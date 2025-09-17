@@ -12,7 +12,9 @@ extension PatronizePublished on PublishedService {
   }) async {
     try {
       final token = await SecurePrefs.getToken();
-      final url = Uri.parse("$baseUrl/published/userPatronizedPublished/$publishedId");
+      final url = Uri.parse(
+        "$baseUrl/published/userPatronizedPublished/$publishedId",
+      );
 
       final body = jsonEncode({
         "measurement": [measurement],
@@ -34,7 +36,9 @@ extension PatronizePublished on PublishedService {
       print("⬅️ Response [${response.statusCode}]: ${response.body}");
 
       if (response.statusCode != 201 && response.statusCode != 200) {
-        throw Exception("Failed to patronize published cloth: ${response.body}");
+        throw Exception(
+          "Failed to patronize published cloth: ${response.body}",
+        );
       }
     } catch (e) {
       print("❌ Error patronizing published cloth: $e");

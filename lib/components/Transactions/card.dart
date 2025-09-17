@@ -7,11 +7,7 @@ class TransactionCard extends StatelessWidget {
   final TransactionResponse txn;
   final VoidCallback onTap;
 
-  const TransactionCard({
-    super.key,
-    required this.txn,
-    required this.onTap,
-  });
+  const TransactionCard({super.key, required this.txn, required this.onTap});
 
   String formatAmount(int amount) {
     final formatter = NumberFormat("#,###");
@@ -35,10 +31,7 @@ class TransactionCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.grey.shade400,
-            width: 1.5,
-          ),
+          border: Border.all(color: Colors.grey.shade400, width: 1.5),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -64,12 +57,11 @@ class TransactionCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-CustomText(
-  "₦${formatAmount(txn.amountPaid!.toInt())}",
-  fontSize: 16,
-  fontWeight: FontWeight.bold,
-),
-
+                  CustomText(
+                    "₦${formatAmount(txn.amountPaid!.toInt())}",
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
 
                   const SizedBox(height: 6),
                   CustomText(
@@ -82,8 +74,11 @@ CustomText(
                   // Date with icon
                   Row(
                     children: [
-                      const Icon(Icons.date_range,
-                          size: 14, color: Colors.purple),
+                      const Icon(
+                        Icons.date_range,
+                        size: 14,
+                        color: Colors.purple,
+                      ),
                       const SizedBox(width: 4),
                       CustomText(
                         formatDate(txn.createdAt.toString()),
@@ -98,8 +93,7 @@ CustomText(
 
             // Status Badge
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: isSuccess ? Colors.purple[50] : Colors.red[50],
                 borderRadius: BorderRadius.circular(20),

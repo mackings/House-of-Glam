@@ -121,7 +121,6 @@ class TailorHomeService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       return responseData["message"] ?? "Attire delivered successfully";
     } else {
-    
       // 🔹 Return server message if available, otherwise fallback
       throw Exception(responseData["message"] ?? "Failed to deliver attire");
     }

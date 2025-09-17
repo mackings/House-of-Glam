@@ -12,9 +12,6 @@ import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
 import 'package:image_picker/image_picker.dart';
 
-
-
-
 class PublishMaterial extends StatefulWidget {
   const PublishMaterial({super.key});
 
@@ -94,9 +91,9 @@ class _PublishMaterialState extends State<PublishMaterial> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("❌ Failed: $e")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("❌ Failed: $e")));
       }
     }
 
@@ -129,7 +126,12 @@ class _PublishMaterialState extends State<PublishMaterial> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomText("Attire Details *", color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
+              CustomText(
+                "Attire Details *",
+                color: Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
               const Divider(),
               const SizedBox(height: 10),
 
@@ -139,7 +141,9 @@ class _PublishMaterialState extends State<PublishMaterial> {
                 selectedValue: selectedCategory?.name,
                 onChanged: (val) {
                   setState(() {
-                    selectedCategory = categories.firstWhere((c) => c.name == val);
+                    selectedCategory = categories.firstWhere(
+                      (c) => c.name == val,
+                    );
                   });
                 },
               ),
@@ -169,11 +173,19 @@ class _PublishMaterialState extends State<PublishMaterial> {
               ),
               const SizedBox(height: 20),
 
-              CustomText("Upload Images *", color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
+              CustomText(
+                "Upload Images *",
+                color: Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
               const Divider(),
               const SizedBox(height: 10),
 
-              MultiImagePicker(images: sampleImages, onAddImage: pickSampleImage),
+              MultiImagePicker(
+                images: sampleImages,
+                onAddImage: pickSampleImage,
+              ),
 
               const SizedBox(height: 40),
               CustomButton(title: "Publish", onPressed: _submitPublish),
