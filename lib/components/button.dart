@@ -4,9 +4,10 @@ import 'package:hog/components/texts.dart';
 class CustomButton extends StatelessWidget {
   final String title;
   final bool isOutlined;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed; // ✅ make nullable so we can disable
   final double? width;
   final double? height;
+  final bool isLoading; // ✅ optional loading state
 
   const CustomButton({
     Key? key,
@@ -15,6 +16,7 @@ class CustomButton extends StatelessWidget {
     this.isOutlined = false,
     this.width,
     this.height,
+    this.isLoading = false, // ✅ default false
   }) : super(key: key);
 
   @override
@@ -25,7 +27,7 @@ class CustomButton extends StatelessWidget {
       width: width ?? double.infinity,
       height: height ?? 50,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: isLoading ? null : onPressed, // ✅ disable while loading
         style: ElevatedButton.styleFrom(
           elevation: 0,
           backgroundColor: isOutlined ? Colors.transparent : Colors.purple,
@@ -37,13 +39,23 @@ class CustomButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: CustomText(
-          title,
-          fontSize: screenWidth * 0.04,
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
-        ),
+        child: isLoading
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : CustomText(
+                title,
+                fontSize: screenWidth * 0.04,
+                fontWeight: FontWeight.w600,
+                color: isOutlined ? Colors.purple : Colors.white,
+              ),
       ),
     );
   }
 }
+

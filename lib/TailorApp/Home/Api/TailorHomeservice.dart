@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/TailorApp/Home/Model/AssignedMaterial.dart';
 import 'package:hog/TailorApp/Home/Model/materialModel.dart';
-import 'package:http/http.dart' as http ;
+import 'package:hog/components/Navigator.dart';
+import 'package:http/http.dart' as http;
 
 class TailorHomeService {
   final String baseUrl = "https://hog-ymud.onrender.com/api/v1";
@@ -35,46 +36,43 @@ class TailorHomeService {
     }
   }
 
-
   // Submit quotation
-Future<void> submitQuotation({
-  required String materialId,
-  required String comment,
-  required String materialTotalCost,
-  required String workmanshipTotalCost,
-  required String deliveryDate,
-  required String reminderDate,
-}) async {
-  final token = await SecurePrefs.getToken();
+  Future<void> submitQuotation({
+    required String materialId,
+    required String comment,
+    required String materialTotalCost,
+    required String workmanshipTotalCost,
+    required String deliveryDate,
+    required String reminderDate,
+  }) async {
+    final token = await SecurePrefs.getToken();
 
-  final url = Uri.parse("$baseUrl/review/createReview/$materialId");
+    final url = Uri.parse("$baseUrl/review/createReview/$materialId");
 
-  final body = json.encode({
-    "comment": comment,
-    "materialTotalCost": materialTotalCost,
-    "workmanshipTotalCost": workmanshipTotalCost,
-    "deliveryDate": deliveryDate,
-    "reminderDate": reminderDate,
-  });
+    final body = json.encode({
+      "comment": comment,
+      "materialTotalCost": materialTotalCost,
+      "workmanshipTotalCost": workmanshipTotalCost,
+      "deliveryDate": deliveryDate,
+      "reminderDate": reminderDate,
+    });
 
-  final response = await http.post(
-    url,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token",
-    },
-    body: body,
-  );
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: body,
+    );
 
-  print("➡️ POST Request: $url");
-  print("⬅️ Response [${response.statusCode}]: ${response.body}");
+    print("➡️ POST Request: $url");
+    print("⬅️ Response [${response.statusCode}]: ${response.body}");
 
-  if (response.statusCode != 200 && response.statusCode != 201) {
-    throw Exception("Failed to submit quotation: ${response.body}");
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception("Failed to submit quotation: ${response.body}");
+    }
   }
-}
-
-
 
   // 🆕 Assigned Materials API
   Future<TailorAssignedMaterialsResponse> fetchAssignedMaterials() async {
@@ -99,28 +97,33 @@ Future<void> submitQuotation({
     }
   }
 
-
-
   // 🆕 Deliver Attire (Create Tracking)
-Future<void> deliverAttire(String materialId) async {
-  final token = await SecurePrefs.getToken();
+  Future<String> deliverAttire(String materialId) async {
+    final token = await SecurePrefs.getToken();
 
-  final url = Uri.parse("$baseUrl/tracking/createTracking?materialId=$materialId");
+    final url = Uri.parse(
+      "$baseUrl/tracking/createTracking?materialId=$materialId",
+    );
 
-  final response = await http.post(
-    url,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token",
-    },
-  );
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
 
-  print("➡️ POST Request: $url");
-  print("⬅️ Response [${response.statusCode}]: ${response.body}");
+    print("➡️ POST Request: $url");
+    print("⬅️ Response [${response.statusCode}]: ${response.body}");
 
-  if (response.statusCode != 200 && response.statusCode != 201) {
-    throw Exception("Failed to deliver attire: ${response.body}");
+    final responseData = json.decode(response.body);
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return responseData["message"] ?? "Attire delivered successfully";
+    } else {
+    
+      // 🔹 Return server message if available, otherwise fallback
+      throw Exception(responseData["message"] ?? "Failed to deliver attire");
+    }
   }
-}
-
 }
