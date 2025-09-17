@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Home/Views/PuB/widgets/poolservice.dart';
 import 'package:hog/TailorApp/Home/Api/publishservice.dart';
+import 'package:hog/components/Tailors/dropdown.dart';
+import 'package:hog/components/button.dart';
+import 'package:hog/components/formfields.dart';
+import 'package:hog/components/loadingoverlay.dart';
+import 'package:hog/components/texts.dart';
 
 class PatronizeForm extends StatefulWidget {
   final String publishedId;
@@ -44,8 +49,10 @@ class _PatronizeFormState extends State<PatronizeForm> {
 
     final measurement = measurementControllers.map((key, controller) {
       if (key == "Arm Type") return MapEntry("armType", controller.text);
-      return MapEntry(key.replaceAll(" ", "").toLowerCase(),
-          double.tryParse(controller.text) ?? 0);
+      return MapEntry(
+        key.replaceAll(" ", "").toLowerCase(),
+        double.tryParse(controller.text) ?? 0,
+      );
     });
 
     setState(() => isLoading = true);
@@ -56,87 +63,104 @@ class _PatronizeFormState extends State<PatronizeForm> {
         measurement: measurement,
         specialInstructions: specialInstructionsController.text,
       );
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ Order placed successfully")),
-      );
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("✅ Order placed successfully")),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Failed: $e")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("❌ Failed: $e")),
+        );
+      }
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
     }
+  }
+
+  Widget buildMeasurementFields() {
+    List<Widget> rows = [];
+    for (var i = 0; i < measurementFields.length; i += 2) {
+      rows.add(Row(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: MeasurementField(
+                label: measurementFields[i],
+                controller: measurementControllers[measurementFields[i]]!,
+              ),
+            ),
+          ),
+          if (i + 1 < measurementFields.length)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: MeasurementField(
+                  label: measurementFields[i + 1],
+                  controller: measurementControllers[measurementFields[i + 1]]!,
+                ),
+              ),
+            ),
+        ],
+      ));
+      rows.add(const SizedBox(height: 10));
+    }
+    return Column(children: rows);
+  }
+
+  @override
+  void dispose() {
+    specialInstructionsController.dispose();
+    measurementControllers.values.forEach((c) => c.dispose());
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.8,
-      minChildSize: 0.6,
-      maxChildSize: 0.95,
-      builder: (_, controller) => Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            controller: controller,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[400],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+    return LoadingOverlay(
+      isLoading: isLoading,
+      child: Scaffold(
+        
+        appBar: AppBar(
+          iconTheme: IconThemeData(color: Colors.white),
+          backgroundColor: Colors.purple,
+          title: const CustomText("Patronize Work", color: Colors.white, fontSize: 18),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // CustomText("Special Instructions *", 
+                //   color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
+                // const Divider(),
+                CustomTextField(
+                  title: "Special Instructions",
+                  hintText: "e.g. Make it slim fit",
+                  fieldKey: "specialInstructions",
+                  controller: specialInstructionsController,
                 ),
-              ),
-              const SizedBox(height: 16),
-              const Text("Place Order",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const Divider(),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: specialInstructionsController,
-                decoration: const InputDecoration(
-                  labelText: "Special Instructions",
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 20),
-              const Text("Measurements",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 10),
-              ...measurementFields.map((field) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
-                    child: TextFormField(
-                      controller: measurementControllers[field],
-                      decoration: InputDecoration(
-                        labelText: field,
-                        border: const OutlineInputBorder(),
-                      ),
-                    ),
-                  )),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                icon: isLoading
-                    ? const CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2)
-                    : const Icon(Icons.check),
-                label: Text(isLoading ? "Submitting..." : "Submit Order"),
-                onPressed: isLoading ? null : _submit,
-              ),
-            ],
+
+                const SizedBox(height: 20),
+                CustomText("Measurements *", 
+                  color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
+                const Divider(),
+                buildMeasurementFields(),
+
+                const SizedBox(height: 40),
+                CustomButton(title: "Submit Order", onPressed: _submit),
+                const SizedBox(height: 30),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
+
