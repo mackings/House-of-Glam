@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/TailorApp/Home/Model/PublishedModel.dart';
 import 'package:http/http.dart' as http;
 
 class PublishedService {
+
   final String baseUrl = "https://hog-ymud.onrender.com/api/v1";
 
   Future<void> createPublished({
@@ -42,6 +45,35 @@ class PublishedService {
       }
     } catch (e) {
       print("❌ Error creating published cloth: $e");
+      rethrow;
+    }
+  }
+
+
+    // ✅ New getAllPublished
+    
+  Future<TailorPublishedResponse> getAllPublished() async {
+    try {
+      final token = await SecurePrefs.getToken();
+      final url = Uri.parse("$baseUrl/published/getAllPublished");
+
+      print("➡️ GET Request: $url");
+
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $token"},
+      );
+
+      print("⬅️ Response [${response.statusCode}]: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        return TailorPublishedResponse.fromJson(jsonData);
+      } else {
+        throw Exception("Failed to fetch published cloths: ${response.body}");
+      }
+    } catch (e) {
+      print("❌ Error fetching published cloths: $e");
       rethrow;
     }
   }

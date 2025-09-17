@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hog/TailorApp/Home/Views/AssignedMaterials.dart';
 import 'package:hog/TailorApp/Home/Views/Deliveries.dart';
+import 'package:hog/TailorApp/Home/Views/Myworks.dart';
 import 'package:hog/TailorApp/Home/Views/Publish.dart';
 import 'package:hog/TailorApp/Home/Views/TailorDashboard.dart';
 import 'package:hog/TailorApp/Home/Views/Tailorbusiness.dart';
@@ -22,10 +23,12 @@ class _TailorMainPageState extends State<TailorMainPage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = const [
+
     Tailordashboard(),
     AssignedMaterials(),
     TailorDeliveries(),
-    PublishMaterial()
+    Myworks(),
+    
   ];
 
   @override

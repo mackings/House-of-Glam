@@ -14,6 +14,7 @@ import 'package:image_picker/image_picker.dart';
 
 
 
+
 class PublishMaterial extends StatefulWidget {
   const PublishMaterial({super.key});
 
@@ -115,6 +116,7 @@ class _PublishMaterialState extends State<PublishMaterial> {
       isLoading: isLoading,
       child: Scaffold(
         appBar: AppBar(
+          iconTheme: IconThemeData(color: Colors.white),
           backgroundColor: Colors.purple,
           title: const CustomText(
             "Publish Material",
