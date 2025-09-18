@@ -135,36 +135,42 @@ class _PatronizeFormState extends State<PatronizeForm> {
             fontSize: 18,
           ),
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: _formKey,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // CustomText("Special Instructions *",
-                //   color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
-                // const Divider(),
-                CustomTextField(
-                  title: "Special Instructions",
-                  hintText: "e.g. Make it slim fit",
-                  fieldKey: "specialInstructions",
-                  controller: specialInstructionsController,
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // CustomText("Special Instructions *",
+                      //   color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
+                      // const Divider(),
+                      CustomTextField(
+                        title: "Special Instructions",
+                        hintText: "e.g. Make it slim fit",
+                        fieldKey: "specialInstructions",
+                        controller: specialInstructionsController,
+                      ),
+                          
+                      const SizedBox(height: 20),
+                      CustomText(
+                        "Measurements *",
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      const Divider(),
+                      buildMeasurementFields(),
+                          
+                      const SizedBox(height: 40),
+                      CustomButton(title: "Submit Order", onPressed: _submit),
+                      const SizedBox(height: 30),
+                    ],
+                  ),
                 ),
-
-                const SizedBox(height: 20),
-                CustomText(
-                  "Measurements *",
-                  color: Colors.black,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                ),
-                const Divider(),
-                buildMeasurementFields(),
-
-                const SizedBox(height: 40),
-                CustomButton(title: "Submit Order", onPressed: _submit),
-                const SizedBox(height: 30),
               ],
             ),
           ),

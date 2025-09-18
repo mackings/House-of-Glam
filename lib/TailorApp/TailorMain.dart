@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:hog/TailorApp/Home/Views/AssignedMaterials.dart';
 import 'package:hog/TailorApp/Home/Views/Deliveries.dart';
 import 'package:hog/TailorApp/Home/Views/Myworks.dart';
-import 'package:hog/TailorApp/Home/Views/Publish.dart';
+import 'package:hog/TailorApp/Home/Views/Subscription.dart';
 import 'package:hog/TailorApp/Home/Views/TailorDashboard.dart';
 import 'package:hog/TailorApp/Home/Views/Tailorbusiness.dart';
 import 'package:hog/TailorApp/TailorNav.dart';
+
 
 class TailorMainPage extends StatefulWidget {
   final bool isVendorEnabled;
@@ -25,6 +26,7 @@ class _TailorMainPageState extends State<TailorMainPage> {
     AssignedMaterials(),
     TailorDeliveries(),
     Myworks(),
+    Subscription()
   ];
 
   @override
