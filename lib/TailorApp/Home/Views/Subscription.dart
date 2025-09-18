@@ -212,7 +212,7 @@ CustomText(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 CustomText(
-                                  "${plan.duration.toUpperCase()} Plan",
+                                  "${plan.name.toUpperCase()} Plan",
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.black,
@@ -234,7 +234,7 @@ CustomText(
                             ),
                             const SizedBox(height: 8),
                             CustomText(
-                              plan.description,
+                              plan.duration,
                               fontSize: 14,
                               color: Colors.black87,
                             ),

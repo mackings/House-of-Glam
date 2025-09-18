@@ -88,6 +88,7 @@ class _UpdateQuotationBottomSheetState
       );
 
       Navigator.pop(context);
+      Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("✅ Quotation updated!")),
       );
