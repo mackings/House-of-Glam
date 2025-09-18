@@ -5,18 +5,18 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
-
-
-class QuotationBottomSheet extends StatefulWidget {
+class UpdateQuotationBottomSheet extends StatefulWidget {
   final String materialId;
 
-  const QuotationBottomSheet({super.key, required this.materialId});
+  const UpdateQuotationBottomSheet({super.key, required this.materialId});
 
   @override
-  State<QuotationBottomSheet> createState() => _QuotationBottomSheetState();
+  State<UpdateQuotationBottomSheet> createState() =>
+      _UpdateQuotationBottomSheetState();
 }
 
-class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
+class _UpdateQuotationBottomSheetState
+    extends State<UpdateQuotationBottomSheet> {
   final _formKey = GlobalKey<FormState>();
 
   final commentController = TextEditingController();
@@ -28,7 +28,6 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
   bool isLoading = false;
   final service = TailorHomeService();
 
-  // Format numbers for UI display (e.g., 12000 → 12,000)
   String formatNumber(String value) {
     if (value.isEmpty) return "";
     final number = int.tryParse(value.replaceAll(",", ""));
@@ -36,10 +35,7 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
     return NumberFormat("#,###").format(number);
   }
 
-  // Parse number for backend (e.g., "12,000" → "12000")
-  String parseNumber(String value) {
-    return value.replaceAll(",", "");
-  }
+  String parseNumber(String value) => value.replaceAll(",", "");
 
   Future<void> pickDate(TextEditingController controller) async {
     final now = DateTime.now();
@@ -55,37 +51,34 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
     }
   }
 
-  Future<void> handleSubmit() async {
+  Future<void> handleUpdate() async {
     if (!_formKey.currentState!.validate()) return;
 
     final confirm = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("Confirm Quotation"),
-            content: const Text(
-              "By submitting, you confirm that the prices are correct, "
-              "originality and authenticity of the quotation have been verified. "
-              "Do you wish to proceed?",
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text("Cancel"),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text("Yes, Submit"),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text("Confirm Update"),
+        content: const Text(
+          "Are you sure you want to update this quotation with the new values?",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancel"),
           ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Yes, Update"),
+          ),
+        ],
+      ),
     );
 
     if (confirm != true) return;
 
     setState(() => isLoading = true);
     try {
-      await service.submitQuotation(
+      await service.updateQuotation(
         materialId: widget.materialId,
         comment: commentController.text,
         materialTotalCost: parseNumber(materialCostController.text),
@@ -95,13 +88,13 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
       );
 
       Navigator.pop(context);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("✅ Quotation submitted!")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("✅ Quotation updated!")),
+      );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("❌ Error: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("❌ Error: $e")),
+      );
     } finally {
       setState(() => isLoading = false);
     }
@@ -124,7 +117,7 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
             children: [
               const Center(
                 child: CustomText(
-                  "Submit Quotation",
+                  "Update Quotation",
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -134,16 +127,16 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
               CustomTextField(
                 title: "Comment",
                 controller: commentController,
-                hintText: "Enter your notes or message",
-                fieldKey: "comment_field",
+                hintText: "Enter your update notes",
+                fieldKey: "update_comment_field",
                 validator: (v) => v == null || v.isEmpty ? "Required" : null,
               ),
 
               CustomTextField(
                 title: "Material Cost",
                 controller: materialCostController,
-                hintText: "e.g. 23,000",
-                fieldKey: "material_cost_field",
+                hintText: "e.g. 45,000",
+                fieldKey: "update_material_cost_field",
                 keyboardType: TextInputType.number,
                 onChanged: (v) {
                   final formatted = formatNumber(v);
@@ -162,8 +155,8 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
               CustomTextField(
                 title: "Workmanship Cost",
                 controller: workmanshipCostController,
-                hintText: "e.g. 23,000",
-                fieldKey: "workmanship_cost_field",
+                hintText: "e.g. 12,000",
+                fieldKey: "update_workmanship_cost_field",
                 keyboardType: TextInputType.number,
                 onChanged: (v) {
                   final formatted = formatNumber(v);
@@ -186,7 +179,7 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
                     title: "Delivery Date",
                     controller: deliveryDateController,
                     hintText: "YYYY-MM-DD",
-                    fieldKey: "delivery_date_field",
+                    fieldKey: "update_delivery_date_field",
                     validator:
                         (v) => v == null || v.isEmpty ? "Required" : null,
                   ),
@@ -200,7 +193,7 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
                     title: "Reminder Date",
                     controller: reminderDateController,
                     hintText: "YYYY-MM-DD",
-                    fieldKey: "reminder_date_field",
+                    fieldKey: "update_reminder_date_field",
                     validator:
                         (v) => v == null || v.isEmpty ? "Required" : null,
                   ),
@@ -211,13 +204,13 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
 
               isLoading
                   ? const Center(
-                    child: CircularProgressIndicator(color: Colors.purple),
-                  )
+                      child: CircularProgressIndicator(color: Colors.purple),
+                    )
                   : CustomButton(
-                    title: "Submit Quotation",
-                    isOutlined: false,
-                    onPressed: handleSubmit,
-                  ),
+                      title: "Update Quotation",
+                      isOutlined: false,
+                      onPressed: handleUpdate,
+                    ),
             ],
           ),
         ),
@@ -225,3 +218,4 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
     );
   }
 }
+

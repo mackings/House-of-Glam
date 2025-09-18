@@ -35,6 +35,10 @@ class ApiService {
     }
   }
 
+
+
+
+
 /// 🔹 Login
 static Future<Map<String, dynamic>> login({
   required String email,
@@ -89,8 +93,6 @@ static Future<Map<String, dynamic>> login({
     "error": result["error"] ?? "Login failed",
   };
 }
-
-
 
 
 

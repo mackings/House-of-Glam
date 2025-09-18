@@ -125,4 +125,45 @@ class TailorHomeService {
       throw Exception(responseData["message"] ?? "Failed to deliver attire");
     }
   }
+
+  Future<String> updateQuotation({
+    required String materialId,
+    required String comment,
+    required String materialTotalCost,
+    required String workmanshipTotalCost,
+    required String deliveryDate,
+    required String reminderDate,
+  }) async {
+    final token = await SecurePrefs.getToken();
+    final url = Uri.parse("$baseUrl/review/createReview/$materialId");
+
+    final body = json.encode({
+      "comment": comment,
+      "materialTotalCost": materialTotalCost,
+      "workmanshipTotalCost": workmanshipTotalCost,
+      "deliveryDate": deliveryDate,
+      "reminderDate": reminderDate,
+    });
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: body,
+    );
+
+    print("➡️ [Update] $url");
+    print("📦 Payload: $body");
+    print("⬅️ Response [${response.statusCode}]: ${response.body}");
+
+    final responseData = json.decode(response.body);
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return responseData["message"] ?? "Quotation updated successfully";
+    } else {
+      throw Exception(responseData["message"] ?? "Failed to update quotation");
+    }
+  }
 }
