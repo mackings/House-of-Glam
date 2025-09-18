@@ -75,12 +75,14 @@ class TailorUser {
   final String fullName;
   final String? image;
   final String? address;
+  final String? subscriptionPlan;
 
   TailorUser({
     required this.id,
     required this.fullName,
     this.image,
     this.address,
+    this.subscriptionPlan
   });
 
   factory TailorUser.fromJson(Map<String, dynamic> json) {
@@ -89,6 +91,7 @@ class TailorUser {
       fullName: json['fullName'] ?? '',
       image: json['image'],
       address: json['address'],
+      subscriptionPlan: json['subscriptionPlan']
     );
   }
 }

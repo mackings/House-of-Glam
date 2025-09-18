@@ -14,17 +14,16 @@ class WorkCard extends StatelessWidget {
   void _showFullImage(BuildContext context, String imageUrl) {
     showDialog(
       context: context,
-      builder:
-          (_) => Dialog(
-            backgroundColor: Colors.black,
-            insetPadding: const EdgeInsets.all(10),
-            child: InteractiveViewer(
-              clipBehavior: Clip.none,
-              minScale: 0.8,
-              maxScale: 4.0,
-              child: Image.network(imageUrl, fit: BoxFit.contain),
-            ),
-          ),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.black,
+        insetPadding: const EdgeInsets.all(10),
+        child: InteractiveViewer(
+          clipBehavior: Clip.none,
+          minScale: 0.8,
+          maxScale: 4.0,
+          child: Image.network(imageUrl, fit: BoxFit.contain),
+        ),
+      ),
     );
   }
 
@@ -39,6 +38,22 @@ class WorkCard extends StatelessWidget {
     );
   }
 
+  /// Map subscription plan name to a color
+  Color getPlanColor(String? planName) {
+    switch (planName?.toLowerCase()) {
+      case "premium":
+        return Colors.orange;
+      case "enterprise":
+        return Colors.green;
+      case "standard":
+        return Colors.blue;
+      case "free":
+        return Colors.grey;
+      default:
+        return Colors.grey; // Unknown / no plan
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     String formattedDate = "Unknown date";
@@ -46,8 +61,12 @@ class WorkCard extends StatelessWidget {
       formattedDate = DateFormat("d MMMM y • h:mma").format(work.createdAt);
     } catch (_) {}
 
+    final planName = work.user?.subscriptionPlan?.toLowerCase() ?? "free";
+    final planColor = getPlanColor(planName);
+    final isVerified = planName != "free"; // Free plan is not verified
+
     return GestureDetector(
-      onTap: () => _openPatronizeSheet(context), // 👈 Open bottom sheet on tap
+      onTap: () => _openPatronizeSheet(context),
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
@@ -85,6 +104,7 @@ class WorkCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Header: title + verified check
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -94,11 +114,24 @@ class WorkCard extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color: Colors.purple,
                       ),
-                      const Icon(
-                        Icons.check_circle,
-                        color: Colors.purple,
-                        size: 20,
-                      ),
+                      if (planName.isNotEmpty)
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              color: isVerified ? planColor : Colors.grey,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 4),
+                            CustomText(
+                              isVerified
+                                  ? "Verified • ${planName[0].toUpperCase()}${planName.substring(1)}"
+                                  : "Unverified",
+                              fontSize: 12,
+                              color: planColor,
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -116,6 +149,15 @@ class WorkCard extends StatelessWidget {
                     label: formattedDate,
                     smallText: true,
                   ),
+                  const SizedBox(height: 6),
+
+                  // Show subscription plan name as a row
+                  WorkDetailRow(
+                    icon: Icons.star,
+                    label: "Subscription Plan: ${work.user?.subscriptionPlan ?? 'Free'}",
+                    smallText: true,
+                  ),
+
                   const SizedBox(height: 10),
                   if (work.user != null)
                     GestureDetector(
@@ -135,3 +177,4 @@ class WorkCard extends StatelessWidget {
     );
   }
 }
+
