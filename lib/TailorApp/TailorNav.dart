@@ -12,12 +12,13 @@ class TailorCustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     final items = [
       {"icon": Icons.home, "label": "Home"},
       {"icon": Icons.card_travel, "label": "My Orders"},
       {"icon": Icons.telegram, "label": "Deliverables"},
       {"icon": Icons.publish, "label": "Publish"},
-      {"icon": Icons.person, "label": "Profile"},
+      {"icon": Icons.person, "label": "Subscription"},
     ];
 
     return Container(

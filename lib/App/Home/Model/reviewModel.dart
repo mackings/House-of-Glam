@@ -66,8 +66,8 @@ class Review {
       materialTotalCost: json['materialTotalCost'] ?? 0,
       workmanshipTotalCost: json['workmanshipTotalCost'] ?? 0,
       totalCost: json['totalCost'] ?? 0,
-      amountPaid: json['amountPaid'] ?? 0, // ✅ now mapped
-      amountToPay: json['amountToPay'] ?? 0, // ✅ now mapped
+      amountPaid: json['amountPaid'] ?? 0, 
+      amountToPay: json['amountToPay'] ?? 0,
       deliveryDate:
           DateTime.tryParse(json['deliveryDate'] ?? '') ?? DateTime.now(),
       reminderDate:
