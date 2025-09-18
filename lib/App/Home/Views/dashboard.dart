@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Home/Api/home.dart';
 import 'package:hog/App/Home/Model/category.dart';
 import 'package:hog/App/Home/Model/tailor.dart';
@@ -7,7 +8,6 @@ import 'package:hog/App/Home/Views/alltailors.dart';
 import 'package:hog/App/Tailors/details.dart';
 import 'package:hog/components/Tailors/tailorcard.dart';
 import 'package:hog/components/header.dart';
-import 'package:hog/components/search.dart';
 import 'package:hog/components/slideritem.dart';
 import 'package:hog/components/sliders.dart';
 import 'package:hog/components/texts.dart';
@@ -28,6 +28,9 @@ class _HomeState extends ConsumerState<Home> {
   bool _isLoadingTailors = true;
   bool _isLoadingCategories = true;
 
+  String userName = "User"; // default
+  String userAvatar = "https://i.pravatar.cc/150"; // default
+
   void _onNavTap(int index) {
     setState(() {});
   }
@@ -37,6 +40,7 @@ class _HomeState extends ConsumerState<Home> {
     super.initState();
     _fetchTailors();
     _fetchCategories();
+    _loadUserData();
   }
 
   Future<void> _fetchTailors() async {
@@ -50,6 +54,16 @@ class _HomeState extends ConsumerState<Home> {
       print("❌ Error fetching tailors: $e");
       setState(() {
         _isLoadingTailors = false;
+      });
+    }
+  }
+
+  Future<void> _loadUserData() async {
+    final userData = await SecurePrefs.getUserData();
+    if (userData != null) {
+      setState(() {
+        userName = userData["fullName"] ?? "User";
+        userAvatar = userData["image"] ?? "https://i.pravatar.cc/150";
       });
     }
   }
@@ -103,21 +117,21 @@ class _HomeState extends ConsumerState<Home> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Header(
-                  userName: "Mac Kingsley",
-                  avatarUrl: "https://i.pravatar.cc/150?img=3",
+                  userName: userName,
+                  avatarUrl: userAvatar,
                   onNotificationTap: () {
                     print("Notifications tapped!");
                   },
                 ),
-                const SizedBox(height: 20),
 
-                CustomSearchBar(
-                  controller: searchController,
-                  hintText: "Search item",
-                  onChanged: (value) => print("Search: $value"),
-                  onFilterTap: () => print("Filter tapped!"),
-                ),
+                //const SizedBox(height: 10),
 
+                // CustomSearchBar(
+                //   controller: searchController,
+                //   hintText: "Search item",
+                //   onChanged: (value) => print("Search: $value"),
+                //   onFilterTap: () => print("Filter tapped!"),
+                // ),
                 const SizedBox(height: 30),
 
                 CarouselSlider(
