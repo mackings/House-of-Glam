@@ -39,58 +39,64 @@ class _SigninState extends ConsumerState<Signin> {
     super.dispose();
   }
 
-  Future<void> _handleSignin() async {
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
+Future<void> _handleSignin() async {
+  final email = emailController.text.trim();
+  final password = passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill in all fields")),
-      );
-      return;
-    }
-
-    setState(() => isLoading = true);
-    final response = await ApiService.login(email: email, password: password);
-    setState(() => isLoading = false);
-
-    print("🔎 Login response: $response");
-
-    if (response["success"] == true) {
-      final data = response["data"];
-      final token = data["token"];
-      final user = data["user"];
-
-      if (rememberMe && token != null) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("token", token);
-      }
-
-      await showSuccessDialog(context, data["message"] ?? "Login successful!");
-
-      if (user != null && user["role"] == "tailor") {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder:
-                (_) => TailorMainPage(
-                  isVendorEnabled: user["isVendorEnabled"] ?? false,
-                ),
-          ),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const MainPage()),
-        );
-      }
-    } else {
-      await showErrorDialog(
-        context,
-        response["error"] ?? "Something went wrong",
-      );
-    }
+  if (email.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Please fill in all fields")),
+    );
+    return;
   }
+
+  setState(() => isLoading = true);
+  final response = await ApiService.login(email: email, password: password);
+  setState(() => isLoading = false);
+
+  print("🔎 Login response: $response");
+
+  if (response["success"] == true && response["token"] != null) {
+    final token = response["token"];
+    final user = response["user"];
+
+    // ✅ Save token if remember me
+    if (rememberMe && token != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString("token", token);
+    }
+
+    // ✅ Show success
+    await showSuccessDialog(
+      context,
+      response["message"] ?? "Login successful!",
+    );
+
+    // ✅ Redirect based on role
+    if (user != null && user["role"] == "tailor") {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => TailorMainPage(
+            isVendorEnabled: user["isVendorEnabled"] ?? false,
+          ),
+        ),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainPage()),
+      );
+    }
+  } else {
+    await showErrorDialog(
+      context,
+      response["error"] ?? "Something went wrong",
+    );
+  }
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +110,6 @@ class _SigninState extends ConsumerState<Signin> {
               horizontal: 16.0,
               vertical: 50.0,
             ),
-            //padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -114,8 +119,8 @@ class _SigninState extends ConsumerState<Signin> {
                 Text(
                   "Sign In",
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 30),
 
@@ -155,7 +160,6 @@ class _SigninState extends ConsumerState<Signin> {
                         const CustomText("Remember me"),
                       ],
                     ),
-
                     GestureDetector(
                       onTap: () {
                         Nav.push(context, ForgotPassword());

@@ -35,23 +35,64 @@ class ApiService {
     }
   }
 
-  /// 🔹 Login
-  static Future<Map<String, dynamic>> login({
-    required String email,
-    required String password,
-  }) async {
-    final result = await postRequest("user/login", {
-      "email": email,
-      "password": password,
-    });
+/// 🔹 Login
+static Future<Map<String, dynamic>> login({
+  required String email,
+  required String password,
+}) async {
+  final result = await postRequest("user/login", {
+    "email": email,
+    "password": password,
+  });
 
-    if (result["success"] == true) {
-      final token = result["data"]["token"];
+  if (result["success"] == true && result["data"] != null) {
+    final data = result["data"];
+    final token = data["token"];
+    final user = data["user"];
+
+    if (token != null && user != null) {
+      // ✅ Save token
       await SecurePrefs.saveToken(token);
-    }
 
-    return result;
+      // ✅ Save user details
+      await SecurePrefs.saveUserData({
+        "id": user["_id"],
+        "fullName": user["fullName"],
+        "email": user["email"],
+        "phoneNumber": user["phoneNumber"],
+        "role": user["role"],
+        "image": user["image"],
+        "address": user["address"],
+        "subscriptionPlan": user["subscriptionPlan"],
+        "billTerm": user["billTerm"],
+        "subscriptionStartDate": user["subscriptionStartDate"],
+        "subscriptionEndDate": user["subscriptionEndDate"],
+        "isVendorEnabled": user["isVendorEnabled"],
+        "wallet": user["wallet"],
+        "isVerified": user["isVerified"],
+        "isBlocked": user["isBlocked"],
+      });
+
+      // ✅ Flatten response before returning
+      return {
+        "success": true,
+        "message": data["message"],
+        "token": token,
+        "user": user,
+      };
+    }
   }
+
+  // fallback (error)
+  return {
+    "success": false,
+    "error": result["error"] ?? "Login failed",
+  };
+}
+
+
+
+
 
   /// 🔹 Sign up
   static Future<Map<String, dynamic>> signup({

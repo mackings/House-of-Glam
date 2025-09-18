@@ -6,7 +6,8 @@ class SecurePrefs {
   static final _storage = const FlutterSecureStorage();
   static const String _authTokenKey = "auth_token";
   static const String _categoriesKey = "cached_categories";
-  static const String _attireIdKey = "attire_id"; // ✅ new key
+  static const String _attireIdKey = "attire_id";
+  static const String _userDataKey = "user_data"; // ✅ new key
 
   /// Save token
   static Future<void> saveToken(String token) async {
@@ -31,7 +32,7 @@ class SecurePrefs {
     await _storage.write(key: _categoriesKey, value: categoriesJson);
   }
 
-  /// Get categories (decode JSON back into list)
+  /// Get categories
   static Future<List<Category>> getCategories() async {
     final categoriesJson = await _storage.read(key: _categoriesKey);
     if (categoriesJson != null) {
@@ -41,23 +42,43 @@ class SecurePrefs {
     return [];
   }
 
-  /// Clear cached categories
+  /// Clear categories
   static Future<void> clearCategories() async {
     await _storage.delete(key: _categoriesKey);
   }
 
-  /// ✅ Save attireId
+  /// Save attireId
   static Future<void> saveAttireId(String attireId) async {
     await _storage.write(key: _attireIdKey, value: attireId);
   }
 
-  /// ✅ Get attireId
+  /// Get attireId
   static Future<String?> getAttireId() async {
     return await _storage.read(key: _attireIdKey);
   }
 
-  /// ✅ Clear attireId
+  /// Clear attireId
   static Future<void> clearAttireId() async {
     await _storage.delete(key: _attireIdKey);
+  }
+
+  /// ✅ Save user data (from login)
+  static Future<void> saveUserData(Map<String, dynamic> user) async {
+    final userJson = jsonEncode(user);
+    await _storage.write(key: _userDataKey, value: userJson);
+  }
+
+  /// ✅ Get user data
+  static Future<Map<String, dynamic>?> getUserData() async {
+    final userJson = await _storage.read(key: _userDataKey);
+    if (userJson != null) {
+      return jsonDecode(userJson);
+    }
+    return null;
+  }
+
+  /// ✅ Clear user data
+  static Future<void> clearUserData() async {
+    await _storage.delete(key: _userDataKey);
   }
 }
