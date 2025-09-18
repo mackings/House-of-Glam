@@ -19,12 +19,13 @@ class _AlltailorsState extends ConsumerState<Alltailors> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         title: const CustomText(
           "All tailors",
-          fontSize: 20,
-          color: Colors.black,
+          fontSize: 18,
+          color: Colors.white,
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.purple,
       ),
       body: SafeArea(
         child:

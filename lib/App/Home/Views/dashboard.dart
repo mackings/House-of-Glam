@@ -5,7 +5,9 @@ import 'package:hog/App/Home/Api/home.dart';
 import 'package:hog/App/Home/Model/category.dart';
 import 'package:hog/App/Home/Model/tailor.dart';
 import 'package:hog/App/Home/Views/alltailors.dart';
+import 'package:hog/App/Home/Views/tracking.dart';
 import 'package:hog/App/Tailors/details.dart';
+import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/Tailors/tailorcard.dart';
 import 'package:hog/components/header.dart';
 import 'package:hog/components/slideritem.dart';
@@ -120,6 +122,7 @@ class _HomeState extends ConsumerState<Home> {
                   userName: userName,
                   avatarUrl: userAvatar,
                   onNotificationTap: () {
+                    Nav.push(context, TrackingDelivery());
                     print("Notifications tapped!");
                   },
                 ),
@@ -166,18 +169,19 @@ class _HomeState extends ConsumerState<Home> {
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 5,
-                      ),
-                      child: CustomText(
-                        "view more",
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.purple,
-                      ),
-                    ),
+
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(
+                    //     horizontal: 15,
+                    //     vertical: 5,
+                    //   ),
+                    //   child: CustomText(
+                    //     "view more",
+                    //     fontSize: 15,
+                    //     fontWeight: FontWeight.w500,
+                    //     color: Colors.purple,
+                    //   ),
+                    // ),
                   ],
                 ),
 
