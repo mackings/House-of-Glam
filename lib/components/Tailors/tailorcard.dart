@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:hog/components/texts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 class TailorCard extends StatefulWidget {
-  final String id; // unique id for each tailor
+  final String id; 
   final String name;
   final String specialty;
   final String imageUrl;
@@ -108,14 +109,14 @@ class _TailorCardState extends State<TailorCard> {
                 children: [
                   CustomText(
                     widget.name,
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
                   const SizedBox(height: 4),
                   CustomText(
                     widget.specialty,
-                    fontSize: 13,
+                    fontSize: 11,
                     color: Colors.grey[600]!,
                   ),
                   const SizedBox(height: 8),

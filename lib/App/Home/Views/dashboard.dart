@@ -229,7 +229,7 @@ class _HomeState extends ConsumerState<Home> {
                                             ? cat.name!
                                             : "Unnamed",
                                         textAlign: TextAlign.center,
-                                        fontSize: 14,
+                                        fontSize: 10,
                                         fontWeight: FontWeight.w500,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
