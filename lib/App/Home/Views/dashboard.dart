@@ -113,7 +113,7 @@ class _HomeState extends ConsumerState<Home> {
           },
           child: SingleChildScrollView(
             physics:
-                const AlwaysScrollableScrollPhysics(), // required for RefreshIndicator
+                const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,14 +127,6 @@ class _HomeState extends ConsumerState<Home> {
                   },
                 ),
 
-                //const SizedBox(height: 10),
-
-                // CustomSearchBar(
-                //   controller: searchController,
-                //   hintText: "Search item",
-                //   onChanged: (value) => print("Search: $value"),
-                //   onFilterTap: () => print("Filter tapped!"),
-                // ),
                 const SizedBox(height: 30),
 
                 CarouselSlider(
@@ -169,19 +161,6 @@ class _HomeState extends ConsumerState<Home> {
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
-
-                    // Padding(
-                    //   padding: const EdgeInsets.symmetric(
-                    //     horizontal: 15,
-                    //     vertical: 5,
-                    //   ),
-                    //   child: CustomText(
-                    //     "view more",
-                    //     fontSize: 15,
-                    //     fontWeight: FontWeight.w500,
-                    //     color: Colors.purple,
-                    //   ),
-                    // ),
                   ],
                 ),
 

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 
 class TailorCard extends StatefulWidget {
+
   final String id; 
   final String name;
   final String specialty;
@@ -24,6 +25,7 @@ class TailorCard extends StatefulWidget {
   @override
   State<TailorCard> createState() => _TailorCardState();
 }
+
 
 class _TailorCardState extends State<TailorCard> {
   bool isFavorite = false;

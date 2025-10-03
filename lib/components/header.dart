@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hog/App/Profile/profileHome.dart';
+import 'package:hog/components/Navigator.dart';
 import 'package:intl/intl.dart';
 
 class Header extends StatelessWidget {
@@ -34,10 +36,15 @@ class Header extends StatelessWidget {
         // Left side: Avatar + Greeting + Name
         Row(
           children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundImage: NetworkImage(avatarUrl),
-              backgroundColor: Colors.grey[300],
+            GestureDetector(
+              onTap: () {
+                Nav.push(context, UserProfile());
+              },
+              child: CircleAvatar(
+                radius: 24,
+                backgroundImage: NetworkImage(avatarUrl),
+                backgroundColor: Colors.grey[300],
+              ),
             ),
             const SizedBox(width: 12),
             Column(
