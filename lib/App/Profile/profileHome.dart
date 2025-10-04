@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hog/App/Admin/Views/adminHome.dart';
 import 'package:hog/App/Profile/Views/marketPlace.dart';
 import 'package:hog/App/Profile/widgets/profileMenu.dart';
 import 'package:hog/components/Navigator.dart';
@@ -41,15 +42,19 @@ class _UserProfileState extends State<UserProfile> {
                 text: "",
                 onTap: () {},
               ),
+
               ProfileMenuItem(
                 icon: Icons.favorite_border,
                 text: "Wishlist",
                 onTap: () {},
               ),
+
               ProfileMenuItem(
-                icon: Icons.settings_outlined,
-                text: "Settings",
-                onTap: () {},
+                icon: Icons.admin_panel_settings,
+                text: "Admin",
+                onTap: () {
+                  Nav.push(context, AdminHome());
+                },
               ),
             ],
           ),
