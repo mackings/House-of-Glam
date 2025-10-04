@@ -84,12 +84,15 @@ class ProductCard extends StatelessWidget {
                   const SizedBox(height: 6),
 
                   // PRICE
-                  CustomText(
-                    formatPrice(listing.price),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.purple,
-                  ),
+ CustomText(
+  listing.price == 0
+      ? "Free"
+      : "${formatPrice(listing.price)}",
+  fontSize: 15,
+  fontWeight: FontWeight.w600,
+  color: Colors.purple,
+),
+
                   const SizedBox(height: 6),
 
                   // SIZE
