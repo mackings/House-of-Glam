@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Profile/Api/ListingService.dart';
 import 'package:hog/App/Profile/Model/SellerListing.dart';
+import 'package:hog/App/Profile/Views/UploadListing.dart';
 import 'package:hog/App/Profile/widgets/modal.dart';
 import 'package:hog/App/Profile/widgets/productCard.dart';
+import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/texts.dart';
 
 class MarketPlace extends StatefulWidget {
@@ -27,12 +29,16 @@ class _MarketPlaceState extends State<MarketPlace> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.purple,
-        title: CustomText(
-          "Market Place",
-          fontSize: 18,
-          color: Colors.white,
-        ),
+        title: CustomText("Market Place", fontSize: 18, color: Colors.white),
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Nav.push(context, Uploadlisting());
+            },
+            icon: Icon(Icons.upload_file),
+          ),
+        ],
       ),
       body: SafeArea(
         child: FutureBuilder<SellerListingResponse?>(
@@ -68,16 +74,15 @@ class _MarketPlaceState extends State<MarketPlace> {
               itemBuilder: (context, index) {
                 final product = listings[index];
 
-return Padding(
-  padding: const EdgeInsets.only(bottom: 12),
-  child: ProductCard(
-    listing: product, 
-    onTap: () {
-      showProductDetails(context, product); 
-    },
-  ),
-);
-
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: ProductCard(
+                    listing: product,
+                    onTap: () {
+                      showProductDetails(context, product);
+                    },
+                  ),
+                );
               },
             );
           },
