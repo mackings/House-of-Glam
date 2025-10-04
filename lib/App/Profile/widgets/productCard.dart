@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Profile/Model/SellerListing.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
+
+
+
 class ProductCard extends StatelessWidget {
   final SellerListing listing;
   final VoidCallback onTap;

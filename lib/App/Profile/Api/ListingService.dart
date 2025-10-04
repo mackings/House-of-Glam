@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Profile/Model/SellerListing.dart';
+import 'package:hog/App/Profile/Model/UploadedListings.dart';
 import 'package:http/http.dart' as http;
 
 class MarketplaceService {
@@ -94,4 +95,62 @@ class MarketplaceService {
       return false;
     }
   }
+
+
+  /// 🔹 Fetch seller’s uploaded listings
+static Future<List<UserListing>> getSellerListings() async {
+  try {
+    final token = await SecurePrefs.getToken();
+    final url = Uri.parse("$baseUrl/seller/getSellerListings");
+
+    print("➡️ GET Request to: $url");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    print("⬅️ Response [${response.statusCode}]: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final listingsJson = data["data"] as List;
+      return listingsJson.map((e) => UserListing.fromJson(e)).toList();
+    } else {
+      throw Exception("Failed to fetch listings");
+    }
+  } catch (e) {
+    print("❌ Error fetching seller listings: $e");
+    return [];
+  }
+}
+
+/// 🔹 Delete seller listing
+static Future<bool> deleteSellerListing(String listingId) async {
+  try {
+    final token = await SecurePrefs.getToken();
+    final url = Uri.parse("$baseUrl/seller/deleteSellerListing/$listingId");
+
+    print("➡️ DELETE Request to: $url");
+
+    final response = await http.delete(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    print("⬅️ Response [${response.statusCode}]: ${response.body}");
+
+    return response.statusCode == 200;
+  } catch (e) {
+    print("❌ Error deleting listing: $e");
+    return false;
+  }
+}
+
 }

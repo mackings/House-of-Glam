@@ -4,6 +4,8 @@ import 'package:hog/App/Profile/widgets/FullImageView.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
+
+
 void showProductDetails(BuildContext context, SellerListing listing) {
   showModalBottomSheet(
     context: context,
@@ -14,6 +16,7 @@ void showProductDetails(BuildContext context, SellerListing listing) {
     isScrollControlled: true,
     builder: (context) {
       final priceFormatter = NumberFormat('#,###');
+      final pageController = PageController();
 
       return Padding(
         padding: const EdgeInsets.all(16),
@@ -21,30 +24,83 @@ void showProductDetails(BuildContext context, SellerListing listing) {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🖼 Product Image (Tappable)
-              GestureDetector(
-                onTap: () {
-                  if (listing.images.isNotEmpty) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => FullImageView(
-                          imageUrl: listing.images[0],
-                        ),
-                      ),
-                    );
-                  }
-                },
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    listing.images.isNotEmpty ? listing.images[0] : '',
-                    height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
+              // 🖼 Slidable Product Images
+              SizedBox(
+                height: 220,
+                child: Stack(
+                  children: [
+                    PageView.builder(
+                      controller: pageController,
+                      itemCount: listing.images.isNotEmpty ? listing.images.length : 1,
+                      itemBuilder: (context, index) {
+                        final imageUrl = listing.images.isNotEmpty
+                            ? listing.images[index]
+                            : '';
+
+                        return GestureDetector(
+                          onTap: () {
+                            if (imageUrl.isNotEmpty) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => FullImageView(imageUrl: imageUrl),
+                                ),
+                              );
+                            }
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              imageUrl.isNotEmpty ? imageUrl : 'https://via.placeholder.com/200',
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+
+                    // 🔘 Page Indicator
+// 🔘 Page Indicator
+Positioned(
+  bottom: 8,
+  left: 0,
+  right: 0,
+  child: Center(
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(
+        listing.images.isNotEmpty ? listing.images.length : 1,
+        (index) => AnimatedBuilder(
+          animation: pageController,
+          builder: (context, child) {
+            double selected = 0;
+            if (pageController.hasClients) {
+              selected = pageController.page ?? pageController.initialPage.toDouble();
+            }
+
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              width: selected.round() == index ? 10 : 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: selected.round() == index
+                    ? Colors.purple
+                    : Colors.grey.shade400,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            );
+          },
+        ),
+      ),
+    ),
+  ),
+),
+
+                  ],
                 ),
               ),
+
               const SizedBox(height: 16),
 
               // Title
@@ -58,7 +114,9 @@ void showProductDetails(BuildContext context, SellerListing listing) {
 
               // Price
               CustomText(
-                "₦${priceFormatter.format(listing.price)}",
+                listing.price == 0
+                    ? "Free"
+                    : "₦${priceFormatter.format(listing.price)}",
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.purple,

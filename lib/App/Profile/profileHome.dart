@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Admin/Views/adminHome.dart';
+import 'package:hog/App/Profile/Views/UserListings.dart';
 import 'package:hog/App/Profile/Views/marketPlace.dart';
 import 'package:hog/App/Profile/widgets/profileMenu.dart';
 import 'package:hog/components/Navigator.dart';
+
+
 
 class UserProfile extends StatefulWidget {
   const UserProfile({super.key});
@@ -39,8 +42,10 @@ class _UserProfileState extends State<UserProfile> {
               ),
               ProfileMenuItem(
                 icon: Icons.shopping_bag_outlined,
-                text: "",
-                onTap: () {},
+                text: "Listings",
+                onTap: () {
+                  Nav.push(context, Userlistings());
+                },
               ),
 
               ProfileMenuItem(
