@@ -10,6 +10,7 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 
 
@@ -29,6 +30,9 @@ class _UploadlistingState extends State<Uploadlisting> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
 
+  final NumberFormat _formatter = NumberFormat('#,###'); // ✅ for display
+  bool _isFormatting = false; // ✅ avoid recursion in listener
+
   // ✅ Separate image slots
   File? frontImage;
   File? sideImage;
@@ -44,6 +48,38 @@ class _UploadlistingState extends State<Uploadlisting> {
   void initState() {
     super.initState();
     _loadCategories();
+
+    // ✅ Add listener to format price with commas
+ priceController.addListener(() {
+  if (_isFormatting) return;
+  _isFormatting = true;
+
+  // Remove all commas
+  String raw = priceController.text.replaceAll(',', '');
+
+  // ✅ If user cleared the field, just clear it
+  if (raw.isEmpty) {
+    priceController.value = TextEditingValue(
+      text: '',
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+    _isFormatting = false;
+    return;
+  }
+
+  // ✅ Parse and format
+  final value = int.tryParse(raw);
+  if (value != null) {
+    final formatted = _formatter.format(value);
+    priceController.value = TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+
+  _isFormatting = false;
+});
+
   }
 
   Future<void> _loadCategories() async {
@@ -76,13 +112,17 @@ class _UploadlistingState extends State<Uploadlisting> {
         backImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content:
-                Text("Please fill all fields and upload all 3 required images.")),
+          content: Text("Please fill all fields and upload all 3 required images."),
+        ),
       );
       return;
     }
 
     setState(() => isLoading = true);
+
+    // ✅ Remove commas before sending
+    final rawPrice = priceController.text.replaceAll(',', '');
+    final priceToSend = double.tryParse(rawPrice) ?? 0;
 
     final success = await MarketplaceService.createSellerListing(
       categoryId: selectedCategory!.id,
@@ -91,8 +131,8 @@ class _UploadlistingState extends State<Uploadlisting> {
       description: descriptionController.text,
       condition: condition,
       status: status,
-      price: double.tryParse(priceController.text) ?? 0,
-      images: [frontImage!, sideImage!, backImage!], // ✅ Pass in order
+      price: priceToSend, // ✅ raw number
+      images: [frontImage!, sideImage!, backImage!],
     );
 
     setState(() => isLoading = false);
@@ -197,12 +237,18 @@ class _UploadlistingState extends State<Uploadlisting> {
               ),
               const SizedBox(height: 16),
 
+              /// ✅ Price Field with hint
               CustomTextField(
                 title: "Price",
-                hintText: "Enter price",
+                hintText: "Enter price (0 if free)",
                 fieldKey: "price",
                 controller: priceController,
                 keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                "💡 Enter 0 if this item is listed for free",
+                style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
               const SizedBox(height: 16),
 
@@ -218,7 +264,8 @@ class _UploadlistingState extends State<Uploadlisting> {
                 label: "Condition",
                 options: const ["Newly Sewed", "Used"],
                 selectedValue: condition,
-                onChanged: (val) => setState(() => condition = val ?? "Newly Sewed"),
+                onChanged: (val) =>
+                    setState(() => condition = val ?? "Newly Sewed"),
               ),
               const SizedBox(height: 16),
 
@@ -226,7 +273,8 @@ class _UploadlistingState extends State<Uploadlisting> {
                 label: "Status",
                 options: const ["Available", "Out of Stock"],
                 selectedValue: status,
-                onChanged: (val) => setState(() => status = val ?? "Available"),
+                onChanged: (val) =>
+                    setState(() => status = val ?? "Available"),
               ),
               const SizedBox(height: 20),
 
@@ -260,4 +308,3 @@ class _UploadlistingState extends State<Uploadlisting> {
     );
   }
 }
-

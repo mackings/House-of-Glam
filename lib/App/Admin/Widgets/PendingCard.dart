@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Admin/Model/PendingListing.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/texts.dart';
+import 'package:intl/intl.dart';
 
 
 
@@ -22,6 +23,8 @@ class PendingListingCard extends StatefulWidget {
 }
 
 class _PendingListingCardState extends State<PendingListingCard> {
+
+  final _priceFormatter = NumberFormat("#,##0", "en_US");
   int _currentImageIndex = 0;
   late PageController _pageController;
 
@@ -180,12 +183,16 @@ PageView.builder(
                   color: Colors.black,
                 ),
                 const SizedBox(width: 8),
-                CustomText(
-                  "₦${listing.price.toStringAsFixed(2)}",
-                  fontSize: priceFontSize,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.purple,
-                ),
+
+CustomText(
+  listing.price == 0
+      ? "Free"
+      : "₦${_priceFormatter.format(listing.price)}",
+  fontSize: priceFontSize,
+  fontWeight: FontWeight.w600,
+  color: Colors.purple,
+),
+
               ],
             ),
 
