@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hog/App/Profile/Api/BidPaymentService.dart';
 import 'package:hog/App/Profile/Model/SellerListing.dart';
 import 'package:hog/App/Profile/widgets/FullImageView.dart';
+import 'package:hog/App/Profile/widgets/Payment.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
@@ -200,12 +202,46 @@ Positioned(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    // 🟢 Contact seller logic
-                  },
+onPressed: () async {
+  // ✅ Save a reference to the parent context
+  final parentContext = Navigator.of(context).context;
+
+  // ✅ Close the bottom sheet first
+  Navigator.pop(context);
+
+  // ✅ Call API
+  final response = await BidPaymentService.purchaseListings(
+    listingIds: [listing.id],
+    shipmentMethod: "Express",
+  );
+
+  if (response != null && response['success'] == true) {
+    final authUrl = response['authorizationUrl'];
+
+    if (listing.price == 0 || authUrl == null) {
+      // ✅ Free item — no need for payment screen
+      ScaffoldMessenger.of(parentContext).showSnackBar(
+        const SnackBar(content: Text("Order placed successfully!")),
+      );
+    } else {
+      // 💳 Paid — open payment screen with the *parent* context
+      Navigator.push(
+        parentContext,
+        MaterialPageRoute(
+          builder: (_) => PaymentWebView(paymentUrl: authUrl),
+        ),
+      );
+    }
+  } else {
+    ScaffoldMessenger.of(parentContext).showSnackBar(
+      const SnackBar(content: Text("Failed to place order")),
+    );
+  }
+},
+
+
                   child: const CustomText(
-                    "Contact Seller",
+                    "Bid",
                     fontSize: 16,
                     color: Colors.white,
                   ),

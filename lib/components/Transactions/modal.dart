@@ -150,11 +150,11 @@ class TransactionDetailsModal extends StatelessWidget {
                         color: Colors.purple,
                       ),
                       title: CustomText(
-                        item.attireType,
+                        item.attireType.toString(),
                         fontWeight: FontWeight.bold,
                       ),
                       subtitle: CustomText("${item.color} • ${item.brand}"),
-                      trailing: CustomText(item.clothMaterial),
+                      trailing: CustomText(item.clothMaterial.toString()),
                     ),
                   ),
                 ),

@@ -39,10 +39,9 @@ class TransactionResponse {
       userId: json["userId"],
       vendorId: json["vendorId"],
       materialId: json["materialId"],
-      cartItems:
-          (json["cartItems"] as List? ?? [])
-              .map((e) => CartItem.fromJson(e))
-              .toList(),
+      cartItems: (json["cartItems"] as List? ?? [])
+          .map((e) => CartItem.fromJson(e))
+          .toList(),
       totalAmount: json["totalAmount"],
       paymentMethod: json["paymentMethod"],
       paymentReference: json["paymentReference"],
@@ -58,20 +57,36 @@ class TransactionResponse {
 }
 
 class CartItem {
-  final String attireType;
-  final String clothMaterial;
-  final String color;
-  final String brand;
+  // For material/attire-based orders
+  final String? attireType;
+  final String? clothMaterial;
+  final String? color;
+  final String? brand;
+
+  // For marketplace listings
+  final String? title;
+  final String? size;
+  final String? description;
+  final String? condition;
+  final int? amount;
+
   final List<Measurement> measurement;
   final List<String> sampleImage;
+  final List<String> images; // for listings
 
   CartItem({
-    required this.attireType,
-    required this.clothMaterial,
-    required this.color,
-    required this.brand,
+    this.attireType,
+    this.clothMaterial,
+    this.color,
+    this.brand,
+    this.title,
+    this.size,
+    this.description,
+    this.condition,
+    this.amount,
     required this.measurement,
     required this.sampleImage,
+    required this.images,
   });
 
   factory CartItem.fromJson(Map<String, dynamic> json) {
@@ -80,11 +95,19 @@ class CartItem {
       clothMaterial: json["clothMaterial"],
       color: json["color"],
       brand: json["brand"],
-      measurement:
-          (json["measurement"] as List? ?? [])
-              .map((e) => Measurement.fromJson(e))
-              .toList(),
+
+      title: json["title"],
+      size: json["size"],
+      description: json["description"],
+      condition: json["condition"],
+      amount: json["amount"],
+
+      measurement: (json["measurement"] as List? ?? [])
+          .map((e) => Measurement.fromJson(e))
+          .toList(),
+
       sampleImage: List<String>.from(json["sampleImage"] ?? []),
+      images: List<String>.from(json["images"] ?? []),
     );
   }
 }
@@ -130,7 +153,7 @@ class Measurement {
       waist: json["waist"],
       hip: json["hip"],
       length: json["length"],
-      shoulderLength: json["shoulder"],
+      shoulderLength: json["shoulderLength"] ?? json["shoulder"],
       armLength: json["armLength"] ?? json["armlength"],
       aroundArm: json["aroundArm"] ?? json["aroundarm"],
       wrist: json["wrist"],
@@ -146,15 +169,17 @@ class TransactionListResponse {
   final String message;
   final List<TransactionResponse> transactions;
 
-  TransactionListResponse({required this.message, required this.transactions});
+  TransactionListResponse({
+    required this.message,
+    required this.transactions,
+  });
 
   factory TransactionListResponse.fromJson(Map<String, dynamic> json) {
     return TransactionListResponse(
       message: json["message"] ?? "",
-      transactions:
-          (json["data"] as List? ?? [])
-              .map((e) => TransactionResponse.fromJson(e))
-              .toList(),
+      transactions: (json["data"] as List? ?? [])
+          .map((e) => TransactionResponse.fromJson(e))
+          .toList(),
     );
   }
 }

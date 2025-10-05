@@ -49,8 +49,8 @@ class _UserProfileState extends State<UserProfile> {
               ),
 
               ProfileMenuItem(
-                icon: Icons.favorite_border,
-                text: "Wishlist",
+                icon: Icons.delivery_dining,
+                text: "Deliveries",
                 onTap: () {},
               ),
 
