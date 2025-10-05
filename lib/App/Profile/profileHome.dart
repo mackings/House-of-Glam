@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Admin/Views/adminHome.dart';
+import 'package:hog/App/Admin/Views/analytics.dart';
 import 'package:hog/App/Admin/Views/billing.dart';
 import 'package:hog/App/Profile/Views/Delivery.dart';
 import 'package:hog/App/Profile/Views/SellerDeliverylog.dart';
@@ -46,6 +47,15 @@ class _UserProfileState extends State<UserProfile> {
                 text: "Listings",
                 onTap: () {
                   Nav.push(context, Userlistings());
+                },
+              ),
+
+              
+            ProfileMenuItem(
+                icon: Icons.dashboard,
+                text: "Analytics",
+                onTap: () {
+                  Nav.push(context, Analytics());
                 },
               ),
 
