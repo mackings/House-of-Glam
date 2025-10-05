@@ -17,7 +17,14 @@ class CustomTextField extends ConsumerWidget {
   final TextInputType keyboardType;
   final String fieldKey;
   final List<TextInputFormatter>? inputFormatters;
-  final ValueChanged<String>? onChanged; // ✅ optional callback
+  final ValueChanged<String>? onChanged;
+
+  /// Dropdown mode
+  final List<String>? dropdownItems; 
+  final String? selectedValue;
+
+  /// 🔥 NEW: Control padding for row layouts
+  final bool isCompact;
 
   const CustomTextField({
     Key? key,
@@ -30,7 +37,10 @@ class CustomTextField extends ConsumerWidget {
     this.validator,
     this.keyboardType = TextInputType.text,
     this.inputFormatters,
-    this.onChanged, // ✅ new
+    this.onChanged,
+    this.dropdownItems,
+    this.selectedValue,
+    this.isCompact = false,  // 🔥 Default to false for backward compatibility
   }) : super(key: key);
 
   @override
@@ -39,44 +49,76 @@ class CustomTextField extends ConsumerWidget {
     final obscureText = ref.watch(obscureTextProvider(fieldKey));
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: isCompact 
+          ? const EdgeInsets.only(bottom: 10)  // 🔥 Reduced padding for rows
+          : const EdgeInsets.symmetric(vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CustomText(title, fontSize: 15, fontWeight: FontWeight.w500),
           const SizedBox(height: 8),
-          TextFormField(
-            controller: controller,
-            validator: validator,
-            keyboardType: keyboardType,
-            inputFormatters: inputFormatters,
-            obscureText: isPassword ? obscureText : false,
-            onChanged: onChanged, // ✅ wire it up here
-            decoration: InputDecoration(
-              hintText: hintText,
-              prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-              suffixIcon:
-                  isPassword
-                      ? IconButton(
-                        icon: Icon(
-                          obscureText ? Icons.visibility_off : Icons.visibility,
-                        ),
-                        onPressed: () {
-                          ref
-                              .read(obscureTextProvider(fieldKey).notifier)
-                              .state = !obscureText;
-                        },
-                      )
-                      : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              contentPadding: EdgeInsets.symmetric(
-                vertical: 15,
-                horizontal: screenWidth * 0.04,
-              ),
-            ),
-          ),
+
+          /// If dropdownItems is provided, show dropdown
+          dropdownItems != null
+              ? DropdownButtonFormField<String>(
+                  value: selectedValue,
+                  decoration: InputDecoration(
+                    hintText: hintText,
+                    prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 15,
+                      horizontal: screenWidth * 0.04,
+                    ),
+                  ),
+                  items: dropdownItems!
+                      .map((item) => DropdownMenuItem<String>(
+                            value: item,
+                            child: Text(item),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    if (controller != null) controller!.text = value ?? '';
+                    if (onChanged != null && value != null) onChanged!(value);
+                  },
+                )
+
+              /// Else render normal TextField
+              : TextFormField(
+                  controller: controller,
+                  validator: validator,
+                  keyboardType: keyboardType,
+                  inputFormatters: inputFormatters,
+                  obscureText: isPassword ? obscureText : false,
+                  onChanged: onChanged,
+                  decoration: InputDecoration(
+                    hintText: hintText,
+                    prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
+                    suffixIcon: isPassword
+                        ? IconButton(
+                            icon: Icon(
+                              obscureText
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () {
+                              ref
+                                  .read(obscureTextProvider(fieldKey).notifier)
+                                  .state = !obscureText;
+                            },
+                          )
+                        : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 15,
+                      horizontal: screenWidth * 0.04,
+                    ),
+                  ),
+                ),
         ],
       ),
     );

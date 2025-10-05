@@ -217,21 +217,14 @@ onPressed: () async {
 
   if (response != null && response['success'] == true) {
     final authUrl = response['authorizationUrl'];
-
-    if (listing.price == 0 || authUrl == null) {
-      // ✅ Free item — no need for payment screen
-      ScaffoldMessenger.of(parentContext).showSnackBar(
-        const SnackBar(content: Text("Order placed successfully!")),
-      );
-    } else {
-      // 💳 Paid — open payment screen with the *parent* context
-      Navigator.push(
+    
+       Navigator.push(
         parentContext,
         MaterialPageRoute(
           builder: (_) => PaymentWebView(paymentUrl: authUrl),
         ),
       );
-    }
+
   } else {
     ScaffoldMessenger.of(parentContext).showSnackBar(
       const SnackBar(content: Text("Failed to place order")),

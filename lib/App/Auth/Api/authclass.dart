@@ -104,7 +104,8 @@ static Future<Map<String, dynamic>> login({
     required String password,
     required String phoneNumber,
     required String role,
-    required String address,
+    required String address, 
+    required String country,
   }) async {
     return await postRequest("user/register", {
       "fullName": fullName,
@@ -113,6 +114,7 @@ static Future<Map<String, dynamic>> login({
       "phoneNumber": phoneNumber,
       "role": role,
       "address": address,
+      "country":country
     });
   }
 

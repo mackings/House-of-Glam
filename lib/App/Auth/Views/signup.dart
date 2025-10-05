@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Auth/Api/authclass.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
@@ -11,6 +14,8 @@ import 'package:hog/components/dialogs.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
+
+
 
 class Signup extends ConsumerStatefulWidget {
   const Signup({super.key});
@@ -25,18 +30,31 @@ class _SignupState extends ConsumerState<Signup> {
   late TextEditingController phoneController;
   late TextEditingController passwordController;
   late TextEditingController addressController;
+  late TextEditingController countryController;
 
-  bool isLoading = false; // for loading overlay
-  bool isTailor = false; // 👈 checkbox state
+  bool isLoading = false; 
+  bool isTailor = false; 
+  List<String> countries = [];
+  String? selectedCountry;
+
+  Future<void> loadCountries() async {
+    final String response = await rootBundle.loadString('assets/countries.json');
+    final List<dynamic> data = json.decode(response);
+    setState(() {
+      countries = data.cast<String>();
+    });
+  }
 
   @override
   void initState() {
     super.initState();
+    loadCountries();
     fullnameController = TextEditingController();
     emailController = TextEditingController();
     phoneController = TextEditingController();
     passwordController = TextEditingController();
     addressController = TextEditingController();
+    countryController = TextEditingController();
   }
 
   @override
@@ -46,6 +64,7 @@ class _SignupState extends ConsumerState<Signup> {
     phoneController.dispose();
     passwordController.dispose();
     addressController.dispose();
+    countryController.dispose();
     super.dispose();
   }
 
@@ -55,11 +74,13 @@ class _SignupState extends ConsumerState<Signup> {
     final phone = phoneController.text.trim();
     final password = passwordController.text.trim();
     final address = addressController.text.trim();
+    final country = countryController.text.trim();
 
     if (fullname.isEmpty ||
         email.isEmpty ||
         phone.isEmpty ||
         password.isEmpty ||
+        country.isEmpty ||
         address.isEmpty) {
       await showErrorDialog(context, "Please fill in all fields");
       return;
@@ -73,7 +94,8 @@ class _SignupState extends ConsumerState<Signup> {
       password: password,
       phoneNumber: phone,
       address: address,
-      role: isTailor ? "tailor" : "user", // 👈 role depends on checkbox
+      country: country,
+      role: isTailor ? "tailor" : "user",
     );
 
     setState(() => isLoading = false);
@@ -98,17 +120,15 @@ class _SignupState extends ConsumerState<Signup> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
 
-                // Title
                 CustomText(
                   "Sign Up",
                   fontWeight: FontWeight.w700,
                   fontSize: 25,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 40),
 
-                // Full Name Field
                 CustomTextField(
                   title: "Full Name",
                   hintText: "Enter your full name",
@@ -136,12 +156,71 @@ class _SignupState extends ConsumerState<Signup> {
                   keyboardType: TextInputType.phone,
                 ),
 
-                CustomTextField(
-                  title: "Address",
-                  hintText: "Enter your Address",
-                  prefixIcon: Icons.house,
-                  fieldKey: "address",
-                  controller: addressController,
+                // 🔥 FIXED: Responsive Address/Country Layout
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isWideScreen = constraints.maxWidth > 600;
+                    
+                    if (isWideScreen) {
+                      // Desktop/Tablet: Side by side
+                      return IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: CustomTextField(
+                                title: "Address",
+                                hintText: "Enter Address",
+                                prefixIcon: Icons.house,
+                                fieldKey: "address",
+                                controller: addressController,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: CustomTextField(
+                                title: "Country",
+                                hintText: "Select Country",
+                                prefixIcon: Icons.public,
+                                fieldKey: "country",
+                                controller: countryController,
+                                dropdownItems: countries,
+                                selectedValue: selectedCountry,
+                                onChanged: (value) {
+                                  setState(() => selectedCountry = value);
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    
+                    // Mobile: Stacked vertically
+                    return Column(
+                      children: [
+                        CustomTextField(
+                          title: "Address",
+                          hintText: "Enter Address",
+                          prefixIcon: Icons.house,
+                          fieldKey: "address",
+                          controller: addressController,
+                        ),
+                        CustomTextField(
+                          title: "Country",
+                          hintText: "Select Country",
+                          prefixIcon: Icons.public,
+                          fieldKey: "country",
+                          controller: countryController,
+                          dropdownItems: countries,
+                          selectedValue: selectedCountry,
+                          onChanged: (value) {
+                            setState(() => selectedCountry = value);
+                          },
+                        ),
+                      ],
+                    );
+                  },
                 ),
 
                 CustomTextField(
@@ -153,7 +232,6 @@ class _SignupState extends ConsumerState<Signup> {
                   controller: passwordController,
                 ),
 
-                // 👇 Checkbox for tailor role
                 Row(
                   children: [
                     Checkbox(
@@ -175,7 +253,7 @@ class _SignupState extends ConsumerState<Signup> {
                         }
                       },
                     ),
-                    const CustomText("I'm a Tailor"),
+                    const CustomText("I'm a Designer"),
                   ],
                 ),
 
@@ -188,7 +266,6 @@ class _SignupState extends ConsumerState<Signup> {
                 ),
                 const SizedBox(height: 20),
 
-                // Existing user? Login
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
