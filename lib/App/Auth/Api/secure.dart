@@ -1,38 +1,55 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hog/App/Home/Model/category.dart';
-
 class SecurePrefs {
   static final _storage = const FlutterSecureStorage();
+
+  // Keys
   static const String _authTokenKey = "auth_token";
+  static const String _refreshTokenKey = "refresh_token";
   static const String _categoriesKey = "cached_categories";
   static const String _attireIdKey = "attire_id";
-  static const String _userDataKey = "user_data"; // ✅ new key
+  static const String _userDataKey = "user_data";
+  static const String _adminSettingsKey = "admin_settings";
 
-  /// Save token
+  // -------------------------
+  // AUTH TOKEN
+  // -------------------------
   static Future<void> saveToken(String token) async {
     await _storage.write(key: _authTokenKey, value: token);
   }
 
-  /// Get token
   static Future<String?> getToken() async {
     return await _storage.read(key: _authTokenKey);
   }
 
-  /// Delete token (logout)
   static Future<void> clearToken() async {
     await _storage.delete(key: _authTokenKey);
   }
 
-  /// Save categories (as JSON string)
+  // -------------------------
+  // REFRESH TOKEN
+  // -------------------------
+  static Future<void> saveRefreshToken(String token) async {
+    await _storage.write(key: _refreshTokenKey, value: token);
+  }
+
+  static Future<String?> getRefreshToken() async {
+    return await _storage.read(key: _refreshTokenKey);
+  }
+
+  static Future<void> clearRefreshToken() async {
+    await _storage.delete(key: _refreshTokenKey);
+  }
+
+  // -------------------------
+  // CATEGORIES
+  // -------------------------
   static Future<void> saveCategories(List<Category> categories) async {
-    final categoriesJson = jsonEncode(
-      categories.map((c) => c.toJson()).toList(),
-    );
+    final categoriesJson = jsonEncode(categories.map((c) => c.toJson()).toList());
     await _storage.write(key: _categoriesKey, value: categoriesJson);
   }
 
-  /// Get categories
   static Future<List<Category>> getCategories() async {
     final categoriesJson = await _storage.read(key: _categoriesKey);
     if (categoriesJson != null) {
@@ -42,43 +59,95 @@ class SecurePrefs {
     return [];
   }
 
-  /// Clear categories
   static Future<void> clearCategories() async {
     await _storage.delete(key: _categoriesKey);
   }
 
-  /// Save attireId
+  // -------------------------
+  // ATTIRE ID
+  // -------------------------
   static Future<void> saveAttireId(String attireId) async {
     await _storage.write(key: _attireIdKey, value: attireId);
   }
 
-  /// Get attireId
   static Future<String?> getAttireId() async {
     return await _storage.read(key: _attireIdKey);
   }
 
-  /// Clear attireId
   static Future<void> clearAttireId() async {
     await _storage.delete(key: _attireIdKey);
   }
 
-  /// ✅ Save user data (from login)
+  // -------------------------
+  // USER DATA
+  // -------------------------
   static Future<void> saveUserData(Map<String, dynamic> user) async {
     final userJson = jsonEncode(user);
     await _storage.write(key: _userDataKey, value: userJson);
   }
 
-  /// ✅ Get user data
   static Future<Map<String, dynamic>?> getUserData() async {
     final userJson = await _storage.read(key: _userDataKey);
     if (userJson != null) {
-      return jsonDecode(userJson);
+      try {
+        final decoded = jsonDecode(userJson) as Map<String, dynamic>;
+        return decoded;
+      } catch (e) {
+        return null;
+      }
     }
     return null;
   }
 
-  /// ✅ Clear user data
   static Future<void> clearUserData() async {
     await _storage.delete(key: _userDataKey);
+  }
+
+  /// ✅ Convenience: return only the user's role (null if missing)
+  static Future<String?> getUserRole() async {
+    final userJson = await _storage.read(key: _userDataKey);
+    if (userJson != null) {
+      try {
+        final Map<String, dynamic> userMap = jsonDecode(userJson);
+        final role = userMap['role'];
+        return role != null ? role.toString() : null;
+      } catch (e) {
+        // invalid JSON or unexpected format
+        return null;
+      }
+    }
+    return null;
+  }
+
+  // -------------------------
+  // ADMIN SETTINGS
+  // -------------------------
+  static Future<void> saveAdminSettings(Map<String, dynamic> settings) async {
+    final settingsJson = jsonEncode(settings);
+    await _storage.write(key: _adminSettingsKey, value: settingsJson);
+  }
+
+  static Future<Map<String, dynamic>?> getAdminSettings() async {
+    final settingsJson = await _storage.read(key: _adminSettingsKey);
+    if (settingsJson != null) {
+      try {
+        final decoded = jsonDecode(settingsJson) as Map<String, dynamic>;
+        return decoded;
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  static Future<void> clearAdminSettings() async {
+    await _storage.delete(key: _adminSettingsKey);
+  }
+
+  // -------------------------
+  // CLEAR ALL (LOGOUT)
+  // -------------------------
+  static Future<void> clearAll() async {
+    await _storage.deleteAll();
   }
 }

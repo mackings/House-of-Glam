@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Admin/Views/adminHome.dart';
 import 'package:hog/App/Admin/Views/analytics.dart';
 import 'package:hog/App/Admin/Views/billing.dart';
+import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Profile/Views/Delivery.dart';
 import 'package:hog/App/Profile/Views/SellerDeliverylog.dart';
 import 'package:hog/App/Profile/Views/UserListings.dart';
@@ -17,8 +18,33 @@ class UserProfile extends StatefulWidget {
 }
 
 class _UserProfileState extends State<UserProfile> {
+  String? userRole;
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserRole();
+  }
+
+  Future<void> loadUserRole() async {
+    final role = await SecurePrefs.getUserRole();
+    setState(() {
+      userRole = role;
+      loading = false;
+    });
+  }
+
+  bool get isAdmin => userRole == 'admin';
+
   @override
   Widget build(BuildContext context) {
+    if (loading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -39,59 +65,62 @@ class _UserProfileState extends State<UserProfile> {
                 icon: Icons.laptop_mac_rounded,
                 text: "Market Place",
                 onTap: () {
-                  Nav.push(context, MarketPlace());
+                  Nav.push(context, const MarketPlace());
                 },
               ),
               ProfileMenuItem(
                 icon: Icons.shopping_bag_outlined,
                 text: "Listings",
                 onTap: () {
-                  Nav.push(context, Userlistings());
+                  Nav.push(context, const Userlistings());
                 },
               ),
 
-              
-            ProfileMenuItem(
-                icon: Icons.dashboard,
-                text: "Analytics",
-                onTap: () {
-                  Nav.push(context, Analytics());
-                },
-              ),
+              // ✅ Only show for admins
+              if (isAdmin)
+                ProfileMenuItem(
+                  icon: Icons.dashboard,
+                  text: "Analytics",
+                  onTap: () {
+                    Nav.push(context, const Analytics());
+                  },
+                ),
 
-           ProfileMenuItem(
+              ProfileMenuItem(
                 icon: Icons.shopping_bag_outlined,
                 text: "SendOuts",
                 onTap: () {
-                  Nav.push(context, SellerDelivery());
+                  Nav.push(context, const SellerDelivery());
                 },
               ),
-
-              
 
               ProfileMenuItem(
                 icon: Icons.delivery_dining,
                 text: "Deliveries",
                 onTap: () {
-                  Nav.push(context, MarketDelivery());
+                  Nav.push(context, const MarketDelivery());
                 },
               ),
 
-              ProfileMenuItem(
-                icon: Icons.admin_panel_settings,
-                text: "Listing Approvals",
-                onTap: () {
-                  Nav.push(context, AdminHome());
-                },
-              ),
+              // ✅ Only show for admins
+              if (isAdmin)
+                ProfileMenuItem(
+                  icon: Icons.admin_panel_settings,
+                  text: "Listing Approvals",
+                  onTap: () {
+                    Nav.push(context, const AdminHome());
+                  },
+                ),
 
-            ProfileMenuItem(
-                icon: Icons.money,
-                text: "Billing",
-                onTap: () {
-                  Nav.push(context, SetBilling());
-                },
-              ),
+              // ✅ Only show for admins
+              if (isAdmin)
+                ProfileMenuItem(
+                  icon: Icons.money,
+                  text: "Billing",
+                  onTap: () {
+                    Nav.push(context, const SetBilling());
+                  },
+                ),
             ],
           ),
         ),
