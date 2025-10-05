@@ -16,15 +16,16 @@ class _WebViewScreenState extends State<WebViewScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (_) => setState(() => isLoading = true),
-          onPageFinished: (_) => setState(() => isLoading = false),
-        ),
-      )
-      ..loadRequest(Uri.parse(widget.url));
+    _controller =
+        WebViewController()
+          ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..setNavigationDelegate(
+            NavigationDelegate(
+              onPageStarted: (_) => setState(() => isLoading = true),
+              onPageFinished: (_) => setState(() => isLoading = false),
+            ),
+          )
+          ..loadRequest(Uri.parse(widget.url));
   }
 
   @override
@@ -32,8 +33,10 @@ class _WebViewScreenState extends State<WebViewScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.purple,
-        title: const Text("Complete Subscription",
-            style: TextStyle(color: Colors.white)),
+        title: const Text(
+          "Complete Subscription",
+          style: TextStyle(color: Colors.white),
+        ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Stack(
@@ -48,4 +51,3 @@ class _WebViewScreenState extends State<WebViewScreen> {
     );
   }
 }
-

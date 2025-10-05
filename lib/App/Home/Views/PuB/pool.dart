@@ -4,8 +4,6 @@ import 'package:hog/TailorApp/Home/Api/publishservice.dart';
 import 'package:hog/TailorApp/Home/Model/PublishedModel.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 class Pool extends StatefulWidget {
   const Pool({super.key});
 
@@ -36,11 +34,12 @@ class _PoolState extends State<Pool> {
   void _filterWorks(String query) {
     final lowerQuery = query.toLowerCase();
     setState(() {
-      filteredWorks = allWorks.where((work) {
-        return work.clothPublished.toLowerCase().contains(lowerQuery) ||
-               work.attireType.toLowerCase().contains(lowerQuery) ||
-               work.brand.toLowerCase().contains(lowerQuery);
-      }).toList();
+      filteredWorks =
+          allWorks.where((work) {
+            return work.clothPublished.toLowerCase().contains(lowerQuery) ||
+                work.attireType.toLowerCase().contains(lowerQuery) ||
+                work.brand.toLowerCase().contains(lowerQuery);
+          }).toList();
     });
   }
 
@@ -50,26 +49,28 @@ class _PoolState extends State<Pool> {
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: Colors.purple,
-        title: !isSearching
-            ? const CustomText(
-                "Check room",
-                color: Colors.white,
-                fontSize: 18,
-              )
-            : TextField(
-                autofocus: true,
-                style: const TextStyle(color: Colors.white),
-                cursorColor: Colors.white,
-                decoration: const InputDecoration(
-                  hintText: "Search materials...",
-                  hintStyle: TextStyle(color: Colors.white70),
-                  border: InputBorder.none,
+        title:
+            !isSearching
+                ? const CustomText(
+                  "Check room",
+                  color: Colors.white,
+                  fontSize: 18,
+                )
+                : TextField(
+                  autofocus: true,
+                  style: const TextStyle(color: Colors.white),
+                  cursorColor: Colors.white,
+                  decoration: const InputDecoration(
+                    hintText: "Search materials...",
+                    hintStyle: TextStyle(color: Colors.white70),
+                    border: InputBorder.none,
+                  ),
+                  onChanged: _filterWorks,
                 ),
-                onChanged: _filterWorks,
-              ),
         actions: [
           IconButton(
-            icon: Icon(isSearching ? Icons.close : Icons.search),color: Colors.white,
+            icon: Icon(isSearching ? Icons.close : Icons.search),
+            color: Colors.white,
             onPressed: () {
               setState(() {
                 if (isSearching) {
@@ -119,4 +120,3 @@ class _PoolState extends State<Pool> {
     );
   }
 }
-

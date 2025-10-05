@@ -36,20 +36,23 @@ class TrackingCard extends StatelessWidget {
             // Thumbnail
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: images.isNotEmpty
-                  ? Image.network(
-                      images.first,
-                      width: 55,
-                      height: 55,
-                      fit: BoxFit.cover,
-                    )
-                  : Container(
-                      width: 55,
-                      height: 55,
-                      color: Colors.purple.shade50,
-                      child: const Icon(Icons.image_outlined,
-                          color: Colors.purple),
-                    ),
+              child:
+                  images.isNotEmpty
+                      ? Image.network(
+                        images.first,
+                        width: 55,
+                        height: 55,
+                        fit: BoxFit.cover,
+                      )
+                      : Container(
+                        width: 55,
+                        height: 55,
+                        color: Colors.purple.shade50,
+                        child: const Icon(
+                          Icons.image_outlined,
+                          color: Colors.purple,
+                        ),
+                      ),
             ),
             const SizedBox(width: 12),
 
@@ -73,8 +76,11 @@ class TrackingCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       GestureDetector(
                         onTap: () {
-                          Clipboard.setData(ClipboardData(
-                              text: record.trackingNumber.toString()));
+                          Clipboard.setData(
+                            ClipboardData(
+                              text: record.trackingNumber.toString(),
+                            ),
+                          );
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text("📋 Tracking ID copied"),
@@ -82,8 +88,11 @@ class TrackingCard extends StatelessWidget {
                             ),
                           );
                         },
-                        child: const Icon(Icons.copy,
-                            size: 14, color: Colors.purple),
+                        child: const Icon(
+                          Icons.copy,
+                          size: 14,
+                          color: Colors.purple,
+                        ),
                       ),
                     ],
                   ),
@@ -109,7 +118,8 @@ class TrackingCard extends StatelessWidget {
                             ? Icons.check_circle_rounded
                             : Icons.local_shipping_rounded,
                         size: 16,
-                        color: record.isDelivered ? Colors.green : Colors.purple,
+                        color:
+                            record.isDelivered ? Colors.green : Colors.purple,
                       ),
                       const SizedBox(width: 4),
                       Flexible(
@@ -117,9 +127,8 @@ class TrackingCard extends StatelessWidget {
                           record.isDelivered ? "Delivered" : "In Progress",
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: record.isDelivered
-                              ? Colors.green
-                              : Colors.purple,
+                          color:
+                              record.isDelivered ? Colors.green : Colors.purple,
                         ),
                       ),
                     ],
@@ -129,8 +138,11 @@ class TrackingCard extends StatelessWidget {
             ),
 
             // Arrow
-            const Icon(Icons.arrow_forward_ios,
-                size: 16, color: Colors.black26),
+            const Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: Colors.black26,
+            ),
           ],
         ),
       ),

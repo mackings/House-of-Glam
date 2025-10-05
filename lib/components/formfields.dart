@@ -20,7 +20,7 @@ class CustomTextField extends ConsumerWidget {
   final ValueChanged<String>? onChanged;
 
   /// Dropdown mode
-  final List<String>? dropdownItems; 
+  final List<String>? dropdownItems;
   final String? selectedValue;
 
   /// 🔥 NEW: Control padding for row layouts
@@ -40,7 +40,7 @@ class CustomTextField extends ConsumerWidget {
     this.onChanged,
     this.dropdownItems,
     this.selectedValue,
-    this.isCompact = false,  // 🔥 Default to false for backward compatibility
+    this.isCompact = false, // 🔥 Default to false for backward compatibility
   }) : super(key: key);
 
   @override
@@ -49,9 +49,10 @@ class CustomTextField extends ConsumerWidget {
     final obscureText = ref.watch(obscureTextProvider(fieldKey));
 
     return Padding(
-      padding: isCompact 
-          ? const EdgeInsets.only(bottom: 10)  // 🔥 Reduced padding for rows
-          : const EdgeInsets.symmetric(vertical: 10),
+      padding:
+          isCompact
+              ? const EdgeInsets.only(bottom: 10) // 🔥 Reduced padding for rows
+              : const EdgeInsets.symmetric(vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -61,43 +62,46 @@ class CustomTextField extends ConsumerWidget {
           /// If dropdownItems is provided, show dropdown
           dropdownItems != null
               ? DropdownButtonFormField<String>(
-                  value: selectedValue,
-                  decoration: InputDecoration(
-                    hintText: hintText,
-                    prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 15,
-                      horizontal: screenWidth * 0.04,
-                    ),
+                value: selectedValue,
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  items: dropdownItems!
-                      .map((item) => DropdownMenuItem<String>(
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 15,
+                    horizontal: screenWidth * 0.04,
+                  ),
+                ),
+                items:
+                    dropdownItems!
+                        .map(
+                          (item) => DropdownMenuItem<String>(
                             value: item,
                             child: Text(item),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    if (controller != null) controller!.text = value ?? '';
-                    if (onChanged != null && value != null) onChanged!(value);
-                  },
-                )
-
+                          ),
+                        )
+                        .toList(),
+                onChanged: (value) {
+                  if (controller != null) controller!.text = value ?? '';
+                  if (onChanged != null && value != null) onChanged!(value);
+                },
+              )
               /// Else render normal TextField
               : TextFormField(
-                  controller: controller,
-                  validator: validator,
-                  keyboardType: keyboardType,
-                  inputFormatters: inputFormatters,
-                  obscureText: isPassword ? obscureText : false,
-                  onChanged: onChanged,
-                  decoration: InputDecoration(
-                    hintText: hintText,
-                    prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-                    suffixIcon: isPassword
-                        ? IconButton(
+                controller: controller,
+                validator: validator,
+                keyboardType: keyboardType,
+                inputFormatters: inputFormatters,
+                obscureText: isPassword ? obscureText : false,
+                onChanged: onChanged,
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
+                  suffixIcon:
+                      isPassword
+                          ? IconButton(
                             icon: Icon(
                               obscureText
                                   ? Icons.visibility_off
@@ -109,16 +113,16 @@ class CustomTextField extends ConsumerWidget {
                                   .state = !obscureText;
                             },
                           )
-                        : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 15,
-                      horizontal: screenWidth * 0.04,
-                    ),
+                          : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 15,
+                    horizontal: screenWidth * 0.04,
                   ),
                 ),
+              ),
         ],
       ),
     );

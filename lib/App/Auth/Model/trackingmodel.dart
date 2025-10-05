@@ -13,7 +13,8 @@ class TrackingResponse {
     return TrackingResponse(
       success: json['success'] ?? false,
       message: json['message'] ?? '',
-      data: (json['data'] as List<dynamic>?)
+      data:
+          (json['data'] as List<dynamic>?)
               ?.map((e) => TrackingRecord.fromJson(e))
               .toList() ??
           [],
@@ -82,11 +83,13 @@ class MaterialInfo {
       clothMaterial: json['clothMaterial'] ?? '',
       color: json['color'] ?? '',
       brand: json['brand'] ?? '',
-      measurements: (json['measurement'] as List<dynamic>?)
+      measurements:
+          (json['measurement'] as List<dynamic>?)
               ?.map((e) => Measurement.fromJson(e))
               .toList() ??
           [],
-      sampleImages: (json['sampleImage'] as List<dynamic>?)
+      sampleImages:
+          (json['sampleImage'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],

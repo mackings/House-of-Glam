@@ -3,7 +3,6 @@ import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  
   static const String baseUrl = "https://hog-ymud.onrender.com/api/v1";
 
   /// Generic POST request with body
@@ -36,66 +35,57 @@ class ApiService {
     }
   }
 
+  /// 🔹 Login
+  static Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+  }) async {
+    final result = await postRequest("user/login", {
+      "email": email,
+      "password": password,
+    });
 
+    if (result["success"] == true && result["data"] != null) {
+      final data = result["data"];
+      final token = data["token"];
+      final user = data["user"];
 
+      if (token != null && user != null) {
+        // ✅ Save token
+        await SecurePrefs.saveToken(token);
 
+        // ✅ Save user details
+        await SecurePrefs.saveUserData({
+          "id": user["_id"],
+          "fullName": user["fullName"],
+          "email": user["email"],
+          "phoneNumber": user["phoneNumber"],
+          "role": user["role"],
+          "image": user["image"],
+          "address": user["address"],
+          "subscriptionPlan": user["subscriptionPlan"],
+          "billTerm": user["billTerm"],
+          "subscriptionStartDate": user["subscriptionStartDate"],
+          "subscriptionEndDate": user["subscriptionEndDate"],
+          "isVendorEnabled": user["isVendorEnabled"],
+          "wallet": user["wallet"],
+          "isVerified": user["isVerified"],
+          "isBlocked": user["isBlocked"],
+        });
 
-/// 🔹 Login
-static Future<Map<String, dynamic>> login({
-  required String email,
-  required String password,
-}) async {
-  final result = await postRequest("user/login", {
-    "email": email,
-    "password": password,
-  });
-
-  if (result["success"] == true && result["data"] != null) {
-    final data = result["data"];
-    final token = data["token"];
-    final user = data["user"];
-
-    if (token != null && user != null) {
-      // ✅ Save token
-      await SecurePrefs.saveToken(token);
-
-      // ✅ Save user details
-      await SecurePrefs.saveUserData({
-        "id": user["_id"],
-        "fullName": user["fullName"],
-        "email": user["email"],
-        "phoneNumber": user["phoneNumber"],
-        "role": user["role"],
-        "image": user["image"],
-        "address": user["address"],
-        "subscriptionPlan": user["subscriptionPlan"],
-        "billTerm": user["billTerm"],
-        "subscriptionStartDate": user["subscriptionStartDate"],
-        "subscriptionEndDate": user["subscriptionEndDate"],
-        "isVendorEnabled": user["isVendorEnabled"],
-        "wallet": user["wallet"],
-        "isVerified": user["isVerified"],
-        "isBlocked": user["isBlocked"],
-      });
-
-      // ✅ Flatten response before returning
-      return {
-        "success": true,
-        "message": data["message"],
-        "token": token,
-        "user": user,
-      };
+        // ✅ Flatten response before returning
+        return {
+          "success": true,
+          "message": data["message"],
+          "token": token,
+          "user": user,
+        };
+      }
     }
+
+    // fallback (error)
+    return {"success": false, "error": result["error"] ?? "Login failed"};
   }
-
-  // fallback (error)
-  return {
-    "success": false,
-    "error": result["error"] ?? "Login failed",
-  };
-}
-
-
 
   /// 🔹 Sign up
   static Future<Map<String, dynamic>> signup({
@@ -104,7 +94,7 @@ static Future<Map<String, dynamic>> login({
     required String password,
     required String phoneNumber,
     required String role,
-    required String address, 
+    required String address,
     required String country,
   }) async {
     return await postRequest("user/register", {
@@ -114,7 +104,7 @@ static Future<Map<String, dynamic>> login({
       "phoneNumber": phoneNumber,
       "role": role,
       "address": address,
-      "country":country
+      "country": country,
     });
   }
 

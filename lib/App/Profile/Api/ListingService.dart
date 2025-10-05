@@ -40,14 +40,14 @@ class MarketplaceService {
 
   /// 🔹 Upload a new seller listing
   static Future<bool> createSellerListing({
-    required String categoryId,      // from SecurePrefs.getAttireId()
+    required String categoryId, // from SecurePrefs.getAttireId()
     required String title,
     required String size,
     required String description,
-    required String condition,       // e.g., "Newly Sewed"
-    required String status,          // e.g., "Available"
+    required String condition, // e.g., "Newly Sewed"
+    required String status, // e.g., "Available"
     required double price,
-    required List<File> images,      // local image files
+    required List<File> images, // local image files
   }) async {
     try {
       final token = await SecurePrefs.getToken();
@@ -71,11 +71,13 @@ class MarketplaceService {
       // ✅ Add images
       for (final imageFile in images) {
         final fileName = imageFile.path.split('/').last;
-        request.files.add(await http.MultipartFile.fromPath(
-          "images",         
-          imageFile.path,
-          filename: fileName,
-        ));
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            "images",
+            imageFile.path,
+            filename: fileName,
+          ),
+        );
       }
 
       // ✅ Send request
@@ -96,61 +98,59 @@ class MarketplaceService {
     }
   }
 
-
   /// 🔹 Fetch seller’s uploaded listings
-static Future<List<UserListing>> getSellerListings() async {
-  try {
-    final token = await SecurePrefs.getToken();
-    final url = Uri.parse("$baseUrl/seller/getSellerListings");
+  static Future<List<UserListing>> getSellerListings() async {
+    try {
+      final token = await SecurePrefs.getToken();
+      final url = Uri.parse("$baseUrl/seller/getSellerListings");
 
-    print("➡️ GET Request to: $url");
+      print("➡️ GET Request to: $url");
 
-    final response = await http.get(
-      url,
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-    );
+      final response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
 
-    print("⬅️ Response [${response.statusCode}]: ${response.body}");
+      print("⬅️ Response [${response.statusCode}]: ${response.body}");
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final listingsJson = data["data"] as List;
-      return listingsJson.map((e) => UserListing.fromJson(e)).toList();
-    } else {
-      throw Exception("Failed to fetch listings");
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final listingsJson = data["data"] as List;
+        return listingsJson.map((e) => UserListing.fromJson(e)).toList();
+      } else {
+        throw Exception("Failed to fetch listings");
+      }
+    } catch (e) {
+      print("❌ Error fetching seller listings: $e");
+      return [];
     }
-  } catch (e) {
-    print("❌ Error fetching seller listings: $e");
-    return [];
   }
-}
 
-/// 🔹 Delete seller listing
-static Future<bool> deleteSellerListing(String listingId) async {
-  try {
-    final token = await SecurePrefs.getToken();
-    final url = Uri.parse("$baseUrl/seller/deleteSellerListing/$listingId");
+  /// 🔹 Delete seller listing
+  static Future<bool> deleteSellerListing(String listingId) async {
+    try {
+      final token = await SecurePrefs.getToken();
+      final url = Uri.parse("$baseUrl/seller/deleteSellerListing/$listingId");
 
-    print("➡️ DELETE Request to: $url");
+      print("➡️ DELETE Request to: $url");
 
-    final response = await http.delete(
-      url,
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-    );
+      final response = await http.delete(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
 
-    print("⬅️ Response [${response.statusCode}]: ${response.body}");
+      print("⬅️ Response [${response.statusCode}]: ${response.body}");
 
-    return response.statusCode == 200;
-  } catch (e) {
-    print("❌ Error deleting listing: $e");
-    return false;
+      return response.statusCode == 200;
+    } catch (e) {
+      print("❌ Error deleting listing: $e");
+      return false;
+    }
   }
-}
-
 }

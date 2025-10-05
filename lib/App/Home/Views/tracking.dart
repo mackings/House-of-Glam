@@ -5,8 +5,6 @@ import 'package:hog/App/Home/Views/PuB/widgets/trackingCard.dart';
 import 'package:hog/App/Home/Views/PuB/widgets/tracksheet.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 class TrackingDelivery extends StatefulWidget {
   const TrackingDelivery({super.key});
 
@@ -48,15 +46,19 @@ class _TrackingDeliveryState extends State<TrackingDelivery> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-                child: CircularProgressIndicator(color: Colors.purple));
+              child: CircularProgressIndicator(color: Colors.purple),
+            );
           }
 
           if (!snapshot.hasData ||
               snapshot.data == null ||
               snapshot.data!.data.isEmpty) {
             return const Center(
-                child: CustomText("No tracking records found",
-                    color: Colors.black54));
+              child: CustomText(
+                "No tracking records found",
+                color: Colors.black54,
+              ),
+            );
           }
 
           final records = snapshot.data!.data;
@@ -77,4 +79,3 @@ class _TrackingDeliveryState extends State<TrackingDelivery> {
     );
   }
 }
-

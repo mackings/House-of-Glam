@@ -75,9 +75,6 @@ class ListingCategory {
   ListingCategory({required this.id, required this.name});
 
   factory ListingCategory.fromJson(Map<String, dynamic> json) {
-    return ListingCategory(
-      id: json["_id"],
-      name: json["name"] ?? '',
-    );
+    return ListingCategory(id: json["_id"], name: json["name"] ?? '');
   }
 }

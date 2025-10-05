@@ -7,8 +7,6 @@ import 'package:hog/App/Profile/widgets/productCard.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 class MarketPlace extends StatefulWidget {
   const MarketPlace({super.key});
 

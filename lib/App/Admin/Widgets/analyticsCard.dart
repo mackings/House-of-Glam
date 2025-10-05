@@ -25,11 +25,10 @@ class AnalyticsCard extends StatelessWidget {
           gradient: const LinearGradient(
             colors: [
               Colors.purple,
-              Colors.purple
+              Colors.purple,
 
-            ////  Color(0xFF6A1B9A), // Deep Purple
-             // Color(0xFF4A148C), // Darker Purple
-             
+              ////  Color(0xFF6A1B9A), // Deep Purple
+              // Color(0xFF4A148C), // Darker Purple
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -45,11 +44,7 @@ class AnalyticsCard extends StatelessWidget {
                 color: Colors.white.withOpacity(0.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                size: 36,
-                color: Colors.white,
-              ),
+              child: Icon(icon, size: 36, color: Colors.white),
             ),
 
             // Text section
@@ -75,7 +70,7 @@ class AnalyticsCard extends StatelessWidget {
                   ),
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

@@ -12,9 +12,6 @@ import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
-
 class Signin extends ConsumerStatefulWidget {
   const Signin({super.key});
 
@@ -42,64 +39,63 @@ class _SigninState extends ConsumerState<Signin> {
     super.dispose();
   }
 
-Future<void> _handleSignin() async {
-  final email = emailController.text.trim();
-  final password = passwordController.text.trim();
+  Future<void> _handleSignin() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
 
-  if (email.isEmpty || password.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Please fill in all fields")),
-    );
-    return;
-  }
-
-  setState(() => isLoading = true);
-  final response = await ApiService.login(email: email, password: password);
-  setState(() => isLoading = false);
-
-  print("🔎 Login response: $response");
-
-  if (response["success"] == true && response["token"] != null) {
-    final token = response["token"];
-    final user = response["user"];
-
-    // ✅ Save token if remember me
-    if (rememberMe && token != null) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString("token", token);
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill in all fields")),
+      );
+      return;
     }
 
-    // ✅ Show success
-    await showSuccessDialog(
-      context,
-      response["message"] ?? "Login successful!",
-    );
+    setState(() => isLoading = true);
+    final response = await ApiService.login(email: email, password: password);
+    setState(() => isLoading = false);
 
-    // ✅ Redirect based on role
-    if (user != null && user["role"] == "tailor") {
-      Navigator.pushReplacement(
+    print("🔎 Login response: $response");
+
+    if (response["success"] == true && response["token"] != null) {
+      final token = response["token"];
+      final user = response["user"];
+
+      // ✅ Save token if remember me
+      if (rememberMe && token != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("token", token);
+      }
+
+      // ✅ Show success
+      await showSuccessDialog(
         context,
-        MaterialPageRoute(
-          builder: (_) => TailorMainPage(
-            isVendorEnabled: user["isVendorEnabled"] ?? false,
+        response["message"] ?? "Login successful!",
+      );
+
+      // ✅ Redirect based on role
+      if (user != null && user["role"] == "tailor") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder:
+                (_) => TailorMainPage(
+                  isVendorEnabled: user["isVendorEnabled"] ?? false,
+                ),
           ),
-        ),
-      );
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainPage()),
+        );
+      }
     } else {
-      Navigator.pushReplacement(
+      await showErrorDialog(
         context,
-        MaterialPageRoute(builder: (_) => const MainPage()),
+        response["error"] ?? "Something went wrong",
       );
     }
-  } else {
-    await showErrorDialog(
-      context,
-      response["error"] ?? "Something went wrong",
-    );
   }
-}
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -122,8 +118,8 @@ Future<void> _handleSignin() async {
                 Text(
                   "Sign In",
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 30),
 

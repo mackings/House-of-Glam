@@ -13,8 +13,11 @@ class InfoRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
-          CustomText("$title: ",
-              fontWeight: FontWeight.bold, color: Colors.black),
+          CustomText(
+            "$title: ",
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
           Expanded(child: CustomText(value, color: Colors.black87)),
         ],
       ),

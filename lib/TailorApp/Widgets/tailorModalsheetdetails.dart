@@ -222,30 +222,33 @@ void showTailorMaterialDetails(
 
                       const SizedBox(height: 20),
 
-CustomButton(
-  title: item.status.toLowerCase() == "requesting"
-      ? "Update Quotation"
-      : "Deliver Attire",
-  onPressed: () {
-    if (item.status.toLowerCase() == "requesting") {
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.white,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        builder: (_) => UpdateQuotationBottomSheet(
-          materialId: material.id,
-        ),
-      );
-    } else {
-      _deliverAttire();
-    }
-  },
-  isLoading: isLoading,
-),
-
+                      CustomButton(
+                        title:
+                            item.status.toLowerCase() == "requesting"
+                                ? "Update Quotation"
+                                : "Deliver Attire",
+                        onPressed: () {
+                          if (item.status.toLowerCase() == "requesting") {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.white,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(20),
+                                ),
+                              ),
+                              builder:
+                                  (_) => UpdateQuotationBottomSheet(
+                                    materialId: material.id,
+                                  ),
+                            );
+                          } else {
+                            _deliverAttire();
+                          }
+                        },
+                        isLoading: isLoading,
+                      ),
 
                       const SizedBox(height: 16),
                     ],

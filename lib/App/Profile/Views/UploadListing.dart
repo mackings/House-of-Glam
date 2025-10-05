@@ -12,8 +12,6 @@ import 'package:hog/components/texts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
-
-
 class Uploadlisting extends StatefulWidget {
   const Uploadlisting({super.key});
 
@@ -50,36 +48,35 @@ class _UploadlistingState extends State<Uploadlisting> {
     _loadCategories();
 
     // ✅ Add listener to format price with commas
- priceController.addListener(() {
-  if (_isFormatting) return;
-  _isFormatting = true;
+    priceController.addListener(() {
+      if (_isFormatting) return;
+      _isFormatting = true;
 
-  // Remove all commas
-  String raw = priceController.text.replaceAll(',', '');
+      // Remove all commas
+      String raw = priceController.text.replaceAll(',', '');
 
-  // ✅ If user cleared the field, just clear it
-  if (raw.isEmpty) {
-    priceController.value = TextEditingValue(
-      text: '',
-      selection: const TextSelection.collapsed(offset: 0),
-    );
-    _isFormatting = false;
-    return;
-  }
+      // ✅ If user cleared the field, just clear it
+      if (raw.isEmpty) {
+        priceController.value = TextEditingValue(
+          text: '',
+          selection: const TextSelection.collapsed(offset: 0),
+        );
+        _isFormatting = false;
+        return;
+      }
 
-  // ✅ Parse and format
-  final value = int.tryParse(raw);
-  if (value != null) {
-    final formatted = _formatter.format(value);
-    priceController.value = TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
-    );
-  }
+      // ✅ Parse and format
+      final value = int.tryParse(raw);
+      if (value != null) {
+        final formatted = _formatter.format(value);
+        priceController.value = TextEditingValue(
+          text: formatted,
+          selection: TextSelection.collapsed(offset: formatted.length),
+        );
+      }
 
-  _isFormatting = false;
-});
-
+      _isFormatting = false;
+    });
   }
 
   Future<void> _loadCategories() async {
@@ -112,7 +109,9 @@ class _UploadlistingState extends State<Uploadlisting> {
         backImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Please fill all fields and upload all 3 required images."),
+          content: Text(
+            "Please fill all fields and upload all 3 required images.",
+          ),
         ),
       );
       return;
@@ -169,21 +168,22 @@ class _UploadlistingState extends State<Uploadlisting> {
           border: Border.all(color: Colors.grey.shade400),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: image == null
-            ? Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.add_a_photo, size: 30, color: Colors.grey),
-                    const SizedBox(height: 5),
-                    Text(label, style: TextStyle(color: Colors.grey)),
-                  ],
+        child:
+            image == null
+                ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.add_a_photo, size: 30, color: Colors.grey),
+                      const SizedBox(height: 5),
+                      Text(label, style: TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                )
+                : ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.file(image, fit: BoxFit.cover),
                 ),
-              )
-            : ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(image, fit: BoxFit.cover),
-              ),
       ),
     );
   }
@@ -214,8 +214,9 @@ class _UploadlistingState extends State<Uploadlisting> {
                 selectedValue: selectedCategory?.name,
                 onChanged: (val) {
                   setState(() {
-                    selectedCategory =
-                        categories.firstWhere((c) => c.name == val);
+                    selectedCategory = categories.firstWhere(
+                      (c) => c.name == val,
+                    );
                   });
                 },
               ),
@@ -264,8 +265,8 @@ class _UploadlistingState extends State<Uploadlisting> {
                 label: "Condition",
                 options: const ["Newly Sewed", "Used"],
                 selectedValue: condition,
-                onChanged: (val) =>
-                    setState(() => condition = val ?? "Newly Sewed"),
+                onChanged:
+                    (val) => setState(() => condition = val ?? "Newly Sewed"),
               ),
               const SizedBox(height: 16),
 
@@ -273,8 +274,7 @@ class _UploadlistingState extends State<Uploadlisting> {
                 label: "Status",
                 options: const ["Available", "Out of Stock"],
                 selectedValue: status,
-                onChanged: (val) =>
-                    setState(() => status = val ?? "Available"),
+                onChanged: (val) => setState(() => status = val ?? "Available"),
               ),
               const SizedBox(height: 20),
 
@@ -290,17 +290,18 @@ class _UploadlistingState extends State<Uploadlisting> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  imagePickerCard("Front", frontImage, () => pickImage("front")),
+                  imagePickerCard(
+                    "Front",
+                    frontImage,
+                    () => pickImage("front"),
+                  ),
                   imagePickerCard("Side", sideImage, () => pickImage("side")),
                   imagePickerCard("Back", backImage, () => pickImage("back")),
                 ],
               ),
 
               const SizedBox(height: 30),
-              CustomButton(
-                title: "Upload Listing",
-                onPressed: _submitListing,
-              ),
+              CustomButton(title: "Upload Listing", onPressed: _submitListing),
             ],
           ),
         ),

@@ -41,11 +41,7 @@ class UserData {
   final String fullName;
   final String address;
 
-  UserData({
-    required this.id,
-    required this.fullName,
-    required this.address,
-  });
+  UserData({required this.id, required this.fullName, required this.address});
 
   factory UserData.fromJson(Map<String, dynamic> json) {
     return UserData(

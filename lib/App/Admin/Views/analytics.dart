@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Admin/Api/AnalyticsService.dart';
 import 'package:hog/App/Admin/Widgets/analyticsCard.dart';
 
-
-
-
 class Analytics extends StatefulWidget {
   const Analytics({super.key});
 
@@ -13,7 +10,6 @@ class Analytics extends StatefulWidget {
 }
 
 class _AnalyticsState extends State<Analytics> {
-  
   int totalUsers = 0;
   int freeListings = 0;
   int paidListings = 0;
@@ -60,56 +56,52 @@ class _AnalyticsState extends State<Analytics> {
         ),
         backgroundColor: Colors.purple,
       ),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: fetchAnalytics,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  AnalyticsCard(
-                    title: "Total Users",
-                    value: "$totalUsers",
-                    icon: Icons.people,
-     
-                  ),
-                  const SizedBox(height: 12),
-                  AnalyticsCard(
-                    title: "Free Listings",
-                    value: "$freeListings",
-                    icon: Icons.list_alt,
-       
-                  ),
-                  const SizedBox(height: 12),
-                  AnalyticsCard(
-                    title: "Paid Listings",
-                    value: "$paidListings",
-                    icon: Icons.monetization_on,
-      
-                  ),
-                  const SizedBox(height: 12),
-                  AnalyticsCard(
-                    title: "Total Earnings",
-                    value: "${totalEarnings.toStringAsFixed(2)}",
-                    icon: Icons.account_balance_wallet,
-
-                  ),
-                  const SizedBox(height: 12),
-                  AnalyticsCard(
-                    title: "Total Transactions",
-                    value: "$totalTransactions",
-                    icon: Icons.swap_horiz,
-                  ),
-                  const SizedBox(height: 12),
-                  AnalyticsCard(
-                    title: "Total Listings",
-                    value: "$totalListings",
-                    icon: Icons.storefront,
-    
-                  ),
-                ],
+      body:
+          loading
+              ? const Center(child: CircularProgressIndicator())
+              : RefreshIndicator(
+                onRefresh: fetchAnalytics,
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    AnalyticsCard(
+                      title: "Total Users",
+                      value: "$totalUsers",
+                      icon: Icons.people,
+                    ),
+                    const SizedBox(height: 12),
+                    AnalyticsCard(
+                      title: "Free Listings",
+                      value: "$freeListings",
+                      icon: Icons.list_alt,
+                    ),
+                    const SizedBox(height: 12),
+                    AnalyticsCard(
+                      title: "Paid Listings",
+                      value: "$paidListings",
+                      icon: Icons.monetization_on,
+                    ),
+                    const SizedBox(height: 12),
+                    AnalyticsCard(
+                      title: "Total Earnings",
+                      value: "${totalEarnings.toStringAsFixed(2)}",
+                      icon: Icons.account_balance_wallet,
+                    ),
+                    const SizedBox(height: 12),
+                    AnalyticsCard(
+                      title: "Total Transactions",
+                      value: "$totalTransactions",
+                      icon: Icons.swap_horiz,
+                    ),
+                    const SizedBox(height: 12),
+                    AnalyticsCard(
+                      title: "Total Listings",
+                      value: "$totalListings",
+                      icon: Icons.storefront,
+                    ),
+                  ],
+                ),
               ),
-            ),
     );
   }
 }

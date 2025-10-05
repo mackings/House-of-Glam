@@ -6,8 +6,6 @@ import 'package:hog/App/Profile/widgets/Payment.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
-
-
 void showProductDetails(BuildContext context, SellerListing listing) {
   showModalBottomSheet(
     context: context,
@@ -33,11 +31,13 @@ void showProductDetails(BuildContext context, SellerListing listing) {
                   children: [
                     PageView.builder(
                       controller: pageController,
-                      itemCount: listing.images.isNotEmpty ? listing.images.length : 1,
+                      itemCount:
+                          listing.images.isNotEmpty ? listing.images.length : 1,
                       itemBuilder: (context, index) {
-                        final imageUrl = listing.images.isNotEmpty
-                            ? listing.images[index]
-                            : '';
+                        final imageUrl =
+                            listing.images.isNotEmpty
+                                ? listing.images[index]
+                                : '';
 
                         return GestureDetector(
                           onTap: () {
@@ -45,7 +45,8 @@ void showProductDetails(BuildContext context, SellerListing listing) {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => FullImageView(imageUrl: imageUrl),
+                                  builder:
+                                      (_) => FullImageView(imageUrl: imageUrl),
                                 ),
                               );
                             }
@@ -53,7 +54,9 @@ void showProductDetails(BuildContext context, SellerListing listing) {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Image.network(
-                              imageUrl.isNotEmpty ? imageUrl : 'https://via.placeholder.com/200',
+                              imageUrl.isNotEmpty
+                                  ? imageUrl
+                                  : 'https://via.placeholder.com/200',
                               fit: BoxFit.cover,
                               width: double.infinity,
                             ),
@@ -63,42 +66,48 @@ void showProductDetails(BuildContext context, SellerListing listing) {
                     ),
 
                     // 🔘 Page Indicator
-// 🔘 Page Indicator
-Positioned(
-  bottom: 8,
-  left: 0,
-  right: 0,
-  child: Center(
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(
-        listing.images.isNotEmpty ? listing.images.length : 1,
-        (index) => AnimatedBuilder(
-          animation: pageController,
-          builder: (context, child) {
-            double selected = 0;
-            if (pageController.hasClients) {
-              selected = pageController.page ?? pageController.initialPage.toDouble();
-            }
+                    // 🔘 Page Indicator
+                    Positioned(
+                      bottom: 8,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(
+                            listing.images.isNotEmpty
+                                ? listing.images.length
+                                : 1,
+                            (index) => AnimatedBuilder(
+                              animation: pageController,
+                              builder: (context, child) {
+                                double selected = 0;
+                                if (pageController.hasClients) {
+                                  selected =
+                                      pageController.page ??
+                                      pageController.initialPage.toDouble();
+                                }
 
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 3),
-              width: selected.round() == index ? 10 : 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: selected.round() == index
-                    ? Colors.purple
-                    : Colors.grey.shade400,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            );
-          },
-        ),
-      ),
-    ),
-  ),
-),
-
+                                return Container(
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 3,
+                                  ),
+                                  width: selected.round() == index ? 10 : 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        selected.round() == index
+                                            ? Colors.purple
+                                            : Colors.grey.shade400,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -154,13 +163,19 @@ Positioned(
                 children: [
                   CircleAvatar(
                     radius: 22,
-                    backgroundImage: listing.user.image != null
-                        ? NetworkImage(listing.user.image!)
-                        : null,
+                    backgroundImage:
+                        listing.user.image != null
+                            ? NetworkImage(listing.user.image!)
+                            : null,
                     backgroundColor: Colors.purple.withOpacity(0.2),
-                    child: listing.user.image == null
-                        ? const Icon(Icons.person, color: Colors.purple, size: 24)
-                        : null,
+                    child:
+                        listing.user.image == null
+                            ? const Icon(
+                              Icons.person,
+                              color: Colors.purple,
+                              size: 24,
+                            )
+                            : null,
                   ),
                   const SizedBox(width: 12),
                   Column(
@@ -202,36 +217,34 @@ Positioned(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-onPressed: () async {
-  // ✅ Save a reference to the parent context
-  final parentContext = Navigator.of(context).context;
+                  onPressed: () async {
+                    // ✅ Save a reference to the parent context
+                    final parentContext = Navigator.of(context).context;
 
-  // ✅ Close the bottom sheet first
-  Navigator.pop(context);
+                    // ✅ Close the bottom sheet first
+                    Navigator.pop(context);
 
-  // ✅ Call API
-  final response = await BidPaymentService.purchaseListings(
-    listingIds: [listing.id],
-    shipmentMethod: "Express",
-  );
+                    // ✅ Call API
+                    final response = await BidPaymentService.purchaseListings(
+                      listingIds: [listing.id],
+                      shipmentMethod: "Express",
+                    );
 
-  if (response != null && response['success'] == true) {
-    final authUrl = response['authorizationUrl'];
-    
-       Navigator.push(
-        parentContext,
-        MaterialPageRoute(
-          builder: (_) => PaymentWebView(paymentUrl: authUrl),
-        ),
-      );
+                    if (response != null && response['success'] == true) {
+                      final authUrl = response['authorizationUrl'];
 
-  } else {
-    ScaffoldMessenger.of(parentContext).showSnackBar(
-      const SnackBar(content: Text("Failed to place order")),
-    );
-  }
-},
-
+                      Navigator.push(
+                        parentContext,
+                        MaterialPageRoute(
+                          builder: (_) => PaymentWebView(paymentUrl: authUrl),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(parentContext).showSnackBar(
+                        const SnackBar(content: Text("Failed to place order")),
+                      );
+                    }
+                  },
 
                   child: const CustomText(
                     "Bid",

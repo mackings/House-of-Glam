@@ -43,7 +43,10 @@ class RejectReasonSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.purple.shade700, width: 1.5),
+                  borderSide: BorderSide(
+                    color: Colors.purple.shade700,
+                    width: 1.5,
+                  ),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
@@ -51,7 +54,6 @@ class RejectReasonSheet extends StatelessWidget {
             const SizedBox(height: 16),
             Row(
               children: [
-
                 Expanded(
                   child: CustomButton(
                     isOutlined: true,
@@ -62,12 +64,8 @@ class RejectReasonSheet extends StatelessWidget {
 
                 const SizedBox(width: 12),
                 Expanded(
-                  child: CustomButton(
-                    title: "Reject",
-                    onPressed: onSubmit,
-                  ),
+                  child: CustomButton(title: "Reject", onPressed: onSubmit),
                 ),
-
               ],
             ),
           ],

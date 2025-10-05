@@ -3,8 +3,6 @@ import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Profile/Model/DeliveryTrack.dart';
 import 'package:http/http.dart' as http;
 
-
-
 class MarketPlaceDeliveryService {
   static const String baseUrl = "https://hog-ymud.onrender.com/api/v1";
 
@@ -63,7 +61,9 @@ class MarketPlaceDeliveryService {
         final records = jsonData["data"] as List;
         return records.map((e) => MarketTrackingRecord.fromJson(e)).toList();
       } else {
-        print("⚠️ Failed to fetch seller tracking records: ${response.statusCode}");
+        print(
+          "⚠️ Failed to fetch seller tracking records: ${response.statusCode}",
+        );
         return [];
       }
     } catch (e) {
@@ -76,7 +76,9 @@ class MarketPlaceDeliveryService {
   static Future<bool> acceptOrder(String trackingNumber) async {
     try {
       final token = await SecurePrefs.getToken();
-      final url = Uri.parse("$baseUrl/buyer/acceptOrder?trackingNumber=$trackingNumber");
+      final url = Uri.parse(
+        "$baseUrl/buyer/acceptOrder?trackingNumber=$trackingNumber",
+      );
 
       print("➡️ PUT Request to: $url");
 

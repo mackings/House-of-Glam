@@ -4,8 +4,6 @@ import 'package:hog/App/Admin/Model/PendingListing.dart';
 import 'package:hog/App/Admin/Widgets/PendingCard.dart';
 import 'package:hog/App/Admin/Widgets/rejectionSheet.dart';
 
-
-
 class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
 
@@ -44,7 +42,9 @@ class _AdminHomeState extends State<AdminHome> {
             final reason = controller.text.trim();
             if (reason.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Please enter a rejection reason")),
+                const SnackBar(
+                  content: Text("Please enter a rejection reason"),
+                ),
               );
               return;
             }
@@ -52,9 +52,9 @@ class _AdminHomeState extends State<AdminHome> {
             Navigator.pop(context); // close the sheet
             final success = await AdminService.rejectListing(listingId, reason);
             if (success) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Listing rejected")),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text("Listing rejected")));
               _refresh();
             }
           },
@@ -96,8 +96,7 @@ class _AdminHomeState extends State<AdminHome> {
               return PendingListingCard(
                 listing: listing,
                 onApprove: () async {
-                  final success =
-                      await AdminService.approveListing(listing.id);
+                  final success = await AdminService.approveListing(listing.id);
                   if (success) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("Listing approved")),

@@ -13,9 +13,10 @@ class SellerListingResponse {
     return SellerListingResponse(
       success: json['success'] ?? false,
       message: json['message'] ?? '',
-      data: (json['data'] as List<dynamic>)
-          .map((e) => SellerListing.fromJson(e))
-          .toList(),
+      data:
+          (json['data'] as List<dynamic>)
+              .map((e) => SellerListing.fromJson(e))
+              .toList(),
     );
   }
 }
@@ -97,15 +98,9 @@ class Category {
   final String id;
   final String name;
 
-  Category({
-    required this.id,
-    required this.name,
-  });
+  Category({required this.id, required this.name});
 
   factory Category.fromJson(Map<String, dynamic> json) {
-    return Category(
-      id: json['_id'],
-      name: json['name'] ?? '',
-    );
+    return Category(id: json['_id'], name: json['name'] ?? '');
   }
 }

@@ -13,7 +13,8 @@ class SubscriptionPlanResponse {
     return SubscriptionPlanResponse(
       success: json['success'] ?? false,
       message: json['message'] ?? '',
-      data: (json['data'] as List<dynamic>?)
+      data:
+          (json['data'] as List<dynamic>?)
               ?.map((e) => SubscriptionPlan.fromJson(e))
               .toList() ??
           [],

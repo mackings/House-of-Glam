@@ -15,8 +15,6 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 class Signup extends ConsumerStatefulWidget {
   const Signup({super.key});
 
@@ -32,13 +30,15 @@ class _SignupState extends ConsumerState<Signup> {
   late TextEditingController addressController;
   late TextEditingController countryController;
 
-  bool isLoading = false; 
-  bool isTailor = false; 
+  bool isLoading = false;
+  bool isTailor = false;
   List<String> countries = [];
   String? selectedCountry;
 
   Future<void> loadCountries() async {
-    final String response = await rootBundle.loadString('assets/countries.json');
+    final String response = await rootBundle.loadString(
+      'assets/countries.json',
+    );
     final List<dynamic> data = json.decode(response);
     setState(() {
       countries = data.cast<String>();
@@ -160,7 +160,7 @@ class _SignupState extends ConsumerState<Signup> {
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final isWideScreen = constraints.maxWidth > 600;
-                    
+
                     if (isWideScreen) {
                       // Desktop/Tablet: Side by side
                       return IntrinsicHeight(
@@ -195,7 +195,7 @@ class _SignupState extends ConsumerState<Signup> {
                         ),
                       );
                     }
-                    
+
                     // Mobile: Stacked vertically
                     return Column(
                       children: [

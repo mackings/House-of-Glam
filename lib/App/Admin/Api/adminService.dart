@@ -3,8 +3,6 @@ import 'package:hog/App/Admin/Model/PendingListing.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:http/http.dart' as http;
 
-
-
 class AdminService {
   static const String baseUrl = "https://hog-ymud.onrender.com/api/v1/admin";
 
@@ -16,10 +14,13 @@ class AdminService {
     try {
       print("➡️ GET $url");
 
-      final response = await http.get(url, headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      });
+      final response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
 
       print("⬅️ Response [${response.statusCode}]: ${response.body}");
 
@@ -42,10 +43,13 @@ class AdminService {
     final url = Uri.parse("$baseUrl/approveSellerListing/$listingId");
 
     try {
-      final response = await http.put(url, headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      });
+      final response = await http.put(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
 
       print("✅ Approve Response [${response.statusCode}]: ${response.body}");
 
@@ -62,12 +66,14 @@ class AdminService {
     final url = Uri.parse("$baseUrl/rejectSellerListing/$listingId");
 
     try {
-      final response = await http.put(url,
-          headers: {
-            "Authorization": "Bearer $token",
-            "Content-Type": "application/json",
-          },
-          body: jsonEncode({"reasons": reason}));
+      final response = await http.put(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({"reasons": reason}),
+      );
 
       print("🚫 Reject Response [${response.statusCode}]: ${response.body}");
 

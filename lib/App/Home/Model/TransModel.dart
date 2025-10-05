@@ -39,9 +39,10 @@ class TransactionResponse {
       userId: json["userId"],
       vendorId: json["vendorId"],
       materialId: json["materialId"],
-      cartItems: (json["cartItems"] as List? ?? [])
-          .map((e) => CartItem.fromJson(e))
-          .toList(),
+      cartItems:
+          (json["cartItems"] as List? ?? [])
+              .map((e) => CartItem.fromJson(e))
+              .toList(),
       totalAmount: json["totalAmount"],
       paymentMethod: json["paymentMethod"],
       paymentReference: json["paymentReference"],
@@ -102,9 +103,10 @@ class CartItem {
       condition: json["condition"],
       amount: json["amount"],
 
-      measurement: (json["measurement"] as List? ?? [])
-          .map((e) => Measurement.fromJson(e))
-          .toList(),
+      measurement:
+          (json["measurement"] as List? ?? [])
+              .map((e) => Measurement.fromJson(e))
+              .toList(),
 
       sampleImage: List<String>.from(json["sampleImage"] ?? []),
       images: List<String>.from(json["images"] ?? []),
@@ -169,17 +171,15 @@ class TransactionListResponse {
   final String message;
   final List<TransactionResponse> transactions;
 
-  TransactionListResponse({
-    required this.message,
-    required this.transactions,
-  });
+  TransactionListResponse({required this.message, required this.transactions});
 
   factory TransactionListResponse.fromJson(Map<String, dynamic> json) {
     return TransactionListResponse(
       message: json["message"] ?? "",
-      transactions: (json["data"] as List? ?? [])
-          .map((e) => TransactionResponse.fromJson(e))
-          .toList(),
+      transactions:
+          (json["data"] as List? ?? [])
+              .map((e) => TransactionResponse.fromJson(e))
+              .toList(),
     );
   }
 }

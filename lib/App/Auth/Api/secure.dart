@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hog/App/Home/Model/category.dart';
+
 class SecurePrefs {
   static final _storage = const FlutterSecureStorage();
 
@@ -46,7 +47,9 @@ class SecurePrefs {
   // CATEGORIES
   // -------------------------
   static Future<void> saveCategories(List<Category> categories) async {
-    final categoriesJson = jsonEncode(categories.map((c) => c.toJson()).toList());
+    final categoriesJson = jsonEncode(
+      categories.map((c) => c.toJson()).toList(),
+    );
     await _storage.write(key: _categoriesKey, value: categoriesJson);
   }
 

@@ -56,22 +56,23 @@ class _UpdateQuotationBottomSheetState
 
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Confirm Update"),
-        content: const Text(
-          "Are you sure you want to update this quotation with the new values?",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancel"),
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Confirm Update"),
+            content: const Text(
+              "Are you sure you want to update this quotation with the new values?",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text("Yes, Update"),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text("Yes, Update"),
-          ),
-        ],
-      ),
     );
 
     if (confirm != true) return;
@@ -89,13 +90,13 @@ class _UpdateQuotationBottomSheetState
 
       Navigator.pop(context);
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ Quotation updated!")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("✅ Quotation updated!")));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Error: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("❌ Error: $e")));
     } finally {
       setState(() => isLoading = false);
     }
@@ -205,13 +206,13 @@ class _UpdateQuotationBottomSheetState
 
               isLoading
                   ? const Center(
-                      child: CircularProgressIndicator(color: Colors.purple),
-                    )
+                    child: CircularProgressIndicator(color: Colors.purple),
+                  )
                   : CustomButton(
-                      title: "Update Quotation",
-                      isOutlined: false,
-                      onPressed: handleUpdate,
-                    ),
+                    title: "Update Quotation",
+                    isOutlined: false,
+                    onPressed: handleUpdate,
+                  ),
             ],
           ),
         ),
@@ -219,4 +220,3 @@ class _UpdateQuotationBottomSheetState
     );
   }
 }
-

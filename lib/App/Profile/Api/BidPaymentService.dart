@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:http/http.dart' as http;
 
-
 class BidPaymentService {
   static const String baseUrl = "https://hog-ymud.onrender.com/api/v1";
 

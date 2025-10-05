@@ -7,7 +7,6 @@ import 'package:hog/TailorApp/Home/Views/TailorDashboard.dart';
 import 'package:hog/TailorApp/Home/Views/Tailorbusiness.dart';
 import 'package:hog/TailorApp/TailorNav.dart';
 
-
 class TailorMainPage extends StatefulWidget {
   final bool isVendorEnabled;
 
@@ -26,7 +25,7 @@ class _TailorMainPageState extends State<TailorMainPage> {
     AssignedMaterials(),
     TailorDeliveries(),
     Myworks(),
-    Subscription()
+    Subscription(),
   ];
 
   @override

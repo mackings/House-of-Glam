@@ -3,17 +3,11 @@ import 'package:hog/App/Profile/Model/SellerListing.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
-
-
 class ProductCard extends StatelessWidget {
   final SellerListing listing;
   final VoidCallback onTap;
 
-  const ProductCard({
-    super.key,
-    required this.listing,
-    required this.onTap,
-  });
+  const ProductCard({super.key, required this.listing, required this.onTap});
 
   String formatPrice(double price) {
     final formatter = NumberFormat('#,###');
@@ -49,7 +43,9 @@ class ProductCard extends StatelessWidget {
             // 🖼 PRODUCT IMAGE
             // =========================
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
               child: AspectRatio(
                 aspectRatio: 16 / 9,
                 child: Image.network(
@@ -59,7 +55,11 @@ class ProductCard extends StatelessWidget {
                     return Container(
                       color: Colors.grey[200],
                       child: const Center(
-                        child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey),
+                        child: Icon(
+                          Icons.image_not_supported,
+                          size: 40,
+                          color: Colors.grey,
+                        ),
                       ),
                     );
                   },
@@ -87,14 +87,14 @@ class ProductCard extends StatelessWidget {
                   const SizedBox(height: 6),
 
                   // PRICE
- CustomText(
-  listing.price == 0
-      ? "Free"
-      : "${formatPrice(listing.price)}",
-  fontSize: 15,
-  fontWeight: FontWeight.w600,
-  color: Colors.purple,
-),
+                  CustomText(
+                    listing.price == 0
+                        ? "Free"
+                        : "${formatPrice(listing.price)}",
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.purple,
+                  ),
 
                   const SizedBox(height: 6),
 
@@ -102,7 +102,11 @@ class ProductCard extends StatelessWidget {
                   if (listing.size.isNotEmpty) ...[
                     Row(
                       children: [
-                        Icon(Icons.straighten, size: 16, color: Colors.purple.shade400),
+                        Icon(
+                          Icons.straighten,
+                          size: 16,
+                          color: Colors.purple.shade400,
+                        ),
                         const SizedBox(width: 4),
                         CustomText(
                           "Size: ${listing.size}",
@@ -121,13 +125,19 @@ class ProductCard extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 16,
-                        backgroundImage: listing.user.image != null
-                            ? NetworkImage(listing.user.image!)
-                            : null,
+                        backgroundImage:
+                            listing.user.image != null
+                                ? NetworkImage(listing.user.image!)
+                                : null,
                         backgroundColor: Colors.purple.withOpacity(0.15),
-                        child: listing.user.image == null
-                            ? const Icon(Icons.person, color: Colors.purple, size: 18)
-                            : null,
+                        child:
+                            listing.user.image == null
+                                ? const Icon(
+                                  Icons.person,
+                                  color: Colors.purple,
+                                  size: 18,
+                                )
+                                : null,
                       ),
                       const SizedBox(width: 10),
                       Expanded(

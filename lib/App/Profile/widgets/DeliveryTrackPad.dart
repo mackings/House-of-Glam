@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Profile/Model/DeliveryTrack.dart';
 import 'package:intl/intl.dart';
 
-
-
 class TrackingCard extends StatelessWidget {
   final MarketTrackingRecord tracking;
   final VoidCallback onAccept;
@@ -48,12 +46,15 @@ class TrackingCard extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: tracking.isDelivered
-                          ? Colors.green.shade600
-                          : Colors.orange.shade600,
+                      color:
+                          tracking.isDelivered
+                              ? Colors.green.shade600
+                              : Colors.orange.shade600,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -73,7 +74,11 @@ class TrackingCard extends StatelessWidget {
               // ✅ Buyer & Vendor info
               Row(
                 children: [
-                  const Icon(Icons.person_outline, size: 18, color: Colors.purple),
+                  const Icon(
+                    Icons.person_outline,
+                    size: 18,
+                    color: Colors.purple,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -86,8 +91,11 @@ class TrackingCard extends StatelessWidget {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  const Icon(Icons.store_mall_directory_outlined,
-                      size: 18, color: Colors.purple),
+                  const Icon(
+                    Icons.store_mall_directory_outlined,
+                    size: 18,
+                    color: Colors.purple,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -103,8 +111,11 @@ class TrackingCard extends StatelessWidget {
 
               // ✅ Amount, Status & Date
               const SizedBox(height: 12),
-              _buildInfoRow('Amount:',
-                  '₦${tracking.amount.toStringAsFixed(2)}', Colors.purple),
+              _buildInfoRow(
+                'Amount:',
+                '₦${tracking.amount.toStringAsFixed(2)}',
+                Colors.purple,
+              ),
               const SizedBox(height: 4),
               _buildInfoRow('Status:', tracking.status, Colors.grey.shade700),
               const SizedBox(height: 4),
@@ -147,17 +158,16 @@ class TrackingCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label,
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              color: Colors.grey.shade600,
-            )),
+        Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: Colors.grey.shade600,
+          ),
+        ),
         Text(
           value,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: color,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w600, color: color),
         ),
       ],
     );

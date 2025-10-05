@@ -6,8 +6,6 @@ import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/Orders/ordercard.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 class OrderHistory extends StatefulWidget {
   const OrderHistory({super.key});
 

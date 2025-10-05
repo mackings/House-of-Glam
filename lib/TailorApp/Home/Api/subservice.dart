@@ -4,7 +4,6 @@ import 'package:hog/TailorApp/Home/Model/submodel.dart';
 import 'package:hog/TailorApp/Home/Model/subpay.dart';
 import 'package:http/http.dart' as http;
 
-
 class SubscriptionService {
   final String baseUrl = "https://hog-ymud.onrender.com/api/v1/subscription";
 
@@ -27,8 +26,7 @@ class SubscriptionService {
         final jsonData = jsonDecode(response.body);
         return SubscriptionPlanResponse.fromJson(jsonData);
       } else {
-        throw Exception(
-            "Failed to fetch subscription plans: ${response.body}");
+        throw Exception("Failed to fetch subscription plans: ${response.body}");
       }
     } catch (e) {
       print("❌ Error fetching subscription plans: $e");
@@ -46,11 +44,7 @@ class SubscriptionService {
       final token = await SecurePrefs.getToken();
       final url = Uri.parse("$baseUrl/subscriptionPayments");
 
-      final body = {
-        "plan": plan,
-        "amount": amount,
-        "billTerm": billTerm,
-      };
+      final body = {"plan": plan, "amount": amount, "billTerm": billTerm};
 
       print("➡️ POST Request: $url with body $body");
 

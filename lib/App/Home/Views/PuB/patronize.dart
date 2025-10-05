@@ -154,7 +154,7 @@ class _PatronizeFormState extends State<PatronizeForm> {
                         fieldKey: "specialInstructions",
                         controller: specialInstructionsController,
                       ),
-                          
+
                       const SizedBox(height: 20),
                       CustomText(
                         "Measurements *",
@@ -164,7 +164,7 @@ class _PatronizeFormState extends State<PatronizeForm> {
                       ),
                       const Divider(),
                       buildMeasurementFields(),
-                          
+
                       const SizedBox(height: 40),
                       CustomButton(title: "Submit Order", onPressed: _submit),
                       const SizedBox(height: 30),

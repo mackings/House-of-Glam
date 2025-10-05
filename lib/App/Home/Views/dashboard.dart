@@ -112,8 +112,7 @@ class _HomeState extends ConsumerState<Home> {
             await Future.wait([_fetchCategories(), _fetchTailors()]);
           },
           child: SingleChildScrollView(
-            physics:
-                const AlwaysScrollableScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

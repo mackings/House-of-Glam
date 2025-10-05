@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Admin/Api/billingService.dart';
 import 'package:hog/components/texts.dart';
 
-
 class SetBilling extends StatefulWidget {
   const SetBilling({super.key});
 
@@ -73,42 +72,45 @@ class _SetBillingState extends State<SetBilling> {
         backgroundColor: Colors.purple,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator(color: Colors.purple))
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  if (_currentFee != null)
-                    CustomText(
-                      "${_currentFee!.toStringAsFixed(2)}",
-                      fontSize: 58,
-                      color: Colors.purple,
-                    ),
-                  const SizedBox(height: 40),
-                  TextField(
-                    controller: _feeController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: "Set new percentage",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+      body:
+          _loading
+              ? const Center(
+                child: CircularProgressIndicator(color: Colors.purple),
+              )
+              : Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    if (_currentFee != null)
+                      CustomText(
+                        "${_currentFee!.toStringAsFixed(2)}",
+                        fontSize: 58,
+                        color: Colors.purple,
+                      ),
+                    const SizedBox(height: 40),
+                    TextField(
+                      controller: _feeController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: "Set new percentage",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _submitFee,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 50),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _submitFee,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 50),
+                      ),
+                      child: const Text("Update Fee"),
                     ),
-                    child: const Text("Update Fee"),
-                  )
-                ],
+                  ],
+                ),
               ),
-            ),
     );
   }
 }

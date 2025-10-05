@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 class ProfileMenuItem extends StatelessWidget {
   final IconData icon;
   final String text;
@@ -37,27 +35,19 @@ class ProfileMenuItem extends StatelessWidget {
                     children: [
                       Icon(icon, color: color, size: 24),
                       const SizedBox(width: 12),
-                      CustomText(
-                        text,
-                        fontSize: 16,
-                        color: color,
-                      ),
+                      CustomText(text, fontSize: 16, color: color),
                     ],
                   ),
-      
+
                   // 👉 Trailing arrow
                   const Icon(Icons.chevron_right, color: Colors.grey),
                 ],
               ),
             ),
           ),
-      
+
           // ➖ Divider below each container
-          const Divider(
-            height: 1,
-            thickness: 0.5,
-            color: Colors.grey,
-          ),
+          const Divider(height: 1, thickness: 0.5, color: Colors.grey),
         ],
       ),
     );

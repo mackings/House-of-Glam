@@ -5,8 +5,6 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
-
-
 class QuotationBottomSheet extends StatefulWidget {
   final String materialId;
 

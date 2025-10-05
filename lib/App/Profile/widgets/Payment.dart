@@ -11,14 +11,19 @@ class PaymentWebView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const CustomText("Complete Payment",color: Colors.white,fontSize: 18,),
+        title: const CustomText(
+          "Complete Payment",
+          color: Colors.white,
+          fontSize: 18,
+        ),
         iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: Colors.purple,
       ),
       body: WebViewWidget(
-        controller: WebViewController()
-          ..setJavaScriptMode(JavaScriptMode.unrestricted)
-          ..loadRequest(Uri.parse(paymentUrl)),
+        controller:
+            WebViewController()
+              ..setJavaScriptMode(JavaScriptMode.unrestricted)
+              ..loadRequest(Uri.parse(paymentUrl)),
       ),
     );
   }

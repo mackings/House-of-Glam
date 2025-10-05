@@ -1,10 +1,7 @@
-
-
 import 'dart:convert';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Auth/Model/trackingmodel.dart';
 import 'package:http/http.dart' as http;
-
 
 class TrackingService {
   static const String baseUrl = "https://hog-ymud.onrender.com/api/v1";
@@ -32,8 +29,6 @@ class TrackingService {
     }
     return null;
   }
-
-
 
   /// 🔹 Update material through tracking
   static Future<bool> updateMaterialThroughTracking(int trackingNumber) async {
@@ -63,5 +58,4 @@ class TrackingService {
     }
     return false;
   }
-  
 }

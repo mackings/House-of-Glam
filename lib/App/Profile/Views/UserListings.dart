@@ -3,7 +3,6 @@ import 'package:hog/App/Profile/Api/ListingService.dart';
 import 'package:hog/App/Profile/Model/UploadedListings.dart';
 import 'package:hog/App/Profile/widgets/uploadedListings.dart';
 
-
 class Userlistings extends StatefulWidget {
   const Userlistings({super.key});
 
@@ -30,18 +29,26 @@ class _UserlistingsState extends State<Userlistings> {
   Future<void> _deleteListing(String id) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Delete Listing"),
-        content: const Text("Are you sure you want to delete this listing?"),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text("Cancel")),
-          TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text("Delete", style: TextStyle(color: Colors.red))),
-        ],
-      ),
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Delete Listing"),
+            content: const Text(
+              "Are you sure you want to delete this listing?",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text("Cancel"),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text(
+                  "Delete",
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
     );
 
     if (confirm == true) {
@@ -73,28 +80,29 @@ class _UserlistingsState extends State<Userlistings> {
         ),
         backgroundColor: Colors.purple,
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : listings.isEmpty
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : listings.isEmpty
               ? const Center(
-                  child: Text(
-                    "No listings yet.",
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _fetchListings,
-                  child: ListView.builder(
-                    itemCount: listings.length,
-                    itemBuilder: (context, index) {
-                      final listing = listings[index];
-                      return UserListingCard(
-                        listing: listing,
-                        onDelete: () => _deleteListing(listing.id),
-                      );
-                    },
-                  ),
+                child: Text(
+                  "No listings yet.",
+                  style: TextStyle(color: Colors.grey),
                 ),
+              )
+              : RefreshIndicator(
+                onRefresh: _fetchListings,
+                child: ListView.builder(
+                  itemCount: listings.length,
+                  itemBuilder: (context, index) {
+                    final listing = listings[index];
+                    return UserListingCard(
+                      listing: listing,
+                      onDelete: () => _deleteListing(listing.id),
+                    );
+                  },
+                ),
+              ),
     );
   }
 }

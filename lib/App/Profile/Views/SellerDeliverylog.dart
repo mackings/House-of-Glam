@@ -32,9 +32,9 @@ class _SellerDeliveryState extends State<SellerDelivery> {
       });
     } catch (e) {
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('❌ Error: $e')));
     }
   }
 
@@ -51,24 +51,20 @@ class _SellerDeliveryState extends State<SellerDelivery> {
         backgroundColor: Colors.purple,
       ),
       body: SafeArea(
-        child: _loading
-            ? const Center(
-                child: CircularProgressIndicator(color: Colors.purple),
-              )
-            : _records.isEmpty
+        child:
+            _loading
                 ? const Center(
-                    child: CustomText("No delivery records yet."),
-                  )
+                  child: CircularProgressIndicator(color: Colors.purple),
+                )
+                : _records.isEmpty
+                ? const Center(child: CustomText("No delivery records yet."))
                 : ListView.builder(
-                    itemCount: _records.length,
-                    itemBuilder: (context, index) {
-                      final tracking = _records[index];
-                      return TrackingCard(
-                        tracking: tracking,
-                        onAccept: () {},
-                      );
-                    },
-                  ),
+                  itemCount: _records.length,
+                  itemBuilder: (context, index) {
+                    final tracking = _records[index];
+                    return TrackingCard(tracking: tracking, onAccept: () {});
+                  },
+                ),
       ),
     );
   }

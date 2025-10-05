@@ -14,16 +14,17 @@ class WorkCard extends StatelessWidget {
   void _showFullImage(BuildContext context, String imageUrl) {
     showDialog(
       context: context,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.black,
-        insetPadding: const EdgeInsets.all(10),
-        child: InteractiveViewer(
-          clipBehavior: Clip.none,
-          minScale: 0.8,
-          maxScale: 4.0,
-          child: Image.network(imageUrl, fit: BoxFit.contain),
-        ),
-      ),
+      builder:
+          (_) => Dialog(
+            backgroundColor: Colors.black,
+            insetPadding: const EdgeInsets.all(10),
+            child: InteractiveViewer(
+              clipBehavior: Clip.none,
+              minScale: 0.8,
+              maxScale: 4.0,
+              child: Image.network(imageUrl, fit: BoxFit.contain),
+            ),
+          ),
     );
   }
 
@@ -154,7 +155,8 @@ class WorkCard extends StatelessWidget {
                   // Show subscription plan name as a row
                   WorkDetailRow(
                     icon: Icons.star,
-                    label: "Subscription Plan: ${work.user?.subscriptionPlan ?? 'Free'}",
+                    label:
+                        "Subscription Plan: ${work.user?.subscriptionPlan ?? 'Free'}",
                     smallText: true,
                   ),
 
@@ -177,4 +179,3 @@ class WorkCard extends StatelessWidget {
     );
   }
 }
-

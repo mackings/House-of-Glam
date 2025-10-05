@@ -19,10 +19,7 @@ class FullImageView extends StatelessWidget {
           panEnabled: true,
           minScale: 0.8,
           maxScale: 4.0,
-          child: Image.network(
-            imageUrl,
-            fit: BoxFit.contain,
-          ),
+          child: Image.network(imageUrl, fit: BoxFit.contain),
         ),
       ),
     );

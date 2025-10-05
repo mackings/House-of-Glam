@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Profile/Model/UploadedListings.dart';
 import 'package:intl/intl.dart';
 
-
-
 class UserListingCard extends StatelessWidget {
   final UserListing listing;
   final VoidCallback onDelete;
@@ -85,14 +83,24 @@ class UserListingCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         "Size: ${listing.size}",
-                        style: const TextStyle(fontSize: 13, color: Colors.black54),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                        ),
                       ),
                       const SizedBox(width: 12),
-                      Icon(Icons.info_outline, size: 14, color: Colors.grey[700]),
+                      Icon(
+                        Icons.info_outline,
+                        size: 14,
+                        color: Colors.grey[700],
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         listing.condition,
-                        style: const TextStyle(fontSize: 13, color: Colors.black54),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                        ),
                       ),
                     ],
                   ),
@@ -102,11 +110,18 @@ class UserListingCard extends StatelessWidget {
                   // Date Uploaded
                   Row(
                     children: [
-                      Icon(Icons.calendar_today, size: 14, color: Colors.grey[700]),
+                      Icon(
+                        Icons.calendar_today,
+                        size: 14,
+                        color: Colors.grey[700],
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         "Uploaded: ${DateFormat.yMMMd().format(listing.createdAt)}",
-                        style: const TextStyle(fontSize: 12, color: Colors.black54),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black54,
+                        ),
                       ),
                     ],
                   ),
@@ -120,28 +135,30 @@ class UserListingCard extends StatelessWidget {
               onPressed: () {
                 showDialog(
                   context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text("Delete Listing"),
-                    content: Text(
-                        "Are you sure you want to delete '${listing.title}'?"),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Cancel"),
-                      ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
+                  builder:
+                      (_) => AlertDialog(
+                        title: const Text("Delete Listing"),
+                        content: Text(
+                          "Are you sure you want to delete '${listing.title}'?",
                         ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                          onDelete();
-                        },
-                        child: const Text("Delete"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("Cancel"),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                              onDelete();
+                            },
+                            child: const Text("Delete"),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
                 );
               },
             ),
