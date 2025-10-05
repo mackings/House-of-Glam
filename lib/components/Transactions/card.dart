@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Home/Model/TransModel.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/constants/currency.dart';
 import 'package:intl/intl.dart';
 
 class TransactionCard extends StatelessWidget {
@@ -57,10 +58,15 @@ class TransactionCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomText(
-                    "₦${formatAmount(txn.amountPaid!.toInt())}",
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                  GestureDetector(
+                    onTap: () {
+                      print(currencySymbol);
+                    },
+                    child: CustomText(
+                      "${currencySymbol}${formatAmount(txn.amountPaid!.toInt())}",
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
 
                   const SizedBox(height: 6),

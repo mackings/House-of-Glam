@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Profile/Model/UploadedListings.dart';
+import 'package:hog/constants/currency.dart';
 import 'package:intl/intl.dart';
 
 class UserListingCard extends StatelessWidget {
@@ -15,7 +16,7 @@ class UserListingCard extends StatelessWidget {
   String formatPrice(double price) {
     if (price == 0) return "Free";
     final formatter = NumberFormat('#,###');
-    return "₦${formatter.format(price)}";
+    return "${currencySymbol}${formatter.format(price)}";
   }
 
   @override

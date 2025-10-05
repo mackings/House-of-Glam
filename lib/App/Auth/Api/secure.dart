@@ -13,6 +13,9 @@ class SecurePrefs {
   static const String _userDataKey = "user_data";
   static const String _adminSettingsKey = "admin_settings";
 
+  // ✅ NEW: Currency Key
+  static const String _userCurrencyKey = "user_currency";
+
   // -------------------------
   // AUTH TOKEN
   // -------------------------
@@ -106,7 +109,7 @@ class SecurePrefs {
     await _storage.delete(key: _userDataKey);
   }
 
-  /// ✅ Convenience: return only the user's role (null if missing)
+  /// ✅ Convenience: return only the user's role
   static Future<String?> getUserRole() async {
     final userJson = await _storage.read(key: _userDataKey);
     if (userJson != null) {
@@ -115,11 +118,25 @@ class SecurePrefs {
         final role = userMap['role'];
         return role != null ? role.toString() : null;
       } catch (e) {
-        // invalid JSON or unexpected format
         return null;
       }
     }
     return null;
+  }
+
+  // -------------------------
+  // ✅ USER CURRENCY
+  // -------------------------
+  static Future<void> saveUserCurrency(String currency) async {
+    await _storage.write(key: _userCurrencyKey, value: currency);
+  }
+
+  static Future<String?> getUserCurrency() async {
+    return await _storage.read(key: _userCurrencyKey);
+  }
+
+  static Future<void> clearUserCurrency() async {
+    await _storage.delete(key: _userCurrencyKey);
   }
 
   // -------------------------

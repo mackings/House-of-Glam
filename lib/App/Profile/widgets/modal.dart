@@ -4,6 +4,7 @@ import 'package:hog/App/Profile/Model/SellerListing.dart';
 import 'package:hog/App/Profile/widgets/FullImageView.dart';
 import 'package:hog/App/Profile/widgets/Payment.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/constants/currency.dart';
 import 'package:intl/intl.dart';
 
 void showProductDetails(BuildContext context, SellerListing listing) {
@@ -127,7 +128,7 @@ void showProductDetails(BuildContext context, SellerListing listing) {
               CustomText(
                 listing.price == 0
                     ? "Free"
-                    : "₦${priceFormatter.format(listing.price)}",
+                    : "${currencySymbol}${priceFormatter.format(listing.price)}",
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.purple,

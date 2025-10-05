@@ -153,12 +153,12 @@ class WorkCard extends StatelessWidget {
                   const SizedBox(height: 6),
 
                   // Show subscription plan name as a row
-                  WorkDetailRow(
-                    icon: Icons.star,
-                    label:
-                        "Subscription Plan: ${work.user?.subscriptionPlan ?? 'Free'}",
-                    smallText: true,
-                  ),
+                  // WorkDetailRow(
+                  //   icon: Icons.star,
+                  //   label:
+                  //       "Subscription Plan: ${work.user?.subscriptionPlan ?? 'Free'}",
+                  //   smallText: true,
+                  // ),
 
                   const SizedBox(height: 10),
                   if (work.user != null)

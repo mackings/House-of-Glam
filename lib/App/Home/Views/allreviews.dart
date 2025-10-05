@@ -246,7 +246,7 @@ import 'package:intl/intl.dart' show NumberFormat;
 //               ],
 //             ),
 //             Text(
-//               "₦${currencyFormat.format(review.totalCost)}",
+//               "${currencySymbol}${currencyFormat.format(review.totalCost)}",
 //               style: const TextStyle(
 //                   fontWeight: FontWeight.bold, fontSize: 15),
 //             ),

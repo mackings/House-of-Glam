@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Profile/Model/SellerListing.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/constants/currency.dart';
 import 'package:intl/intl.dart';
 
 class ProductCard extends StatelessWidget {
@@ -11,7 +12,7 @@ class ProductCard extends StatelessWidget {
 
   String formatPrice(double price) {
     final formatter = NumberFormat('#,###');
-    return "₦${formatter.format(price)}";
+    return "${currencySymbol}${formatter.format(price)}";
   }
 
   String formatDate(DateTime date) {

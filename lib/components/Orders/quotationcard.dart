@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Home/Model/reviewModel.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/constants/currency.dart';
 import 'package:intl/intl.dart';
 
 class QuotationCard extends StatelessWidget {
@@ -130,7 +131,7 @@ class QuotationCard extends StatelessWidget {
                   const Icon(Icons.checkroom, size: 16, color: Colors.purple),
                   const SizedBox(width: 4),
                   CustomText(
-                    "₦${formatAmount(review.materialTotalCost)}",
+                    "${currencySymbol}${formatAmount(review.materialTotalCost)}",
                     fontSize: 12,
                   ),
                 ],
@@ -140,7 +141,7 @@ class QuotationCard extends StatelessWidget {
                   const Icon(Icons.handyman, size: 16, color: Colors.purple),
                   const SizedBox(width: 4),
                   CustomText(
-                    "Charge: ₦${formatAmount(review.workmanshipTotalCost)}",
+                    "Charge: $currencySymbol${formatAmount(review.workmanshipTotalCost)}",
                     fontSize: 12,
                   ),
                 ],
@@ -154,7 +155,7 @@ class QuotationCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   CustomText(
-                    "Total: ₦${formatAmount(review.totalCost)}",
+                    "Total: $currencySymbol${formatAmount(review.totalCost)}",
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),

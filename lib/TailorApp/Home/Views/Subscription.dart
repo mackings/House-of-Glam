@@ -4,6 +4,7 @@ import 'package:hog/TailorApp/Home/Api/subservice.dart';
 import 'package:hog/TailorApp/Home/Model/submodel.dart';
 import 'package:hog/TailorApp/Home/Views/payment.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/constants/currency.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:intl/intl.dart';
@@ -248,7 +249,7 @@ class _SubscriptionState extends State<Subscription> {
                               ),
                               const SizedBox(height: 8),
                               CustomText(
-                                "₦$formattedAmount / ${plan.duration}",
+                                "${currencySymbol}$formattedAmount / ${plan.duration}",
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.purple,
