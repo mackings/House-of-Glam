@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Admin/Views/adminHome.dart';
+import 'package:hog/App/Admin/Views/billing.dart';
+import 'package:hog/App/Profile/Views/Delivery.dart';
+import 'package:hog/App/Profile/Views/SellerDeliverylog.dart';
 import 'package:hog/App/Profile/Views/UserListings.dart';
 import 'package:hog/App/Profile/Views/marketPlace.dart';
 import 'package:hog/App/Profile/widgets/profileMenu.dart';
 import 'package:hog/components/Navigator.dart';
-
-
 
 class UserProfile extends StatefulWidget {
   const UserProfile({super.key});
@@ -48,17 +49,37 @@ class _UserProfileState extends State<UserProfile> {
                 },
               ),
 
+           ProfileMenuItem(
+                icon: Icons.shopping_bag_outlined,
+                text: "SendOuts",
+                onTap: () {
+                  Nav.push(context, SellerDelivery());
+                },
+              ),
+
+              
+
               ProfileMenuItem(
                 icon: Icons.delivery_dining,
                 text: "Deliveries",
-                onTap: () {},
+                onTap: () {
+                  Nav.push(context, MarketDelivery());
+                },
               ),
 
               ProfileMenuItem(
                 icon: Icons.admin_panel_settings,
-                text: "Admin",
+                text: "Listing Approvals",
                 onTap: () {
                   Nav.push(context, AdminHome());
+                },
+              ),
+
+            ProfileMenuItem(
+                icon: Icons.money,
+                text: "Billing",
+                onTap: () {
+                  Nav.push(context, SetBilling());
                 },
               ),
             ],
