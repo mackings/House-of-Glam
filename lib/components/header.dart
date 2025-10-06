@@ -67,13 +67,28 @@ class Header extends StatelessWidget {
         ),
 
         // Right side: Notifications Bell
-        IconButton(
-          onPressed: onNotificationTap ?? () {},
-          icon: const Icon(
-            Icons.notifications_none,
-            size: 28,
-            color: Colors.black87,
-          ),
+        Row(
+          children: [
+            IconButton(
+              onPressed: onNotificationTap ?? () {},
+              icon: const Icon(
+                Icons.delivery_dining_outlined,
+                size: 28,
+                color: Colors.black87,
+              ),
+            ),
+
+            IconButton(
+              onPressed: (){
+                 Nav.push(context, UserProfile());
+              },
+              icon: const Icon(
+                Icons.favorite_border_outlined,
+                size: 28,
+                color: Colors.black87,
+              ),
+            ),
+          ],
         ),
       ],
     );

@@ -48,7 +48,7 @@ class _UserProfileState extends State<UserProfile> {
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
-          "Profile",
+          "Preloved",
           style: TextStyle(fontSize: 18, color: Colors.white),
         ),
         backgroundColor: Colors.purple,

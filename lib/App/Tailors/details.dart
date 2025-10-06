@@ -99,7 +99,9 @@ class _DetailsState extends State<Details> {
 
             // Details with icons
             _buildInfoTile(Icons.email, "Business Email", vendor.businessEmail),
-            _buildInfoTile(Icons.phone, "Business Phone", vendor.businessPhone),
+            _buildInfoTile(Icons.phone, "Business Phone", ""),
+
+            //vendor.businessPhone
             _buildInfoTile(
               Icons.location_on,
               "Business Address",
@@ -122,11 +124,11 @@ class _DetailsState extends State<Details> {
               "Owner Email",
               userProfile.email,
             ),
-            _buildInfoTile(
-              Icons.person,
-              "Owner Phone",
-              userProfile.phoneNumber,
-            ),
+            // _buildInfoTile(
+            //   Icons.person,
+            //   "Owner Phone",
+            //   userProfile.phoneNumber,
+            // ),
           ],
         ),
       ),
