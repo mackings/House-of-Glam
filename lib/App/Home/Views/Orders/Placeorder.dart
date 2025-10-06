@@ -278,7 +278,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
 
               const SizedBox(height: 20),
               CustomText(
-                "Measurements*",
+                "Measurements (CM)*",
                 color: Colors.black,
                 fontSize: 18,
                 fontWeight: FontWeight.w500,

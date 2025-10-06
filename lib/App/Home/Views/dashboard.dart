@@ -7,6 +7,7 @@ import 'package:hog/App/Home/Model/tailor.dart';
 import 'package:hog/App/Home/Views/alltailors.dart';
 import 'package:hog/App/Home/Views/tracking.dart';
 import 'package:hog/App/Tailors/details.dart';
+import 'package:hog/TailorApp/Home/Views/Tailorbusiness.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/Tailors/tailorcard.dart';
 import 'package:hog/components/header.dart';
@@ -155,10 +156,15 @@ class _HomeState extends ConsumerState<Home> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    CustomText(
-                      "Top Categories",
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                    GestureDetector(
+                      onTap: () {
+                        Nav.push(context, TailorRegistrationPage());
+                      },
+                      child: CustomText(
+                        "Top Categories",
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),

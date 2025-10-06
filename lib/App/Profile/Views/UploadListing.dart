@@ -263,7 +263,7 @@ class _UploadlistingState extends State<Uploadlisting> {
 
               CustomDropdown(
                 label: "Condition",
-                options: const ["Newly Sewed", "Used"],
+                options: const ["Newly", "Preloved","Newly Sewed"],
                 selectedValue: condition,
                 onChanged:
                     (val) => setState(() => condition = val ?? "Newly Sewed"),
@@ -272,7 +272,7 @@ class _UploadlistingState extends State<Uploadlisting> {
 
               CustomDropdown(
                 label: "Status",
-                options: const ["Available", "Out of Stock"],
+                options: const ["Available", "Incoming"],
                 selectedValue: status,
                 onChanged: (val) => setState(() => status = val ?? "Available"),
               ),
