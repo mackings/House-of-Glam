@@ -10,6 +10,8 @@ import 'package:hog/App/Profile/Views/marketPlace.dart';
 import 'package:hog/App/Profile/widgets/profileMenu.dart';
 import 'package:hog/components/Navigator.dart';
 
+
+
 class UserProfile extends StatefulWidget {
   const UserProfile({super.key});
 

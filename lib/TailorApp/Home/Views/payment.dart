@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hog/components/texts.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebViewScreen extends StatefulWidget {
@@ -33,10 +34,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.purple,
-        title: const Text(
-          "Complete Subscription",
-          style: TextStyle(color: Colors.white),
-        ),
+        title: CustomText("Complete Subscription",color: Colors.white,fontSize: 18,),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Stack(
