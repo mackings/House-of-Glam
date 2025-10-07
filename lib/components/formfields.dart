@@ -7,6 +7,7 @@ final obscureTextProvider = StateProvider.family<bool, String>(
   (ref, fieldKey) => true,
 );
 
+
 class CustomTextField extends ConsumerWidget {
   final String title;
   final String hintText;
@@ -19,11 +20,16 @@ class CustomTextField extends ConsumerWidget {
   final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onChanged;
 
-  /// Dropdown mode
+  /// Dropdown mode for other purposes
   final List<String>? dropdownItems;
   final String? selectedValue;
 
-  /// 🔥 NEW: Control padding for row layouts
+  /// Country code selector
+  final bool enableCountryCode;                 // ✅ New
+  final List<String> countryCodes;              // ✅ New
+  final String? selectedCountryCode;            // ✅ New
+  final ValueChanged<String?>? onCountryChanged; // ✅ New
+
   final bool isCompact;
 
   const CustomTextField({
@@ -40,7 +46,11 @@ class CustomTextField extends ConsumerWidget {
     this.onChanged,
     this.dropdownItems,
     this.selectedValue,
-    this.isCompact = false, // 🔥 Default to false for backward compatibility
+    this.isCompact = false,
+    this.enableCountryCode = false,               // ✅ default off
+    this.countryCodes = const ['+1', '+44', '+234', '+91'], // ✅ sample
+    this.selectedCountryCode,
+    this.onCountryChanged,
   }) : super(key: key);
 
   @override
@@ -49,80 +59,115 @@ class CustomTextField extends ConsumerWidget {
     final obscureText = ref.watch(obscureTextProvider(fieldKey));
 
     return Padding(
-      padding:
-          isCompact
-              ? const EdgeInsets.only(bottom: 10) // 🔥 Reduced padding for rows
-              : const EdgeInsets.symmetric(vertical: 10),
+      padding: isCompact
+          ? const EdgeInsets.only(bottom: 10)
+          : const EdgeInsets.symmetric(vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CustomText(title, fontSize: 15, fontWeight: FontWeight.w500),
           const SizedBox(height: 8),
 
-          /// If dropdownItems is provided, show dropdown
+          /// If dropdownItems is provided (like a normal dropdown field)
           dropdownItems != null
               ? DropdownButtonFormField<String>(
-                value: selectedValue,
-                decoration: InputDecoration(
-                  hintText: hintText,
-                  prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  value: selectedValue,
+                  decoration: InputDecoration(
+                    hintText: hintText,
+                    prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 15,
+                      horizontal: screenWidth * 0.04,
+                    ),
                   ),
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 15,
-                    horizontal: screenWidth * 0.04,
-                  ),
-                ),
-                items:
-                    dropdownItems!
-                        .map(
-                          (item) => DropdownMenuItem<String>(
-                            value: item,
-                            child: Text(item),
-                          ),
-                        )
-                        .toList(),
-                onChanged: (value) {
-                  if (controller != null) controller!.text = value ?? '';
-                  if (onChanged != null && value != null) onChanged!(value);
-                },
-              )
-              /// Else render normal TextField
-              : TextFormField(
-                controller: controller,
-                validator: validator,
-                keyboardType: keyboardType,
-                inputFormatters: inputFormatters,
-                obscureText: isPassword ? obscureText : false,
-                onChanged: onChanged,
-                decoration: InputDecoration(
-                  hintText: hintText,
-                  prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-                  suffixIcon:
-                      isPassword
-                          ? IconButton(
-                            icon: Icon(
-                              obscureText
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
+                  items: dropdownItems!
+                      .map(
+                        (item) => DropdownMenuItem<String>(
+                          value: item,
+                          child: Text(item),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (controller != null) controller!.text = value ?? '';
+                    if (onChanged != null && value != null) onChanged!(value);
+                  },
+                )
+
+              /// Normal TextField (with optional country code)
+              : Row(
+                  children: [
+                    if (enableCountryCode) ...[
+                      SizedBox(
+                        width: 100,
+                        child: DropdownButtonFormField<String>(
+                          value: selectedCountryCode ?? countryCodes.first,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            onPressed: () {
-                              ref
-                                  .read(obscureTextProvider(fieldKey).notifier)
-                                  .state = !obscureText;
-                            },
-                          )
-                          : null,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 15,
-                    horizontal: screenWidth * 0.04,
-                  ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 15,
+                              horizontal: 10,
+                            ),
+                          ),
+                          items: countryCodes
+                              .map(
+                                (code) => DropdownMenuItem<String>(
+                                  value: code,
+                                  child: Text(code),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: onCountryChanged,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                    ],
+
+                    /// Phone number input
+                    Expanded(
+                      child: TextFormField(
+                        controller: controller,
+                        validator: validator,
+                        keyboardType: keyboardType,
+                        inputFormatters: inputFormatters,
+                        obscureText: isPassword ? obscureText : false,
+                        onChanged: onChanged,
+                        decoration: InputDecoration(
+                          hintText: hintText,
+                          prefixIcon:
+                              prefixIcon != null ? Icon(prefixIcon) : null,
+                          suffixIcon: isPassword
+                              ? IconButton(
+                                  icon: Icon(
+                                    obscureText
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                  ),
+                                  onPressed: () {
+                                    ref
+                                        .read(obscureTextProvider(fieldKey)
+                                            .notifier)
+                                        .state = !obscureText;
+                                  },
+                                )
+                              : null,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 15,
+                            horizontal: screenWidth * 0.04,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
         ],
       ),
     );

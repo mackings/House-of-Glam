@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Auth/Api/authclass.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
 import 'package:hog/App/Auth/Views/verify.dart';
+import 'package:hog/App/Auth/widgets/countryCodes.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/alerts.dart';
 import 'package:hog/components/button.dart';
@@ -32,8 +33,12 @@ class _SignupState extends ConsumerState<Signup> {
 
   bool isLoading = false;
   bool isTailor = false;
+
   List<String> countries = [];
   String? selectedCountry;
+
+  // ✅ Track selected country code for phone
+  String selectedCountryCode = '+234'; // default to Nigeria
 
   Future<void> loadCountries() async {
     final String response = await rootBundle.loadString(
@@ -86,13 +91,16 @@ class _SignupState extends ConsumerState<Signup> {
       return;
     }
 
+    // ✅ Combine selected country code with phone number
+    final formattedPhone = '$selectedCountryCode$phone';
+
     setState(() => isLoading = true);
 
     final response = await ApiService.signup(
       fullName: fullname,
       email: email,
       password: password,
-      phoneNumber: phone,
+      phoneNumber: formattedPhone, // ✅ send full phone with country code
       address: address,
       country: country,
       role: isTailor ? "tailor" : "user",
@@ -147,6 +155,7 @@ class _SignupState extends ConsumerState<Signup> {
                   keyboardType: TextInputType.emailAddress,
                 ),
 
+                // ✅ Phone field with country code dropdown
                 CustomTextField(
                   title: "Phone",
                   hintText: "Enter your phone number",
@@ -154,15 +163,22 @@ class _SignupState extends ConsumerState<Signup> {
                   fieldKey: "phone",
                   controller: phoneController,
                   keyboardType: TextInputType.phone,
+                  enableCountryCode: true,
+                  countryCodes: africanAndUkCountryCodes,
+                  selectedCountryCode: selectedCountryCode,
+                  onCountryChanged: (code) {
+                    setState(() {
+                      selectedCountryCode = code ?? '+234';
+                    });
+                  },
                 ),
 
-                // 🔥 FIXED: Responsive Address/Country Layout
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final isWideScreen = constraints.maxWidth > 600;
 
                     if (isWideScreen) {
-                      // Desktop/Tablet: Side by side
+                      // Desktop/Tablet layout
                       return IntrinsicHeight(
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,7 +212,7 @@ class _SignupState extends ConsumerState<Signup> {
                       );
                     }
 
-                    // Mobile: Stacked vertically
+                    // Mobile layout
                     return Column(
                       children: [
                         CustomTextField(
