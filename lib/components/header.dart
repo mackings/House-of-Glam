@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Profile/profileHome.dart';
+import 'package:hog/App/UserProfile/Views/UserProfile.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:intl/intl.dart';
 
@@ -38,7 +39,7 @@ class Header extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: () {
-                Nav.push(context, UserProfile());
+                Nav.push(context, UserProfileView());
               },
               child: CircleAvatar(
                 radius: 24,
@@ -83,7 +84,7 @@ class Header extends StatelessWidget {
                  Nav.push(context, UserProfile());
               },
               icon: const Icon(
-                Icons.favorite_border_outlined,
+                Icons.shopping_bag,
                 size: 28,
                 color: Colors.black87,
               ),
