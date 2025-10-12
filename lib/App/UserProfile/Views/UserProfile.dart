@@ -3,6 +3,8 @@ import 'package:hog/App/UserProfile/Api/profileViewS.dart';
 import 'package:hog/App/UserProfile/model/profileViewModel.dart';
 import 'package:hog/App/UserProfile/widgets/ProfileCards.dart';
 import 'package:hog/components/texts.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 
 
 
@@ -16,6 +18,30 @@ class UserProfileView extends StatefulWidget {
 class _UserProfileViewState extends State<UserProfileView> {
   UserProfile? _userProfile;
   bool _loading = true;
+
+
+  Future<void> _launchWhatsApp(String phone) async {
+  final url = Uri.parse("https://wa.me/$phone");
+  if (await canLaunchUrl(url)) {
+    await launchUrl(url, mode: LaunchMode.externalApplication);
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Could not open WhatsApp")),
+    );
+  }
+}
+
+Future<void> _launchEmail(String email) async {
+  final url = Uri.parse("mailto:$email");
+  if (await canLaunchUrl(url)) {
+    await launchUrl(url, mode: LaunchMode.externalApplication);
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Could not open Email app")),
+    );
+  }
+}
+
 
   @override
   void initState() {
@@ -102,7 +128,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                         ),
                         const SizedBox(height: 20),
 
-                        // Verified Badge
+                        // ✅ Verified Badge
                         Container(
                           padding: const EdgeInsets.symmetric(
                               vertical: 8, horizontal: 16),
@@ -123,7 +149,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                         ),
 
                         const SizedBox(height: 25),
-          
+                        const Divider(color: Colors.black12, thickness: 1),
 
                         // 🧱 Info Cards
                         const SizedBox(height: 15),
@@ -162,6 +188,27 @@ class _UserProfileViewState extends State<UserProfileView> {
                           title: "Wallet Balance",
                           value: "₦${_userProfile!.wallet ?? 0}",
                         ),
+
+
+                        const SizedBox(height: 10),
+
+GestureDetector(
+  onTap: () => _launchWhatsApp("2348137159066"), 
+  child: ProfileInfoCard(
+    icon: Icons.chat_bubble,
+    title: "WhatsApp Support",
+    value: "Admin",
+  ),
+),
+GestureDetector(
+  onTap: () => _launchEmail("macsonline500@gmail.com"),
+  child: ProfileInfoCard(
+    icon: Icons.support_agent,
+    title: "Email Support",
+    value: "Regional Admin",
+  ),
+),
+
                       ],
                     ),
                   ),
