@@ -50,7 +50,7 @@ class _UserProfileState extends State<UserProfile> {
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
-          "Preloved",
+          "Market place",
           style: TextStyle(fontSize: 18, color: Colors.white),
         ),
         backgroundColor: Colors.purple,
@@ -62,8 +62,8 @@ class _UserProfileState extends State<UserProfile> {
               const SizedBox(height: 20),
 
               ProfileMenuItem(
-                icon: Icons.laptop_mac_rounded,
-                text: "Market Place",
+                icon: Icons.shop,
+                text: "Shop",
                 onTap: () {
                   Nav.push(context, const MarketPlace());
                 },
