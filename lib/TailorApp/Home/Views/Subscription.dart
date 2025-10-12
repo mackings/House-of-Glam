@@ -257,7 +257,7 @@ Widget build(BuildContext context) {
                                 const SizedBox(height: 6),
                                 CustomText(
                                  // "₦$formattedAmount",
-                                 "${Cur} $formattedAmount",
+                                 "${currencySymbol} $formattedAmount",
                                   fontSize: 15,
                                   color: Colors.purple,
                                   fontWeight: FontWeight.bold,

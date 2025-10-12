@@ -4,7 +4,7 @@ class UserProfile {
   final String? email;
   final bool? isVerified;
   final bool? isBlocked;
-  final int? wallet;
+  //final int? wallet;
   final String? billImage;
   final String? address;
   final String? subscriptionPlan;
@@ -20,7 +20,7 @@ class UserProfile {
     this.email,
     this.isVerified,
     this.isBlocked,
-    this.wallet,
+    //this.wallet,
     this.billImage,
     this.address,
     this.subscriptionPlan,
@@ -38,7 +38,7 @@ class UserProfile {
       email: json["email"],
       isVerified: json["isVerified"],
       isBlocked: json["isBlocked"],
-      wallet: json["wallet"],
+     // wallet: json["wallet"],
       billImage: json["billImage"],
       address: json["address"],
       subscriptionPlan: json["subscriptionPlan"],

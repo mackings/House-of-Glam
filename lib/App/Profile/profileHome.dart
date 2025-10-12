@@ -116,7 +116,7 @@ class _UserProfileState extends State<UserProfile> {
               if (isAdmin)
                 ProfileMenuItem(
                   icon: Icons.money,
-                  text: "Billing",
+                  text: "Commission",
                   onTap: () {
                     Nav.push(context, const SetBilling());
                   },
