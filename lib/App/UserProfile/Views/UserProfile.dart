@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:hog/App/UserProfile/Api/profileViewS.dart';
 import 'package:hog/App/UserProfile/model/profileViewModel.dart';
 import 'package:hog/App/UserProfile/widgets/ProfileCards.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/texts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UserProfileView extends StatefulWidget {
@@ -36,6 +39,34 @@ class _UserProfileViewState extends State<UserProfileView> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Could not open Email app")));
+    }
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final imageFile = File(pickedFile.path);
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Uploading image...")));
+
+      final success = await UserProfileViewService.uploadProfileImage(
+        imageFile,
+      );
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("✅ Profile image updated")),
+        );
+        _fetchProfile(); // Refresh after upload
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("❌ Failed to upload image")),
+        );
+      }
     }
   }
 
@@ -75,48 +106,53 @@ class _UserProfileViewState extends State<UserProfileView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // 👤 Profile Picture Section
-                      Center(
-                        child: Stack(
-                          alignment: Alignment.bottomRight,
-                          children: [
-                            CircleAvatar(
-                              radius: 50,
-                              backgroundColor: Colors.purple.shade100,
-                              backgroundImage:
-                                  _userProfile!.billImage != null
-                                      ? NetworkImage(_userProfile!.billImage!)
-                                      : null,
-                              child:
-                                  _userProfile!.billImage == null
-                                      ? const Icon(
-                                        Icons.person,
-                                        size: 60,
-                                        color: Colors.purple,
-                                      )
-                                      : null,
-                            ),
-                            if (_userProfile!.isVerified == true)
-                              Container(
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                padding: const EdgeInsets.all(3),
-                                child: const CircleAvatar(
-                                  radius: 12,
-                                  backgroundColor: Colors.green,
-                                  child: Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 14,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
+                      // 👤 Profile Picture + Upload
+Center(
+  child: Stack(
+    alignment: Alignment.bottomRight,
+    children: [
+      GestureDetector(
+        onTap: () {
+          _pickAndUploadImage(); // ✅ Now it actually runs the function
+        },
+        child: CircleAvatar(
+          radius: 50,
+          backgroundColor: Colors.purple.shade100,
+          backgroundImage: _userProfile!.billImage != null
+              ? NetworkImage(_userProfile!.billImage!)
+              : null,
+          child: _userProfile!.billImage == null
+              ? const Icon(
+                  Icons.person,
+                  size: 60,
+                  color: Colors.purple,
+                )
+              : null,
+        ),
+      ),
+      if (_userProfile!.isVerified == true)
+        Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          padding: const EdgeInsets.all(3),
+          child: const CircleAvatar(
+            radius: 12,
+            backgroundColor: Colors.green,
+            child: Icon(
+              Icons.check,
+              color: Colors.white,
+              size: 14,
+            ),
+          ),
+        ),
+    ],
+  ),
+),
+
+
+                      const SizedBox(height: 16),
                       CustomText(
                         _userProfile!.fullName ?? "N/A",
                         fontSize: 18,
