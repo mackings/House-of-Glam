@@ -182,7 +182,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                       ),
                       onPressed: _pickImage,
                       icon: const Icon(Icons.upload),
-                      label: const Text("Add Business Logo"),
+                      label: const Text("Buiness Registration Doc"),
                     ),
                     const SizedBox(width: 12),
                     if (_selectedImage != null)
@@ -197,7 +197,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                       )
                     else
                       const Text(
-                        "No logo selected",
+                        "No Image seletcted",
                         style: TextStyle(color: Colors.grey),
                       ),
                   ],
@@ -326,7 +326,7 @@ _isRegisteredBusiness
           ),
           const SizedBox(height: 4),
           const Text(
-            "I don’t have a registered business and I agree to provide an image for verification.",
+            "My business is not registered yet and I agree to provide my business logo.",
             style: TextStyle(fontSize: 13, color: Colors.grey),
           ),
           const SizedBox(height: 10),
@@ -341,7 +341,7 @@ _isRegisteredBusiness
             ),
             onPressed: _pickConsentImage,
             icon: const Icon(Icons.image_outlined),
-            label: const Text("Upload Image"),
+            label: const Text("Upload Logo"),
           ),
           if (_consentImage != null)
             Padding(

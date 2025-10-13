@@ -7,6 +7,7 @@ import 'package:hog/App/Auth/Api/authclass.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
 import 'package:hog/App/Auth/Views/verify.dart';
 import 'package:hog/App/Auth/widgets/countryCodes.dart';
+import 'package:hog/TailorApp/Home/Views/Tailorbusiness.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/alerts.dart';
 import 'package:hog/components/button.dart';
@@ -130,10 +131,15 @@ class _SignupState extends ConsumerState<Signup> {
               children: [
                 const SizedBox(height: 20),
 
-                CustomText(
-                  "Sign Up",
-                  fontWeight: FontWeight.w700,
-                  fontSize: 25,
+                GestureDetector(
+                  onTap: () {
+                    Nav.push(context, TailorRegistrationPage());
+                  },
+                  child: CustomText(
+                    "Sign Up",
+                    fontWeight: FontWeight.w700,
+                    fontSize: 25,
+                  ),
                 ),
                 const SizedBox(height: 40),
 

@@ -20,15 +20,13 @@ class CustomTextField extends ConsumerWidget {
   final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onChanged;
 
-  /// Dropdown mode for other purposes
   final List<String>? dropdownItems;
   final String? selectedValue;
 
-  /// Country code selector
-  final bool enableCountryCode;                 // ✅ New
-  final List<String> countryCodes;              // ✅ New
-  final String? selectedCountryCode;            // ✅ New
-  final ValueChanged<String?>? onCountryChanged; // ✅ New
+  final bool enableCountryCode;
+  final List<String> countryCodes;
+  final String? selectedCountryCode;
+  final ValueChanged<String?>? onCountryChanged;
 
   final bool isCompact;
 
@@ -47,8 +45,8 @@ class CustomTextField extends ConsumerWidget {
     this.dropdownItems,
     this.selectedValue,
     this.isCompact = false,
-    this.enableCountryCode = false,               // ✅ default off
-    this.countryCodes = const ['+1', '+44', '+234', '+91'], // ✅ sample
+    this.enableCountryCode = false,
+    this.countryCodes = const ['+1', '+44', '+234', '+91'],
     this.selectedCountryCode,
     this.onCountryChanged,
   }) : super(key: key);
@@ -68,7 +66,6 @@ class CustomTextField extends ConsumerWidget {
           CustomText(title, fontSize: 15, fontWeight: FontWeight.w500),
           const SizedBox(height: 8),
 
-          /// If dropdownItems is provided (like a normal dropdown field)
           dropdownItems != null
               ? DropdownButtonFormField<String>(
                   value: selectedValue,
@@ -96,8 +93,6 @@ class CustomTextField extends ConsumerWidget {
                     if (onChanged != null && value != null) onChanged!(value);
                   },
                 )
-
-              /// Normal TextField (with optional country code)
               : Row(
                   children: [
                     if (enableCountryCode) ...[
@@ -128,15 +123,40 @@ class CustomTextField extends ConsumerWidget {
                       const SizedBox(width: 10),
                     ],
 
-                    /// Phone number input
                     Expanded(
                       child: TextFormField(
                         controller: controller,
-                        validator: validator,
                         keyboardType: keyboardType,
                         inputFormatters: inputFormatters,
                         obscureText: isPassword ? obscureText : false,
                         onChanged: onChanged,
+
+                        /// ✅ Smart validator for password fields
+                        validator: (value) {
+                          if (isPassword) {
+                            if (value == null || value.isEmpty) {
+                              return 'Password is required';
+                            }
+                            if (value.length < 8) {
+                              return 'Password must be at least 8 characters long';
+                            }
+                            if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                              return 'Password must contain at least one uppercase letter';
+                            }
+                            if (!RegExp(r'[0-9]').hasMatch(value)) {
+                              return 'Password must contain at least one number';
+                            }
+                            if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(value)) {
+                              return 'Password must contain at least one special character';
+                            }
+                          }
+
+                          if (validator != null) {
+                            return validator!(value);
+                          }
+                          return null;
+                        },
+
                         decoration: InputDecoration(
                           hintText: hintText,
                           prefixIcon:
