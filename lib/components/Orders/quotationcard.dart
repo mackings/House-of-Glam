@@ -4,6 +4,8 @@ import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:intl/intl.dart';
 
+
+
 class QuotationCard extends StatelessWidget {
   final Review review;
   final VoidCallback onHireDesigner; // ✅ keep existing
@@ -109,6 +111,7 @@ class QuotationCard extends StatelessWidget {
               ),
             ],
           ),
+          
           const SizedBox(height: 10),
 
           // 🔹 Comment

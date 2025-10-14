@@ -5,6 +5,7 @@ import 'package:hog/App/UserProfile/model/profileViewModel.dart';
 import 'package:http/http.dart' as http;
 
 class UserProfileViewService {
+  
   static const String baseUrl = "https://hog-ymud.onrender.com/api/v1";
 
   static Future<UserProfile?> getProfile() async {
