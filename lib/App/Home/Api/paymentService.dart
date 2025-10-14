@@ -54,13 +54,14 @@ class PaymentService {
     required String reviewId,
     required String amount,
     required String shipmentMethod,
+    String? address
   }) async {
     final token = await SecurePrefs.getToken();
     final url = Uri.parse(
       "$liveBaseURL/material/createPaymentOnline/$reviewId",
     );
 
-    final payload = {"amount": amount, "shipmentMethod": shipmentMethod};
+    final payload = {"amount": amount, "shipmentMethod": shipmentMethod, "address":address};
 
     print("➡️ Full Payment Request: $payload");
 

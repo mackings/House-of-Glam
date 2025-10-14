@@ -7,6 +7,9 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/components/thousandformat.dart';
 
+
+
+
 class PaymentOptionsModal extends StatefulWidget {
   final Review review;
   final Function(String url) onCheckout;
@@ -22,10 +25,14 @@ class PaymentOptionsModal extends StatefulWidget {
 }
 
 class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
+
   String paymentType = "part";
   String shipment = "Regular";
+
   final TextEditingController amountController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
   bool isLoading = false;
+
 
   @override
   void initState() {
@@ -83,6 +90,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
         reviewId: widget.review.id,
         amount: amountToSend,
         shipmentMethod: shipment,
+        address: addressController.text.trim()
       );
     }
 
@@ -115,15 +123,19 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
             bottom: MediaQuery.of(context).viewInsets.bottom,
             left: 16,
             right: 16,
-            top: 16,
+            top: 36,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CustomText(
-                "Choose a Payment Option",
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+              Row(
+                children: [
+                  const CustomText(
+                    "Choose a Payment Option",
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
 
@@ -149,6 +161,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                   const Text("Part Payment"),
                 ],
               ),
+
               const SizedBox(height: 12),
 
               if (paymentType == "part")
@@ -170,12 +183,15 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
                   const CustomText(
                     "Shipment Method",
                     fontSize: 16,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w400,
                   ),
+
                   const SizedBox(height: 6),
+
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
@@ -197,8 +213,23 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                       onChanged: (val) => setState(() => shipment = val!),
                     ),
                   ),
+
+
+             if (paymentType != "part")
+             CustomTextField(
+                  title: "Address",
+                  fieldKey: "Address",
+                  hintText: "Enter delivery address",
+                  controller: addressController,
+                  keyboardType: TextInputType.text,
+
+                ),
+
+
+                  
                 ],
               ),
+
               const SizedBox(height: 20),
 
               CustomButton(title: "Make Payment", onPressed: _makePayment),
