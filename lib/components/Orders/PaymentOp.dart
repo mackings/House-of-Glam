@@ -46,6 +46,9 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     super.dispose();
   }
 
+
+
+
   Future<void> _makePayment() async {
     setState(() => isLoading = true);
 
@@ -113,6 +116,8 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
       );
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {

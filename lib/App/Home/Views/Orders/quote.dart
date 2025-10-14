@@ -173,6 +173,10 @@ class _QuotationState extends State<Quotation> {
           fontSize: 18,
         ),
         backgroundColor: Colors.purple,
+
+        actions: [
+          Icon(Icons.chat_bubble)
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: fetchReviews,

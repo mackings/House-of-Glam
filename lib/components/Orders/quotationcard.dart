@@ -111,7 +111,7 @@ class QuotationCard extends StatelessWidget {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 10),
 
           // 🔹 Comment
@@ -168,7 +168,7 @@ class QuotationCard extends StatelessWidget {
           ),
           const SizedBox(height: 25),
 
-          // 🔹 Action Button
+
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
