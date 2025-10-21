@@ -145,208 +145,206 @@ String _getCountryNameFromCode(String code) {
     }
   }
 
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return LoadingOverlay(
       isLoading: isLoading,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: 
+Scaffold(
+  backgroundColor: Colors.white,
+  body: SafeArea(
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Form(
+        key: _formKey, // ✅ attach form key here
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+
+            GestureDetector(
+              onTap: () {
+                Nav.push(context, TailorRegistrationPage());
+              },
+              child: CustomText(
+                "Sign Up",
+                fontWeight: FontWeight.w700,
+                fontSize: 25,
+              ),
+            ),
+            const SizedBox(height: 40),
+
+            CustomTextField(
+              title: "Full Name",
+              hintText: "Enter your full name",
+              prefixIcon: Icons.person,
+              fieldKey: "fullname",
+              controller: fullnameController,
+              keyboardType: TextInputType.name,
+            ),
+
+            CustomTextField(
+              title: "Email",
+              hintText: "Enter your email",
+              prefixIcon: Icons.email,
+              fieldKey: "email",
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+            ),
+
+            // ✅ Phone field with global picker
+            CustomTextField(
+              title: "Phone",
+              hintText: "Enter your phone number",
+              prefixIcon: Icons.phone,
+              fieldKey: "phone",
+              controller: phoneController,
+              keyboardType: TextInputType.phone,
+              enableCountryCode: true,
+              useGlobalCountryPicker: true,
+              selectedCountryCode: selectedCountryCode,
+              onCountryChanged: (code) {
+                setState(() {
+                  selectedCountryCode = code ?? '+234';
+                  countryController.text = _getCountryNameFromCode(code ?? '+234');
+                  selectedCountry = countryController.text;
+                });
+              },
+            ),
+
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isWideScreen = constraints.maxWidth > 600;
+
+                if (isWideScreen) {
+                  // 💻 Desktop / Tablet
+                  return IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: CustomTextField(
+                            title: "Address",
+                            hintText: "Enter Address",
+                            prefixIcon: Icons.house,
+                            fieldKey: "address",
+                            controller: addressController,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: CustomTextField(
+                            title: "Country",
+                            hintText: "Select Country",
+                            prefixIcon: Icons.public,
+                            fieldKey: "country",
+                            controller: countryController,
+                           // readOnly: true, // ✅ prevent dropdown & overflow
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                // 📱 Mobile Layout
+                return Column(
+                  children: [
+                    CustomTextField(
+                      title: "Address",
+                      hintText: "Enter Address",
+                      prefixIcon: Icons.house,
+                      fieldKey: "address",
+                      controller: addressController,
+                    ),
+                    CustomTextField(
+                      title: "Country",
+                      hintText: "Select Country",
+                      prefixIcon: Icons.public,
+                      fieldKey: "country",
+                      controller: countryController,
+                     // readOnly: true, // ✅ prevents overflow
+                    ),
+                  ],
+                );
+              },
+            ),
+
+            // 🔒 Password Field (validation included)
+            CustomTextField(
+              title: "Password",
+              hintText: "Enter your password",
+              prefixIcon: Icons.lock,
+              isPassword: true,
+              fieldKey: "password",
+              controller: passwordController,
+            ),
+
+            Row(
               children: [
-                const SizedBox(height: 20),
-
-                GestureDetector(
-                  onTap: () {
-                    Nav.push(context, TailorRegistrationPage());
-                  },
-                  child: CustomText(
-                    "Sign Up",
-                    fontWeight: FontWeight.w700,
-                    fontSize: 25,
-                  ),
-                ),
-                const SizedBox(height: 40),
-
-                CustomTextField(
-                  title: "Full Name",
-                  hintText: "Enter your full name",
-                  prefixIcon: Icons.person,
-                  fieldKey: "fullname",
-                  controller: fullnameController,
-                  keyboardType: TextInputType.name,
-                ),
-
-                CustomTextField(
-                  title: "Email",
-                  hintText: "Enter your email",
-                  prefixIcon: Icons.email,
-                  fieldKey: "email",
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-
-                // ✅ Phone field with country code dropdown
-CustomTextField(
-  title: "Phone",
-  hintText: "Enter your phone number",
-  prefixIcon: Icons.phone,
-  fieldKey: "phone",
-  controller: phoneController,
-  keyboardType: TextInputType.phone,
-  enableCountryCode: true,
-  useGlobalCountryPicker: true, // ✅ activate new picker
-  selectedCountryCode: selectedCountryCode,
-onCountryChanged: (code) {
-  setState(() {
-    selectedCountryCode = code ?? '+234';
-    countryController.text = _getCountryNameFromCode(code ?? '+234');
-    selectedCountry = countryController.text;
-  });
-},
-
-),
-
-
-
-
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isWideScreen = constraints.maxWidth > 600;
-
-                    if (isWideScreen) {
-                      // Desktop/Tablet layout
-                      return IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: CustomTextField(
-                                title: "Address",
-                                hintText: "Enter Address",
-                                prefixIcon: Icons.house,
-                                fieldKey: "address",
-                                controller: addressController,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: CustomTextField(
-                                title: "Country",
-                                hintText: "Select Country",
-                                prefixIcon: Icons.public,
-                                fieldKey: "country",
-                                controller: countryController,
-                                dropdownItems: countries,
-                                selectedValue: selectedCountry,
-                                onChanged: (value) {
-                                  setState(() => selectedCountry = value);
-                                },
-                              ),
-                            ),
-                          ],
+                Checkbox(
+                  value: isTailor,
+                  onChanged: (val) {
+                    setState(() {
+                      isTailor = val ?? false;
+                    });
+                    if (val == true) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Leave blank if you are not a tailor"),
+                          duration: Duration(seconds: 2),
                         ),
                       );
                     }
-
-                    // Mobile layout
-                    return Column(
-                      children: [
-
-                        CustomTextField(
-                          title: "Address",
-                          hintText: "Enter Address",
-                          prefixIcon: Icons.house,
-                          fieldKey: "address",
-                          controller: addressController,
-                        ),
-
-
-                        CustomTextField(
-  title: "Country",
-  hintText: "Select Country",
-  prefixIcon: Icons.public,
-  fieldKey: "country",
-  controller: countryController,
-),
-
-
-
-
-
-
-                      ],
-                    );
                   },
                 ),
+                const CustomText("I'm a Designer"),
+              ],
+            ),
 
-                CustomTextField(
-                  title: "Password",
-                  hintText: "Enter your password",
-                  prefixIcon: Icons.lock,
-                  isPassword: true,
-                  fieldKey: "password",
-                  controller: passwordController,
-                ),
+            const SizedBox(height: 20),
 
-                Row(
-                  children: [
-                    Checkbox(
-                      value: isTailor,
-                      onChanged: (val) {
-                        setState(() {
-                          isTailor = val ?? false;
-                        });
+            // ✅ Validate before signup
+            CustomButton(
+              title: "Create Account",
+              isOutlined: false,
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  _handleSignup(); // ✅ validation passed
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please fix the errors')),
+                  );
+                }
+              },
+            ),
 
-                        if (val == true) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                "Leave blank if you are not a tailor",
-                              ),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    const CustomText("I'm a Designer"),
-                  ],
-                ),
+            const SizedBox(height: 20),
 
-                const SizedBox(height: 20),
-
-                CustomButton(
-                  title: "Create Account",
-                  isOutlined: false,
-                  onPressed: _handleSignup,
-                ),
-                const SizedBox(height: 20),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CustomText("Existing user? "),
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => const Signin()),
-                        );
-                      },
-                      child: CustomText("Login", fontWeight: FontWeight.bold),
-                    ),
-                  ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const CustomText("Existing user? "),
+                const SizedBox(width: 10),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const Signin()),
+                    );
+                  },
+                  child: CustomText("Login", fontWeight: FontWeight.bold),
                 ),
               ],
             ),
-          ),
+          ],
         ),
       ),
+    ),
+  ),
+),
     );
   }
 }
