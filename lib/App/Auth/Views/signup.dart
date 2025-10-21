@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +17,8 @@ import 'package:hog/components/dialogs.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
+
+
 
 class Signup extends ConsumerStatefulWidget {
   const Signup({super.key});
@@ -41,15 +44,40 @@ class _SignupState extends ConsumerState<Signup> {
   // ✅ Track selected country code for phone
   String selectedCountryCode = '+234'; // default to Nigeria
 
-  Future<void> loadCountries() async {
-    final String response = await rootBundle.loadString(
-      'assets/countries.json',
+  // Future<void> loadCountries() async {
+  //   final String response = await rootBundle.loadString(
+  //     'assets/countries.json',
+  //   );
+  //   final List<dynamic> data = json.decode(response);
+  //   setState(() {
+  //     countries = data.cast<String>();
+  //   });
+  // }
+
+Future<void> loadCountries() async {
+  final allCountries = CountryService().getAll();
+  final names = allCountries.map((e) => e.name).toSet().toList(); 
+  setState(() {
+    countries = names;
+  });
+}
+
+
+String _getCountryNameFromCode(String code) {
+  try {
+    final allCountries = CountryService().getAll();
+    final cleanCode = code.replaceAll('+', '');
+    final match = allCountries.firstWhere(
+      (c) => c.phoneCode == cleanCode,
+      orElse: () => allCountries.firstWhere((c) => c.countryCode == 'NG'), // fallback: Nigeria 🇳🇬
     );
-    final List<dynamic> data = json.decode(response);
-    setState(() {
-      countries = data.cast<String>();
-    });
+    return match.name;
+  } catch (e) {
+    return 'Unknown';
   }
+}
+
+
 
   @override
   void initState() {
@@ -162,22 +190,28 @@ class _SignupState extends ConsumerState<Signup> {
                 ),
 
                 // ✅ Phone field with country code dropdown
-                CustomTextField(
-                  title: "Phone",
-                  hintText: "Enter your phone number",
-                  prefixIcon: Icons.phone,
-                  fieldKey: "phone",
-                  controller: phoneController,
-                  keyboardType: TextInputType.phone,
-                  enableCountryCode: true,
-                  countryCodes: africanAndUkCountryCodes,
-                  selectedCountryCode: selectedCountryCode,
-                  onCountryChanged: (code) {
-                    setState(() {
-                      selectedCountryCode = code ?? '+234';
-                    });
-                  },
-                ),
+CustomTextField(
+  title: "Phone",
+  hintText: "Enter your phone number",
+  prefixIcon: Icons.phone,
+  fieldKey: "phone",
+  controller: phoneController,
+  keyboardType: TextInputType.phone,
+  enableCountryCode: true,
+  useGlobalCountryPicker: true, // ✅ activate new picker
+  selectedCountryCode: selectedCountryCode,
+onCountryChanged: (code) {
+  setState(() {
+    selectedCountryCode = code ?? '+234';
+    countryController.text = _getCountryNameFromCode(code ?? '+234');
+    selectedCountry = countryController.text;
+  });
+},
+
+),
+
+
+
 
                 LayoutBuilder(
                   builder: (context, constraints) {
@@ -221,6 +255,7 @@ class _SignupState extends ConsumerState<Signup> {
                     // Mobile layout
                     return Column(
                       children: [
+
                         CustomTextField(
                           title: "Address",
                           hintText: "Enter Address",
@@ -228,18 +263,21 @@ class _SignupState extends ConsumerState<Signup> {
                           fieldKey: "address",
                           controller: addressController,
                         ),
+
+
                         CustomTextField(
-                          title: "Country",
-                          hintText: "Select Country",
-                          prefixIcon: Icons.public,
-                          fieldKey: "country",
-                          controller: countryController,
-                          dropdownItems: countries,
-                          selectedValue: selectedCountry,
-                          onChanged: (value) {
-                            setState(() => selectedCountry = value);
-                          },
-                        ),
+  title: "Country",
+  hintText: "Select Country",
+  prefixIcon: Icons.public,
+  fieldKey: "country",
+  controller: countryController,
+),
+
+
+
+
+
+
                       ],
                     );
                   },

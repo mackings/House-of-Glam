@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Home/Model/reviewModel.dart';
+import 'package:hog/App/Home/Views/Offers/Api/OfferService.dart';
+import 'package:hog/App/Home/Views/Offers/Views/OfferHome.dart';
+import 'package:hog/App/Home/Views/Offers/Widgets/Offersheet.dart';
+import 'package:hog/components/Navigator.dart';
+import 'package:hog/components/button.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:intl/intl.dart';
@@ -168,7 +173,6 @@ class QuotationCard extends StatelessWidget {
           ),
           const SizedBox(height: 25),
 
-
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -205,6 +209,37 @@ class QuotationCard extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
+          ),
+
+          SizedBox(height: 10),
+
+          CustomButton(
+            title: "Make Offer",
+onPressed: () async {
+  final result = await ReusableOfferSheet.show(
+    context,
+    onSubmit: (comment, material, work) async {
+      final res = await OfferService.makeOffer(
+        reviewId: review.id,
+        comment: comment,
+        materialTotalCost: material,
+        workmanshipTotalCost: work,
+      );
+      return res;
+    },
+  );
+
+  if (result?["success"] == true) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Offer submitted successfully!"),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+},
+
+            isOutlined: true,
           ),
         ],
       ),

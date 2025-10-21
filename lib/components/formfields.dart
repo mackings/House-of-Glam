@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hog/components/texts.dart';
+import 'package:country_picker/country_picker.dart';
+
 
 final obscureTextProvider = StateProvider.family<bool, String>(
   (ref, fieldKey) => true,
 );
-
 
 class CustomTextField extends ConsumerWidget {
   final String title;
@@ -24,6 +24,7 @@ class CustomTextField extends ConsumerWidget {
   final String? selectedValue;
 
   final bool enableCountryCode;
+  final bool useGlobalCountryPicker; // ✅ new flag
   final List<String> countryCodes;
   final String? selectedCountryCode;
   final ValueChanged<String?>? onCountryChanged;
@@ -49,6 +50,7 @@ class CustomTextField extends ConsumerWidget {
     this.countryCodes = const ['+1', '+44', '+234', '+91'],
     this.selectedCountryCode,
     this.onCountryChanged,
+    this.useGlobalCountryPicker = false, // ✅ default = false (backward compatible)
   }) : super(key: key);
 
   @override
@@ -63,9 +65,11 @@ class CustomTextField extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CustomText(title, fontSize: 15, fontWeight: FontWeight.w500),
+          Text(title,
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
           const SizedBox(height: 8),
 
+          // 🧩 Dropdown Text Field
           dropdownItems != null
               ? DropdownButtonFormField<String>(
                   value: selectedValue,
@@ -93,36 +97,74 @@ class CustomTextField extends ConsumerWidget {
                     if (onChanged != null && value != null) onChanged!(value);
                   },
                 )
+
+              // 🧩 Regular / Country Code Field
               : Row(
                   children: [
-                    if (enableCountryCode) ...[
-                      SizedBox(
-                        width: 100,
-                        child: DropdownButtonFormField<String>(
-                          value: selectedCountryCode ?? countryCodes.first,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 15,
-                              horizontal: 10,
-                            ),
-                          ),
-                          items: countryCodes
-                              .map(
-                                (code) => DropdownMenuItem<String>(
-                                  value: code,
-                                  child: Text(code),
+                    if (enableCountryCode)
+                      useGlobalCountryPicker
+                          // ✅ New: Global Country Picker Mode
+                          ? GestureDetector(
+                              onTap: () {
+                                showCountryPicker(
+                                  context: context,
+                                  showPhoneCode: true,
+                                  onSelect: (Country country) {
+                                    onCountryChanged?.call('+${country.phoneCode}');
+                                  },
+                                );
+                              },
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                                alignment: Alignment.center,
+                                height: 58,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey.shade400),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                              )
-                              .toList(),
-                          onChanged: onCountryChanged,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                    ],
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      selectedCountryCode ?? '+1',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    const Icon(Icons.arrow_drop_down),
+                                  ],
+                                ),
+                              ),
+                            )
+                          // 🧩 Legacy Dropdown Mode (no change)
+                          : SizedBox(
+                              width: 100,
+                              child: DropdownButtonFormField<String>(
+                                value:
+                                    selectedCountryCode ?? countryCodes.first,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 15,
+                                    horizontal: 10,
+                                  ),
+                                ),
+                                items: countryCodes
+                                    .map(
+                                      (code) => DropdownMenuItem<String>(
+                                        value: code,
+                                        child: Text(code),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: onCountryChanged,
+                              ),
+                            ),
+                    if (enableCountryCode) const SizedBox(width: 10),
 
+                    // 🧩 Main Text Field
                     Expanded(
                       child: TextFormField(
                         controller: controller,
@@ -130,8 +172,6 @@ class CustomTextField extends ConsumerWidget {
                         inputFormatters: inputFormatters,
                         obscureText: isPassword ? obscureText : false,
                         onChanged: onChanged,
-
-                        /// ✅ Smart validator for password fields
                         validator: (value) {
                           if (isPassword) {
                             if (value == null || value.isEmpty) {
@@ -146,28 +186,23 @@ class CustomTextField extends ConsumerWidget {
                             if (!RegExp(r'[0-9]').hasMatch(value)) {
                               return 'Password must contain at least one number';
                             }
-                            if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(value)) {
+                            if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]')
+                                .hasMatch(value)) {
                               return 'Password must contain at least one special character';
                             }
                           }
-
-                          if (validator != null) {
-                            return validator!(value);
-                          }
+                          if (validator != null) return validator!(value);
                           return null;
                         },
-
                         decoration: InputDecoration(
                           hintText: hintText,
                           prefixIcon:
                               prefixIcon != null ? Icon(prefixIcon) : null,
                           suffixIcon: isPassword
                               ? IconButton(
-                                  icon: Icon(
-                                    obscureText
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                  ),
+                                  icon: Icon(obscureText
+                                      ? Icons.visibility_off
+                                      : Icons.visibility),
                                   onPressed: () {
                                     ref
                                         .read(obscureTextProvider(fieldKey)

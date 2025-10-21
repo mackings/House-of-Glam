@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Home/Api/paymentService.dart';
 import 'package:hog/App/Home/Api/useractivity.dart';
 import 'package:hog/App/Home/Model/reviewModel.dart';
+import 'package:hog/App/Home/Views/Offers/Views/OfferHome.dart';
+import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/Orders/Hireconf.dart';
 import 'package:hog/components/Orders/PaymentOp.dart';
 import 'package:hog/components/Orders/quotationcard.dart';
 import 'package:hog/components/texts.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-
-
-
 
 class Quotation extends StatefulWidget {
   final String materialId;
@@ -107,7 +106,7 @@ class _QuotationState extends State<Quotation> {
                 reviewId: review.id,
                 amount: amountToSend,
                 shipmentMethod: shipment,
-               // address: 
+                // address:
               );
 
       if (resp != null && resp["success"] == true) {
@@ -175,7 +174,12 @@ class _QuotationState extends State<Quotation> {
         backgroundColor: Colors.purple,
 
         actions: [
-          Icon(Icons.chat_bubble)
+          GestureDetector(
+            onTap: () {
+              Nav.push(context, OfferHome());
+            },
+            child: Icon(Icons.local_offer),
+          ),
         ],
       ),
       body: RefreshIndicator(

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hog/App/Home/Views/Offers/Views/OfferHome.dart';
 import 'package:hog/TailorApp/Home/Api/TailorHomeservice.dart';
 import 'package:hog/TailorApp/Home/Model/AssignedMaterial.dart';
 import 'package:hog/TailorApp/Widgets/tailorAssignedCard.dart';
 import 'package:hog/TailorApp/Widgets/tailorModalsheetdetails.dart';
+import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
@@ -40,6 +42,15 @@ class _AssignedMaterialsState extends State<AssignedMaterials> {
         ),
         backgroundColor: Colors.purple,
         elevation: 0,
+
+        actions: [
+          GestureDetector(
+            onTap: () {
+              Nav.push(context, OfferHome());
+            },
+            child: Icon(Icons.local_offer, color: Colors.white),
+          ),
+        ],
       ),
       body: SafeArea(
         child: FutureBuilder<TailorAssignedMaterialsResponse>(
