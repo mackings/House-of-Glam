@@ -194,7 +194,7 @@ Scaffold(
               keyboardType: TextInputType.emailAddress,
             ),
 
-            // ✅ Phone field with global picker
+    
             CustomTextField(
               title: "Phone",
               hintText: "Enter your phone number",
@@ -214,6 +214,7 @@ Scaffold(
               },
             ),
 
+
             LayoutBuilder(
               builder: (context, constraints) {
                 final isWideScreen = constraints.maxWidth > 600;
@@ -224,6 +225,7 @@ Scaffold(
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+
                         Expanded(
                           child: CustomTextField(
                             title: "Address",
@@ -233,7 +235,9 @@ Scaffold(
                             controller: addressController,
                           ),
                         ),
+
                         const SizedBox(width: 10),
+
                         Expanded(
                           child: CustomTextField(
                             title: "Country",
@@ -241,7 +245,6 @@ Scaffold(
                             prefixIcon: Icons.public,
                             fieldKey: "country",
                             controller: countryController,
-                           // readOnly: true, // ✅ prevent dropdown & overflow
                           ),
                         ),
                       ],
@@ -252,6 +255,7 @@ Scaffold(
                 // 📱 Mobile Layout
                 return Column(
                   children: [
+
                     CustomTextField(
                       title: "Address",
                       hintText: "Enter Address",
@@ -259,20 +263,23 @@ Scaffold(
                       fieldKey: "address",
                       controller: addressController,
                     ),
+
+
                     CustomTextField(
                       title: "Country",
                       hintText: "Select Country",
                       prefixIcon: Icons.public,
                       fieldKey: "country",
                       controller: countryController,
-                     // readOnly: true, // ✅ prevents overflow
+        
                     ),
+
                   ],
                 );
               },
             ),
 
-            // 🔒 Password Field (validation included)
+      
             CustomTextField(
               title: "Password",
               hintText: "Enter your password",
@@ -281,6 +288,7 @@ Scaffold(
               fieldKey: "password",
               controller: passwordController,
             ),
+
 
             Row(
               children: [
@@ -304,15 +312,16 @@ Scaffold(
               ],
             ),
 
+
             const SizedBox(height: 20),
 
-            // ✅ Validate before signup
+           
             CustomButton(
               title: "Create Account",
               isOutlined: false,
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  _handleSignup(); // ✅ validation passed
+                  _handleSignup(); 
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Please fix the errors')),
