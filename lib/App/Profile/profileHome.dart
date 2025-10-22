@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hog/App/Admin/Views/DeliverySettings.dart';
 import 'package:hog/App/Admin/Views/adminHome.dart';
 import 'package:hog/App/Admin/Views/analytics.dart';
 import 'package:hog/App/Admin/Views/billing.dart';
@@ -121,6 +122,16 @@ class _UserProfileState extends State<UserProfile> {
                     Nav.push(context, const SetBilling());
                   },
                 ),
+
+                              if (isAdmin)
+                ProfileMenuItem(
+                  icon: Icons.electric_scooter,
+                  text: "Delivery Settings",
+                  onTap: () {
+                    Nav.push(context, const DeliverySettings());
+                  },
+                ),
+
             ],
           ),
         ),
