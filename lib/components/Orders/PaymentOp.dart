@@ -204,19 +204,28 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: DropdownButtonFormField<String>(
-                      value: shipment,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                      ),
-                      items:
-                          ["Regular", "Express", "Cargo"]
-                              .map(
-                                (s) =>
-                                    DropdownMenuItem(value: s, child: Text(s)),
-                              )
-                              .toList(),
-                      onChanged: (val) => setState(() => shipment = val!),
-                    ),
+  value: shipment,
+  decoration: const InputDecoration(
+    border: InputBorder.none,
+  ),
+  items: const [
+    DropdownMenuItem(
+      value: "Regular",
+      child: Text("Regular (1–8 days)"),
+    ),
+    DropdownMenuItem(
+      value: "Express",
+      child: Text("Express (1–4 days)"),
+    ),
+    DropdownMenuItem(
+      value: "Cargo",
+      child: Text("Cargo (1–15 days)"),
+    ),
+  ],
+  onChanged: (val) => setState(() => shipment = val!),
+),
+
+
                   ),
 
 

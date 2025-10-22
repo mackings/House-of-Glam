@@ -248,7 +248,7 @@ void showProductDetails(BuildContext context, SellerListing listing) {
                   },
 
                   child: const CustomText(
-                    "Bid",
+                    "Purchase",
                     fontSize: 16,
                     color: Colors.white,
                   ),
