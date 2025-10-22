@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hog/App/Home/Api/home.dart';
 import 'package:hog/App/Home/Model/tailor.dart';
+import 'package:hog/App/Tailors/details.dart';
 import 'package:hog/components/Tailors/tailorcard.dart';
 import 'package:hog/components/texts.dart';
 
@@ -49,8 +51,37 @@ class _AlltailorsState extends ConsumerState<Alltailors> {
                           tailor.user?.image ??
                           tailor.nepaBill ??
                           "https://i.pravatar.cc/150?img=5",
-                      onTap: () {
+                      onTap: () async{
                         print("Tapped on ${tailor.user?.fullName}");
+
+                                                    print("Tapped on ${tailor.id}");
+
+                            // fetch vendor details from API
+                            final vendorDetails =
+                                await HomeApiService.getVendorDetails(
+                                  tailor.id,
+                                );
+
+                            if (vendorDetails != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => Details(
+                                        vendor: vendorDetails.vendor,
+                                        userProfile: vendorDetails.userProfile,
+                                      ),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    "Failed to load tailor details",
+                                  ),
+                                ),
+                              );
+                            }
                       },
                       id: tailor.id,
                     );
