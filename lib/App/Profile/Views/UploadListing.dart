@@ -12,6 +12,8 @@ import 'package:hog/components/texts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
+
+
 class Uploadlisting extends StatefulWidget {
   const Uploadlisting({super.key});
 
@@ -28,10 +30,13 @@ class _UploadlistingState extends State<Uploadlisting> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
 
-  final NumberFormat _formatter = NumberFormat('#,###'); // ✅ for display
-  bool _isFormatting = false; // ✅ avoid recursion in listener
+  // ✅ For yard inputs
+  final TextEditingController lengthController = TextEditingController();
+  final TextEditingController widthController = TextEditingController();
 
-  // ✅ Separate image slots
+  final NumberFormat _formatter = NumberFormat('#,###');
+  bool _isFormatting = false;
+
   File? frontImage;
   File? sideImage;
   File? backImage;
@@ -42,30 +47,29 @@ class _UploadlistingState extends State<Uploadlisting> {
   String status = "Available";
   bool isLoading = false;
 
+  // ✅ New variable: Listing type
+  String listingType = "Attire"; // or "Material"
+
   @override
   void initState() {
     super.initState();
     _loadCategories();
 
-    // ✅ Add listener to format price with commas
+    // ✅ Price formatting
     priceController.addListener(() {
       if (_isFormatting) return;
       _isFormatting = true;
-
-      // Remove all commas
       String raw = priceController.text.replaceAll(',', '');
 
-      // ✅ If user cleared the field, just clear it
       if (raw.isEmpty) {
-        priceController.value = TextEditingValue(
+        priceController.value = const TextEditingValue(
           text: '',
-          selection: const TextSelection.collapsed(offset: 0),
+          selection: TextSelection.collapsed(offset: 0),
         );
         _isFormatting = false;
         return;
       }
 
-      // ✅ Parse and format
       final value = int.tryParse(raw);
       if (value != null) {
         final formatted = _formatter.format(value);
@@ -81,12 +85,9 @@ class _UploadlistingState extends State<Uploadlisting> {
 
   Future<void> _loadCategories() async {
     final cachedCategories = await SecurePrefs.getCategories();
-    setState(() {
-      categories = cachedCategories;
-    });
+    setState(() => categories = cachedCategories);
   }
 
-  /// ✅ Pick specific image slot
   Future<void> pickImage(String type) async {
     final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
     if (picked == null) return;
@@ -101,27 +102,40 @@ class _UploadlistingState extends State<Uploadlisting> {
   Future<void> _submitListing() async {
     if (selectedCategory == null ||
         titleController.text.isEmpty ||
-        sizeController.text.isEmpty ||
         descriptionController.text.isEmpty ||
         priceController.text.isEmpty ||
         frontImage == null ||
         sideImage == null ||
         backImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Please fill all fields and upload all 3 required images.",
-          ),
-        ),
+        const SnackBar(content: Text("Please fill all required fields.")),
+      );
+      return;
+    }
+
+    if (listingType == "Material" &&
+        (lengthController.text.isEmpty || widthController.text.isEmpty)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter length and width for material.")),
       );
       return;
     }
 
     setState(() => isLoading = true);
 
-    // ✅ Remove commas before sending
     final rawPrice = priceController.text.replaceAll(',', '');
     final priceToSend = double.tryParse(rawPrice) ?? 0;
+
+    // ✅ Create yard data only if Material
+    final List<Map<String, dynamic>>? yards =
+        listingType == "Material"
+            ? [
+                {
+                  "length": lengthController.text.trim(),
+                  "width": widthController.text.trim(),
+                }
+              ]
+            : null;
 
     final success = await MarketplaceService.createSellerListing(
       categoryId: selectedCategory!.id,
@@ -130,8 +144,9 @@ class _UploadlistingState extends State<Uploadlisting> {
       description: descriptionController.text,
       condition: condition,
       status: status,
-      price: priceToSend, // ✅ raw number
+      price: priceToSend,
       images: [frontImage!, sideImage!, backImage!],
+      yards: yards, // ✅ New optional field
     );
 
     setState(() => isLoading = false);
@@ -154,10 +169,11 @@ class _UploadlistingState extends State<Uploadlisting> {
     sizeController.dispose();
     descriptionController.dispose();
     priceController.dispose();
+    lengthController.dispose();
+    widthController.dispose();
     super.dispose();
   }
 
-  /// ✅ Reusable image picker card
   Widget imagePickerCard(String label, File? image, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
@@ -168,22 +184,21 @@ class _UploadlistingState extends State<Uploadlisting> {
           border: Border.all(color: Colors.grey.shade400),
           borderRadius: BorderRadius.circular(8),
         ),
-        child:
-            image == null
-                ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.add_a_photo, size: 30, color: Colors.grey),
-                      const SizedBox(height: 5),
-                      Text(label, style: TextStyle(color: Colors.grey)),
-                    ],
-                  ),
-                )
-                : ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.file(image, fit: BoxFit.cover),
+        child: image == null
+            ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add_a_photo, size: 30, color: Colors.grey),
+                    const SizedBox(height: 5),
+                    Text(label, style: TextStyle(color: Colors.grey)),
+                  ],
                 ),
+              )
+            : ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.file(image, fit: BoxFit.cover),
+              ),
       ),
     );
   }
@@ -194,11 +209,7 @@ class _UploadlistingState extends State<Uploadlisting> {
       isLoading: isLoading,
       child: Scaffold(
         appBar: AppBar(
-          title: const CustomText(
-            "List Item",
-            color: Colors.white,
-            fontSize: 18,
-          ),
+          title: const CustomText("List Item", color: Colors.white, fontSize: 18),
           backgroundColor: Colors.purple,
           iconTheme: const IconThemeData(color: Colors.white),
         ),
@@ -207,16 +218,22 @@ class _UploadlistingState extends State<Uploadlisting> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// Category Dropdown
+              /// ✅ Select Type (Attire or Material)
+              CustomDropdown(
+                label: "Listing Type",
+                options: const ["Attire", "Material"],
+                selectedValue: listingType,
+                onChanged: (val) => setState(() => listingType = val ?? "Attire"),
+              ),
+              const SizedBox(height: 16),
+
               CustomDropdown(
                 label: "Select Category",
                 options: categories.map((c) => c.name).toList(),
                 selectedValue: selectedCategory?.name,
                 onChanged: (val) {
                   setState(() {
-                    selectedCategory = categories.firstWhere(
-                      (c) => c.name == val,
-                    );
+                    selectedCategory = categories.firstWhere((c) => c.name == val);
                   });
                 },
               ),
@@ -238,7 +255,6 @@ class _UploadlistingState extends State<Uploadlisting> {
               ),
               const SizedBox(height: 16),
 
-              /// ✅ Price Field with hint
               CustomTextField(
                 title: "Price",
                 hintText: "Enter price (0 if free)",
@@ -261,24 +277,42 @@ class _UploadlistingState extends State<Uploadlisting> {
               ),
               const SizedBox(height: 16),
 
+              /// ✅ Show yard fields only for Materials
+              if (listingType == "Material") ...[
+                CustomTextField(
+                  title: "Length (yards)",
+                  hintText: "Enter length in yards",
+                  fieldKey: "length",
+                  controller: lengthController,
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 16),
+                CustomTextField(
+                  title: "Width (yards)",
+                  hintText: "Enter width in yards",
+                  fieldKey: "width",
+                  controller: widthController,
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 16),
+              ],
+
               CustomDropdown(
                 label: "Condition",
-                options: const ["Newly", "Preloved","Newly Sewed"],
+                options: const ["Newly", "Preloved", "Newly Sewed"],
                 selectedValue: condition,
-                onChanged:
-                    (val) => setState(() => condition = val ?? "Newly Sewed"),
+                onChanged: (val) => setState(() => condition = val ?? "Newly Sewed"),
               ),
               const SizedBox(height: 16),
 
               CustomDropdown(
                 label: "Status",
-                options: const ["Available", "Incoming"],
+                options: const ["Available", "Incoming", "For Sales"],
                 selectedValue: status,
                 onChanged: (val) => setState(() => status = val ?? "Available"),
               ),
               const SizedBox(height: 20),
 
-              /// ✅ Image Picker
               CustomText(
                 "Upload Images",
                 color: Colors.black,
@@ -290,11 +324,7 @@ class _UploadlistingState extends State<Uploadlisting> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  imagePickerCard(
-                    "Front",
-                    frontImage,
-                    () => pickImage("front"),
-                  ),
+                  imagePickerCard("Front", frontImage, () => pickImage("front")),
                   imagePickerCard("Side", sideImage, () => pickImage("side")),
                   imagePickerCard("Back", backImage, () => pickImage("back")),
                 ],
