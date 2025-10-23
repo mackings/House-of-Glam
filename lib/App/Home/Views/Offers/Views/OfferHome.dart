@@ -230,11 +230,6 @@ class _OfferHomeState extends State<OfferHome> {
                       },
                     ),
             ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.purple,
-        child: const Icon(Icons.refresh),
-        onPressed: loadOffers,
-      ),
     );
   }
 }

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:hog/constants/currency.dart';
+import 'package:intl/intl.dart';
 
-
-import 'package:flutter/material.dart';
 
 class ChatSection extends StatelessWidget {
   final Map<String, dynamic> offer;
-  final String userRole; // "user" or "vendor"
+  final String userRole;
   final TextEditingController commentCtrl;
   final TextEditingController materialCtrl;
   final TextEditingController workmanshipCtrl;
@@ -131,7 +132,6 @@ class ChatSection extends StatelessWidget {
             },
           ),
         ),
-        const Divider(height: 24, thickness: 1),
         _buildReplyForm(context),
       ],
     );
@@ -161,9 +161,10 @@ class ChatSection extends StatelessWidget {
               child: TextField(
                 controller: materialCtrl,
                 keyboardType: TextInputType.number,
+                inputFormatters: [ThousandsFormatter()],
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.checkroom, color: Colors.purple),
-                  hintText: "Material",
+                  hintText: "Material ${currencySymbol}",
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
@@ -174,9 +175,10 @@ class ChatSection extends StatelessWidget {
               child: TextField(
                 controller: workmanshipCtrl,
                 keyboardType: TextInputType.number,
+                inputFormatters: [ThousandsFormatter()],
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.handyman, color: Colors.purple),
-                  hintText: "Workmanship",
+                  hintText: "Workmanship (₦)",
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
@@ -190,7 +192,6 @@ class ChatSection extends StatelessWidget {
     );
   }
 
-  /// 👇 Dynamically shows buttons based on userRole
   Widget _buildButtons(BuildContext context) {
     final btnStyle = ElevatedButton.styleFrom(
       backgroundColor: Colors.purple,
@@ -200,7 +201,6 @@ class ChatSection extends StatelessWidget {
     );
 
     if (userRole == "user") {
-      // 🟣 Buyer can only Counter
       return SizedBox(
         width: double.infinity,
         child: ElevatedButton.icon(
@@ -214,7 +214,6 @@ class ChatSection extends StatelessWidget {
         ),
       );
     } else {
-      // 🧵 Tailor can Accept, Reject, or Counter
       return Column(
         children: [
           Row(
@@ -272,6 +271,13 @@ class ChatSection extends StatelessWidget {
   }
 
   void _confirmAction(BuildContext context, String action) {
+    final rawMaterial =
+        materialCtrl.text.replaceAll(',', '').trim(); // remove commas
+    final rawWorkmanship =
+        workmanshipCtrl.text.replaceAll(',', '').trim(); // remove commas
+
+    print("📤 Sending Material: $rawMaterial, Workmanship: $rawWorkmanship");
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -320,6 +326,26 @@ class ChatSection extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class ThousandsFormatter extends TextInputFormatter {
+  final NumberFormat _formatter = NumberFormat("#,###");
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String digits = newValue.text.replaceAll(',', '');
+    if (digits.isEmpty) return newValue;
+
+    final formatted = _formatter.format(int.parse(digits));
+    return TextEditingValue(
+      text: formatted,
+      selection:
+          TextSelection.collapsed(offset: formatted.length), // keep cursor end
     );
   }
 }

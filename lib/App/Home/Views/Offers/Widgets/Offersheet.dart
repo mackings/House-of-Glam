@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hog/components/texts.dart';
-
+import 'package:intl/intl.dart';
 
 
 
@@ -44,7 +45,8 @@ class ReusableOfferSheet {
                     // 🔹 Header
                     Row(
                       children: [
-                        const Icon(Icons.local_offer, color: Colors.purple, size: 22),
+                        const Icon(Icons.local_offer,
+                            color: Colors.purple, size: 22),
                         const SizedBox(width: 8),
                         Text(
                           title,
@@ -66,6 +68,7 @@ class ReusableOfferSheet {
                       materialCtrl,
                       icon: Icons.category_outlined,
                       type: TextInputType.number,
+                      formatter: ThousandsFormatter(),
                     ),
                     const SizedBox(height: 15),
                     _buildTextField(
@@ -73,6 +76,7 @@ class ReusableOfferSheet {
                       workCtrl,
                       icon: Icons.handyman_outlined,
                       type: TextInputType.number,
+                      formatter: ThousandsFormatter(),
                     ),
                     const SizedBox(height: 25),
 
@@ -90,10 +94,12 @@ class ReusableOfferSheet {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Icon(Icons.send_rounded, color: Colors.white),
+                              : const Icon(Icons.send_rounded,
+                                  color: Colors.white),
                           label: Text(
                             isLoading ? "Submitting..." : "Submit Offer",
-                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 15),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.purple,
@@ -106,8 +112,11 @@ class ReusableOfferSheet {
                               ? null
                               : () async {
                                   final comment = commentCtrl.text.trim();
-                                  final material = materialCtrl.text.trim();
-                                  final work = workCtrl.text.trim();
+                                  final material = materialCtrl.text
+                                      .replaceAll(',', '')
+                                      .trim();
+                                  final work =
+                                      workCtrl.text.replaceAll(',', '').trim();
 
                                   if (comment.isEmpty ||
                                       material.isEmpty ||
@@ -122,39 +131,19 @@ class ReusableOfferSheet {
                                   }
 
                                   // 🧩 Confirm action before API call
-                                  final confirmed = await _confirmAction(context);
+                                  final confirmed =
+                                      await _confirmAction(context);
                                   if (confirmed != true) return;
 
                                   setState(() => isLoading = true);
-                                  final result = await onSubmit(comment, material, work);
+                                  final result =
+                                      await onSubmit(comment, material, work);
                                   setState(() => isLoading = false);
 
                                   Navigator.pop(context, result);
                                 },
                         ),
                         const SizedBox(height: 12),
-
-                        // 🔹 Wide reject button
-                        OutlinedButton.icon(
-                          icon: const Icon(Icons.close, color: Colors.black87),
-                          label: const Text(
-                            "Reject Offer",
-                            style: TextStyle(color: Colors.black, fontSize: 15),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.black54, width: 1.2),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          onPressed: () async {
-                            final confirmed = await _confirmReject(context);
-                            if (confirmed == true) {
-                              Navigator.pop(context, {"action": "rejected"});
-                            }
-                          },
-                        ),
                       ],
                     ),
                     const SizedBox(height: 30),
@@ -175,6 +164,7 @@ class ReusableOfferSheet {
     IconData? icon,
     int maxLines = 1,
     TextInputType? type,
+    TextInputFormatter? formatter,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,6 +192,7 @@ class ReusableOfferSheet {
             controller: controller,
             maxLines: maxLines,
             keyboardType: type,
+            inputFormatters: formatter != null ? [formatter] : [],
             style: const TextStyle(fontSize: 14),
             decoration: InputDecoration(
               prefixIcon:
@@ -221,7 +212,6 @@ class ReusableOfferSheet {
     );
   }
 
-  // ✅ Confirm modal before submission
   static Future<bool?> _confirmAction(BuildContext context) async {
     return await showDialog<bool>(
       context: context,
@@ -233,20 +223,18 @@ class ReusableOfferSheet {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const CustomText("cancel",color: Colors.black,)
-          ),
+              onPressed: () => Navigator.pop(ctx, false),
+              child:
+                  const Text("Cancel", style: TextStyle(color: Colors.black))),
           ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-            child: const CustomText("Yes",color: Colors.white,)
-          ),
+              onPressed: () => Navigator.pop(ctx, true),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+              child: const Text("Yes", style: TextStyle(color: Colors.white))),
         ],
       ),
     );
   }
 
-  // ✅ Confirm modal before rejection
   static Future<bool?> _confirmReject(BuildContext context) async {
     return await showDialog<bool>(
       context: context,
@@ -268,6 +256,26 @@ class ReusableOfferSheet {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 🔹 Formatter that adds commas as the user types (e.g., 23000 → 23,000)
+class ThousandsFormatter extends TextInputFormatter {
+  final NumberFormat _formatter = NumberFormat("#,###");
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String digits = newValue.text.replaceAll(',', '');
+    if (digits.isEmpty) return newValue;
+
+    final formatted = _formatter.format(int.parse(digits));
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }

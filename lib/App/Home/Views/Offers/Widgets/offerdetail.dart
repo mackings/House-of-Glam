@@ -17,7 +17,9 @@ class OfferDetail extends StatefulWidget {
   State<OfferDetail> createState() => _OfferDetailState();
 }
 
+
 class _OfferDetailState extends State<OfferDetail> {
+
   final TextEditingController _commentCtrl = TextEditingController();
   final TextEditingController _materialCtrl = TextEditingController();
   final TextEditingController _workmanshipCtrl = TextEditingController();
@@ -87,6 +89,7 @@ class _OfferDetailState extends State<OfferDetail> {
     if (ok) Navigator.pop(context);
   }
 
+
   Future<void> _replyOffer(String action) async {
   final offerId = offer["_id"];
   if (offerId == null) return _showSnack("Missing offer ID");
@@ -131,44 +134,6 @@ class _OfferDetailState extends State<OfferDetail> {
   if (ok) Navigator.pop(context);
 }
 
-
-  // Future<void> _replyOffer(String action) async {
-  //   final offerId = offer["_id"];
-  //   if (offerId == null) return _showSnack("Missing offer ID");
-
-  //   final comment = _commentCtrl.text.trim();
-  //   final counterMat = _materialCtrl.text.trim();
-  //   final counterWork = _workmanshipCtrl.text.trim();
-  //   if (comment.isEmpty) return _showSnack("Please add a comment");
-
-  //   setState(() => _isSubmitting = true);
-  //   Map<String, dynamic> res;
-
-  //   if (_userRole == "user") {
-  //     res = await OfferService.buyerReplyOffer(
-  //       offerId: offerId,
-  //       comment: comment,
-  //       counterMaterialCost: counterMat.isEmpty ? "0" : counterMat,
-  //       counterWorkmanshipCost: counterWork.isEmpty ? "0" : counterWork,
-  //       action: action,
-  //     );
-  //   } else {
-  //     res = await OfferService.vendorReplyOffer(
-  //       offerId: offerId,
-  //       comment: comment,
-  //       counterMaterialCost: counterMat.isEmpty ? "0" : counterMat,
-  //       counterWorkmanshipCost: counterWork.isEmpty ? "0" : counterWork,
-  //       action: action,
-  //     );
-  //   }
-
-  //   setState(() => _isSubmitting = false);
-  //   final ok = (res["success"] == true);
-  //   _showSnack(res["message"] ?? (ok ? "Reply sent" : "Failed"));
-  //   if (ok) Navigator.pop(context);
-  // }
-
-  
 
   @override
   Widget build(BuildContext context) {

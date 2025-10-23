@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:hog/App/Auth/Views/signin.dart';
 import 'package:hog/App/UserProfile/Api/profileViewS.dart';
 import 'package:hog/App/UserProfile/model/profileViewModel.dart';
 import 'package:hog/App/UserProfile/widgets/ProfileCards.dart';
@@ -107,50 +108,51 @@ class _UserProfileViewState extends State<UserProfileView> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       // 👤 Profile Picture + Upload
-Center(
-  child: Stack(
-    alignment: Alignment.bottomRight,
-    children: [
-      GestureDetector(
-        onTap: () {
-          _pickAndUploadImage(); // ✅ Now it actually runs the function
-        },
-        child: CircleAvatar(
-          radius: 50,
-          backgroundColor: Colors.purple.shade100,
-          backgroundImage: _userProfile!.billImage != null
-              ? NetworkImage(_userProfile!.billImage!)
-              : null,
-          child: _userProfile!.billImage == null
-              ? const Icon(
-                  Icons.person,
-                  size: 60,
-                  color: Colors.purple,
-                )
-              : null,
-        ),
-      ),
-      if (_userProfile!.isVerified == true)
-        Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-          ),
-          padding: const EdgeInsets.all(3),
-          child: const CircleAvatar(
-            radius: 12,
-            backgroundColor: Colors.green,
-            child: Icon(
-              Icons.check,
-              color: Colors.white,
-              size: 14,
-            ),
-          ),
-        ),
-    ],
-  ),
-),
-
+                      Center(
+                        child: Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                _pickAndUploadImage(); // ✅ Now it actually runs the function
+                              },
+                              child: CircleAvatar(
+                                radius: 50,
+                                backgroundColor: Colors.purple.shade100,
+                                backgroundImage:
+                                    _userProfile!.billImage != null
+                                        ? NetworkImage(_userProfile!.billImage!)
+                                        : null,
+                                child:
+                                    _userProfile!.billImage == null
+                                        ? const Icon(
+                                          Icons.person,
+                                          size: 60,
+                                          color: Colors.purple,
+                                        )
+                                        : null,
+                              ),
+                            ),
+                            if (_userProfile!.isVerified == true)
+                              Container(
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                padding: const EdgeInsets.all(3),
+                                child: const CircleAvatar(
+                                  radius: 12,
+                                  backgroundColor: Colors.green,
+                                  child: Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                    size: 14,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
 
                       const SizedBox(height: 16),
                       CustomText(
@@ -252,8 +254,7 @@ Center(
 
                       GestureDetector(
                         onTap: () {
-                          Nav.pop(context);
-                          Nav.pop(context);
+                          Nav.pushReplacementAll(context, Signin());
                         },
                         child: ProfileInfoCard(
                           icon: Icons.exit_to_app,
