@@ -15,6 +15,9 @@ import 'package:hog/components/slideritem.dart';
 import 'package:hog/components/sliders.dart';
 import 'package:hog/components/texts.dart';
 
+
+
+
 class Home extends ConsumerStatefulWidget {
   const Home({super.key});
 
@@ -269,62 +272,57 @@ class _HomeState extends ConsumerState<Home> {
 
                 const SizedBox(height: 20),
 
-                _isLoadingTailors
-                    ? const Center(child: CircularProgressIndicator())
-                    : GridView.builder(
-                      itemCount: _tailors.length,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 3 / 4,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                          ),
-                      itemBuilder: (context, index) {
-                        final tailor = _tailors[index];
-                        return TailorCard(
-                          name: tailor.user?.fullName ?? "Unknown",
-                          specialty: tailor.businessName ?? "N/A",
-                          imageUrl:
-                              tailor.user?.image ??
-                              tailor.nepaBill ??
-                              "https://i.pravatar.cc/150?img=5",
-                          onTap: () async {
-                            print("Tapped on ${tailor.id}");
+_isLoadingTailors
+    ? const Center(child: CircularProgressIndicator())
+    : GridView.builder(
+        itemCount: _tailors.length,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 3 / 4,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+        itemBuilder: (context, index) {
+          final tailor = _tailors[index];
+          return TailorCard(
+            tailor: tailor, // ✅ Use the model directly
+            onTap: () async {
+              print("Tapped on ${tailor.id}");
 
-                            // fetch vendor details from API
-                            final vendorDetails =
-                                await HomeApiService.getVendorDetails(
-                                  tailor.id,
-                                );
+              // fetch vendor details from API
+              final vendorDetails =
+                  await HomeApiService.getVendorDetails(
+                tailor.id,
+              );
 
-                            if (vendorDetails != null) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => Details(
-                                        vendor: vendorDetails.vendor,
-                                        userProfile: vendorDetails.userProfile,
-                                      ),
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "Failed to load tailor details",
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                          id: tailor.id,
-                        );
-                      },
+              if (vendorDetails != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Details(
+                      vendor: vendorDetails.vendor,
+                      userProfile: vendorDetails.userProfile,
                     ),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      "Failed to load tailor details",
+                    ),
+                  ),
+                );
+              }
+            },
+          );
+        },
+      ),
+
+
               ],
             ),
           ),
