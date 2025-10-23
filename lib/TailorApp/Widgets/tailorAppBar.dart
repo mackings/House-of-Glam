@@ -6,7 +6,12 @@ class TailorAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onRefresh;
   final VoidCallback onProfileClick;
 
-  const TailorAppBar({super.key, required this.title, required this.onRefresh,required this.onProfileClick});
+  const TailorAppBar({
+    super.key,
+    required this.title,
+    required this.onRefresh,
+    required this.onProfileClick,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,8 +19,7 @@ class TailorAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.purple,
       title: CustomText(title, fontSize: 18, color: Colors.white),
       actions: [
-
-         IconButton(
+        IconButton(
           onPressed: onRefresh,
           icon: const Icon(Icons.refresh, color: Colors.white),
         ),

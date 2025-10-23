@@ -80,8 +80,8 @@ class Header extends StatelessWidget {
             ),
 
             IconButton(
-              onPressed: (){
-                 Nav.push(context, UserProfile());
+              onPressed: () {
+                Nav.push(context, UserProfile());
               },
               icon: const Icon(
                 Icons.shopping_bag,

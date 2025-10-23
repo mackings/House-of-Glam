@@ -1,5 +1,3 @@
-
-
 class OfferThreadResponse {
   final bool success;
   final String message;
@@ -18,7 +16,8 @@ class OfferThreadResponse {
       success: json['success'] ?? false,
       message: json['message'] ?? '',
       count: json['count'] ?? 0,
-      data: (json['data'] as List<dynamic>?)
+      data:
+          (json['data'] as List<dynamic>?)
               ?.map((e) => OfferThread.fromJson(e))
               .toList() ??
           [],
@@ -59,7 +58,8 @@ class OfferThread {
       material: MaterialItem.fromJson(json['materialId']),
       review: Review.fromJson(json['reviewId']),
       status: json['status'] ?? '',
-      chats: (json['chats'] as List<dynamic>?)
+      chats:
+          (json['chats'] as List<dynamic>?)
               ?.map((e) => OfferChat.fromJson(e))
               .toList() ??
           [],
@@ -210,10 +210,7 @@ class ChatSummary {
   final int totalMessages;
   final OfferChat latestMessage;
 
-  ChatSummary({
-    required this.totalMessages,
-    required this.latestMessage,
-  });
+  ChatSummary({required this.totalMessages, required this.latestMessage});
 
   factory ChatSummary.fromJson(Map<String, dynamic> json) {
     return ChatSummary(

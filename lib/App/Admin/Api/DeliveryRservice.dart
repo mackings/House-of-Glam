@@ -1,17 +1,17 @@
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:http/http.dart' as http;
 
-
 class DeliveryRateService {
   static const String baseUrl =
       "https://hog-ymud.onrender.com/api/v1/deliveryRate";
 
   /// 🧩 Helper for safe API requests with retry and timeout
-  static Future<http.Response?> _safeRequest(Future<http.Response> Function() request) async {
+  static Future<http.Response?> _safeRequest(
+    Future<http.Response> Function() request,
+  ) async {
     const int maxRetries = 3;
     int attempt = 0;
 
@@ -30,7 +30,9 @@ class DeliveryRateService {
       }
 
       attempt++;
-      await Future.delayed(Duration(seconds: 1 * attempt)); // exponential backoff
+      await Future.delayed(
+        Duration(seconds: 1 * attempt),
+      ); // exponential backoff
     }
     print("🚫 All retry attempts failed.");
     return null;
@@ -48,17 +50,19 @@ class DeliveryRateService {
       print("➡️ POST $url");
       print("📦 Payload: { amount: $amount, deliveryType: $deliveryType }");
 
-      final response = await _safeRequest(() => http.post(
-            url,
-            headers: {
-              "Authorization": "Bearer $token",
-              "Content-Type": "application/json",
-            },
-            body: jsonEncode({
-              "amount": amount.toString(),
-              "deliveryType": deliveryType,
-            }),
-          ));
+      final response = await _safeRequest(
+        () => http.post(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode({
+            "amount": amount.toString(),
+            "deliveryType": deliveryType,
+          }),
+        ),
+      );
 
       if (response == null) return false;
 
@@ -83,10 +87,15 @@ class DeliveryRateService {
 
       print("➡️ GET $url");
 
-      final response = await _safeRequest(() => http.get(url, headers: {
+      final response = await _safeRequest(
+        () => http.get(
+          url,
+          headers: {
             "Authorization": "Bearer $token",
             "Content-Type": "application/json",
-          }));
+          },
+        ),
+      );
 
       if (response == null) return [];
 
@@ -116,14 +125,16 @@ class DeliveryRateService {
       print("➡️ PUT $url");
       print("📦 Payload: { amount: $amount }");
 
-      final response = await _safeRequest(() => http.put(
-            url,
-            headers: {
-              "Authorization": "Bearer $token",
-              "Content-Type": "application/json",
-            },
-            body: jsonEncode({"amount": amount.toString()}),
-          ));
+      final response = await _safeRequest(
+        () => http.put(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode({"amount": amount.toString()}),
+        ),
+      );
 
       if (response == null) return false;
 
@@ -143,13 +154,15 @@ class DeliveryRateService {
 
       print("➡️ DELETE $url");
 
-      final response = await _safeRequest(() => http.delete(
-            url,
-            headers: {
-              "Authorization": "Bearer $token",
-              "Content-Type": "application/json",
-            },
-          ));
+      final response = await _safeRequest(
+        () => http.delete(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
 
       if (response == null) return false;
 
@@ -174,19 +187,23 @@ class DeliveryRateService {
       );
 
       print("➡️ POST $url");
-      print("📦 Payload: { shipmentMethod: $shipmentMethod, address: $address }");
+      print(
+        "📦 Payload: { shipmentMethod: $shipmentMethod, address: $address }",
+      );
 
-      final response = await _safeRequest(() => http.post(
-            url,
-            headers: {
-              "Authorization": "Bearer $token",
-              "Content-Type": "application/json",
-            },
-            body: jsonEncode({
-              "shipmentMethod": shipmentMethod,
-              "address": address,
-            }),
-          ));
+      final response = await _safeRequest(
+        () => http.post(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode({
+            "shipmentMethod": shipmentMethod,
+            "address": address,
+          }),
+        ),
+      );
 
       if (response == null) return null;
 

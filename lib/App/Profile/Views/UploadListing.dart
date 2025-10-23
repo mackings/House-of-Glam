@@ -12,8 +12,6 @@ import 'package:hog/components/texts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
-
-
 class Uploadlisting extends StatefulWidget {
   const Uploadlisting({super.key});
 
@@ -116,7 +114,9 @@ class _UploadlistingState extends State<Uploadlisting> {
     if (listingType == "Material" &&
         (lengthController.text.isEmpty || widthController.text.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter length and width for material.")),
+        const SnackBar(
+          content: Text("Please enter length and width for material."),
+        ),
       );
       return;
     }
@@ -130,11 +130,11 @@ class _UploadlistingState extends State<Uploadlisting> {
     final List<Map<String, dynamic>>? yards =
         listingType == "Material"
             ? [
-                {
-                  "length": lengthController.text.trim(),
-                  "width": widthController.text.trim(),
-                }
-              ]
+              {
+                "length": lengthController.text.trim(),
+                "width": widthController.text.trim(),
+              },
+            ]
             : null;
 
     final success = await MarketplaceService.createSellerListing(
@@ -184,21 +184,22 @@ class _UploadlistingState extends State<Uploadlisting> {
           border: Border.all(color: Colors.grey.shade400),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: image == null
-            ? Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.add_a_photo, size: 30, color: Colors.grey),
-                    const SizedBox(height: 5),
-                    Text(label, style: TextStyle(color: Colors.grey)),
-                  ],
+        child:
+            image == null
+                ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.add_a_photo, size: 30, color: Colors.grey),
+                      const SizedBox(height: 5),
+                      Text(label, style: TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                )
+                : ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.file(image, fit: BoxFit.cover),
                 ),
-              )
-            : ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(image, fit: BoxFit.cover),
-              ),
       ),
     );
   }
@@ -209,7 +210,11 @@ class _UploadlistingState extends State<Uploadlisting> {
       isLoading: isLoading,
       child: Scaffold(
         appBar: AppBar(
-          title: const CustomText("List Item", color: Colors.white, fontSize: 18),
+          title: const CustomText(
+            "List Item",
+            color: Colors.white,
+            fontSize: 18,
+          ),
           backgroundColor: Colors.purple,
           iconTheme: const IconThemeData(color: Colors.white),
         ),
@@ -223,7 +228,8 @@ class _UploadlistingState extends State<Uploadlisting> {
                 label: "Listing Type",
                 options: const ["Attire", "Material"],
                 selectedValue: listingType,
-                onChanged: (val) => setState(() => listingType = val ?? "Attire"),
+                onChanged:
+                    (val) => setState(() => listingType = val ?? "Attire"),
               ),
               const SizedBox(height: 16),
 
@@ -233,7 +239,9 @@ class _UploadlistingState extends State<Uploadlisting> {
                 selectedValue: selectedCategory?.name,
                 onChanged: (val) {
                   setState(() {
-                    selectedCategory = categories.firstWhere((c) => c.name == val);
+                    selectedCategory = categories.firstWhere(
+                      (c) => c.name == val,
+                    );
                   });
                 },
               ),
@@ -301,7 +309,8 @@ class _UploadlistingState extends State<Uploadlisting> {
                 label: "Condition",
                 options: const ["Newly", "Preloved", "Newly Sewed"],
                 selectedValue: condition,
-                onChanged: (val) => setState(() => condition = val ?? "Newly Sewed"),
+                onChanged:
+                    (val) => setState(() => condition = val ?? "Newly Sewed"),
               ),
               const SizedBox(height: 16),
 
@@ -324,7 +333,11 @@ class _UploadlistingState extends State<Uploadlisting> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  imagePickerCard("Front", frontImage, () => pickImage("front")),
+                  imagePickerCard(
+                    "Front",
+                    frontImage,
+                    () => pickImage("front"),
+                  ),
                   imagePickerCard("Side", sideImage, () => pickImage("side")),
                   imagePickerCard("Back", backImage, () => pickImage("back")),
                 ],

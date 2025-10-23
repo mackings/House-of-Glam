@@ -1,7 +1,7 @@
 // lib/utils/country_codes.dart
 
 const List<String> africanAndUkCountryCodes = [
-  '+44',  // United Kingdom
+  '+44', // United Kingdom
   '+213', '+20', '+212', '+218', '+249', '+222', '+216',
   '+229', '+226', '+237', '+238', '+225', '+220', '+233', '+224',
   '+245', '+231', '+223', '+227', '+234', '+221', '+232', '+228',
@@ -68,6 +68,3 @@ const Map<String, String> countryCodeToName = {
   '+261': 'Madagascar',
   '+239': 'Sao Tome & Principe',
 };
-
-
-

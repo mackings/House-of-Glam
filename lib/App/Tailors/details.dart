@@ -76,18 +76,15 @@ class _DetailsState extends State<Details> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Rating Description
               const Text(
                 "How was your experience with this designer?",
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black54,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.black54),
               ),
               const SizedBox(height: 24),
-              
+
               // Star Rating
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -105,29 +102,30 @@ class _DetailsState extends State<Details> {
                             ? Icons.star
                             : Icons.star_border,
                         size: 40,
-                        color: index < _selectedRating
-                            ? Colors.amber
-                            : Colors.grey,
+                        color:
+                            index < _selectedRating
+                                ? Colors.amber
+                                : Colors.grey,
                       ),
                     ),
                   );
                 }),
               ),
               const SizedBox(height: 16),
-              
+
               // Rating Text
               Text(
                 _selectedRating == 0
                     ? "Tap a star to rate"
                     : _selectedRating == 1
-                        ? "Poor"
-                        : _selectedRating == 2
-                            ? "Fair"
-                            : _selectedRating == 3
-                                ? "Good"
-                                : _selectedRating == 4
-                                    ? "Very Good"
-                                    : "Excellent",
+                    ? "Poor"
+                    : _selectedRating == 2
+                    ? "Fair"
+                    : _selectedRating == 3
+                    ? "Good"
+                    : _selectedRating == 4
+                    ? "Very Good"
+                    : "Excellent",
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -135,15 +133,16 @@ class _DetailsState extends State<Details> {
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               // Rate Button
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _selectedRating == 0 || _isSubmittingRating
-                      ? null
-                      : () => _submitRating(setModalState),
+                  onPressed:
+                      _selectedRating == 0 || _isSubmittingRating
+                          ? null
+                          : () => _submitRating(setModalState),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.purple,
                     disabledBackgroundColor: Colors.purple.withOpacity(0.5),
@@ -152,27 +151,28 @@ class _DetailsState extends State<Details> {
                     ),
                     elevation: 2,
                   ),
-                  child: _isSubmittingRating
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                  child:
+                      _isSubmittingRating
+                          ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation(Colors.white),
+                            ),
+                          )
+                          : const Text(
+                            "Rate Designer",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
-                        )
-                      : const Text(
-                          "Rate Designer",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               // Cancel Button
               SizedBox(
                 width: double.infinity,
@@ -188,10 +188,7 @@ class _DetailsState extends State<Details> {
                   ),
                   child: const Text(
                     "Cancel",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.black54),
                   ),
                 ),
               ),
@@ -221,9 +218,7 @@ class _DetailsState extends State<Details> {
         Navigator.pop(context); // Close bottom sheet
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              "Thanks for rating ${widget.vendor.businessName}!",
-            ),
+            content: Text("Thanks for rating ${widget.vendor.businessName}!"),
             backgroundColor: Colors.green,
           ),
         );
@@ -262,25 +257,26 @@ class _DetailsState extends State<Details> {
             // Profile Image or Fallback Avatar
             Container(
               padding: const EdgeInsets.all(16),
-              child: userProfile.image.isNotEmpty
-                  ? CircleAvatar(
-                      radius: 60,
-                      backgroundImage: NetworkImage(userProfile.image),
-                    )
-                  : CircleAvatar(
-                      radius: 60,
-                      backgroundColor: Colors.blueAccent,
-                      child: Text(
-                        userProfile.fullName.isNotEmpty
-                            ? userProfile.fullName[0].toUpperCase()
-                            : "?",
-                        style: const TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+              child:
+                  userProfile.image.isNotEmpty
+                      ? CircleAvatar(
+                        radius: 60,
+                        backgroundImage: NetworkImage(userProfile.image),
+                      )
+                      : CircleAvatar(
+                        radius: 60,
+                        backgroundColor: Colors.blueAccent,
+                        child: Text(
+                          userProfile.fullName.isNotEmpty
+                              ? userProfile.fullName[0].toUpperCase()
+                              : "?",
+                          style: const TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                    ),
             ),
 
             // Name

@@ -11,8 +11,6 @@ import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
 import 'package:image_picker/image_picker.dart';
 
-
-
 class TailorRegistrationPage extends StatefulWidget {
   @override
   State<TailorRegistrationPage> createState() => _TailorRegistrationPageState();
@@ -205,165 +203,195 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
 
                 const SizedBox(height: 24),
 
-
-
                 // 🔹 Business Registration Choice
- // Title
-const Row(
-  children: [
-    Icon(Icons.business_center, color: Colors.purple, size: 22),
-    SizedBox(width: 8),
-    Text(
-      "Business Registration",
-      style: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-      ),
-    ),
-  ],
-),
-
-const SizedBox(height: 16),
-
-// Radio Options stacked vertically
-Column(
-  children: [
-    RadioListTile<bool>(
-      title: Row(
-        children: [
-          Icon(Icons.apartment, color: Colors.purple, size: 20),
-          SizedBox(width: 6),
-          Text("Registered Business"),
-        ],
-      ),
-      value: true,
-      groupValue: _isRegisteredBusiness,
-      activeColor: Colors.purple,
-      onChanged: (val) {
-        setState(() => _isRegisteredBusiness = val!);
-      },
-    ),
-    RadioListTile<bool>(
-      title: Row(
-        children: [
-          Icon(Icons.person_outline, color: Colors.purple, size: 20),
-          SizedBox(width: 6),
-          Text("Not Registered"),
-        ],
-      ),
-      value: false,
-      groupValue: _isRegisteredBusiness,
-      activeColor: Colors.purple,
-      onChanged: (val) {
-        setState(() => _isRegisteredBusiness = val!);
-      },
-    ),
-  ],
-),
-
-const SizedBox(height: 20),
-
-// Conditional Sections
-_isRegisteredBusiness
-    ? Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: const [
-              Icon(Icons.file_present, color: Colors.purple, size: 20),
-              SizedBox(width: 6),
-              Text(
-                "Upload Business Registration Document",
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            onPressed: _pickBusinessDoc,
-            icon: const Icon(Icons.upload_file),
-            label: const Text("Upload Document"),
-          ),
-          if (_businessDoc != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.green, size: 18),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      "Selected: ${_businessDoc!.path.split('/').last}",
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                      overflow: TextOverflow.ellipsis,
+                // Title
+                const Row(
+                  children: [
+                    Icon(Icons.business_center, color: Colors.purple, size: 22),
+                    SizedBox(width: 8),
+                    Text(
+                      "Business Registration",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      )
-    : Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: const [
-              Icon(Icons.info_outline, color: Colors.orange, size: 20),
-              SizedBox(width: 6),
-              Text(
-                "Consent",
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            "My business is not registered yet and I agree to provide my business logo.",
-            style: TextStyle(fontSize: 13, color: Colors.grey),
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            onPressed: _pickConsentImage,
-            icon: const Icon(Icons.image_outlined),
-            label: const Text("Upload Logo"),
-          ),
-          if (_consentImage != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.green, size: 18),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      "Selected: ${_consentImage!.path.split('/').last}",
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
+                  ],
+                ),
 
-const SizedBox(height: 24),
+                const SizedBox(height: 16),
+
+                // Radio Options stacked vertically
+                Column(
+                  children: [
+                    RadioListTile<bool>(
+                      title: Row(
+                        children: [
+                          Icon(Icons.apartment, color: Colors.purple, size: 20),
+                          SizedBox(width: 6),
+                          Text("Registered Business"),
+                        ],
+                      ),
+                      value: true,
+                      groupValue: _isRegisteredBusiness,
+                      activeColor: Colors.purple,
+                      onChanged: (val) {
+                        setState(() => _isRegisteredBusiness = val!);
+                      },
+                    ),
+                    RadioListTile<bool>(
+                      title: Row(
+                        children: [
+                          Icon(
+                            Icons.person_outline,
+                            color: Colors.purple,
+                            size: 20,
+                          ),
+                          SizedBox(width: 6),
+                          Text("Not Registered"),
+                        ],
+                      ),
+                      value: false,
+                      groupValue: _isRegisteredBusiness,
+                      activeColor: Colors.purple,
+                      onChanged: (val) {
+                        setState(() => _isRegisteredBusiness = val!);
+                      },
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // Conditional Sections
+                _isRegisteredBusiness
+                    ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: const [
+                            Icon(
+                              Icons.file_present,
+                              color: Colors.purple,
+                              size: 20,
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              "Upload Business Registration Document",
+                              style: TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.purple,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: _pickBusinessDoc,
+                          icon: const Icon(Icons.upload_file),
+                          label: const Text("Upload Document"),
+                        ),
+                        if (_businessDoc != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    "Selected: ${_businessDoc!.path.split('/').last}",
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    )
+                    : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: const [
+                            Icon(
+                              Icons.info_outline,
+                              color: Colors.orange,
+                              size: 20,
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              "Consent",
+                              style: TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          "My business is not registered yet and I agree to provide my business logo.",
+                          style: TextStyle(fontSize: 13, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 10),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.purple,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: _pickConsentImage,
+                          icon: const Icon(Icons.image_outlined),
+                          label: const Text("Upload Logo"),
+                        ),
+                        if (_consentImage != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    "Selected: ${_consentImage!.path.split('/').last}",
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+
+                const SizedBox(height: 24),
 
                 CustomButton(
                   title: "Submit",

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/components/texts.dart';
 
-
 class ChatSummaryCard extends StatelessWidget {
   final Map<String, dynamic> offer, user, vendor;
   final String currencySymbol;
@@ -97,7 +96,9 @@ class ChatSummaryCard extends StatelessWidget {
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.purple.shade50,
                           borderRadius: BorderRadius.circular(12),

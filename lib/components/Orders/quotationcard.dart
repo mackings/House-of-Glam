@@ -9,8 +9,6 @@ import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:intl/intl.dart';
 
-
-
 class QuotationCard extends StatelessWidget {
   final Review review;
   final VoidCallback onHireDesigner; // ✅ keep existing
@@ -215,29 +213,29 @@ class QuotationCard extends StatelessWidget {
 
           CustomButton(
             title: "Make Offer",
-onPressed: () async {
-  final result = await ReusableOfferSheet.show(
-    context,
-    onSubmit: (comment, material, work) async {
-      final res = await OfferService.makeOffer(
-        reviewId: review.id,
-        comment: comment,
-        materialTotalCost: material,
-        workmanshipTotalCost: work,
-      );
-      return res;
-    },
-  );
+            onPressed: () async {
+              final result = await ReusableOfferSheet.show(
+                context,
+                onSubmit: (comment, material, work) async {
+                  final res = await OfferService.makeOffer(
+                    reviewId: review.id,
+                    comment: comment,
+                    materialTotalCost: material,
+                    workmanshipTotalCost: work,
+                  );
+                  return res;
+                },
+              );
 
-  if (result?["success"] == true) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Offer submitted successfully!"),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
-},
+              if (result?["success"] == true) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Offer submitted successfully!"),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
 
             isOutlined: true,
           ),

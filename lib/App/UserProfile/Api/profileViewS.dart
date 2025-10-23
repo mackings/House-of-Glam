@@ -5,7 +5,6 @@ import 'package:hog/App/UserProfile/model/profileViewModel.dart';
 import 'package:http/http.dart' as http;
 
 class UserProfileViewService {
-  
   static const String baseUrl = "https://hog-ymud.onrender.com/api/v1";
 
   static Future<UserProfile?> getProfile() async {
@@ -35,34 +34,33 @@ class UserProfileViewService {
     return null;
   }
 
-
-
   static Future<bool> uploadProfileImage(File imageFile) async {
-  try {
-    final token = await SecurePrefs.getToken();
-    final url = Uri.parse("$baseUrl/user/uploadImage");
+    try {
+      final token = await SecurePrefs.getToken();
+      final url = Uri.parse("$baseUrl/user/uploadImage");
 
-    final request = http.MultipartRequest("PUT", url)
-      ..headers["Authorization"] = "Bearer $token"
-      ..files.add(await http.MultipartFile.fromPath("images", imageFile.path));
+      final request =
+          http.MultipartRequest("PUT", url)
+            ..headers["Authorization"] = "Bearer $token"
+            ..files.add(
+              await http.MultipartFile.fromPath("images", imageFile.path),
+            );
 
-    final response = await request.send();
+      final response = await request.send();
 
-    final responseBody = await response.stream.bytesToString();
-    print("➡️ PUT Request: $url");
-    print("⬅️ Response: $responseBody");
+      final responseBody = await response.stream.bytesToString();
+      print("➡️ PUT Request: $url");
+      print("⬅️ Response: $responseBody");
 
-    if (response.statusCode == 200) {
-      return true;
-    } else {
-      print("❌ Upload failed: ${response.reasonPhrase}");
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print("❌ Upload failed: ${response.reasonPhrase}");
+        return false;
+      }
+    } catch (e) {
+      print("❌ Error uploading image: $e");
       return false;
     }
-  } catch (e) {
-    print("❌ Error uploading image: $e");
-    return false;
   }
-}
-
-
 }

@@ -7,9 +7,6 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/components/thousandformat.dart';
 
-
-
-
 class PaymentOptionsModal extends StatefulWidget {
   final Review review;
   final Function(String url) onCheckout;
@@ -25,14 +22,12 @@ class PaymentOptionsModal extends StatefulWidget {
 }
 
 class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
-
   String paymentType = "part";
   String shipment = "Regular";
 
   final TextEditingController amountController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   bool isLoading = false;
-
 
   @override
   void initState() {
@@ -45,9 +40,6 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     amountController.dispose();
     super.dispose();
   }
-
-
-
 
   Future<void> _makePayment() async {
     setState(() => isLoading = true);
@@ -93,7 +85,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
         reviewId: widget.review.id,
         amount: amountToSend,
         shipmentMethod: shipment,
-        address: addressController.text.trim()
+        address: addressController.text.trim(),
       );
     }
 
@@ -116,8 +108,6 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
       );
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -188,7 +178,6 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   const CustomText(
                     "Shipment Method",
                     fontSize: 16,
@@ -204,43 +193,36 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: DropdownButtonFormField<String>(
-  value: shipment,
-  decoration: const InputDecoration(
-    border: InputBorder.none,
-  ),
-  items: const [
-    DropdownMenuItem(
-      value: "Regular",
-      child: Text("Regular (1–8 days)"),
-    ),
-    DropdownMenuItem(
-      value: "Express",
-      child: Text("Express (1–4 days)"),
-    ),
-    DropdownMenuItem(
-      value: "Cargo",
-      child: Text("Cargo (1–15 days)"),
-    ),
-  ],
-  onChanged: (val) => setState(() => shipment = val!),
-),
-
-
+                      value: shipment,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: "Regular",
+                          child: Text("Regular (1–8 days)"),
+                        ),
+                        DropdownMenuItem(
+                          value: "Express",
+                          child: Text("Express (1–4 days)"),
+                        ),
+                        DropdownMenuItem(
+                          value: "Cargo",
+                          child: Text("Cargo (1–15 days)"),
+                        ),
+                      ],
+                      onChanged: (val) => setState(() => shipment = val!),
+                    ),
                   ),
 
-
-             if (paymentType != "part")
-             CustomTextField(
-                  title: "Address",
-                  fieldKey: "Address",
-                  hintText: "Enter delivery address",
-                  controller: addressController,
-                  keyboardType: TextInputType.text,
-
-                ),
-
-
-                  
+                  if (paymentType != "part")
+                    CustomTextField(
+                      title: "Address",
+                      fieldKey: "Address",
+                      hintText: "Enter delivery address",
+                      controller: addressController,
+                      keyboardType: TextInputType.text,
+                    ),
                 ],
               ),
 

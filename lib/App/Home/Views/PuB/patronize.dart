@@ -129,7 +129,7 @@ class _PatronizeFormState extends State<PatronizeForm> {
         appBar: AppBar(
           iconTheme: IconThemeData(color: Colors.white),
           backgroundColor: Colors.purple,
-          title:  CustomText(
+          title: CustomText(
             "Patronize Work",
             color: Colors.white,
             fontSize: 18,

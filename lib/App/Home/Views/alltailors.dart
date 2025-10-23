@@ -44,35 +44,36 @@ class _AlltailorsState extends ConsumerState<Alltailors> {
                   ),
                   itemBuilder: (context, index) {
                     final tailor = widget.tailors[index];
-                    return  TailorCard(
-  tailor: tailor,
-  onTap: () async {
-    print("Tapped on ${tailor.user?.fullName}");
-    print("Tapped on ${tailor.id}");
+                    return TailorCard(
+                      tailor: tailor,
+                      onTap: () async {
+                        print("Tapped on ${tailor.user?.fullName}");
+                        print("Tapped on ${tailor.id}");
 
-    // fetch vendor details from API
-    final vendorDetails = await HomeApiService.getVendorDetails(tailor.id);
+                        // fetch vendor details from API
+                        final vendorDetails =
+                            await HomeApiService.getVendorDetails(tailor.id);
 
-    if (vendorDetails != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Details(
-            vendor: vendorDetails.vendor,
-            userProfile: vendorDetails.userProfile,
-          ),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Failed to load tailor details"),
-        ),
-      );
-    }
-  },
-);
-
+                        if (vendorDetails != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => Details(
+                                    vendor: vendorDetails.vendor,
+                                    userProfile: vendorDetails.userProfile,
+                                  ),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Failed to load tailor details"),
+                            ),
+                          );
+                        }
+                      },
+                    );
                   },
                 ),
       ),

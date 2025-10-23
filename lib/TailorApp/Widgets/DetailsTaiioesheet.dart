@@ -7,7 +7,6 @@ import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:intl/intl.dart';
 
-
 class TailorMaterialDetailSheet extends StatefulWidget {
   final TailorMaterialItem material;
 
@@ -24,8 +23,9 @@ class _TailorMaterialDetailSheetState extends State<TailorMaterialDetailSheet> {
   @override
   Widget build(BuildContext context) {
     final material = widget.material;
-    String formattedDate = DateFormat("dd MMM, yyyy")
-        .format(DateTime.parse(material.createdAt));
+    String formattedDate = DateFormat(
+      "dd MMM, yyyy",
+    ).format(DateTime.parse(material.createdAt));
 
     return DraggableScrollableSheet(
       expand: false,
@@ -87,7 +87,8 @@ class _TailorMaterialDetailSheetState extends State<TailorMaterialDetailSheet> {
                                 loadingBuilder: (context, child, progress) {
                                   if (progress == null) return child;
                                   return const Center(
-                                      child: CircularProgressIndicator());
+                                    child: CircularProgressIndicator(),
+                                  );
                                 },
                                 errorBuilder: (context, error, stackTrace) {
                                   return const Center(
@@ -106,14 +107,14 @@ class _TailorMaterialDetailSheetState extends State<TailorMaterialDetailSheet> {
                           material.sampleImage.length,
                           (index) => AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
-                            margin:
-                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            margin: const EdgeInsets.symmetric(horizontal: 4.0),
                             height: 8,
                             width: _currentImage == index ? 18 : 8,
                             decoration: BoxDecoration(
-                              color: _currentImage == index
-                                  ? Colors.purple
-                                  : Colors.grey[400],
+                              color:
+                                  _currentImage == index
+                                      ? Colors.purple
+                                      : Colors.grey[400],
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
@@ -147,29 +148,48 @@ class _TailorMaterialDetailSheetState extends State<TailorMaterialDetailSheet> {
                 _buildDetailRow(Icons.store, "Brand", material.brand),
                 _buildDetailRow(Icons.color_lens, "Color", material.color),
                 _buildDetailRow(
-                    Icons.texture, "Material", material.clothMaterial),
+                  Icons.texture,
+                  "Material",
+                  material.clothMaterial,
+                ),
 
                 Divider(height: 24, thickness: 1, color: Colors.grey[300]),
 
                 _buildDetailRow(
-                    Icons.person, "Customer", material.userId.fullName),
-              //  _buildDetailRow(Icons.email, "Email", material.userId.email),
+                  Icons.person,
+                  "Customer",
+                  material.userId.fullName,
+                ),
 
+                //  _buildDetailRow(Icons.email, "Email", material.userId.email),
                 Divider(height: 24, thickness: 1, color: Colors.grey[300]),
 
-                _buildDetailRow(Icons.attach_money, "Price",
-                    "$currencySymbol ${material.price ?? 'TBD'}",
-                    valueColor: Colors.purple, isBold: true),
-                _buildDetailRow(Icons.local_shipping, "Delivered",
-                    material.isDelivered ? "Yes" : "No"),
                 _buildDetailRow(
-                    Icons.calendar_today, "Posted On", formattedDate),
+                  Icons.attach_money,
+                  "Price",
+                  "$currencySymbol ${material.price ?? 'TBD'}",
+                  valueColor: Colors.purple,
+                  isBold: true,
+                ),
+                _buildDetailRow(
+                  Icons.local_shipping,
+                  "Delivered",
+                  material.isDelivered ? "Yes" : "No",
+                ),
+                _buildDetailRow(
+                  Icons.calendar_today,
+                  "Posted On",
+                  formattedDate,
+                ),
 
                 if (material.specialInstructions != null &&
                     material.specialInstructions!.isNotEmpty) ...[
                   Divider(height: 24, thickness: 1, color: Colors.grey[300]),
                   _buildDetailRow(
-                      Icons.note, "Notes", material.specialInstructions!),
+                    Icons.note,
+                    "Notes",
+                    material.specialInstructions!,
+                  ),
                 ],
 
                 const SizedBox(height: 24),
@@ -184,11 +204,12 @@ class _TailorMaterialDetailSheetState extends State<TailorMaterialDetailSheet> {
                       context: context,
                       isScrollControlled: true,
                       shape: const RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(20)),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(20),
+                        ),
                       ),
-                      builder: (_) =>
-                          QuotationBottomSheet(materialId: material.id),
+                      builder:
+                          (_) => QuotationBottomSheet(materialId: material.id),
                     );
                   },
                 ),
@@ -205,69 +226,74 @@ class _TailorMaterialDetailSheetState extends State<TailorMaterialDetailSheet> {
     showDialog(
       context: context,
       builder: (_) {
-        PageController pageController =
-            PageController(initialPage: _currentImage);
+        PageController pageController = PageController(
+          initialPage: _currentImage,
+        );
         int activePage = _currentImage;
 
-        return StatefulBuilder(builder: (context, setState) {
-          return GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Scaffold(
-              backgroundColor: Colors.black,
-              body: Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  PageView.builder(
-                    controller: pageController,
-                    itemCount: images.length,
-                    onPageChanged: (index) => setState(() {
-                      activePage = index;
-                    }),
-                    itemBuilder: (context, index) {
-                      return InteractiveViewer(
-                        child: Center(
-                          child: Image.network(
-                            images[index],
-                            fit: BoxFit.contain,
-                            loadingBuilder: (context, child, progress) {
-                              if (progress == null) return child;
-                              return const Center(
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Scaffold(
+                backgroundColor: Colors.black,
+                body: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    PageView.builder(
+                      controller: pageController,
+                      itemCount: images.length,
+                      onPageChanged:
+                          (index) => setState(() {
+                            activePage = index;
+                          }),
+                      itemBuilder: (context, index) {
+                        return InteractiveViewer(
+                          child: Center(
+                            child: Image.network(
+                              images[index],
+                              fit: BoxFit.contain,
+                              loadingBuilder: (context, child, progress) {
+                                if (progress == null) return child;
+                                return const Center(
                                   child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ));
-                            },
+                                    color: Colors.white,
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        images.length,
-                        (index) => AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          margin:
-                              const EdgeInsets.symmetric(horizontal: 4.0),
-                          height: 8,
-                          width: activePage == index ? 18 : 8,
-                          decoration: BoxDecoration(
-                            color: activePage == index
-                                ? Colors.white
-                                : Colors.grey[600],
-                            borderRadius: BorderRadius.circular(12),
+                        );
+                      },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          images.length,
+                          (index) => AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                            height: 8,
+                            width: activePage == index ? 18 : 8,
+                            decoration: BoxDecoration(
+                              color:
+                                  activePage == index
+                                      ? Colors.white
+                                      : Colors.grey[600],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        });
+            );
+          },
+        );
       },
     );
   }

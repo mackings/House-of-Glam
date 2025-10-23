@@ -144,85 +144,86 @@ class _PublishMaterialState extends State<PublishMaterial> {
             fontSize: 18,
           ),
         ),
-        body: isLoading && categories.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CustomText(
-                      "Attire Details *",
-                      color: Colors.black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    const Divider(),
-                    const SizedBox(height: 10),
+        body:
+            isLoading && categories.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomText(
+                        "Attire Details *",
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      const Divider(),
+                      const SizedBox(height: 10),
 
-                    // 🔹 Category Dropdown
-                    CustomDropdown(
-                      label: "Select Category",
-                      options: categories.map((c) => c.name).toList(),
-                      selectedValue: selectedCategory?.name,
-                      onChanged: (val) {
-                        setState(() {
-                          selectedCategory = categories.firstWhere(
-                            (c) => c.name == val,
-                          );
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 10),
+                      // 🔹 Category Dropdown
+                      CustomDropdown(
+                        label: "Select Category",
+                        options: categories.map((c) => c.name).toList(),
+                        selectedValue: selectedCategory?.name,
+                        onChanged: (val) {
+                          setState(() {
+                            selectedCategory = categories.firstWhere(
+                              (c) => c.name == val,
+                            );
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 10),
 
-                    // 🔹 Attire Type
-                    CustomTextField(
-                      title: "Attire Type",
-                      hintText: "e.g Agbada, Senator",
-                      fieldKey: "attireType",
-                      controller: attireTypeController,
-                    ),
-                    const SizedBox(height: 10),
+                      // 🔹 Attire Type
+                      CustomTextField(
+                        title: "Attire Type",
+                        hintText: "e.g Agbada, Senator",
+                        fieldKey: "attireType",
+                        controller: attireTypeController,
+                      ),
+                      const SizedBox(height: 10),
 
-                    // 🔹 Color
-                    CustomDropdown(
-                      label: "Select Color",
-                      options: colors,
-                      selectedValue: selectedColor,
-                      onChanged: (val) => setState(() => selectedColor = val),
-                    ),
-                    const SizedBox(height: 10),
+                      // 🔹 Color
+                      CustomDropdown(
+                        label: "Select Color",
+                        options: colors,
+                        selectedValue: selectedColor,
+                        onChanged: (val) => setState(() => selectedColor = val),
+                      ),
+                      const SizedBox(height: 10),
 
-                    // 🔹 Brand
-                    CustomTextField(
-                      title: "Brand",
-                      hintText: "Gucci, Versace...",
-                      fieldKey: "brand",
-                      controller: brandController,
-                    ),
-                    const SizedBox(height: 20),
+                      // 🔹 Brand
+                      CustomTextField(
+                        title: "Brand",
+                        hintText: "Gucci, Versace...",
+                        fieldKey: "brand",
+                        controller: brandController,
+                      ),
+                      const SizedBox(height: 20),
 
-                    CustomText(
-                      "Upload Images *",
-                      color: Colors.black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    const Divider(),
-                    const SizedBox(height: 10),
+                      CustomText(
+                        "Upload Images *",
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      const Divider(),
+                      const SizedBox(height: 10),
 
-                    // 🔹 Image Picker
-                    MultiImagePicker(
-                      images: sampleImages,
-                      onAddImage: pickSampleImage,
-                    ),
+                      // 🔹 Image Picker
+                      MultiImagePicker(
+                        images: sampleImages,
+                        onAddImage: pickSampleImage,
+                      ),
 
-                    const SizedBox(height: 40),
-                    CustomButton(title: "Publish", onPressed: _submitPublish),
-                    const SizedBox(height: 30),
-                  ],
+                      const SizedBox(height: 40),
+                      CustomButton(title: "Publish", onPressed: _submitPublish),
+                      const SizedBox(height: 30),
+                    ],
+                  ),
                 ),
-              ),
       ),
     );
   }

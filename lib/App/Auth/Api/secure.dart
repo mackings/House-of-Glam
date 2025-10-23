@@ -160,24 +160,22 @@ class SecurePrefs {
     return null;
   }
 
-
   // -------------------------
-// ✅ USER ID
-// -------------------------
-static Future<String?> getUserId() async {
-  final userJson = await _storage.read(key: _userDataKey);
-  if (userJson != null) {
-    try {
-      final Map<String, dynamic> userMap = jsonDecode(userJson);
-      final userId = userMap['_id'];
-      return userId != null ? userId.toString() : null;
-    } catch (e) {
-      return null;
+  // ✅ USER ID
+  // -------------------------
+  static Future<String?> getUserId() async {
+    final userJson = await _storage.read(key: _userDataKey);
+    if (userJson != null) {
+      try {
+        final Map<String, dynamic> userMap = jsonDecode(userJson);
+        final userId = userMap['_id'];
+        return userId != null ? userId.toString() : null;
+      } catch (e) {
+        return null;
+      }
     }
+    return null;
   }
-  return null;
-}
-
 
   static Future<void> clearAdminSettings() async {
     await _storage.delete(key: _adminSettingsKey);

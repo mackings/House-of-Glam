@@ -11,8 +11,6 @@ import 'package:hog/App/Profile/Views/marketPlace.dart';
 import 'package:hog/App/Profile/widgets/profileMenu.dart';
 import 'package:hog/components/Navigator.dart';
 
-
-
 class UserProfile extends StatefulWidget {
   const UserProfile({super.key});
 
@@ -123,7 +121,7 @@ class _UserProfileState extends State<UserProfile> {
                   },
                 ),
 
-                              if (isAdmin)
+              if (isAdmin)
                 ProfileMenuItem(
                   icon: Icons.electric_scooter,
                   text: "Delivery Settings",
@@ -131,7 +129,6 @@ class _UserProfileState extends State<UserProfile> {
                     Nav.push(context, const DeliverySettings());
                   },
                 ),
-
             ],
           ),
         ),

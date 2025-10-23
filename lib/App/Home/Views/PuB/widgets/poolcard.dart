@@ -159,7 +159,6 @@ class WorkCard extends StatelessWidget {
                   //       "Subscription Plan: ${work.user?.subscriptionPlan ?? 'Free'}",
                   //   smallText: true,
                   // ),
-
                   const SizedBox(height: 10),
                   if (work.user != null)
                     GestureDetector(

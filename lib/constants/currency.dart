@@ -1,6 +1,5 @@
 import 'package:hog/App/Auth/Api/secure.dart';
 
-
 late String Cur;
 
 /// Call this at app startup

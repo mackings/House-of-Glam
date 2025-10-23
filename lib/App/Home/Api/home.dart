@@ -110,9 +110,7 @@ class HomeApiService {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
         },
-        body: jsonEncode({
-          "rating": rating,
-        }),
+        body: jsonEncode({"rating": rating}),
       );
 
       print("➡️ POST Request: $url");

@@ -5,7 +5,6 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
-
 class DeliverySettings extends StatefulWidget {
   const DeliverySettings({super.key});
 
@@ -115,44 +114,48 @@ class _DeliverySettingsState extends State<DeliverySettings> {
 
     showDialog(
       context: context,
-      builder: (_) => Column(
-        children: [
-          AlertDialog(
-            title: CustomText("Edit Delivery Rate"),
-            content: CustomTextField(
-              title: "Rate",
-              fieldKey: "rate",
-              controller: amountCtrl,
-              hintText: "Enter new amount",
-              keyboardType: TextInputType.number,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cancel"),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-                onPressed: () async {
-                  final cleanAmount = amountCtrl.text.replaceAll(',', '');
-                  final updated = await DeliveryRateService.updateDeliveryRate(
-                    rateId: id,
-                    amount: double.parse(cleanAmount),
-                  );
-                  Navigator.pop(context);
-                  if (updated) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("✅ Rate updated")),
-                    );
-                    fetchDeliveryRates();
-                  }
-                },
-                child: const CustomText("Update",color: Colors.white,)
+      builder:
+          (_) => Column(
+            children: [
+              AlertDialog(
+                title: CustomText("Edit Delivery Rate"),
+                content: CustomTextField(
+                  title: "Rate",
+                  fieldKey: "rate",
+                  controller: amountCtrl,
+                  hintText: "Enter new amount",
+                  keyboardType: TextInputType.number,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Cancel"),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.purple,
+                    ),
+                    onPressed: () async {
+                      final cleanAmount = amountCtrl.text.replaceAll(',', '');
+                      final updated =
+                          await DeliveryRateService.updateDeliveryRate(
+                            rateId: id,
+                            amount: double.parse(cleanAmount),
+                          );
+                      Navigator.pop(context);
+                      if (updated) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("✅ Rate updated")),
+                        );
+                        fetchDeliveryRates();
+                      }
+                    },
+                    child: const CustomText("Update", color: Colors.white),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
     );
   }
 
@@ -175,8 +178,11 @@ class _DeliverySettingsState extends State<DeliverySettings> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CustomText("Add Delivery Rate",
-                  fontSize: 18, fontWeight: FontWeight.bold),
+              CustomText(
+                "Add Delivery Rate",
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
               const SizedBox(height: 15),
               CustomTextField(
                 fieldKey: "Amount",
@@ -222,8 +228,11 @@ class _DeliverySettingsState extends State<DeliverySettings> {
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.purple,
-        title: CustomText("Delivery Settings",
-            color: Colors.white, fontSize: 18,),
+        title: CustomText(
+          "Delivery Settings",
+          color: Colors.white,
+          fontSize: 18,
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.purple,
@@ -231,100 +240,111 @@ class _DeliverySettingsState extends State<DeliverySettings> {
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: SafeArea(
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator(color: Colors.purple))
-            : Padding(
-                padding: const EdgeInsets.all(16),
-                child: deliveryRates.isEmpty
-                    ? Center(
-                        child: CustomText(
-                          "No delivery rates found",
-                          color: Colors.black54,
-                        ),
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-
-                          const SizedBox(height: 10),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: deliveryRates.length,
-                            itemBuilder: (context, index) {
-                              final rate = deliveryRates[index];
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 5,
-                                      offset: const Offset(0, 3),
-                                    )
-                                  ],
-                                  border: Border.all(
-                                    color: Colors.purple.withOpacity(0.3),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
+        child:
+            isLoading
+                ? const Center(
+                  child: CircularProgressIndicator(color: Colors.purple),
+                )
+                : Padding(
+                  padding: const EdgeInsets.all(16),
+                  child:
+                      deliveryRates.isEmpty
+                          ? Center(
+                            child: CustomText(
+                              "No delivery rates found",
+                              color: Colors.black54,
+                            ),
+                          )
+                          : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 10),
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: deliveryRates.length,
+                                itemBuilder: (context, index) {
+                                  final rate = deliveryRates[index];
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black12,
+                                          blurRadius: 5,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                                      border: Border.all(
+                                        color: Colors.purple.withOpacity(0.3),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        const Icon(Icons.local_shipping,
-                                            color: Colors.purple),
-                                        const SizedBox(width: 10),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                        Row(
                                           children: [
-                                            CustomText(
-                                              rate["deliveryType"] ?? "N/A",
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
+                                            const Icon(
+                                              Icons.local_shipping,
+                                              color: Colors.purple,
                                             ),
-                                            CustomText(
-                                              "${_formatter.format(rate["amount"])}%",
-                                              color: Colors.black54,
+                                            const SizedBox(width: 10),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                CustomText(
+                                                  rate["deliveryType"] ?? "N/A",
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                                CustomText(
+                                                  "${_formatter.format(rate["amount"])}%",
+                                                  color: Colors.black54,
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.edit,
+                                                color: Colors.black,
+                                              ),
+                                              onPressed:
+                                                  () => _editRate(
+                                                    rate["_id"],
+                                                    double.parse(
+                                                      rate["amount"].toString(),
+                                                    ),
+                                                  ),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.delete,
+                                                color: Colors.red,
+                                              ),
+                                              onPressed:
+                                                  () =>
+                                                      _deleteRate(rate["_id"]),
                                             ),
                                           ],
                                         ),
                                       ],
                                     ),
-                                    Row(
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.edit,
-                                              color: Colors.black),
-                                          onPressed: () => _editRate(
-                                            rate["_id"],
-                                            double.parse(
-                                                rate["amount"].toString()),
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.delete,
-                                              color: Colors.red),
-                                          onPressed: () =>
-                                              _deleteRate(rate["_id"]),
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              );
-                            },
+                                  );
+                                },
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-              ),
+                ),
       ),
     );
   }
 }
-

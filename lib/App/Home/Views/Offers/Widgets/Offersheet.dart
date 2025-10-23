@@ -3,8 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
-
-
 class ReusableOfferSheet {
   static Future<Map<String, dynamic>?> show(
     BuildContext context, {
@@ -13,7 +11,8 @@ class ReusableOfferSheet {
       String comment,
       String materialCost,
       String workCost,
-    ) onSubmit,
+    )
+    onSubmit,
   }) async {
     final commentCtrl = TextEditingController();
     final materialCtrl = TextEditingController();
@@ -45,8 +44,11 @@ class ReusableOfferSheet {
                     // 🔹 Header
                     Row(
                       children: [
-                        const Icon(Icons.local_offer,
-                            color: Colors.purple, size: 22),
+                        const Icon(
+                          Icons.local_offer,
+                          color: Colors.purple,
+                          size: 22,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           title,
@@ -85,21 +87,26 @@ class ReusableOfferSheet {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         ElevatedButton.icon(
-                          icon: isLoading
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
+                          icon:
+                              isLoading
+                                  ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : const Icon(
+                                    Icons.send_rounded,
                                     color: Colors.white,
-                                    strokeWidth: 2,
                                   ),
-                                )
-                              : const Icon(Icons.send_rounded,
-                                  color: Colors.white),
                           label: Text(
                             isLoading ? "Submitting..." : "Submit Offer",
                             style: const TextStyle(
-                                color: Colors.white, fontSize: 15),
+                              color: Colors.white,
+                              fontSize: 15,
+                            ),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.purple,
@@ -108,40 +115,52 @@ class ReusableOfferSheet {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          onPressed: isLoading
-                              ? null
-                              : () async {
-                                  final comment = commentCtrl.text.trim();
-                                  final material = materialCtrl.text
-                                      .replaceAll(',', '')
-                                      .trim();
-                                  final work =
-                                      workCtrl.text.replaceAll(',', '').trim();
+                          onPressed:
+                              isLoading
+                                  ? null
+                                  : () async {
+                                    final comment = commentCtrl.text.trim();
+                                    final material =
+                                        materialCtrl.text
+                                            .replaceAll(',', '')
+                                            .trim();
+                                    final work =
+                                        workCtrl.text
+                                            .replaceAll(',', '')
+                                            .trim();
 
-                                  if (comment.isEmpty ||
-                                      material.isEmpty ||
-                                      work.isEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text("Please fill all fields"),
-                                        backgroundColor: Colors.red,
-                                      ),
+                                    if (comment.isEmpty ||
+                                        material.isEmpty ||
+                                        work.isEmpty) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "Please fill all fields",
+                                          ),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                      return;
+                                    }
+
+                                    // 🧩 Confirm action before API call
+                                    final confirmed = await _confirmAction(
+                                      context,
                                     );
-                                    return;
-                                  }
+                                    if (confirmed != true) return;
 
-                                  // 🧩 Confirm action before API call
-                                  final confirmed =
-                                      await _confirmAction(context);
-                                  if (confirmed != true) return;
+                                    setState(() => isLoading = true);
+                                    final result = await onSubmit(
+                                      comment,
+                                      material,
+                                      work,
+                                    );
+                                    setState(() => isLoading = false);
 
-                                  setState(() => isLoading = true);
-                                  final result =
-                                      await onSubmit(comment, material, work);
-                                  setState(() => isLoading = false);
-
-                                  Navigator.pop(context, result);
-                                },
+                                    Navigator.pop(context, result);
+                                  },
                         ),
                         const SizedBox(height: 12),
                       ],
@@ -169,12 +188,14 @@ class ReusableOfferSheet {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            )),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
         const SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
@@ -199,8 +220,10 @@ class ReusableOfferSheet {
                   icon != null ? Icon(icon, color: Colors.purple) : null,
               hintText: "Enter $label",
               hintStyle: const TextStyle(color: Colors.black38),
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 14,
+                horizontal: 14,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -215,47 +238,56 @@ class ReusableOfferSheet {
   static Future<bool?> _confirmAction(BuildContext context) async {
     return await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Confirm Submission"),
-        content: const Text(
-          "Are you sure you want to submit this offer?",
-          style: TextStyle(fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child:
-                  const Text("Cancel", style: TextStyle(color: Colors.black))),
-          ElevatedButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-              child: const Text("Yes", style: TextStyle(color: Colors.white))),
-        ],
-      ),
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text("Confirm Submission"),
+            content: const Text(
+              "Are you sure you want to submit this offer?",
+              style: TextStyle(fontSize: 14),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+                child: const Text("Yes", style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
     );
   }
 
   static Future<bool?> _confirmReject(BuildContext context) async {
     return await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Reject Offer"),
-        content: const Text(
-          "Are you sure you want to reject this offer?",
-          style: TextStyle(fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text("Cancel", style: TextStyle(color: Colors.black54)),
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text("Reject Offer"),
+            content: const Text(
+              "Are you sure you want to reject this offer?",
+              style: TextStyle(fontSize: 14),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(color: Colors.black54),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+                child: const Text("Yes, Reject"),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-            child: const Text("Yes, Reject"),
-          ),
-        ],
-      ),
     );
   }
 }

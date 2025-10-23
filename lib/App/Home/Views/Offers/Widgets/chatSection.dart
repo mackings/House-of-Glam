@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:intl/intl.dart';
 
-
 class ChatSection extends StatelessWidget {
   final Map<String, dynamic> offer;
   final String userRole;
@@ -41,9 +40,10 @@ class ChatSection extends StatelessWidget {
               final isUser = chat["senderType"] == "customer";
               final alignment =
                   isUser ? CrossAxisAlignment.start : CrossAxisAlignment.end;
-              final bubbleColor = isUser
-                  ? Colors.purple.shade50
-                  : Colors.purple.withOpacity(0.15);
+              final bubbleColor =
+                  isUser
+                      ? Colors.purple.shade50
+                      : Colors.purple.withOpacity(0.15);
               final borderRadius = BorderRadius.only(
                 topLeft: const Radius.circular(16),
                 topRight: const Radius.circular(16),
@@ -55,17 +55,21 @@ class ChatSection extends StatelessWidget {
                 crossAxisAlignment: alignment,
                 children: [
                   Row(
-                    mainAxisAlignment: isUser
-                        ? MainAxisAlignment.start
-                        : MainAxisAlignment.end,
+                    mainAxisAlignment:
+                        isUser
+                            ? MainAxisAlignment.start
+                            : MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (isUser)
                         CircleAvatar(
                           radius: 18,
                           backgroundColor: Colors.purple.shade100,
-                          child: const Icon(Icons.person,
-                              color: Colors.purple, size: 18),
+                          child: const Icon(
+                            Icons.person,
+                            color: Colors.purple,
+                            size: 18,
+                          ),
                         ),
                       const SizedBox(width: 8),
                       Flexible(
@@ -122,8 +126,11 @@ class ChatSection extends StatelessWidget {
                         CircleAvatar(
                           radius: 18,
                           backgroundColor: Colors.purple.shade100,
-                          child: const Icon(Icons.store,
-                              color: Colors.purple, size: 18),
+                          child: const Icon(
+                            Icons.store,
+                            color: Colors.purple,
+                            size: 18,
+                          ),
                         ),
                     ],
                   ),
@@ -144,14 +151,13 @@ class ChatSection extends StatelessWidget {
           controller: commentCtrl,
           maxLines: 3,
           decoration: InputDecoration(
-            hintText: userRole == "user"
-                ? "Write your offer..."
-                : "Reply to buyer...",
+            hintText:
+                userRole == "user"
+                    ? "Write your offer..."
+                    : "Reply to buyer...",
             filled: true,
             fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
           ),
         ),
         const SizedBox(height: 8),
@@ -166,7 +172,8 @@ class ChatSection extends StatelessWidget {
                   prefixIcon: const Icon(Icons.checkroom, color: Colors.purple),
                   hintText: "Material ${currencySymbol}",
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
               ),
             ),
@@ -180,7 +187,8 @@ class ChatSection extends StatelessWidget {
                   prefixIcon: const Icon(Icons.handyman, color: Colors.purple),
                   hintText: "Workmanship (₦)",
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
               ),
             ),
@@ -223,12 +231,14 @@ class ChatSection extends StatelessWidget {
                   icon: const Icon(Icons.swap_horiz),
                   label: const Text("Counter"),
                   style: btnStyle.copyWith(
-                    backgroundColor:
-                        WidgetStateProperty.all(Colors.orange.shade600),
+                    backgroundColor: WidgetStateProperty.all(
+                      Colors.orange.shade600,
+                    ),
                   ),
-                  onPressed: isSubmitting
-                      ? null
-                      : () => _confirmAction(context, "countered"),
+                  onPressed:
+                      isSubmitting
+                          ? null
+                          : () => _confirmAction(context, "countered"),
                 ),
               ),
               const SizedBox(width: 8),
@@ -237,12 +247,14 @@ class ChatSection extends StatelessWidget {
                   icon: const Icon(Icons.check),
                   label: const Text("Accept"),
                   style: btnStyle.copyWith(
-                    backgroundColor:
-                        WidgetStateProperty.all(Colors.green.shade600),
+                    backgroundColor: WidgetStateProperty.all(
+                      Colors.green.shade600,
+                    ),
                   ),
-                  onPressed: isSubmitting
-                      ? null
-                      : () => _confirmAction(context, "accepted"),
+                  onPressed:
+                      isSubmitting
+                          ? null
+                          : () => _confirmAction(context, "accepted"),
                 ),
               ),
             ],
@@ -252,17 +264,21 @@ class ChatSection extends StatelessWidget {
             width: double.infinity,
             child: OutlinedButton.icon(
               icon: const Icon(Icons.close, color: Colors.black87),
-              label: const Text("Reject",
-                  style: TextStyle(color: Colors.black87, fontSize: 14)),
+              label: const Text(
+                "Reject",
+                style: TextStyle(color: Colors.black87, fontSize: 14),
+              ),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 side: const BorderSide(color: Colors.black54),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
-              onPressed: isSubmitting
-                  ? null
-                  : () => _confirmAction(context, "rejected"),
+              onPressed:
+                  isSubmitting
+                      ? null
+                      : () => _confirmAction(context, "rejected"),
             ),
           ),
         ],
@@ -284,48 +300,56 @@ class ChatSection extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: Wrap(
-          children: [
-            Icon(Icons.help_outline, color: Colors.purple.shade400, size: 40),
-            const SizedBox(height: 10),
-            Text(
-              "Are you sure you want to ${action.toUpperCase()} this offer?",
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87),
-            ),
-            const SizedBox(height: 20),
-            Row(
+      builder:
+          (_) => Padding(
+            padding: const EdgeInsets.all(20),
+            child: Wrap(
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    child: const Text("Cancel"),
-                    onPressed: () => Navigator.pop(context),
+                Icon(
+                  Icons.help_outline,
+                  color: Colors.purple.shade400,
+                  size: 40,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "Are you sure you want to ${action.toUpperCase()} this offer?",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple,
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        child: const Text("Cancel"),
+                        onPressed: () => Navigator.pop(context),
+                      ),
                     ),
-                    child: const Text("Yes, Proceed",
-                        style: TextStyle(color: Colors.white)),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      onReply(action);
-                    },
-                  ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple,
+                        ),
+                        child: const Text(
+                          "Yes, Proceed",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          onReply(action);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 }
@@ -344,8 +368,9 @@ class ThousandsFormatter extends TextInputFormatter {
     final formatted = _formatter.format(int.parse(digits));
     return TextEditingValue(
       text: formatted,
-      selection:
-          TextSelection.collapsed(offset: formatted.length), // keep cursor end
+      selection: TextSelection.collapsed(
+        offset: formatted.length,
+      ), // keep cursor end
     );
   }
 }

@@ -18,8 +18,6 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 class Signup extends ConsumerStatefulWidget {
   const Signup({super.key});
 
@@ -54,30 +52,30 @@ class _SignupState extends ConsumerState<Signup> {
   //   });
   // }
 
-Future<void> loadCountries() async {
-  final allCountries = CountryService().getAll();
-  final names = allCountries.map((e) => e.name).toSet().toList(); 
-  setState(() {
-    countries = names;
-  });
-}
-
-
-String _getCountryNameFromCode(String code) {
-  try {
+  Future<void> loadCountries() async {
     final allCountries = CountryService().getAll();
-    final cleanCode = code.replaceAll('+', '');
-    final match = allCountries.firstWhere(
-      (c) => c.phoneCode == cleanCode,
-      orElse: () => allCountries.firstWhere((c) => c.countryCode == 'NG'), // fallback: Nigeria 🇳🇬
-    );
-    return match.name;
-  } catch (e) {
-    return 'Unknown';
+    final names = allCountries.map((e) => e.name).toSet().toList();
+    setState(() {
+      countries = names;
+    });
   }
-}
 
-
+  String _getCountryNameFromCode(String code) {
+    try {
+      final allCountries = CountryService().getAll();
+      final cleanCode = code.replaceAll('+', '');
+      final match = allCountries.firstWhere(
+        (c) => c.phoneCode == cleanCode,
+        orElse:
+            () => allCountries.firstWhere(
+              (c) => c.countryCode == 'NG',
+            ), // fallback: Nigeria 🇳🇬
+      );
+      return match.name;
+    } catch (e) {
+      return 'Unknown';
+    }
+  }
 
   @override
   void initState() {
@@ -151,209 +149,203 @@ String _getCountryNameFromCode(String code) {
   Widget build(BuildContext context) {
     return LoadingOverlay(
       isLoading: isLoading,
-      child: 
-Scaffold(
-  backgroundColor: Colors.white,
-  body: SafeArea(
-    child: SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Form(
-        key: _formKey, // ✅ attach form key here
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Form(
+              key: _formKey, // ✅ attach form key here
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
 
-            GestureDetector(
-              onTap: () {
-                Nav.push(context, TailorRegistrationPage());
-              },
-              child: CustomText(
-                "Sign Up",
-                fontWeight: FontWeight.w700,
-                fontSize: 25,
-              ),
-            ),
-            const SizedBox(height: 40),
+                  GestureDetector(
+                    onTap: () {
+                      Nav.push(context, TailorRegistrationPage());
+                    },
+                    child: CustomText(
+                      "Sign Up",
+                      fontWeight: FontWeight.w700,
+                      fontSize: 25,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
 
-            CustomTextField(
-              title: "Full Name",
-              hintText: "Enter your full name",
-              prefixIcon: Icons.person,
-              fieldKey: "fullname",
-              controller: fullnameController,
-              keyboardType: TextInputType.name,
-            ),
+                  CustomTextField(
+                    title: "Full Name",
+                    hintText: "Enter your full name",
+                    prefixIcon: Icons.person,
+                    fieldKey: "fullname",
+                    controller: fullnameController,
+                    keyboardType: TextInputType.name,
+                  ),
 
-            CustomTextField(
-              title: "Email",
-              hintText: "Enter your email",
-              prefixIcon: Icons.email,
-              fieldKey: "email",
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-            ),
+                  CustomTextField(
+                    title: "Email",
+                    hintText: "Enter your email",
+                    prefixIcon: Icons.email,
+                    fieldKey: "email",
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
 
-    
-            CustomTextField(
-              title: "Phone",
-              hintText: "Enter your phone number",
-              prefixIcon: Icons.phone,
-              fieldKey: "phone",
-              controller: phoneController,
-              keyboardType: TextInputType.phone,
-              enableCountryCode: true,
-              useGlobalCountryPicker: true,
-              selectedCountryCode: selectedCountryCode,
-              onCountryChanged: (code) {
-                setState(() {
-                  selectedCountryCode = code ?? '+234';
-                  countryController.text = _getCountryNameFromCode(code ?? '+234');
-                  selectedCountry = countryController.text;
-                });
-              },
-            ),
+                  CustomTextField(
+                    title: "Phone",
+                    hintText: "Enter your phone number",
+                    prefixIcon: Icons.phone,
+                    fieldKey: "phone",
+                    controller: phoneController,
+                    keyboardType: TextInputType.phone,
+                    enableCountryCode: true,
+                    useGlobalCountryPicker: true,
+                    selectedCountryCode: selectedCountryCode,
+                    onCountryChanged: (code) {
+                      setState(() {
+                        selectedCountryCode = code ?? '+234';
+                        countryController.text = _getCountryNameFromCode(
+                          code ?? '+234',
+                        );
+                        selectedCountry = countryController.text;
+                      });
+                    },
+                  ),
 
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWideScreen = constraints.maxWidth > 600;
 
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final isWideScreen = constraints.maxWidth > 600;
+                      if (isWideScreen) {
+                        // 💻 Desktop / Tablet
+                        return IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: CustomTextField(
+                                  title: "Address",
+                                  hintText: "Enter Address",
+                                  prefixIcon: Icons.house,
+                                  fieldKey: "address",
+                                  controller: addressController,
+                                ),
+                              ),
 
-                if (isWideScreen) {
-                  // 💻 Desktop / Tablet
-                  return IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                              const SizedBox(width: 10),
 
-                        Expanded(
-                          child: CustomTextField(
+                              Expanded(
+                                child: CustomTextField(
+                                  title: "Country",
+                                  hintText: "Select Country",
+                                  prefixIcon: Icons.public,
+                                  fieldKey: "country",
+                                  controller: countryController,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      // 📱 Mobile Layout
+                      return Column(
+                        children: [
+                          CustomTextField(
                             title: "Address",
                             hintText: "Enter Address",
                             prefixIcon: Icons.house,
                             fieldKey: "address",
                             controller: addressController,
                           ),
-                        ),
 
-                        const SizedBox(width: 10),
-
-                        Expanded(
-                          child: CustomTextField(
+                          CustomTextField(
                             title: "Country",
                             hintText: "Select Country",
                             prefixIcon: Icons.public,
                             fieldKey: "country",
                             controller: countryController,
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                // 📱 Mobile Layout
-                return Column(
-                  children: [
-
-                    CustomTextField(
-                      title: "Address",
-                      hintText: "Enter Address",
-                      prefixIcon: Icons.house,
-                      fieldKey: "address",
-                      controller: addressController,
-                    ),
-
-
-                    CustomTextField(
-                      title: "Country",
-                      hintText: "Select Country",
-                      prefixIcon: Icons.public,
-                      fieldKey: "country",
-                      controller: countryController,
-        
-                    ),
-
-                  ],
-                );
-              },
-            ),
-
-      
-            CustomTextField(
-              title: "Password",
-              hintText: "Enter your password",
-              prefixIcon: Icons.lock,
-              isPassword: true,
-              fieldKey: "password",
-              controller: passwordController,
-            ),
-
-
-            Row(
-              children: [
-                Checkbox(
-                  value: isTailor,
-                  onChanged: (val) {
-                    setState(() {
-                      isTailor = val ?? false;
-                    });
-                    if (val == true) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Leave blank if you are not a tailor"),
-                          duration: Duration(seconds: 2),
-                        ),
+                        ],
                       );
-                    }
-                  },
-                ),
-                const CustomText("I'm a Designer"),
-              ],
+                    },
+                  ),
+
+                  CustomTextField(
+                    title: "Password",
+                    hintText: "Enter your password",
+                    prefixIcon: Icons.lock,
+                    isPassword: true,
+                    fieldKey: "password",
+                    controller: passwordController,
+                  ),
+
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: isTailor,
+                        onChanged: (val) {
+                          setState(() {
+                            isTailor = val ?? false;
+                          });
+                          if (val == true) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Leave blank if you are not a tailor",
+                                ),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                      const CustomText("I'm a Designer"),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  CustomButton(
+                    title: "Create Account",
+                    isOutlined: false,
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _handleSignup();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please fix the errors'),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CustomText("Existing user? "),
+                      const SizedBox(width: 10),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const Signin()),
+                          );
+                        },
+                        child: CustomText("Login", fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-
-
-            const SizedBox(height: 20),
-
-           
-            CustomButton(
-              title: "Create Account",
-              isOutlined: false,
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  _handleSignup(); 
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please fix the errors')),
-                  );
-                }
-              },
-            ),
-
-            const SizedBox(height: 20),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const CustomText("Existing user? "),
-                const SizedBox(width: 10),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const Signin()),
-                    );
-                  },
-                  child: CustomText("Login", fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
-    ),
-  ),
-),
     );
   }
 }

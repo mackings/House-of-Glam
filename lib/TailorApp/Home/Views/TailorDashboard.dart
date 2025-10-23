@@ -45,7 +45,7 @@ class _TailordashboardState extends State<Tailordashboard> {
         title: "Attire Pool",
         onRefresh: _refreshMaterials,
         onProfileClick: () {
-          Nav.push(context,UserProfileView());
+          Nav.push(context, UserProfileView());
         },
       ),
       body: SafeArea(

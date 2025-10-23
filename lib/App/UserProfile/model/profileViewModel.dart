@@ -38,7 +38,7 @@ class UserProfile {
       email: json["email"],
       isVerified: json["isVerified"],
       isBlocked: json["isBlocked"],
-     // wallet: json["wallet"],
+      // wallet: json["wallet"],
       billImage: json["billImage"],
       address: json["address"],
       subscriptionPlan: json["subscriptionPlan"],

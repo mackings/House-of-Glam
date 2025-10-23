@@ -11,7 +11,6 @@ class WebViewScreen extends StatefulWidget {
 }
 
 class _WebViewScreenState extends State<WebViewScreen> {
-  
   late final WebViewController _controller;
   bool isLoading = true;
 
@@ -35,7 +34,11 @@ class _WebViewScreenState extends State<WebViewScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.purple,
-        title: CustomText("Complete Subscription",color: Colors.white,fontSize: 18,),
+        title: CustomText(
+          "Complete Subscription",
+          color: Colors.white,
+          fontSize: 18,
+        ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Stack(

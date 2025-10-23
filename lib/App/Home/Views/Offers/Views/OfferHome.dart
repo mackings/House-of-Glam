@@ -5,7 +5,6 @@ import 'package:hog/App/Home/Views/Offers/Widgets/offerdetail.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 
-
 class OfferHome extends StatefulWidget {
   const OfferHome({super.key});
 
@@ -105,131 +104,198 @@ class _OfferHomeState extends State<OfferHome> {
             icon: const Icon(Icons.refresh),
             onPressed: loadOffers,
             tooltip: "Refresh",
-          )
+          ),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: loadOffers,
-              child: offers.isEmpty
-                  ? ListView(
-                      children: const [
-                        SizedBox(height: 180),
-                        Center(child: CustomText("No offers yet", fontSize: 16, color: Colors.black54)),
-                      ],
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(12),
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemCount: offers.length,
-                      itemBuilder: (context, index) {
-                        final offer = offers[index] as Map<String, dynamic>;
-                        final isBuyer = isBuyerOffer(offer);
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : RefreshIndicator(
+                onRefresh: loadOffers,
+                child:
+                    offers.isEmpty
+                        ? ListView(
+                          children: const [
+                            SizedBox(height: 180),
+                            Center(
+                              child: CustomText(
+                                "No offers yet",
+                                fontSize: 16,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        )
+                        : ListView.separated(
+                          padding: const EdgeInsets.all(12),
+                          separatorBuilder:
+                              (_, __) => const SizedBox(height: 8),
+                          itemCount: offers.length,
+                          itemBuilder: (context, index) {
+                            final offer = offers[index] as Map<String, dynamic>;
+                            final isBuyer = isBuyerOffer(offer);
 
-                        final title = (offer["comment"] ?? "").toString();
-                        final material = offer["materialTotalCost"]?.toString() ?? "-";
-                        final workmanship = offer["workmanshipTotalCost"]?.toString() ?? "-";
-                        final status = offer["status"]?.toString() ?? "-";
-                        final createdAt = offer["createdAt"]?.toString() ?? "";
+                            final title = (offer["comment"] ?? "").toString();
+                            final material =
+                                offer["materialTotalCost"]?.toString() ?? "-";
+                            final workmanship =
+                                offer["workmanshipTotalCost"]?.toString() ??
+                                "-";
+                            final status = offer["status"]?.toString() ?? "-";
+                            final createdAt =
+                                offer["createdAt"]?.toString() ?? "";
 
-                        final user = offer["userId"] as Map<String, dynamic>?;
-                        final vendor = offer["vendorId"] as Map<String, dynamic>?;
+                            final user =
+                                offer["userId"] as Map<String, dynamic>?;
+                            final vendor =
+                                offer["vendorId"] as Map<String, dynamic>?;
 
-                        final avatarUrl = isBuyer ? (user?["image"] as String?) : (vendor?["nepaBill"] as String?);
-                        final name = isBuyer ? (user?["fullName"] ?? "You") : (vendor?["businessName"] ?? "Vendor");
+                            final avatarUrl =
+                                isBuyer
+                                    ? (user?["image"] as String?)
+                                    : (vendor?["nepaBill"] as String?);
+                            final name =
+                                isBuyer
+                                    ? (user?["fullName"] ?? "You")
+                                    : (vendor?["businessName"] ?? "Vendor");
 
-                        // avatar fallback initials
-                        String initials = "?";
-                        if (name != null && name.toString().trim().isNotEmpty) {
-                          initials = name.toString().trim().split(" ").map((e) => e.isEmpty ? '' : e[0]).take(2).join().toUpperCase();
-                        }
+                            // avatar fallback initials
+                            String initials = "?";
+                            if (name != null &&
+                                name.toString().trim().isNotEmpty) {
+                              initials =
+                                  name
+                                      .toString()
+                                      .trim()
+                                      .split(" ")
+                                      .map((e) => e.isEmpty ? '' : e[0])
+                                      .take(2)
+                                      .join()
+                                      .toUpperCase();
+                            }
 
-                        return GestureDetector(
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => OfferDetail(
-                                  offer: offer,
+                            return GestureDetector(
+                              onTap: () async {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => OfferDetail(offer: offer),
+                                  ),
+                                );
+                                await loadOffers();
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(14),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black12.withOpacity(0.04),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                padding: const EdgeInsets.all(12),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 28,
+                                      backgroundColor: Colors.purple.shade50,
+                                      backgroundImage:
+                                          avatarUrl != null
+                                              ? NetworkImage(avatarUrl)
+                                              : null,
+                                      child:
+                                          avatarUrl == null
+                                              ? CustomText(
+                                                initials,
+                                                fontWeight: FontWeight.w700,
+                                                color: Colors.purple,
+                                              )
+                                              : null,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: CustomText(
+                                                  title.isNotEmpty
+                                                      ? title
+                                                      : (isBuyer
+                                                          ? "Your offer"
+                                                          : "New vendor reply"),
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              _statusChip(status),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.checkroom,
+                                                size: 16,
+                                                color: Colors.purple,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              CustomText(
+                                                "$currencySymbol${formatAmount(material)}",
+                                                fontSize: 13,
+                                              ),
+                                              const SizedBox(width: 14),
+                                              const Icon(
+                                                Icons.handyman,
+                                                size: 16,
+                                                color: Colors.purple,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              CustomText(
+                                                "$currencySymbol${formatAmount(workmanship)}",
+                                                fontSize: 13,
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              CustomText(
+                                                name.toString(),
+                                                fontSize: 12,
+                                                color: Colors.black54,
+                                              ),
+                                              CustomText(
+                                                formatDate(createdAt),
+                                                fontSize: 11,
+                                                color: Colors.black45,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Icon(
+                                      Icons.chevron_right,
+                                      color: Colors.black38,
+                                    ),
+                                  ],
                                 ),
                               ),
                             );
-                            await loadOffers();
                           },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black12.withOpacity(0.04),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            padding: const EdgeInsets.all(12),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 28,
-                                  backgroundColor: Colors.purple.shade50,
-                                  backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
-                                  child: avatarUrl == null
-                                      ? CustomText(initials, fontWeight: FontWeight.w700, color: Colors.purple)
-                                      : null,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: CustomText(
-                                              title.isNotEmpty ? title : (isBuyer ? "Your offer" : "New vendor reply"),
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          _statusChip(status),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.checkroom, size: 16, color: Colors.purple),
-                                          const SizedBox(width: 6),
-                                          CustomText("$currencySymbol${formatAmount(material)}", fontSize: 13),
-                                          const SizedBox(width: 14),
-                                          const Icon(Icons.handyman, size: 16, color: Colors.purple),
-                                          const SizedBox(width: 6),
-                                          CustomText("$currencySymbol${formatAmount(workmanship)}", fontSize: 13),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          CustomText(name.toString(), fontSize: 12, color: Colors.black54),
-                                          CustomText(formatDate(createdAt), fontSize: 11, color: Colors.black45),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Icon(Icons.chevron_right, color: Colors.black38),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-            ),
+                        ),
+              ),
     );
   }
 }
