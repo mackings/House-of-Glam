@@ -7,8 +7,6 @@ import 'package:hog/TailorApp/Widgets/DetailsTaiioesheet.dart';
 import 'package:hog/TailorApp/Widgets/MaterialCard.dart';
 import 'package:hog/TailorApp/Widgets/tailorAppBar.dart';
 import 'package:hog/components/Navigator.dart';
-import 'package:hog/components/button.dart';
-import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 
 class Tailordashboard extends StatefulWidget {

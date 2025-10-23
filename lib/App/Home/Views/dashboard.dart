@@ -37,9 +37,6 @@ class _HomeState extends ConsumerState<Home> {
   String userName = "User"; // default
   String userAvatar = "https://i.pravatar.cc/150"; // default
 
-  void _onNavTap(int index) {
-    setState(() {});
-  }
 
   @override
   void initState() {
@@ -200,8 +197,8 @@ class _HomeState extends ConsumerState<Home> {
                                         borderRadius: BorderRadius.circular(16),
                                         image: DecorationImage(
                                           image: NetworkImage(
-                                            cat.image?.isNotEmpty == true
-                                                ? cat.image!
+                                            cat.image.isNotEmpty == true
+                                                ? cat.image
                                                 : "https://via.placeholder.com/150",
                                           ),
                                           fit: BoxFit.cover,
@@ -212,8 +209,8 @@ class _HomeState extends ConsumerState<Home> {
                                     SizedBox(
                                       width: 80,
                                       child: CustomText(
-                                        cat.name?.isNotEmpty == true
-                                            ? cat.name!
+                                        cat.name.isNotEmpty == true
+                                            ? cat.name
                                             : "Unnamed",
                                         textAlign: TextAlign.center,
                                         fontSize: 10,

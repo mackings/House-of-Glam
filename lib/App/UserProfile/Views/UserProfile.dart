@@ -10,6 +10,8 @@ import 'package:hog/components/texts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+
+
 class UserProfileView extends StatefulWidget {
   const UserProfileView({super.key});
 
