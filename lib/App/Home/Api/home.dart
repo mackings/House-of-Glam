@@ -70,6 +70,8 @@ class HomeApiService {
     return [];
   }
 
+  
+
   static Future<VendorDetailsResponse?> getVendorDetails(
     String vendorId,
   ) async {

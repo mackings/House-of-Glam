@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/App/UserProfile/Views/UserProfile.dart';
 import 'package:hog/TailorApp/Home/Api/TailorHomeservice.dart';
 import 'package:hog/TailorApp/Home/Model/materialModel.dart';
 import 'package:hog/TailorApp/Widgets/DetailsTaiioesheet.dart';
 import 'package:hog/TailorApp/Widgets/MaterialCard.dart';
 import 'package:hog/TailorApp/Widgets/tailorAppBar.dart';
+import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
@@ -42,8 +44,11 @@ class _TailordashboardState extends State<Tailordashboard> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: TailorAppBar(
-        title: "Tailor Materials",
+        title: "Attire Pool",
         onRefresh: _refreshMaterials,
+        onProfileClick: () {
+          Nav.push(context,UserProfileView());
+        },
       ),
       body: SafeArea(
         child: FutureBuilder<TailorMaterialResponse>(
