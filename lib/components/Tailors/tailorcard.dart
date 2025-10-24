@@ -154,6 +154,7 @@ class _TailorCardState extends State<TailorCard> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Business Name
+                  
                   Container(
                     width: double.infinity,
                     alignment: Alignment.center,
@@ -170,6 +171,7 @@ class _TailorCardState extends State<TailorCard> {
                   const SizedBox(height: 6),
 
                   // Description - Shortened
+
                   Container(
                     width: double.infinity,
                     alignment: Alignment.center,

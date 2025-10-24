@@ -99,6 +99,7 @@ class _SubscriptionState extends State<Subscription> {
 
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: Colors.purple,
         title: const CustomText(
           "Subscription",

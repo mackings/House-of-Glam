@@ -32,6 +32,7 @@ class _TailorDeliveriesState extends State<TailorDeliveries> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: Colors.purple,
         title: CustomText("Deliverables", color: Colors.white, fontSize: 18),
       ),

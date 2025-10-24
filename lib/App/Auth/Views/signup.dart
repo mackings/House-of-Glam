@@ -208,6 +208,9 @@ class _SignupState extends ConsumerState<Signup> {
                           code ?? '+234',
                         );
                         selectedCountry = countryController.text;
+
+                        print(selectedCountry);
+                        print(selectedCountryCode);
                       });
                     },
                   ),

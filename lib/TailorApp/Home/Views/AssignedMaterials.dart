@@ -35,6 +35,7 @@ class _AssignedMaterialsState extends State<AssignedMaterials> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         title: const CustomText(
           "Assigned Materials",
           fontSize: 18,

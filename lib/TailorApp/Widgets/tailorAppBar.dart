@@ -16,6 +16,7 @@ class TailorAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      automaticallyImplyLeading: false,
       backgroundColor: Colors.purple,
       title: CustomText(title, fontSize: 18, color: Colors.white),
       actions: [

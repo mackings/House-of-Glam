@@ -15,6 +15,7 @@ extension TailorServiceExtension on TailorHomeService {
     required String yearOfExperience,
     required String description,
     File? imageFile,
+    String? businessRegNo,
   }) async {
     final token = await SecurePrefs.getToken();
 
@@ -31,6 +32,8 @@ extension TailorServiceExtension on TailorHomeService {
     request.fields["state"] = state;
     request.fields["yearOfExperience"] = yearOfExperience;
     request.fields["description"] = description;
+    request.fields["businessRegistrationNumber"] = businessRegNo!;
+    request.fields["registeredIn"] = city;
 
     if (imageFile != null) {
       request.files.add(

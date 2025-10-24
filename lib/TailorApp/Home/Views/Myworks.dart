@@ -28,6 +28,7 @@ class _MyworksState extends State<Myworks> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: Colors.purple,
         title: const CustomText("My works", color: Colors.white, fontSize: 18),
         actions: [

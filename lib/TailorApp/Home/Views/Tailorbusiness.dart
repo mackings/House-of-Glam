@@ -11,6 +11,8 @@ import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
 import 'package:image_picker/image_picker.dart';
 
+
+
 class TailorRegistrationPage extends StatefulWidget {
   @override
   State<TailorRegistrationPage> createState() => _TailorRegistrationPageState();
@@ -27,6 +29,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
   final stateController = TextEditingController();
   final yearController = TextEditingController();
   final descriptionController = TextEditingController();
+   final businessRegNoController = TextEditingController();
 
   File? _selectedImage;
   bool isLoading = false; // 🔹 for overlay
@@ -73,6 +76,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
         yearOfExperience: yearController.text,
         description: descriptionController.text,
         imageFile: _selectedImage,
+        businessRegNo: _isRegisteredBusiness ? businessRegNoController.text : null,
         // You can later include _businessDoc / _consentImage if needed
       );
 
@@ -169,6 +173,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
 
                 // Image Picker
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
@@ -180,7 +185,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                       ),
                       onPressed: _pickImage,
                       icon: const Icon(Icons.upload),
-                      label: const Text("Buiness Registration Doc"),
+                      label: const Text("Attach Registration Doc"),
                     ),
                     const SizedBox(width: 12),
                     if (_selectedImage != null)
@@ -264,67 +269,41 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                 const SizedBox(height: 20),
 
                 // Conditional Sections
-                _isRegisteredBusiness
-                    ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: const [
-                            Icon(
-                              Icons.file_present,
-                              color: Colors.purple,
-                              size: 20,
-                            ),
-                            SizedBox(width: 6),
-                            Text(
-                              "Upload Business Registration Document",
-                              style: TextStyle(fontWeight: FontWeight.w500),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.purple,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: _pickBusinessDoc,
-                          icon: const Icon(Icons.upload_file),
-                          label: const Text("Upload Document"),
-                        ),
-                        if (_businessDoc != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.check_circle,
-                                  color: Colors.green,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: Text(
-                                    "Selected: ${_businessDoc!.path.split('/').last}",
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    )
+_isRegisteredBusiness
+    ? Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: const [
+              Icon(Icons.file_present, color: Colors.purple, size: 20),
+              SizedBox(width: 6),
+              Text(
+                "Upload Business Registration Document",
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // 🔹 New Business Reg Number Input
+          CustomTextField(
+            title: "Business Reg Number",
+            hintText: "Bisoness Registration number",
+            fieldKey: "businessRegNo",
+            controller: businessRegNoController,
+            keyboardType: TextInputType.text,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return "Please enter your registration number";
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 10),
+
+        ],
+      )
+
                     : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
