@@ -222,16 +222,21 @@ class _UserProfileViewState extends State<UserProfileView> {
                         title: "Country",
                         value: _userProfile!.country ?? "N/A",
                       ),
-                      ProfileInfoCard(
-                        icon: Icons.workspace_premium,
-                        title: "Subscription Plan",
-                        value: _userProfile!.subscriptionPlan ?? "Free",
-                      ),
-                      ProfileInfoCard(
-                        icon: Icons.verified_user,
-                        title: "Account Type",
-                        value: "${_userProfile!.role ?? "Tailor"}",
-                      ),
+ProfileInfoCard(
+  icon: Icons.workspace_premium,
+  title: "Subscription Plan",
+  value: _userProfile!.subscriptionPlan != null && _userProfile!.subscriptionPlan!.isNotEmpty
+      ? "${_userProfile!.subscriptionPlan![0].toUpperCase()}${_userProfile!.subscriptionPlan!.substring(1)}"
+      : "Free",
+),
+ProfileInfoCard(
+  icon: Icons.verified_user,
+  title: "Account Type",
+  value: _userProfile!.role != null && _userProfile!.role!.isNotEmpty
+      ? "${_userProfile!.role![0].toUpperCase()}${_userProfile!.role!.substring(1)}"
+      : "Tailor",
+),
+
 
                       const SizedBox(height: 10),
 

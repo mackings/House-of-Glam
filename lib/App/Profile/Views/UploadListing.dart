@@ -256,7 +256,7 @@ class _UploadlistingState extends State<Uploadlisting> {
               const SizedBox(height: 16),
 
               CustomTextField(
-                title: "Size",
+                title: "Size (If Applicable)",
                 hintText: "e.g. M, L, XL",
                 fieldKey: "size",
                 controller: sizeController,
@@ -307,7 +307,7 @@ class _UploadlistingState extends State<Uploadlisting> {
 
               CustomDropdown(
                 label: "Condition",
-                options: const ["Newly", "Preloved", "Newly Sewed"],
+                options: const ["New", "Preloved", "Newly Sewed"],
                 selectedValue: condition,
                 onChanged:
                     (val) => setState(() => condition = val ?? "Newly Sewed"),
