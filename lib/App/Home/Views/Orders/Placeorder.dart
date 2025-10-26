@@ -23,13 +23,40 @@ class _PlaceOrderState extends State<PlaceOrder> {
   List<Category> categories = [];
   Category? selectedCategory;
 
-  final List<String> materials = [
-    "Cotton",
-    "Brocade",
-    "Atiku",
-    "Ankara",
-    "Lace",
-  ];
+final List<String> materials = [
+  "Cotton",
+  "Brocade",
+  "Atiku",
+  "Ankara",
+  "Lace",
+  "Silk",
+  "Chiffon",
+  "Linen",
+  "Velvet",
+  "Organza",
+  "Crepe",
+  "Satin",
+  "Tulle",
+  "Georgette",
+  "Damask",
+  "Khaki",
+  "Denim",
+  "Cashmere",
+  "Wool",
+  "Polyester",
+  "Corduroy",
+  "Rayon",
+  "Jersey",
+  "Suede",
+  "Leather",
+  "Net",
+  "Voile",
+  "Sequin",
+  "Taffeta",
+  "Others"
+];
+
+
   final List<String> colors = ["Red", "Blue", "White", "Black", "Green"];
 
   String? selectedMaterial;
