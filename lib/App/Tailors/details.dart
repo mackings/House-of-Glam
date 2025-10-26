@@ -301,8 +301,8 @@ class _DetailsState extends State<Details> {
             const Divider(thickness: 1),
 
             // Details with icons
-            _buildInfoTile(Icons.email, "Business Email", vendor.businessEmail),
-            _buildInfoTile(Icons.phone, "Business Phone", ""),
+           // _buildInfoTile(Icons.email, "Business Email", vendor.businessEmail),
+         //   _buildInfoTile(Icons.phone, "Business Phone", ""),
             _buildInfoTile(
               Icons.location_on,
               "Business Address",
@@ -320,11 +320,11 @@ class _DetailsState extends State<Details> {
               "Ratings",
               "${vendor.totalRatings} (${vendor.rate}/5)",
             ),
-            _buildInfoTile(
-              Icons.home_repair_service,
-              "Owner Email",
-              userProfile.email,
-            ),
+            // _buildInfoTile(
+            //   Icons.home_repair_service,
+            //   "Owner Email",
+            //   userProfile.email,
+            // ),
           ],
         ),
       ),

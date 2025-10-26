@@ -53,7 +53,6 @@ final List<String> materials = [
   "Voile",
   "Sequin",
   "Taffeta",
-  "Others"
 ];
 
 
@@ -65,6 +64,12 @@ final List<String> materials = [
   final TextEditingController brandingController = TextEditingController();
   final TextEditingController specialInstructionsController =
       TextEditingController();
+
+final TextEditingController customMaterialController = TextEditingController();
+final TextEditingController customAttireController = TextEditingController();
+
+String? selectedAttireType;
+
   final Map<String, TextEditingController> measurementControllers = {};
 
   final List<File> sampleImages = [];
@@ -164,50 +169,65 @@ final List<String> materials = [
     return Column(children: rows);
   }
 
-  Future<void> _submitOrder() async {
-    if (selectedCategory == null ||
-        selectedMaterial == null ||
-        selectedColor == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please select attire, material, and color"),
-        ),
-      );
-      return;
-    }
+Future<void> _submitOrder() async {
+  // Handle "Others" for material and attire type
+  final String finalMaterial = selectedMaterial == "Others"
+      ? customMaterialController.text.trim()
+      : selectedMaterial ?? '';
 
-    setState(() => isLoading = true);
-    await SecurePrefs.saveAttireId(selectedCategory!.id);
+  final String finalAttireType = (selectedCategory == null && selectedAttireType == "Others")
+      ? customAttireController.text.trim()
+      : selectedCategory?.name ?? '';
 
-    final measurement = measurementControllers.map((key, controller) {
-      if (key == "Arm Type") return MapEntry("armType", controller.text);
-      return MapEntry(
-        key.replaceAll(' ', '').toLowerCase(),
-        double.tryParse(controller.text) ?? 0,
-      );
-    });
-
-    final response = await UserActivityService.createMaterial(
-      clothMaterial: selectedMaterial!,
-      color: selectedColor!,
-      brand: brandingController.text,
-      images: sampleImages,
-      specialInstructions: specialInstructionsController.text,
-      measurement: measurement,
+  // Validation
+  if (finalAttireType.isEmpty || finalMaterial.isEmpty || selectedColor == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Please select or specify attire, material, and color"),
+      ),
     );
-
-    setState(() => isLoading = false);
-
-    if (response != null && response.success) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("✅ ${response.message}")));
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("❌ Failed to submit order")));
-    }
+    return;
   }
+
+  setState(() => isLoading = true);
+
+  // Only save category ID if not "Others"
+  if (selectedCategory != null) {
+    await SecurePrefs.saveAttireId(selectedCategory!.id);
+  }
+
+  // Build measurement map
+  final measurement = measurementControllers.map((key, controller) {
+    if (key == "Arm Type") return MapEntry("armType", controller.text);
+    return MapEntry(
+      key.replaceAll(' ', '').toLowerCase(),
+      double.tryParse(controller.text) ?? 0,
+    );
+  });
+
+  // Send request
+  final response = await UserActivityService.createMaterial(
+    clothMaterial: finalMaterial,
+    color: selectedColor!,
+    brand: brandingController.text,
+    images: sampleImages,
+    specialInstructions: specialInstructionsController.text,
+    measurement: measurement,
+  );
+
+  setState(() => isLoading = false);
+
+  // Feedback
+  if (response != null && response.success) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("✅ ${response.message}")),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("❌ Failed to submit order")),
+    );
+  }
+}
 
   @override
   void dispose() {
@@ -247,25 +267,56 @@ final List<String> materials = [
               const Divider(),
               SizedBox(height: 20),
 
-          CustomDropdown(
-                label: "Choose Material",
-                options: materials,
-                selectedValue: selectedMaterial,
-                onChanged: (val) => setState(() => selectedMaterial = val),
-              ),
-              const SizedBox(height: 10),
-              CustomDropdown(
-                label: "Select Attire Type",
-                options: categories.map((c) => c.name).toList(),
-                selectedValue: selectedCategory?.name,
-                onChanged: (val) {
-                  setState(() {
-                    selectedCategory = categories.firstWhere(
-                      (c) => c.name == val,
-                    );
-                  });
-                },
-              ),
+// 👇 inside your build() where the dropdowns are
+CustomDropdown(
+  label: "Choose Material",
+  options: [...materials, "Others"], // Add "Others"
+  selectedValue: selectedMaterial,
+  onChanged: (val) {
+    setState(() {
+      selectedMaterial = val;
+    });
+  },
+),
+if (selectedMaterial == "Others") ...[
+  const SizedBox(height: 10),
+  CustomTextField(
+    title: "Specify Material",
+    hintText: "Enter material name",
+    fieldKey: "customMaterial",
+    controller: customMaterialController,
+  ),
+],
+
+const SizedBox(height: 10),
+
+CustomDropdown(
+  label: "Select Attire Type",
+  options: [...categories.map((c) => c.name).toList(), "Others"],
+  selectedValue: selectedCategory?.name,
+  onChanged: (val) {
+    setState(() {
+      if (val == "Others") {
+        selectedCategory = null;
+      } else {
+        selectedCategory = categories.firstWhere((c) => c.name == val);
+      }
+      selectedAttireType = val; 
+    });
+  },
+),
+if (selectedAttireType == "Others") ...[
+  const SizedBox(height: 10),
+  CustomTextField(
+    title: "Specify Attire Type",
+    hintText: "Enter attire type",
+    fieldKey: "customAttireType",
+    controller: customAttireController,
+  ),
+],
+
+
+
               const SizedBox(height: 10),
 
               CustomDropdown(
