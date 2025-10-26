@@ -5,6 +5,7 @@ import 'package:hog/App/Auth/Views/signin.dart';
 import 'package:hog/App/UserProfile/Api/profileViewS.dart';
 import 'package:hog/App/UserProfile/model/profileViewModel.dart';
 import 'package:hog/App/UserProfile/widgets/ProfileCards.dart';
+import 'package:hog/TailorApp/Home/Views/Subscription.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/texts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -222,21 +223,50 @@ class _UserProfileViewState extends State<UserProfileView> {
                         title: "Country",
                         value: _userProfile!.country ?? "N/A",
                       ),
-ProfileInfoCard(
-  icon: Icons.workspace_premium,
-  title: "Subscription Plan",
-  value: _userProfile!.subscriptionPlan != null && _userProfile!.subscriptionPlan!.isNotEmpty
-      ? "${_userProfile!.subscriptionPlan![0].toUpperCase()}${_userProfile!.subscriptionPlan!.substring(1)}"
-      : "Free",
-),
-ProfileInfoCard(
-  icon: Icons.verified_user,
-  title: "Account Type",
-  value: _userProfile!.role != null && _userProfile!.role!.isNotEmpty
-      ? "${_userProfile!.role![0].toUpperCase()}${_userProfile!.role!.substring(1)}"
-      : "Tailor",
-),
 
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ProfileInfoCard(
+                              icon: Icons.workspace_premium,
+                              title: "Subscription Plan",
+                              value:
+                                  _userProfile!.subscriptionPlan != null &&
+                                          _userProfile!
+                                              .subscriptionPlan!
+                                              .isNotEmpty
+                                      ? "${_userProfile!.subscriptionPlan![0].toUpperCase()}${_userProfile!.subscriptionPlan!.substring(1)}"
+                                      : "Free",
+                            ),
+                          ),
+
+                          // ✅ Show icon if plan is "free"
+                          if (_userProfile!.subscriptionPlan == null ||
+                              _userProfile!.subscriptionPlan!.isEmpty ||
+                              _userProfile!.subscriptionPlan!.toLowerCase() ==
+                                  "free")
+                            IconButton(
+                              icon: const Icon(
+                                Icons.arrow_forward_ios,
+                                color: Colors.purple,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                Nav.push(context, Subscription());
+                              },
+                            ),
+                        ],
+                      ),
+
+                      ProfileInfoCard(
+                        icon: Icons.verified_user,
+                        title: "Account Type",
+                        value:
+                            _userProfile!.role != null &&
+                                    _userProfile!.role!.isNotEmpty
+                                ? "${_userProfile!.role![0].toUpperCase()}${_userProfile!.role!.substring(1)}"
+                                : "Tailor",
+                      ),
 
                       const SizedBox(height: 10),
 
