@@ -288,7 +288,7 @@ _isRegisteredBusiness
           // 🔹 New Business Reg Number Input
           CustomTextField(
             title: "Business Reg Number",
-            hintText: "Bisoness Registration number",
+            hintText: "Business Registration number",
             fieldKey: "businessRegNo",
             controller: businessRegNoController,
             keyboardType: TextInputType.text,

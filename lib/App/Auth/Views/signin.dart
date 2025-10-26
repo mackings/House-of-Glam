@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Auth/Api/authclass.dart';
 import 'package:hog/App/Auth/Views/forgotpassword.dart';
+import 'package:hog/App/Auth/Views/signup.dart';
 import 'package:hog/TailorApp/TailorMain.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/button.dart';
@@ -175,6 +176,25 @@ class _SigninState extends ConsumerState<Signin> {
                   isOutlined: false,
                   onPressed: _handleSignin,
                 ),
+
+                 const SizedBox(height: 20),
+
+                 Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CustomText("New user? "),
+                      const SizedBox(width: 10),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const Signup()),
+                          );
+                        },
+                        child: CustomText("Create account", fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),

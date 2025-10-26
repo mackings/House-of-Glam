@@ -246,6 +246,14 @@ final List<String> materials = [
               ),
               const Divider(),
               SizedBox(height: 20),
+
+          CustomDropdown(
+                label: "Choose Material",
+                options: materials,
+                selectedValue: selectedMaterial,
+                onChanged: (val) => setState(() => selectedMaterial = val),
+              ),
+              const SizedBox(height: 10),
               CustomDropdown(
                 label: "Select Attire Type",
                 options: categories.map((c) => c.name).toList(),
@@ -259,13 +267,7 @@ final List<String> materials = [
                 },
               ),
               const SizedBox(height: 10),
-              CustomDropdown(
-                label: "Choose Material",
-                options: materials,
-                selectedValue: selectedMaterial,
-                onChanged: (val) => setState(() => selectedMaterial = val),
-              ),
-              const SizedBox(height: 10),
+
               CustomDropdown(
                 label: "Select Color",
                 options: colors,
