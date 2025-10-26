@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Home/Model/historymodel.dart';
 import 'package:hog/components/texts.dart';
 
+
+
 class OrderDetailsSheet extends StatelessWidget {
   final MaterialReview material;
 
@@ -131,18 +133,18 @@ class OrderDetailsSheet extends StatelessWidget {
               ],
 
               const SizedBox(height: 20),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () {},
-                icon: const Icon(Icons.check_circle, color: Colors.white),
-                label: const CustomText("Hire Designer", color: Colors.white),
-              ),
+              // ElevatedButton.icon(
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: Colors.purple,
+              //     minimumSize: const Size(double.infinity, 50),
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(12),
+              //     ),
+              //   ),
+              //   onPressed: () {},
+              //   icon: const Icon(Icons.check_circle, color: Colors.white),
+              //   label: const CustomText("Hire Designer", color: Colors.white),
+              // ),
               const SizedBox(height: 20),
             ],
           ),
