@@ -77,7 +77,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
         description: descriptionController.text,
         imageFile: _selectedImage,
         businessRegNo: _isRegisteredBusiness ? businessRegNoController.text : null,
-        // You can later include _businessDoc / _consentImage if needed
+
       );
 
       setState(() => isLoading = false);
