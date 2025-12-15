@@ -8,7 +8,7 @@ class TailorCard extends StatefulWidget {
   final VoidCallback? onTap;
 
   const TailorCard({Key? key, required this.tailor, this.onTap})
-    : super(key: key);
+      : super(key: key);
 
   @override
   State<TailorCard> createState() => _TailorCardState();
@@ -53,7 +53,7 @@ class _TailorCardState extends State<TailorCard> {
       return "No description";
     }
 
-    // Shorten to max 40 characters
+    // Shorten to max 30 characters
     if (description.length > 30) {
       return '${description.substring(0, 30)}...';
     }
@@ -64,81 +64,92 @@ class _TailorCardState extends State<TailorCard> {
   @override
   Widget build(BuildContext context) {
     final tailor = widget.tailor;
-
-    // ✅ Calculate average rating
-    if ((tailor.totalRatings ?? 0) > 0) {}
+    final screenWidth = MediaQuery.of(context).size.width;
+    
+    // 📱 Calculate responsive sizes
+    final cardWidth = (screenWidth - 64) / 2; // Accounting for padding
+    final imageHeight = cardWidth * 0.7; // 70% of card width
+    final isSmallScreen = screenWidth < 360;
 
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.4),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+              color: Colors.grey.withOpacity(0.3),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
           children: [
             // 🖼️ Image with favorite icon
             Stack(
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20),
+                    top: Radius.circular(16),
                   ),
-                  child:
-                      (tailor.user?.image != null &&
-                              tailor.user!.image!.isNotEmpty)
-                          ? Image.network(
-                            tailor.user!.image!,
-                            height: 120,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                height: 120,
-                                width: double.infinity,
-                                color: Colors.grey[200],
-                                alignment: Alignment.center,
-                                child: const Icon(
-                                  Icons.person,
-                                  size: 60,
-                                  color: Colors.grey,
-                                ),
-                              );
-                            },
-                          )
-                          : Container(
-                            height: 120,
-                            width: double.infinity,
-                            color: Colors.grey[200],
-                            alignment: Alignment.center,
-                            child: const Icon(
-                              Icons.person,
-                              size: 60,
-                              color: Colors.grey,
-                            ),
+                  child: (tailor.user?.image != null &&
+                          tailor.user!.image!.isNotEmpty)
+                      ? Image.network(
+                          tailor.user!.image!,
+                          height: imageHeight,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              height: imageHeight,
+                              width: double.infinity,
+                              color: Colors.grey[200],
+                              alignment: Alignment.center,
+                              child: Icon(
+                                Icons.person,
+                                size: imageHeight * 0.4,
+                                color: Colors.grey,
+                              ),
+                            );
+                          },
+                        )
+                      : Container(
+                          height: imageHeight,
+                          width: double.infinity,
+                          color: Colors.grey[200],
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.person,
+                            size: imageHeight * 0.4,
+                            color: Colors.grey,
                           ),
+                        ),
                 ),
                 Positioned(
                   top: 8,
                   right: 8,
                   child: GestureDetector(
                     onTap: _toggleFavorite,
-                    child: CircleAvatar(
-                      backgroundColor: Colors.white,
-                      radius: 16,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(6),
                       child: Icon(
                         isFavorite ? Icons.favorite : Icons.favorite_border,
                         color: Colors.red,
-                        size: 18,
+                        size: isSmallScreen ? 16 : 18,
                       ),
                     ),
                   ),
@@ -147,103 +158,72 @@ class _TailorCardState extends State<TailorCard> {
             ),
 
             // ✂️ Tailor Details
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Business Name
-                  
-                  Container(
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    child: CustomText(
-                      tailor.businessName ?? tailor.user?.fullName ?? "Unknown",
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-
-                  // Description - Shortened
-
-                  Container(
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    child: CustomText(
-                      _getShortDescription(tailor.description),
-                      fontSize: 12,
-                      color: Colors.grey[600]!,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // ⭐ Rating Row
-                  Container(
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(isSmallScreen ? 8.0 : 10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
                       children: [
-                        // Stars
-                        // Row(
-                        // mainAxisSize: MainAxisSize.min,
-                        // children: List.generate(5, (index) {
-                        // if (index < avgRating.floor()) {
-                        // return const Icon(
-                        // Icons.star,
-                        // size: 16,
-                        // color: Colors.amber,
-                        // );
-                        // } else if (index < avgRating) {
-                        // return const Icon(
-                        // Icons.star_half,
-                        // size: 16,
-                        // color: Colors.amber,
-                        // );
-                        // }
-                        // return const Icon(
-                        // Icons.star_border,
-                        // size: 16,
-                        // color: Colors.amber,
-                        // );
-                        // }),
-                        // ),
-                        const SizedBox(width: 6),
+                        // Business Name
+                        CustomText(
+                          tailor.businessName ??
+                              tailor.user?.fullName ??
+                              "Unknown",
+                          fontSize: isSmallScreen ? 13 : 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: isSmallScreen ? 4 : 6),
 
-                        // Rating number
-                        // CustomText(
-                        // avgRating.toStringAsFixed(1),
-                        // fontSize: 13,
-                        // fontWeight: FontWeight.w600,
-                        // color: Colors.black87,
-                        // ),
+                        // Description - Shortened
+                        CustomText(
+                          _getShortDescription(tailor.description),
+                          fontSize: isSmallScreen ? 11 : 12,
+                          color: Colors.grey[600]!,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ),
-                  ),
 
-                  // 📦 Total ratings count
-                  if ((tailor.totalRatings ?? 0) > 0)
-                    Container(
-                      width: double.infinity,
-                      alignment: Alignment.center,
-                      child: CustomText(
-                        "${tailor.totalRatings} reviews",
-                        fontSize: 11,
-                        color: Colors.grey,
-                        textAlign: TextAlign.center,
+                    // 📦 Total ratings count
+                    if ((tailor.totalRatings ?? 0) > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.star,
+                              size: isSmallScreen ? 12 : 14,
+                              color: Colors.amber,
+                            ),
+                            const SizedBox(width: 4),
+                            CustomText(
+                              "${tailor.totalRatings} reviews",
+                              fontSize: isSmallScreen ? 10 : 11,
+                              color: Colors.grey[700]!,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

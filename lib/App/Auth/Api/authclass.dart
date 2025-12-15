@@ -37,6 +37,7 @@ class ApiService {
   }
 
   /// 🔹 Login
+/// 🔹 Login
   static Future<Map<String, dynamic>> login({
     required String email,
     required String password,
@@ -56,7 +57,7 @@ class ApiService {
         await SecurePrefs.saveToken(token);
         print("🔑 Token saved: $token");
 
-        // ✅ Save user details
+        // ✅ Save user details (updated with new fields)
         await SecurePrefs.saveUserData({
           "id": user["_id"],
           "fullName": user["fullName"],
@@ -73,6 +74,14 @@ class ApiService {
           "wallet": user["wallet"],
           "isVerified": user["isVerified"],
           "isBlocked": user["isBlocked"],
+          // 🆕 New fields from updated response
+          "billImage": user["billImage"],
+          "country": user["country"],
+          "createdAt": user["createdAt"],
+          "updatedAt": user["updatedAt"],
+          "accountName": user["accountName"],
+          "accountNumber": user["accountNumber"],
+          "bankName": user["bankName"],
         });
 
         // ✅ Fetch and save currency immediately after login
@@ -102,6 +111,8 @@ class ApiService {
     // fallback (error)
     return {"success": false, "error": result["error"] ?? "Login failed"};
   }
+
+
 
   /// 🔹 Sign up
   static Future<Map<String, dynamic>> signup({

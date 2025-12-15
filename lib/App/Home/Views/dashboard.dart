@@ -10,6 +10,7 @@ import 'package:hog/App/Tailors/details.dart';
 import 'package:hog/TailorApp/Home/Views/Tailorbusiness.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/Tailors/tailorcard.dart';
+import 'package:hog/components/bankCard.dart';
 import 'package:hog/components/header.dart';
 import 'package:hog/components/slideritem.dart';
 import 'package:hog/components/sliders.dart';
@@ -125,27 +126,31 @@ class _HomeState extends ConsumerState<Home> {
 
                 const SizedBox(height: 30),
 
-                CarouselSlider(
-                  height: 150,
-                  items: const [
-                    CarouselItemWidget(
-                      title: "",
-                      assetImage: 'assets/Img/agbada.png',
-                    ),
-                    CarouselItemWidget(
-                      title: "",
-                      assetImage: 'assets/Img/gele.png',
-                    ),
-                    CarouselItemWidget(
-                      title: "",
-                      assetImage: 'assets/Img/kaftan.png',
-                    ),
-                    CarouselItemWidget(
-                      title: "",
-                      assetImage: 'assets/Img/suits.png',
-                    ),
-                  ],
-                ),
+CarouselSlider(
+  height: 170,
+  items: const [
+    // 🆕 First card shows bank details
+    BankDetailsCard(),
+    
+    // Rest of your existing cards
+    CarouselItemWidget(
+      title: "",
+      assetImage: 'assets/Img/agbada.png',
+    ),
+    CarouselItemWidget(
+      title: "",
+      assetImage: 'assets/Img/gele.png',
+    ),
+    CarouselItemWidget(
+      title: "",
+      assetImage: 'assets/Img/kaftan.png',
+    ),
+    CarouselItemWidget(
+      title: "",
+      assetImage: 'assets/Img/suits.png',
+    ),
+  ],
+),
 
                 const SizedBox(height: 30),
 
