@@ -198,26 +198,31 @@ class _UserProfileViewState extends State<UserProfileView> {
 
                       // 🧱 Info Cards
                       const SizedBox(height: 15),
+                      
                       ProfileInfoCard(
                         icon: Icons.person,
                         title: "Full Name",
                         value: _userProfile!.fullName ?? "N/A",
                       ),
+
                       ProfileInfoCard(
                         icon: Icons.email,
                         title: "Email",
                         value: _userProfile!.email ?? "N/A",
                       ),
+
                       ProfileInfoCard(
                         icon: Icons.phone,
                         title: "Phone Number",
                         value: _userProfile!.phoneNumber ?? "N/A",
                       ),
+
                       ProfileInfoCard(
                         icon: Icons.home,
                         title: "Address",
                         value: _userProfile!.address ?? "N/A",
                       ),
+
                       ProfileInfoCard(
                         icon: Icons.flag,
                         title: "Country",
