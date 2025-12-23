@@ -6,6 +6,9 @@ import 'package:hog/App/Banks/Model/bankModel.dart';
 import 'package:hog/App/Banks/View/addBank.dart';
 import 'package:hog/App/Banks/View/transferPage.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/constants/currency.dart';
+import 'package:hog/constants/currencyHelper.dart';
+import 'package:intl/intl.dart';
 
 
 class MyBanksPage extends StatefulWidget {
@@ -18,7 +21,8 @@ class MyBanksPage extends StatefulWidget {
 class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStateMixin {
   List<Bank> _banks = [];
   bool _isLoading = true;
-  double _walletBalance = 0.0;
+  double _walletBalance = 0.0; // This will be in NGN
+  double _displayBalance = 0.0; // This will be in user's currency
   bool _balanceVisible = true;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -48,7 +52,6 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
       _isLoading = true;
     });
 
-    // Load banks and wallet balance in parallel
     await Future.wait([
       _fetchBanks(),
       _fetchWalletBalance(),
@@ -78,8 +81,14 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
     try {
       final result = await BankApiService.getUserWalletBalance();
       if (result['success'] == true && mounted) {
+        final balanceNGN = (result['balance'] ?? 0).toDouble();
+        
+        // ✅ Convert to user's currency
+        final converted = await CurrencyHelper.convertFromNGN(balanceNGN.toInt());
+        
         setState(() {
-          _walletBalance = (result['balance'] ?? 0).toDouble();
+          _walletBalance = balanceNGN; // Keep NGN for API calls
+          _displayBalance = converted; // Display in user's currency
         });
       }
     } catch (e) {
@@ -96,15 +105,13 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
     );
 
     if (result == true) {
-      _loadData(); // Refresh the list
+      _loadData();
     }
   }
 
   String _formatCurrency(double amount) {
-    return '₦${amount.toStringAsFixed(2).replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    )}';
+    final formatter = NumberFormat('#,###.##');
+    return '$currencySymbol${formatter.format(amount)}';
   }
 
   void _toggleBalanceVisibility() {
@@ -196,13 +203,13 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const CustomText(
-                                   "Saved Banks",
+                                  "Saved Banks",
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                                 const SizedBox(height: 4),
                                 CustomText(
-                                   "${_banks.length} ${_banks.length == 1 ? 'account' : 'accounts'}",
+                                  "${_banks.length} ${_banks.length == 1 ? 'account' : 'accounts'}",
                                   fontSize: 13,
                                   color: Colors.grey[600],
                                 ),
@@ -231,7 +238,6 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
                             ),
                           ),
 
-                    // Bottom Padding
                     const SliverToBoxAdapter(
                       child: SizedBox(height: 20),
                     ),
@@ -326,7 +332,9 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
           ),
           const SizedBox(height: 8),
           Text(
-            _balanceVisible ? _formatCurrency(_walletBalance) : "₦ •••••••",
+            _balanceVisible 
+                ? _formatCurrency(_displayBalance) // ✅ Show converted balance
+                : "$currencySymbol •••••••",
             style: const TextStyle(
               color: Colors.white,
               fontSize: 36,
@@ -360,6 +368,7 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
     );
   }
 
+  // Rest of the widgets remain the same...
   Widget _buildQuickStats() {
     return Row(
       children: [
@@ -469,16 +478,7 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            "Add your first bank account to start\nmaking withdrawals",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 32),
+
           ElevatedButton.icon(
             onPressed: _navigateToAddBank,
             icon: const Icon(Icons.add_circle_outline, size: 20),
@@ -534,7 +534,6 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
         borderRadius: BorderRadius.circular(20),
         child: Column(
           children: [
-            // Bank Details Section
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -623,8 +622,6 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
                 ],
               ),
             ),
-
-            // Action Button
             Material(
               color: Colors.transparent,
               child: InkWell(
@@ -634,12 +631,12 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
                     MaterialPageRoute(
                       builder: (context) => BankTransferPage(
                         bank: bank,
-                        walletBalance: _walletBalance,
+                        walletBalance: _walletBalance, // Pass NGN balance
                       ),
                     ),
                   ).then((value) {
                     if (value == true) {
-                      _loadData(); // Refresh after transfer
+                      _loadData();
                     }
                   });
                 },

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Home/Model/reviewModel.dart';
 import 'package:hog/App/Home/Views/Offers/Api/OfferService.dart';
 import 'package:hog/App/Home/Views/Offers/Widgets/Offersheet.dart';
+import 'package:hog/components/Orders/PaymentOp.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currencyHelper.dart';
 import 'package:intl/intl.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 
 
@@ -41,10 +43,8 @@ class QuotationCard extends StatelessWidget {
     }
 
     return FutureBuilder<Map<String, double>>(
-      // ✅ Only convert once when card builds
       future: _convertPrices(),
       builder: (context, snapshot) {
-        // Show original NGN while loading
         final displayTotal = snapshot.data?['total'] ?? review.totalCost.toDouble();
         final displayMaterial = snapshot.data?['material'] ?? review.materialTotalCost.toDouble();
         final displayWorkmanship = snapshot.data?['workmanship'] ?? review.workmanshipTotalCost.toDouble();
@@ -67,7 +67,7 @@ class QuotationCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar + Name + Status (unchanged)
+              // Avatar + Name + Status
               Row(
                 children: [
                   CircleAvatar(
@@ -107,7 +107,7 @@ class QuotationCard extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              // Delivery & Reminder (unchanged)
+              // Delivery & Reminder
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -136,7 +136,7 @@ class QuotationCard extends StatelessWidget {
                   ),
                 ),
 
-              // ✅ Costs with converted amounts
+              // Costs
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -173,71 +173,205 @@ class QuotationCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 25),
+              const SizedBox(height: 20),
 
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: isFullPayment
-                      ? null
-                      : isQuote
-                      ? onHireDesigner
-                      : () => onCompletePayment(paymentAmount),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isFullPayment
-                        ? Colors.grey
-                        : isPartPayment
-                        ? Colors.black
-                        : Colors.purple,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+              // Payment Status Info (for part payment)
+              if (isPartPayment)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade50,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.orange.shade200),
                   ),
-                  child: CustomText(
-                    isFullPayment
-                        ? "Paid"
-                        : isPartPayment
-                        ? "Finish Payment (${CurrencyHelper.formatAmount(displayAmountToPay)})"
-                        : isQuote
-                        ? "Hire Designer"
-                        : "Pay in Full (${CurrencyHelper.formatAmount(displayTotal)})",
-                    fontSize: 14,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: Colors.orange.shade700, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CustomText(
+                              "Partial Payment Made",
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.orange.shade900,
+                            ),
+                            const SizedBox(height: 2),
+                            CustomText(
+                              "Balance: ${CurrencyHelper.formatAmount(displayAmountToPay)}",
+                              fontSize: 11,
+                              color: Colors.orange.shade700,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
 
-              SizedBox(height: 10),
-
-              CustomButton(
-                title: "Make Offer",
-                onPressed: () async {
-                  final result = await ReusableOfferSheet.show(
-                    context,
-                    onSubmit: (comment, material, work) async {
-                      final res = await OfferService.makeOffer(
-                        reviewId: review.id,
-                        comment: comment,
-                        materialTotalCost: material,
-                        workmanshipTotalCost: work,
-                      );
-                      return res;
-                    },
-                  );
-
-                  if (result?["success"] == true) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Offer submitted successfully!"),
-                        backgroundColor: Colors.green,
+              // Payment Buttons
+              if (isQuote)
+                // Show "Hire Designer" button for quotes
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: onHireDesigner,
+                    icon: const Icon(Icons.person_add, size: 18, color: Colors.white),
+                    label: const CustomText(
+                      "Hire Designer",
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.purple,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      elevation: 0,
+                    ),
+                  ),
+                )
+              else if (isFullPayment)
+                // Show "Paid" button (disabled)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: null,
+                    icon: const Icon(Icons.check_circle, size: 18),
+                    label: const CustomText(
+                      "Paid",
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                  ),
+                )
+              else
+                // Show both "Pay in Full" and "Part Payment" buttons
+                Column(
+                  children: [
+                    // Pay in Full button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => onCompletePayment(paymentAmount),
+                        icon: const Icon(Icons.payment, size: 18, color: Colors.white),
+                        label: CustomText(
+                          isPartPayment
+                              ? "Complete Payment (${CurrencyHelper.formatAmount(displayAmountToPay)})"
+                              : "Pay in Full (${CurrencyHelper.formatAmount(displayTotal)})",
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 10),
+                    
+                    // ✅ Part Payment button - opens modal
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.white,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(20),
+                              ),
+                            ),
+                            builder: (BuildContext ctx) {
+                              return PaymentOptionsModal(
+                                review: review,
+                                onCheckout: (String url) async {
+                                  // Close modal first
+                                  Navigator.of(ctx).pop();
+                                  // Wait a bit for modal to close
+                                  await Future.delayed(
+                                    const Duration(milliseconds: 250),
+                                  );
+                                  // Then navigate to checkout
+                                  if (context.mounted) {
+                                    _openCheckout(context, url);
+                                  }
+                                },
+                              );
+                            },
+                          );
+                        },
+                        icon: Icon(Icons.payments, size: 18, color: Colors.purple.shade700),
+                        label: CustomText(
+                          "Make Part Payment",
+                          fontSize: 14,
+                          color: Colors.purple.shade700,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: BorderSide(color: Colors.purple.shade300, width: 1.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+              // Make Offer button (only for quotes)
+              if (isQuote) ...[
+                const SizedBox(height: 10),
+                CustomButton(
+                  title: "Make Offer",
+                  onPressed: () async {
+                    final result = await ReusableOfferSheet.show(
+                      context,
+                      onSubmit: (comment, material, work) async {
+                        final res = await OfferService.makeOffer(
+                          reviewId: review.id,
+                          comment: comment,
+                          materialTotalCost: material,
+                          workmanshipTotalCost: work,
+                        );
+                        return res;
+                      },
                     );
-                  }
-                },
-                isOutlined: true,
-              ),
+
+                    if (result?["success"] == true) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Offer submitted successfully!"),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  },
+                  isOutlined: true,
+                ),
+              ],
             ],
           ),
         );
@@ -245,7 +379,33 @@ class QuotationCard extends StatelessWidget {
     );
   }
 
-  // ✅ Convert all prices at once
+  // ✅ Helper method to open checkout WebView
+  void _openCheckout(BuildContext context, String url) {
+    final controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..loadRequest(Uri.parse(url));
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.purple,
+            title: const CustomText(
+              "Payments",
+              color: Colors.white,
+              fontSize: 18,
+            ),
+            iconTheme: const IconThemeData(color: Colors.white),
+          ),
+          body: WebViewWidget(controller: controller),
+        ),
+      ),
+    ).then((_) {
+      controller.clearCache();
+    });
+  }
+
   Future<Map<String, double>> _convertPrices() async {
     return {
       'total': await CurrencyHelper.convertFromNGN(review.totalCost),

@@ -33,50 +33,35 @@ class ChatSection extends StatefulWidget {
 class _ChatSectionState extends State<ChatSection> {
   bool _showReplyForm = false;
 
-String _formatTimestamp(dynamic timestamp) {
-  if (timestamp == null || timestamp.toString().isEmpty) return '';
-  
-  try {
-    final DateTime dt = DateTime.parse(timestamp.toString());
-    final now = DateTime.now();
-    final difference = now.difference(dt);
+  String _formatTimestamp(dynamic timestamp) {
+    if (timestamp == null || timestamp.toString().isEmpty) return '';
+    
+    try {
+      final DateTime dt = DateTime.parse(timestamp.toString());
+      final now = DateTime.now();
+      final difference = now.difference(dt);
 
-    // Just now (< 1 minute)
-    if (difference.inSeconds < 60) {
-      return 'Just now';
+      if (difference.inSeconds < 60) {
+        return 'Just now';
+      } else if (difference.inMinutes < 60) {
+        return '${difference.inMinutes}m ago';
+      } else if (difference.inHours < 6) {
+        return '${difference.inHours}h ago';
+      } else if (dt.day == now.day && dt.month == now.month && dt.year == now.year) {
+        return 'Today, ${DateFormat('h:mm a').format(dt)}';
+      } else if (difference.inDays == 1) {
+        return 'Yesterday, ${DateFormat('h:mm a').format(dt)}';
+      } else if (difference.inDays < 7) {
+        return DateFormat('EEE, h:mm a').format(dt);
+      } else if (dt.year == now.year) {
+        return DateFormat('MMM d • h:mm a').format(dt);
+      } else {
+        return DateFormat('MMM d, yyyy • h:mm a').format(dt);
+      }
+    } catch (e) {
+      return timestamp.toString();
     }
-    // Minutes ago (< 1 hour)
-    else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}m ago';
-    }
-    // Hours ago (< 6 hours) - relative
-    else if (difference.inHours < 6) {
-      return '${difference.inHours}h ago';
-    }
-    // Today - show time
-    else if (dt.day == now.day && dt.month == now.month && dt.year == now.year) {
-      return 'Today, ${DateFormat('h:mm a').format(dt)}'; // e.g., "Today, 2:30 PM"
-    }
-    // Yesterday
-    else if (difference.inDays == 1) {
-      return 'Yesterday, ${DateFormat('h:mm a').format(dt)}'; // e.g., "Yesterday, 2:30 PM"
-    }
-    // Within last 7 days
-    else if (difference.inDays < 7) {
-      return DateFormat('EEE, h:mm a').format(dt); // e.g., "Mon, 2:30 PM"
-    }
-    // This year
-    else if (dt.year == now.year) {
-      return DateFormat('MMM d • h:mm a').format(dt); // e.g., "Dec 15 • 2:30 PM"
-    }
-    // Different year
-    else {
-      return DateFormat('MMM d, yyyy • h:mm a').format(dt); // e.g., "Dec 15, 2024 • 2:30 PM"
-    }
-  } catch (e) {
-    return timestamp.toString();
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +69,6 @@ String _formatTimestamp(dynamic timestamp) {
 
     return Stack(
       children: [
-        // Chat messages
         Column(
           children: [
             Expanded(
@@ -139,7 +123,6 @@ String _formatTimestamp(dynamic timestamp) {
                       },
                     ),
             ),
-            // Reply form (slides up when visible)
             if (_showReplyForm) _buildReplyForm(context),
           ],
         ),
@@ -232,24 +215,14 @@ String _formatTimestamp(dynamic timestamp) {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Sender name
-                          Row(
-                            children: [
-                              Icon(
-                                isUser ? Icons.person : Icons.store,
-                                size: 14,
-                                color: isUser ? Colors.purple.shade700 : Colors.purple.shade800,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                chat["senderName"] ?? "User",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: isUser ? Colors.purple.shade700 : Colors.purple.shade900,
-                                ),
-                              ),
-                            ],
+                          // ✅ Sender label (You/Designer)
+                          Text(
+                            isUser ? "You" : "Designer",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: isUser ? Colors.purple.shade700 : Colors.purple.shade900,
+                            ),
                           ),
                           
                           const SizedBox(height: 10),
@@ -327,27 +300,57 @@ String _formatTimestamp(dynamic timestamp) {
                             ),
                           ),
                           
-                          const SizedBox(height: 8),
-                          
-                          // Timestamp
-Row(
-  children: [
-    Icon(
-      Icons.access_time_rounded,
-      size: 10,
-      color: Colors.grey.shade500,
-    ),
-    const SizedBox(width: 4),
-    Text(
-      _formatTimestamp(chat["timestamp"]),
-      style: TextStyle(
-        fontSize: 10,
-        color: Colors.grey.shade600,
+                         // Replace the Accept Offer Button section in _buildChatBubble with this:
+
+const SizedBox(height: 12),
+
+// ✅ Accept Offer Button (show for both user and designer - they see each other's offers)
+if ((isUser && widget.userRole == "tailor") || (!isUser && widget.userRole == "user"))
+  SizedBox(
+    width: double.infinity,
+    child: ElevatedButton.icon(
+      onPressed: () => _showAcceptOfferSheet(
+        context,
+        displayMaterial,
+        displayWorkmanship,
+      ),
+      icon: const Icon(Icons.check_circle, size: 18),
+      label: const Text(
+        "Accept This Offer",
+        style: TextStyle(fontWeight: FontWeight.w600),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.green.shade600,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        elevation: 0,
       ),
     ),
-  ],
-),
+  ),
 
+const SizedBox(height: 8),
+                          
+                          // Timestamp
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_rounded,
+                                size: 10,
+                                color: Colors.grey.shade500,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _formatTimestamp(chat["timestamp"]),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -361,6 +364,222 @@ Row(
           ),
         );
       },
+    );
+  }
+
+  // ✅ Accept Offer Bottom Sheet
+// ✅ Accept Offer Bottom Sheet
+void _showAcceptOfferSheet(
+  BuildContext context,
+  double materialAmount,
+  double workmanshipAmount,
+) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (ctx) {
+      return Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          left: 20,
+          right: 20,
+          top: 24,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // Header
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.check_circle,
+                    color: Colors.green.shade700,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Accept Offer",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "Review the offer details",
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // Cost breakdown
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                children: [
+                  _buildSummaryRow("Material Cost", materialAmount),
+                  const SizedBox(height: 12),
+                  _buildSummaryRow("Workmanship Cost", workmanshipAmount),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(height: 1, color: Colors.grey.shade300),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Total Amount",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "$currencySymbol${NumberFormat('#,###.##').format(materialAmount + workmanshipAmount)}",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // Action buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: Colors.grey.shade300),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pop(ctx);
+                      
+                      // ✅ Set a default comment if empty
+                      if (widget.commentCtrl.text.trim().isEmpty) {
+                        widget.commentCtrl.text = "I accept this offer";
+                      }
+                      
+                      // Set the amounts in the text fields
+                      widget.materialCtrl.text = NumberFormat('#,###.##').format(materialAmount);
+                      widget.workmanshipCtrl.text = NumberFormat('#,###.##').format(workmanshipAmount);
+                      
+                      // Call the accept action
+                       _confirmAction(context, "accepted");
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green.shade600,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      "Accept Offer",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+
+
+  Widget _buildSummaryRow(String label, double amount) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        Text(
+          "$currencySymbol${NumberFormat('#,###.##').format(amount)}",
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+      ],
     );
   }
 
@@ -433,7 +652,6 @@ Row(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Close button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -462,7 +680,6 @@ Row(
           
           const SizedBox(height: 16),
           
-          // Comment field
           TextField(
             controller: widget.commentCtrl,
             maxLines: 3,
@@ -488,7 +705,6 @@ Row(
           
           const SizedBox(height: 12),
           
-          // Amount fields
           Row(
             children: [
               Expanded(
@@ -637,7 +853,6 @@ Row(
     final rawMaterial = widget.materialCtrl.text.replaceAll(',', '').trim();
     final rawWorkmanship = widget.workmanshipCtrl.text.replaceAll(',', '').trim();
 
-    // Convert back to NGN
     final materialNGN = await CurrencyHelper.convertToNGN(
       double.tryParse(rawMaterial) ?? 0,
     );
@@ -707,7 +922,6 @@ Row(
   }
 }
 
-/// Decimal formatter (reuse from ReusableOfferSheet)
 class DecimalThousandsFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(

@@ -14,6 +14,15 @@ class TransactionResponse {
   final int? amountPaid;
   final String? createdAt;
   final String? updatedAt;
+  
+  // ✅ Bank transfer fields
+  final String? title;
+  final String? accountName;
+  final String? bankName;
+  final String? accountNumber;
+  final String? destination;
+  final String? sessionId;
+  final String? status;
 
   TransactionResponse({
     this.id,
@@ -31,6 +40,14 @@ class TransactionResponse {
     this.amountPaid,
     this.createdAt,
     this.updatedAt,
+    // Bank transfer fields
+    this.title,
+    this.accountName,
+    this.bankName,
+    this.accountNumber,
+    this.destination,
+    this.sessionId,
+    this.status,
   });
 
   factory TransactionResponse.fromJson(Map<String, dynamic> json) {
@@ -39,10 +56,9 @@ class TransactionResponse {
       userId: json["userId"],
       vendorId: json["vendorId"],
       materialId: json["materialId"],
-      cartItems:
-          (json["cartItems"] as List? ?? [])
-              .map((e) => CartItem.fromJson(e))
-              .toList(),
+      cartItems: (json["cartItems"] as List? ?? [])
+          .map((e) => CartItem.fromJson(e))
+          .toList(),
       totalAmount: json["totalAmount"],
       paymentMethod: json["paymentMethod"],
       paymentReference: json["paymentReference"],
@@ -53,8 +69,19 @@ class TransactionResponse {
       amountPaid: json["amountPaid"],
       createdAt: json["createdAt"],
       updatedAt: json["updatedAt"],
+      // ✅ Bank transfer fields
+      title: json["title"],
+      accountName: json["accountName"],
+      bankName: json["bankName"],
+      accountNumber: json["accountNumber"],
+      destination: json["destination"],
+      sessionId: json["sessionId"],
+      status: json["status"],
     );
   }
+
+  // ✅ Helper method to check if this is a bank transfer
+  bool get isBankTransfer => destination == "bank" || title != null;
 }
 
 class CartItem {
@@ -96,18 +123,14 @@ class CartItem {
       clothMaterial: json["clothMaterial"],
       color: json["color"],
       brand: json["brand"],
-
       title: json["title"],
       size: json["size"],
       description: json["description"],
       condition: json["condition"],
       amount: json["amount"],
-
-      measurement:
-          (json["measurement"] as List? ?? [])
-              .map((e) => Measurement.fromJson(e))
-              .toList(),
-
+      measurement: (json["measurement"] as List? ?? [])
+          .map((e) => Measurement.fromJson(e))
+          .toList(),
       sampleImage: List<String>.from(json["sampleImage"] ?? []),
       images: List<String>.from(json["images"] ?? []),
     );
@@ -155,7 +178,7 @@ class Measurement {
       waist: json["waist"],
       hip: json["hip"],
       length: json["length"],
-      shoulderLength: json["shoulderLength"] ?? json["shoulder"],
+      shoulderLength: json["shoulder_length"] ?? json["shoulder"],
       armLength: json["armLength"] ?? json["armlength"],
       aroundArm: json["aroundArm"] ?? json["aroundarm"],
       wrist: json["wrist"],
@@ -176,10 +199,9 @@ class TransactionListResponse {
   factory TransactionListResponse.fromJson(Map<String, dynamic> json) {
     return TransactionListResponse(
       message: json["message"] ?? "",
-      transactions:
-          (json["data"] as List? ?? [])
-              .map((e) => TransactionResponse.fromJson(e))
-              .toList(),
+      transactions: (json["data"] as List? ?? [])
+          .map((e) => TransactionResponse.fromJson(e))
+          .toList(),
     );
   }
 }

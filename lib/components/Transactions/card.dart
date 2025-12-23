@@ -4,14 +4,24 @@ import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:intl/intl.dart';
 
+
+
+
+
 class TransactionCard extends StatelessWidget {
   final TransactionResponse txn;
+  final double convertedAmount;
   final VoidCallback onTap;
 
-  const TransactionCard({super.key, required this.txn, required this.onTap});
+  const TransactionCard({
+    super.key,
+    required this.txn,
+    required this.convertedAmount,
+    required this.onTap,
+  });
 
-  String formatAmount(int amount) {
-    final formatter = NumberFormat("#,###");
+  String formatAmount(double amount) {
+    final formatter = NumberFormat("#,###.##");
     return formatter.format(amount);
   }
 
@@ -19,9 +29,34 @@ class TransactionCard extends StatelessWidget {
     return DateFormat('MMM d, h:mm a').format(DateTime.parse(date));
   }
 
+  // ✅ Get transaction title based on type
+  String getTransactionTitle() {
+    if (txn.isBankTransfer) {
+      return txn.title ?? "Bank Transfer";
+    } else if (txn.cartItems.isNotEmpty) {
+      return "Order Payment";
+    } else {
+      return "Transaction";
+    }
+  }
+
+  // ✅ Get subtitle based on transaction type
+  String getSubtitle() {
+    if (txn.isBankTransfer) {
+      return "${txn.bankName ?? 'Bank'} • ${txn.accountNumber ?? ''}";
+    } else if (txn.orderStatus != null) {
+      return txn.orderStatus!;
+    } else {
+      return "Payment";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isSuccess = txn.paymentStatus!.toLowerCase() == "success";
+    // ✅ Handle both paymentStatus and status fields
+    final statusField = txn.paymentStatus ?? txn.status ?? "pending";
+    final isSuccess = statusField.toLowerCase() == "success" || 
+                      statusField.toLowerCase() == "successfull";
 
     return InkWell(
       onTap: onTap,
@@ -43,11 +78,13 @@ class TransactionCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Status Icon
+            // Status Icon - different for bank transfers
             CircleAvatar(
               backgroundColor: isSuccess ? Colors.purple[50] : Colors.red[50],
               child: Icon(
-                isSuccess ? Icons.check_circle : Icons.error,
+                txn.isBankTransfer
+                    ? (isSuccess ? Icons.account_balance : Icons.error)
+                    : (isSuccess ? Icons.check_circle : Icons.error),
                 color: isSuccess ? Colors.purple : Colors.red,
               ),
             ),
@@ -58,22 +95,28 @@ class TransactionCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      print(currencySymbol);
-                    },
-                    child: CustomText(
-                      "${currencySymbol}${formatAmount(txn.amountPaid!.toInt())}",
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 6),
+                  // ✅ Amount in user's currency
                   CustomText(
-                    txn.orderStatus.toString(),
+                    "$currencySymbol${formatAmount(convertedAmount)}",
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  const SizedBox(height: 6),
+                  
+                  // ✅ Transaction title
+                  CustomText(
+                    getTransactionTitle(),
                     color: Colors.black87,
                     fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  const SizedBox(height: 2),
+                  
+                  // ✅ Subtitle
+                  CustomText(
+                    getSubtitle(),
+                    color: Colors.grey[600],
+                    fontSize: 12,
                   ),
                   const SizedBox(height: 4),
 
@@ -97,6 +140,7 @@ class TransactionCard extends StatelessWidget {
               ),
             ),
 
+
             // Status Badge
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -105,12 +149,14 @@ class TransactionCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: CustomText(
-                txn.paymentStatus.toString(),
+                statusField,
                 color: isSuccess ? Colors.purple : Colors.red,
                 fontWeight: FontWeight.bold,
                 fontSize: 12,
               ),
             ),
+
+
           ],
         ),
       ),

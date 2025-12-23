@@ -233,7 +233,8 @@ class BankApiService {
         endpoint: endpoint,
       );
 
-      if (response.statusCode == 200) {
+
+      if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
         _log('✅ Bank transfer successful. Amount: ₦$amount', level: 'SUCCESS');
         return {
@@ -315,59 +316,63 @@ static Future<Map<String, dynamic>> verifyAccountDetails({
 }
 
   /// 💰 Get User Wallet Balance
-  static Future<Map<String, dynamic>> getUserWalletBalance() async {
-    final endpoint = "$baseUrl/api/v1/user/getUserWalletBalance";
-    
-    try {
-      final token = await SecurePrefs.getToken();
-      if (token == null) {
-        _log('❌ No authentication token found', level: 'ERROR');
-        return {"success": false, "error": "No authentication token found"};
-      }
-
-      final headers = {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      };
-
-      _logRequest(
-        method: 'GET',
-        endpoint: endpoint,
-        headers: headers,
-      );
-
-      final response = await http.get(
-        Uri.parse(endpoint),
-        headers: headers,
-      );
-
-      _logResponse(
-        statusCode: response.statusCode,
-        body: response.body,
-        endpoint: endpoint,
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final balance = data['balance'] ?? 0.0;
-        _log('✅ Wallet balance fetched: ₦$balance', level: 'SUCCESS');
-        return {
-          "success": true,
-          "balance": balance,
-          "data": data,
-        };
-      } else {
-        final error = jsonDecode(response.body);
-        _log('❌ Failed to fetch wallet balance: ${error['message']}', level: 'ERROR');
-        return {
-          "success": false,
-          "error": error['message'] ?? "Failed to fetch balance",
-        };
-      }
-    } catch (e, stackTrace) {
-      _log('❌ Exception fetching wallet balance: $e', level: 'ERROR');
-      _log('Stack trace: $stackTrace', level: 'DEBUG');
-      return {"success": false, "error": "Network error: $e"};
+/// 💰 Get User Wallet Balance
+static Future<Map<String, dynamic>> getUserWalletBalance() async {
+  final endpoint = "$baseUrl/api/v1/user/getUserWalletBalance";
+  
+  try {
+    final token = await SecurePrefs.getToken();
+    if (token == null) {
+      _log('❌ No authentication token found', level: 'ERROR');
+      return {"success": false, "error": "No authentication token found"};
     }
+
+    final headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $token",
+    };
+
+    _logRequest(
+      method: 'GET',
+      endpoint: endpoint,
+      headers: headers,
+    );
+
+    final response = await http.get(
+      Uri.parse(endpoint),
+      headers: headers,
+    );
+
+    _logResponse(
+      statusCode: response.statusCode,
+      body: response.body,
+      endpoint: endpoint,
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      // ✅ Fix: Extract from data.wallet instead of balance
+      final balance = (data['data']?['wallet'] ?? 0).toDouble();
+      _log('✅ Wallet balance fetched: ₦$balance', level: 'SUCCESS');
+      return {
+        "success": true,
+        "balance": balance,
+        "data": data,
+      };
+    } else {
+      final error = jsonDecode(response.body);
+      _log('❌ Failed to fetch wallet balance: ${error['message']}', level: 'ERROR');
+      return {
+        "success": false,
+        "error": error['message'] ?? "Failed to fetch balance",
+      };
+    }
+  } catch (e, stackTrace) {
+    _log('❌ Exception fetching wallet balance: $e', level: 'ERROR');
+    _log('Stack trace: $stackTrace', level: 'DEBUG');
+    return {"success": false, "error": "Network error: $e"};
   }
+}
+
+
 }

@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
+import 'package:hog/App/Banks/View/userBanks.dart';
+import 'package:hog/App/Home/Views/Orders/Transactions/TransactionHistory.dart';
 import 'package:hog/App/UserProfile/Api/profileViewS.dart';
 import 'package:hog/App/UserProfile/model/profileViewModel.dart';
 import 'package:hog/App/UserProfile/widgets/ProfileCards.dart';
@@ -198,11 +200,33 @@ class _UserProfileViewState extends State<UserProfileView> {
 
                       // 🧱 Info Cards
                       const SizedBox(height: 15),
-                      
+
                       ProfileInfoCard(
                         icon: Icons.person,
                         title: "Full Name",
                         value: _userProfile!.fullName ?? "N/A",
+                      ),
+
+                      GestureDetector(
+                        onTap: () {
+                          Nav.push(context, MyBanksPage());
+                        },
+                        child: ProfileInfoCard(
+                          icon: Icons.account_balance,
+                          title: "Wallet",
+                          value: "Wallet Balances",
+                        ),
+                      ),
+
+                     GestureDetector(
+                        onTap: () {
+                          Nav.push(context, Transactions());
+                        },
+                        child: ProfileInfoCard(
+                          icon: Icons.account_balance,
+                          title: "Transactions",
+                          value: "View wallet transactions",
+                        ),
                       ),
 
                       ProfileInfoCard(
