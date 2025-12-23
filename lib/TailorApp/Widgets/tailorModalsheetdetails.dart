@@ -5,6 +5,8 @@ import 'package:hog/TailorApp/Widgets/UpdateQuote.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/constants/currency.dart';
+import 'package:hog/constants/currencyHelper.dart';
 import 'package:intl/intl.dart';
 
 void showTailorMaterialDetails(
@@ -12,7 +14,7 @@ void showTailorMaterialDetails(
   TailorAssignedMaterial item,
 ) {
   final material = item.material;
-  final formatter = NumberFormat("#,##0", "en_US");
+  final formatter = NumberFormat("#,##0.##", "en_US"); // ✅ Allow decimals
   final service = TailorHomeService();
 
   showModalBottomSheet(
@@ -22,36 +24,51 @@ void showTailorMaterialDetails(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder:
-        (_) => DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.9,
-          minChildSize: 0.6,
-          maxChildSize: 0.95,
-          builder: (context, scrollController) {
-            return StatefulBuilder(
-              builder: (context, setState) {
-                bool isLoading = false;
+    builder: (_) => DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.9,
+      minChildSize: 0.6,
+      maxChildSize: 0.95,
+      builder: (context, scrollController) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            bool isLoading = false;
 
-                Future<void> _deliverAttire() async {
-                  try {
-                    setState(() => isLoading = true);
-                    await service.deliverAttire(material.id);
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Attire delivered successfully!"),
-                      ),
-                    );
-                  } catch (e) {
-                    Nav.pop(context);
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text("❌ $e")));
-                  } finally {
-                    setState(() => isLoading = false);
-                  }
-                }
+            Future<void> _deliverAttire() async {
+              try {
+                setState(() => isLoading = true);
+                await service.deliverAttire(material.id);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Attire delivered successfully!"),
+                  ),
+                );
+              } catch (e) {
+                Nav.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("❌ $e")),
+                );
+              } finally {
+                setState(() => isLoading = false);
+              }
+            }
+
+            // ✅ Convert all amounts at once
+            return FutureBuilder<Map<String, double>>(
+              future: _convertAllAmounts(item),
+              builder: (context, snapshot) {
+                // Default to original NGN values while loading
+                final displayMaterialCost = snapshot.data?['materialCost'] ?? 
+                    item.materialTotalCost.toDouble();
+                final displayWorkmanshipCost = snapshot.data?['workmanshipCost'] ?? 
+                    item.workmanshipTotalCost.toDouble();
+                final displayTotalCost = snapshot.data?['totalCost'] ?? 
+                    item.totalCost.toDouble();
+                final displayAmountPaid = snapshot.data?['amountPaid'] ?? 
+                    (item.amountPaid ?? 0).toDouble();
+                final displayAmountToPay = snapshot.data?['amountToPay'] ?? 
+                    (item.amountToPay ?? 0).toDouble();
 
                 return SingleChildScrollView(
                   controller: scrollController,
@@ -126,18 +143,16 @@ void showTailorMaterialDetails(
                         children: [
                           CircleAvatar(
                             radius: 20,
-                            backgroundImage:
-                                item.user.image != null
-                                    ? NetworkImage(item.user.image!)
-                                    : null,
-                            child:
-                                item.user.image == null
-                                    ? Text(
-                                      item.user.fullName.isNotEmpty
-                                          ? item.user.fullName[0].toUpperCase()
-                                          : "?",
-                                    )
-                                    : null,
+                            backgroundImage: item.user.image != null
+                                ? NetworkImage(item.user.image!)
+                                : null,
+                            child: item.user.image == null
+                                ? Text(
+                                    item.user.fullName.isNotEmpty
+                                        ? item.user.fullName[0].toUpperCase()
+                                        : "?",
+                                  )
+                                : null,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -167,28 +182,29 @@ void showTailorMaterialDetails(
                       _buildInfoRow("Phone", item.vendor.businessPhone),
                       const Divider(),
 
+                      // ✅ Costs & Payments with converted amounts
                       _buildSectionTitle("Costs & Payments"),
                       _buildInfoRow(
                         "Material Cost",
-                        "₦${formatter.format(item.materialTotalCost)}",
+                        "$currencySymbol${formatter.format(displayMaterialCost)}",
                       ),
                       _buildInfoRow(
                         "Workmanship",
-                        "₦${formatter.format(item.workmanshipTotalCost)}",
+                        "$currencySymbol${formatter.format(displayWorkmanshipCost)}",
                       ),
                       _buildInfoRow(
                         "Total",
-                        "₦${formatter.format(item.totalCost)}",
+                        "$currencySymbol${formatter.format(displayTotalCost)}",
                         bold: true,
                         color: Colors.purple,
                       ),
                       _buildInfoRow(
                         "Paid",
-                        "₦${formatter.format(item.amountPaid ?? 0)}",
+                        "$currencySymbol${formatter.format(displayAmountPaid)}",
                       ),
                       _buildInfoRow(
                         "Balance",
-                        "₦${formatter.format(item.amountToPay ?? 0)}",
+                        "$currencySymbol${formatter.format(displayAmountToPay)}",
                         color: Colors.redAccent,
                       ),
                       const Divider(),
@@ -223,10 +239,9 @@ void showTailorMaterialDetails(
                       const SizedBox(height: 20),
 
                       CustomButton(
-                        title:
-                            item.status.toLowerCase() == "requesting"
-                                ? "Update Quotation"
-                                : "Deliver Attire",
+                        title: item.status.toLowerCase() == "requesting"
+                            ? "Update Quotation"
+                            : "Deliver Attire",
                         onPressed: () {
                           if (item.status.toLowerCase() == "requesting") {
                             showModalBottomSheet(
@@ -238,10 +253,9 @@ void showTailorMaterialDetails(
                                   top: Radius.circular(20),
                                 ),
                               ),
-                              builder:
-                                  (_) => UpdateQuotationBottomSheet(
-                                    materialId: material.id,
-                                  ),
+                              builder: (_) => UpdateQuotationBottomSheet(
+                                materialId: material.id,
+                              ),
                             );
                           } else {
                             _deliverAttire();
@@ -257,8 +271,21 @@ void showTailorMaterialDetails(
               },
             );
           },
-        ),
+        );
+      },
+    ),
   );
+}
+
+// ✅ Helper function to convert all amounts
+Future<Map<String, double>> _convertAllAmounts(TailorAssignedMaterial item) async {
+  return {
+    'materialCost': await CurrencyHelper.convertFromNGN(item.materialTotalCost),
+    'workmanshipCost': await CurrencyHelper.convertFromNGN(item.workmanshipTotalCost),
+    'totalCost': await CurrencyHelper.convertFromNGN(item.totalCost),
+    'amountPaid': await CurrencyHelper.convertFromNGN(item.amountPaid ?? 0),
+    'amountToPay': await CurrencyHelper.convertFromNGN(item.amountToPay ?? 0),
+  };
 }
 
 Widget _buildSectionTitle(String title) {

@@ -43,7 +43,6 @@ class _AssignedMaterialsState extends State<AssignedMaterials> {
         ),
         backgroundColor: Colors.purple,
         elevation: 0,
-
         actions: [
           GestureDetector(
             onTap: () {

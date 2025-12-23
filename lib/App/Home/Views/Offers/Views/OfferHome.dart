@@ -3,6 +3,8 @@ import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Home/Views/Offers/Api/OfferService.dart';
 import 'package:hog/App/Home/Views/Offers/Widgets/offerdetail.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/constants/currency.dart';
+import 'package:hog/constants/currencyHelper.dart';
 import 'package:intl/intl.dart';
 
 class OfferHome extends StatefulWidget {
@@ -16,7 +18,6 @@ class _OfferHomeState extends State<OfferHome> {
   List<dynamic> offers = [];
   String? userId;
   bool isLoading = true;
-  final String currencySymbol = '₦'; // change if you have global symbol
 
   @override
   void initState() {
@@ -49,13 +50,12 @@ class _OfferHomeState extends State<OfferHome> {
     }
   }
 
-  String formatAmount(dynamic amount) {
+  String formatAmount(double amount) { // ✅ Changed from dynamic to double
     try {
-      final n = int.tryParse(amount?.toString() ?? '') ?? 0;
-      final f = NumberFormat('#,###');
-      return f.format(n);
+      final f = NumberFormat('#,###.##'); // ✅ Allow decimals
+      return f.format(amount);
     } catch (e) {
-      return amount?.toString() ?? '-';
+      return amount.toString();
     }
   }
 
@@ -107,72 +107,79 @@ class _OfferHomeState extends State<OfferHome> {
           ),
         ],
       ),
-      body:
-          isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : RefreshIndicator(
-                onRefresh: loadOffers,
-                child:
-                    offers.isEmpty
-                        ? ListView(
-                          children: const [
-                            SizedBox(height: 180),
-                            Center(
-                              child: CustomText(
-                                "No offers yet",
-                                fontSize: 16,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ],
-                        )
-                        : ListView.separated(
-                          padding: const EdgeInsets.all(12),
-                          separatorBuilder:
-                              (_, __) => const SizedBox(height: 8),
-                          itemCount: offers.length,
-                          itemBuilder: (context, index) {
-                            final offer = offers[index] as Map<String, dynamic>;
-                            final isBuyer = isBuyerOffer(offer);
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: loadOffers,
+              child: offers.isEmpty
+                  ? ListView(
+                      children: const [
+                        SizedBox(height: 180),
+                        Center(
+                          child: CustomText(
+                            "No offers yet",
+                            fontSize: 16,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(12),
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemCount: offers.length,
+                      itemBuilder: (context, index) {
+                        final offer = offers[index] as Map<String, dynamic>;
+                        final isBuyer = isBuyerOffer(offer);
 
-                            final title = (offer["comment"] ?? "").toString();
-                            final material =
-                                offer["materialTotalCost"]?.toString() ?? "-";
-                            final workmanship =
-                                offer["workmanshipTotalCost"]?.toString() ??
-                                "-";
-                            final status = offer["status"]?.toString() ?? "-";
-                            final createdAt =
-                                offer["createdAt"]?.toString() ?? "";
+                        final title = (offer["comment"] ?? "").toString();
+                        final materialNGN = int.tryParse(
+                              offer["materialTotalCost"]?.toString() ?? "0",
+                            ) ??
+                            0;
+                        final workmanshipNGN = int.tryParse(
+                              offer["workmanshipTotalCost"]?.toString() ?? "0",
+                            ) ??
+                            0;
+                        final status = offer["status"]?.toString() ?? "-";
+                        final createdAt = offer["createdAt"]?.toString() ?? "";
 
-                            final user =
-                                offer["userId"] as Map<String, dynamic>?;
-                            final vendor =
-                                offer["vendorId"] as Map<String, dynamic>?;
+                        final user = offer["userId"] as Map<String, dynamic>?;
+                        final vendor =
+                            offer["vendorId"] as Map<String, dynamic>?;
 
-                            final avatarUrl =
-                                isBuyer
-                                    ? (user?["image"] as String?)
-                                    : (vendor?["nepaBill"] as String?);
-                            final name =
-                                isBuyer
-                                    ? (user?["fullName"] ?? "You")
-                                    : (vendor?["businessName"] ?? "Vendor");
+                        final avatarUrl = isBuyer
+                            ? (user?["image"] as String?)
+                            : (vendor?["nepaBill"] as String?);
+                        final name = isBuyer
+                            ? (user?["fullName"] ?? "You")
+                            : (vendor?["businessName"] ?? "Vendor");
 
-                            // avatar fallback initials
-                            String initials = "?";
-                            if (name != null &&
-                                name.toString().trim().isNotEmpty) {
-                              initials =
-                                  name
-                                      .toString()
-                                      .trim()
-                                      .split(" ")
-                                      .map((e) => e.isEmpty ? '' : e[0])
-                                      .take(2)
-                                      .join()
-                                      .toUpperCase();
-                            }
+                        // avatar fallback initials
+                        String initials = "?";
+                        if (name != null && name.toString().trim().isNotEmpty) {
+                          initials = name
+                              .toString()
+                              .trim()
+                              .split(" ")
+                              .map((e) => e.isEmpty ? '' : e[0])
+                              .take(2)
+                              .join()
+                              .toUpperCase();
+                        }
+
+                        // ✅ Convert amounts for this offer
+                        return FutureBuilder<Map<String, double>>(
+                          future: _convertOfferAmounts(
+                            materialNGN,
+                            workmanshipNGN,
+                          ),
+                          builder: (context, snapshot) {
+                            final displayMaterial = snapshot.data?['material'] ??
+                                materialNGN.toDouble();
+                            final displayWorkmanship =
+                                snapshot.data?['workmanship'] ??
+                                    workmanshipNGN.toDouble();
 
                             return GestureDetector(
                               onTap: () async {
@@ -202,18 +209,16 @@ class _OfferHomeState extends State<OfferHome> {
                                     CircleAvatar(
                                       radius: 28,
                                       backgroundColor: Colors.purple.shade50,
-                                      backgroundImage:
-                                          avatarUrl != null
-                                              ? NetworkImage(avatarUrl)
-                                              : null,
-                                      child:
-                                          avatarUrl == null
-                                              ? CustomText(
-                                                initials,
-                                                fontWeight: FontWeight.w700,
-                                                color: Colors.purple,
-                                              )
-                                              : null,
+                                      backgroundImage: avatarUrl != null
+                                          ? NetworkImage(avatarUrl)
+                                          : null,
+                                      child: avatarUrl == null
+                                          ? CustomText(
+                                              initials,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.purple,
+                                            )
+                                          : null,
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
@@ -248,7 +253,7 @@ class _OfferHomeState extends State<OfferHome> {
                                               ),
                                               const SizedBox(width: 6),
                                               CustomText(
-                                                "$currencySymbol${formatAmount(material)}",
+                                                "$currencySymbol${formatAmount(displayMaterial)}", // ✅ Use converted
                                                 fontSize: 13,
                                               ),
                                               const SizedBox(width: 14),
@@ -259,7 +264,7 @@ class _OfferHomeState extends State<OfferHome> {
                                               ),
                                               const SizedBox(width: 6),
                                               CustomText(
-                                                "$currencySymbol${formatAmount(workmanship)}",
+                                                "$currencySymbol${formatAmount(displayWorkmanship)}", // ✅ Use converted
                                                 fontSize: 13,
                                               ),
                                             ],
@@ -294,8 +299,21 @@ class _OfferHomeState extends State<OfferHome> {
                               ),
                             );
                           },
-                        ),
-              ),
+                        );
+                      },
+                    ),
+            ),
     );
+  }
+
+  // ✅ Helper to convert offer amounts
+  Future<Map<String, double>> _convertOfferAmounts(
+    int materialNGN,
+    int workmanshipNGN,
+  ) async {
+    return {
+      'material': await CurrencyHelper.convertFromNGN(materialNGN),
+      'workmanship': await CurrencyHelper.convertFromNGN(workmanshipNGN),
+    };
   }
 }
