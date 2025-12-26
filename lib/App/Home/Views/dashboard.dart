@@ -16,6 +16,8 @@ import 'package:hog/components/slideritem.dart';
 import 'package:hog/components/sliders.dart';
 import 'package:hog/components/texts.dart';
 
+
+
 class Home extends ConsumerStatefulWidget {
   const Home({super.key});
 

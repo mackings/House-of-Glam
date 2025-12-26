@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hog/App/Banks/Api/BamkService.dart';
 import 'package:hog/App/Banks/Model/bankModel.dart';
+import 'package:hog/App/Banks/View/StripeOnboarding.dart';
 import 'package:hog/App/Banks/View/addBank.dart';
 import 'package:hog/App/Banks/View/transferPage.dart';
 import 'package:hog/components/texts.dart';
@@ -47,6 +48,57 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
     super.dispose();
   }
 
+
+
+
+
+Future<void> _connectStripeAccount() async {
+  setState(() {
+    _isLoading = true;
+  });
+
+  // Create Stripe account
+  final result = await BankApiService.createStripeAccount();
+
+  setState(() {
+    _isLoading = false;
+  });
+
+  if (!mounted) return;
+
+  if (result['success'] == true) {
+    // Open onboarding WebView
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => StripeOnboardingPage(
+          onboardingUrl: result['onboardingUrl'],
+          onComplete: (success, message) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(message),
+                backgroundColor: success ? Colors.green : Colors.orange,
+              ),
+            );
+            
+            if (success) {
+              _loadData(); // Refresh banks list
+            }
+          },
+        ),
+      ),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(result['error'] ?? 'Failed to create Stripe account'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
@@ -63,6 +115,9 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
     
     _animationController.forward();
   }
+
+
+
 
   Future<void> _fetchBanks() async {
     try {
@@ -147,20 +202,58 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
             fontSize: 20,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.purple[50],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(Icons.add, color: Colors.purple[700], size: 20),
+actions: [
+  PopupMenuButton<String>(
+    icon: Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.purple[50],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(Icons.add, color: Colors.purple[700], size: 20),
+    ),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+    onSelected: (value) {
+      if (value == 'local') {
+        _navigateToAddBank();
+      } else if (value == 'stripe') {
+        _connectStripeAccount();
+      }
+    },
+    itemBuilder: (context) => [
+      PopupMenuItem(
+        value: 'local',
+        child: Row(
+          children: [
+            Icon(Icons.account_balance, color: Colors.purple[700], size: 20),
+            const SizedBox(width: 12),
+            const Text(
+              'Add Local Bank',
+              style: TextStyle(fontWeight: FontWeight.w600),
             ),
-            onPressed: _navigateToAddBank,
-          ),
-          const SizedBox(width: 12),
-        ],
+          ],
+        ),
+      ),
+      const PopupMenuDivider(),
+      PopupMenuItem(
+        value: 'stripe',
+        child: Row(
+          children: [
+            Icon(Icons.language, color: Colors.blue[700], size: 20),
+            const SizedBox(width: 12),
+            const Text(
+              'Connect Stripe',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    ],
+  ),
+  const SizedBox(width: 12),
+],
       ),
       body: RefreshIndicator(
         onRefresh: _loadData,
@@ -451,39 +544,52 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.purple[50],
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.account_balance_outlined,
-              size: 64,
-              color: Colors.purple[300],
-            ),
+Widget _buildEmptyState() {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.purple[50],
+            shape: BoxShape.circle,
           ),
-          const SizedBox(height: 24),
-          const Text(
-            "No bank accounts yet",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+          child: Icon(
+            Icons.account_balance_outlined,
+            size: 64,
+            color: Colors.purple[300],
           ),
-          const SizedBox(height: 8),
-
-          ElevatedButton.icon(
+        ),
+        const SizedBox(height: 24),
+        const Text(
+          "No accounts yet",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          "Connect your bank or Stripe account\nto start receiving payments",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+            height: 1.5,
+          ),
+        ),
+        const SizedBox(height: 32),
+        
+        // Local Bank Button
+        SizedBox(
+          width: 280,
+          child: ElevatedButton.icon(
             onPressed: _navigateToAddBank,
-            icon: const Icon(Icons.add_circle_outline, size: 20),
+            icon: const Icon(Icons.account_balance, size: 20),
             label: const Text(
-              "Add Your First Bank",
+              "Add Local Bank",
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 15,
@@ -502,170 +608,417 @@ class _MyBanksPageState extends State<MyBanksPage> with SingleTickerProviderStat
               elevation: 0,
             ),
           ),
-        ],
-      ),
-    );
+        ),
+        
+        const SizedBox(height: 12),
+        
+        // Stripe Connect Button
+        SizedBox(
+          width: 280,
+          child: OutlinedButton.icon(
+            onPressed: _connectStripeAccount,
+            icon: Icon(Icons.language, size: 20, color: Colors.blue[700]),
+            label: Text(
+              "Connect Stripe",
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+                color: Colors.blue[700],
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 32,
+                vertical: 16,
+              ),
+              side: BorderSide(color: Colors.blue[300]!, width: 2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildBankCard(Bank bank, int index) {
+  // Check if it's a Stripe account
+  if (bank.isStripeAccount) {
+    return _buildStripeAccountCard(bank, index);
   }
+  
+  // Existing local bank card code...
+  final colors = [
+    [Colors.blue.shade700, Colors.blue.shade500],
+    [Colors.purple.shade700, Colors.purple.shade500],
+    [Colors.green.shade700, Colors.green.shade500],
+    [Colors.orange.shade700, Colors.orange.shade500],
+    [Colors.teal.shade700, Colors.teal.shade500],
+  ];
+  final cardColor = colors[index % colors.length];
 
-  Widget _buildBankCard(Bank bank, int index) {
-    final colors = [
-      [Colors.blue.shade700, Colors.blue.shade500],
-      [Colors.purple.shade700, Colors.purple.shade500],
-      [Colors.green.shade700, Colors.green.shade500],
-      [Colors.orange.shade700, Colors.orange.shade500],
-      [Colors.teal.shade700, Colors.teal.shade500],
-    ];
-    final cardColor = colors[index % colors.length];
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+  return Container(
+    margin: const EdgeInsets.only(bottom: 16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.08),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: cardColor,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        bank.bankName.toUpperCase(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.account_balance,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  "Account Number",
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  bank.accountNumber,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  "Account Name",
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  bank.accountName.toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BankTransferPage(
+                      bank: bank,
+                      walletBalance: _walletBalance,
+                    ),
+                  ),
+                ).then((value) {
+                  if (value == true) {
+                    _loadData();
+                  }
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.arrow_forward, color: cardColor[0], size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Transfer to this account",
+                      style: TextStyle(
+                        color: cardColor[0],
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: cardColor,
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          bank.bankName.toUpperCase(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          Icons.account_balance,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    "Account Number",
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    bank.accountNumber,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Account Name",
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    bank.accountName.toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+    ),
+  );
+}
+
+// ✅ NEW: Stripe Account Card
+Widget _buildStripeAccountCard(Bank bank, int index) {
+  return Container(
+    margin: const EdgeInsets.only(bottom: 16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.08),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Column(
+        children: [
+          // Stripe-branded header
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF635BFF), Color(0xFF00D4FF)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BankTransferPage(
-                        bank: bank,
-                        walletBalance: _walletBalance, // Pass NGN balance
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.language, color: Colors.white, size: 14),
+                          SizedBox(width: 6),
+                          Text(
+                            "STRIPE CONNECT",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ).then((value) {
-                    if (value == true) {
-                      _loadData();
-                    }
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 18),
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: bank.stripeOnboardingComplete == true
+                            ? Colors.green.withOpacity(0.2)
+                            : Colors.orange.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        bank.stripeOnboardingComplete == true
+                            ? Icons.check_circle
+                            : Icons.pending,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  bank.accountName.toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.grey[50],
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.arrow_forward, color: cardColor[0], size: 20),
+                      Text(
+                        bank.currency!.toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 3,
+                        height: 3,
+                        decoration: const BoxDecoration(
+                          color: Colors.white60,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
                       const SizedBox(width: 8),
                       Text(
-                        "Transfer to this account",
-                        style: TextStyle(
-                          color: cardColor[0],
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
+                        bank.countryCode.toString(),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
                 ),
+                if (bank.stripeOnboardingComplete != true) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: const [
+                        Icon(Icons.info_outline, color: Colors.white, size: 16),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            "Complete onboarding to receive payouts",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          // Action button
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: bank.stripeOnboardingComplete == true
+                  ? () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BankTransferPage(
+                            bank: bank,
+                            walletBalance: _walletBalance,
+                          ),
+                        ),
+                      ).then((value) {
+                        if (value == true) {
+                          _loadData();
+                        }
+                      });
+                    }
+                  : _connectStripeAccount,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      bank.stripeOnboardingComplete == true
+                          ? Icons.arrow_forward
+                          : Icons.settings,
+                      color: Color(0xFF635BFF),
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      bank.stripeOnboardingComplete == true
+                          ? "Transfer to this account"
+                          : "Complete Setup",
+                      style: const TextStyle(
+                        color: Color(0xFF635BFF),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

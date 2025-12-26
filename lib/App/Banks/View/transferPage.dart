@@ -1,9 +1,8 @@
-// pages/bank_transfer_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hog/App/Banks/Api/BamkService.dart';
 import 'package:hog/App/Banks/Model/bankModel.dart';
-import 'package:hog/components/texts.dart';
 
 
 class BankTransferPage extends StatefulWidget {
@@ -20,7 +19,8 @@ class BankTransferPage extends StatefulWidget {
   State<BankTransferPage> createState() => _BankTransferPageState();
 }
 
-class _BankTransferPageState extends State<BankTransferPage> with SingleTickerProviderStateMixin {
+class _BankTransferPageState extends State<BankTransferPage>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _pinController = TextEditingController();
@@ -37,16 +37,18 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
-    
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+
     _animationController.forward();
   }
 
@@ -62,7 +64,7 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
     if (!_formKey.currentState!.validate()) return;
 
     final amount = double.tryParse(_amountController.text) ?? 0;
-    
+
     if (amount > widget.walletBalance) {
       _showErrorSnackBar("Insufficient wallet balance");
       return;
@@ -72,11 +74,22 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
       _isProcessing = true;
     });
 
-    final result = await BankApiService.bankTransfer(
-      bankId: widget.bank.id,
-      amount: amount,
-      pin: _pinController.text.isNotEmpty ? _pinController.text : null,
-    );
+    Map<String, dynamic> result;
+
+    // ✅ Check if it's a Stripe account
+    if (widget.bank.isStripeAccount) {
+      result = await BankApiService.stripeTransfer(
+        bankId: widget.bank.id,
+        amount: amount,
+      );
+    } else {
+      // Local bank transfer (existing code)
+      result = await BankApiService.bankTransfer(
+        bankId: widget.bank.id,
+        amount: amount,
+        pin: _pinController.text.isNotEmpty ? _pinController.text : null,
+      );
+    }
 
     setState(() {
       _isProcessing = false;
@@ -95,100 +108,100 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Success Animation
-              TweenAnimationBuilder(
-                duration: const Duration(milliseconds: 600),
-                tween: Tween<double>(begin: 0, end: 1),
-                builder: (context, double value, child) {
-                  return Transform.scale(
-                    scale: value,
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.green[50],
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.check_circle,
-                        color: Colors.green[600],
-                        size: 64,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              
-              const SizedBox(height: 24),
-              
-              const Text(
-                'Transfer Successful!',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              
-              const SizedBox(height: 12),
-              
-              Text(
-                _formatCurrency(amount),
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green[700],
-                ),
-              ),
-              
-              const SizedBox(height: 8),
-              
-              Text(
-                'has been sent to ${widget.bank.accountName}',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-              ),
-              
-              const SizedBox(height: 32),
-              
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Close dialog
-                    Navigator.pop(context, true); // Go back to previous page
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green[600],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 0,
+      builder:
+          (context) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Success Animation
+                  TweenAnimationBuilder(
+                    duration: const Duration(milliseconds: 600),
+                    tween: Tween<double>(begin: 0, end: 1),
+                    builder: (context, double value, child) {
+                      return Transform.scale(
+                        scale: value,
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.green[50],
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.check_circle,
+                            color: Colors.green[600],
+                            size: 64,
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                  child: const Text(
-                    'Done',
+
+                  const SizedBox(height: 24),
+
+                  const Text(
+                    'Transfer Successful!',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  Text(
+                    _formatCurrency(amount),
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.green[700],
                     ),
                   ),
-                ),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    'has been sent to ${widget.bank.accountName}',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context); // Close dialog
+                        Navigator.pop(
+                          context,
+                          true,
+                        ); // Go back to previous page
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green[600],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Done',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 
@@ -211,10 +224,7 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
   }
 
   String _formatCurrency(double amount) {
-    return '₦${amount.toStringAsFixed(2).replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    )}';
+    return '₦${amount.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}';
   }
 
   void _setQuickAmount(double amount) {
@@ -238,7 +248,11 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
               color: Colors.grey[100],
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 16),
+            child: const Icon(
+              Icons.arrow_back_ios_new,
+              color: Colors.black,
+              size: 16,
+            ),
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -308,9 +322,9 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 20),
-                        
+
                         Text(
                           widget.bank.accountName.toUpperCase(),
                           style: const TextStyle(
@@ -320,11 +334,14 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
                             letterSpacing: 0.5,
                           ),
                         ),
-                        
+
                         const SizedBox(height: 12),
-                        
+
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(8),
@@ -365,7 +382,7 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
 
                   // Wallet Balance Card
@@ -438,7 +455,7 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
                     ),
                   ),
                   const SizedBox(height: 12),
-                  
+
                   TextFormField(
                     controller: _amountController,
                     keyboardType: TextInputType.number,
@@ -448,7 +465,9 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
                       letterSpacing: 0.5,
                     ),
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d+\.?\d{0,2}'),
+                      ),
                     ],
                     decoration: InputDecoration(
                       hintText: '0.00',
@@ -479,13 +498,19 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: Colors.blue, width: 2),
+                        borderSide: const BorderSide(
+                          color: Colors.blue,
+                          width: 2,
+                        ),
                       ),
                       errorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: const BorderSide(color: Colors.red),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 20,
+                      ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -543,7 +568,10 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.orange[50],
                           borderRadius: BorderRadius.circular(6),
@@ -560,7 +588,9 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
                       const Spacer(),
                       IconButton(
                         icon: Icon(
-                          _showPin ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                          _showPin
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
                           color: Colors.grey[600],
                           size: 20,
                         ),
@@ -573,7 +603,7 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
                     ],
                   ),
                   const SizedBox(height: 12),
-                  
+
                   TextFormField(
                     controller: _pinController,
                     keyboardType: TextInputType.number,
@@ -606,14 +636,24 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: Colors.blue, width: 2),
+                        borderSide: const BorderSide(
+                          color: Colors.blue,
+                          width: 2,
+                        ),
                       ),
                       prefixIcon: Padding(
                         padding: const EdgeInsets.all(16),
-                        child: Icon(Icons.lock_outline, color: Colors.grey[600], size: 20),
+                        child: Icon(
+                          Icons.lock_outline,
+                          color: Colors.grey[600],
+                          size: 20,
+                        ),
                       ),
                       counterText: '',
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 20,
+                      ),
                     ),
                   ),
 
@@ -634,31 +674,36 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
                         elevation: 0,
                         shadowColor: Colors.blue.withOpacity(0.3),
                       ),
-                      child: _isProcessing
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
-                              ),
-                            )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Icon(Icons.send_rounded, size: 20, color: Colors.white),
-                                SizedBox(width: 12),
-                                Text(
-                                  'Transfer Now',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    letterSpacing: 0.5,
-                                  ),
+                      child:
+                          _isProcessing
+                              ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
                                 ),
-                              ],
-                            ),
+                              )
+                              : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(
+                                    Icons.send_rounded,
+                                    size: 20,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'Transfer Now',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
                     ),
                   ),
 
@@ -674,7 +719,11 @@ class _BankTransferPageState extends State<BankTransferPage> with SingleTickerPr
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
+                        Icon(
+                          Icons.info_outline,
+                          color: Colors.blue[700],
+                          size: 20,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
@@ -704,10 +753,7 @@ class _QuickAmountChip extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
-  const _QuickAmountChip({
-    required this.label,
-    required this.onTap,
-  });
+  const _QuickAmountChip({required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

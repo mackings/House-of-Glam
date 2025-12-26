@@ -1,10 +1,12 @@
-// services/bank_api_service.dart
+
 import 'dart:math' as developer;
 
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Banks/Model/bankModel.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+
 
 
 class BankApiService {
@@ -63,6 +65,197 @@ class BankApiService {
     }
     _log('═══════════════════════════════════════════════════════');
   }
+
+
+
+
+/// 🌍 Create Stripe Connected Account
+static Future<Map<String, dynamic>> createStripeAccount() async {
+  final endpoint = "$baseUrl/api/v1/stripe/create-account";
+  
+  try {
+    final token = await SecurePrefs.getToken();
+    if (token == null) {
+      _log('❌ No authentication token found', level: 'ERROR');
+      return {"success": false, "error": "No authentication token found"};
+    }
+
+    final headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $token",
+    };
+
+    _logRequest(
+      method: 'POST',
+      endpoint: endpoint,
+      headers: headers,
+    );
+
+    final response = await http.post(
+      Uri.parse(endpoint),
+      headers: headers,
+    );
+
+    _logResponse(
+      statusCode: response.statusCode,
+      body: response.body,
+      endpoint: endpoint,
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      _log('✅ Stripe account creation initiated', level: 'SUCCESS');
+      return {
+        "success": true,
+        "stripeAccountId": data['data']['stripeAccountId'],
+        "onboardingUrl": data['data']['onboardingUrl'],
+        "data": data,
+      };
+    } else {
+      final error = jsonDecode(response.body);
+      _log('❌ Failed to create Stripe account: ${error['message']}', level: 'ERROR');
+      return {
+        "success": false,
+        "error": error['message'] ?? "Failed to create Stripe account",
+      };
+    }
+  } catch (e, stackTrace) {
+    _log('❌ Exception creating Stripe account: $e', level: 'ERROR');
+    _log('Stack trace: $stackTrace', level: 'DEBUG');
+    return {"success": false, "error": "Network error: $e"};
+  }
+}
+
+/// 💸 Stripe Transfer to Connected Account
+static Future<Map<String, dynamic>> stripeTransfer({
+  required String bankId,
+  required double amount,
+}) async {
+  final endpoint = "$baseUrl/api/v1/stripe/make-stripe-transfer";
+  
+  try {
+    final token = await SecurePrefs.getToken();
+    if (token == null) {
+      _log('❌ No authentication token found', level: 'ERROR');
+      return {"success": false, "error": "No authentication token found"};
+    }
+
+    final headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $token",
+    };
+
+    final body = {
+      "amount": amount,
+      "bankId": bankId, // Optional: if backend needs it
+    };
+
+    _logRequest(
+      method: 'POST',
+      endpoint: endpoint,
+      headers: headers,
+      body: body,
+    );
+
+    final response = await http.post(
+      Uri.parse(endpoint),
+      headers: headers,
+      body: jsonEncode(body),
+    );
+
+    _logResponse(
+      statusCode: response.statusCode,
+      body: response.body,
+      endpoint: endpoint,
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      _log('✅ Stripe transfer successful. Amount: \$${amount}', level: 'SUCCESS');
+      return {
+        "success": true,
+        "message": "Transfer successful",
+        "data": data,
+      };
+    } else {
+      final error = jsonDecode(response.body);
+      _log('❌ Stripe transfer failed: ${error['message']}', level: 'ERROR');
+      return {
+        "success": false,
+        "error": error['message'] ?? "Transfer failed",
+      };
+    }
+  } catch (e, stackTrace) {
+    _log('❌ Exception during Stripe transfer: $e', level: 'ERROR');
+    _log('Stack trace: $stackTrace', level: 'DEBUG');
+    return {"success": false, "error": "Network error: $e"};
+  }
+}
+
+/// ✅ Check Stripe Account Status
+static Future<Map<String, dynamic>> getStripeAccountStatus() async {
+  final endpoint = "$baseUrl/api/v1/stripe/account-status";
+  
+  try {
+    final token = await SecurePrefs.getToken();
+    if (token == null) {
+      _log('❌ No authentication token found', level: 'ERROR');
+      return {"success": false, "error": "No authentication token found"};
+    }
+
+    final headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $token",
+    };
+
+    _logRequest(
+      method: 'GET',
+      endpoint: endpoint,
+      headers: headers,
+    );
+
+    final response = await http.get(
+      Uri.parse(endpoint),
+      headers: headers,
+    );
+
+    _logResponse(
+      statusCode: response.statusCode,
+      body: response.body,
+      endpoint: endpoint,
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return {
+        "success": true,
+        "data": data,
+      };
+    } else {
+      final error = jsonDecode(response.body);
+      return {
+        "success": false,
+        "error": error['message'] ?? "Failed to get status",
+      };
+    }
+  } catch (e, stackTrace) {
+    _log('❌ Exception getting Stripe status: $e', level: 'ERROR');
+    return {"success": false, "error": "Network error: $e"};
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   /// 🏦 Create Bank Account
   static Future<Map<String, dynamic>> createBankAccount({
@@ -134,6 +327,8 @@ class BankApiService {
     }
   }
 
+
+
   /// 🏦 Get All Banks
   static Future<List<Bank>> getAllBanks() async {
     final endpoint = "$baseUrl/api/v1/bank/account";
@@ -183,6 +378,8 @@ class BankApiService {
       return [];
     }
   }
+
+
 
   /// 💸 Bank Transfer
   static Future<Map<String, dynamic>> bankTransfer({
