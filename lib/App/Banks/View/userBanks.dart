@@ -463,23 +463,26 @@ actions: [
 
   // Rest of the widgets remain the same...
   Widget _buildQuickStats() {
+    final stripeCount = _banks.where((b) => b.isStripeAccount).length;
+    final localCount = _banks.where((b) => b.isLocalBank).length;
+
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
             icon: Icons.account_balance,
-            label: "Total Banks",
-            value: "${_banks.length}",
+            label: "Local Banks",
+            value: "$localCount",
             color: Colors.blue,
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: _buildStatCard(
-            icon: Icons.trending_up,
-            label: "Active",
-            value: "${_banks.length}",
-            color: Colors.green,
+            icon: Icons.language,
+            label: "Stripe",
+            value: "$stripeCount",
+            color: Colors.purple,
           ),
         ),
       ],
@@ -907,7 +910,7 @@ Widget _buildStripeAccountCard(Bank bank, int index) {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        bank.currency!.toUpperCase(),
+                        (bank.currency ?? 'USD').toUpperCase(),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.white,
@@ -925,7 +928,7 @@ Widget _buildStripeAccountCard(Bank bank, int index) {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        bank.countryCode.toString(),
+                        (bank.countryCode ?? 'US').toString(),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.white,

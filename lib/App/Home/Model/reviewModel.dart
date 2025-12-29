@@ -1,4 +1,6 @@
+
 class ReviewResponse {
+  
   final bool success;
   final int count;
   final List<Review> reviews;
@@ -21,6 +23,7 @@ class ReviewResponse {
     );
   }
 }
+
 
 class Review {
   final String id;
@@ -57,6 +60,7 @@ class Review {
     required this.updatedAt,
   });
 
+
   factory Review.fromJson(Map<String, dynamic> json) {
     return Review(
       id: json['_id'] ?? '',
@@ -80,18 +84,32 @@ class Review {
   }
 }
 
+
 class ReviewUser {
   final String id;
   final String fullName;
   final String email;
+  final String? address;
+  final String? phoneNumber;
+  final String? country; // ✅ Added for Stripe payment detection
 
-  ReviewUser({required this.id, required this.fullName, required this.email});
+  ReviewUser({
+    required this.id,
+    required this.fullName,
+    required this.email,
+    this.address,
+    this.phoneNumber,
+    this.country,
+  });
 
   factory ReviewUser.fromJson(Map<String, dynamic> json) {
     return ReviewUser(
       id: json['_id'] ?? '',
       fullName: json['fullName'] ?? '',
       email: json['email'] ?? '',
+      address: json['address'],
+      phoneNumber: json['phoneNumber'],
+      country: json['country'],
     );
   }
 }

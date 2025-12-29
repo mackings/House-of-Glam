@@ -84,18 +84,51 @@ class ApiService {
           "bankName": user["bankName"],
         });
 
-        // ✅ Fetch and save currency immediately after login
-        print("🌍 Fetching user currency...");
-        final currencyResult = await getUserCurrency(token);
+        // ✅ Derive currency from country code and phone number (frontend workaround)
+        print("🌍 Determining user currency...");
+        final userCountry = user["country"];
+        final userPhone = user["phoneNumber"];
 
-        if (currencyResult['success'] == true) {
-          print(
-            "✅ User currency fetched and saved: ${currencyResult['currency']}",
-          );
+        String? derivedCurrency;
+
+        // Try to derive from country first
+        if (userCountry != null && userCountry.isNotEmpty) {
+          derivedCurrency = getCurrencyFromCountry(userCountry);
+          print("💰 Currency derived from country '$userCountry': $derivedCurrency");
+        }
+
+        // If country didn't work or returned default, try phone number
+        if ((derivedCurrency == null || derivedCurrency == 'NGN') &&
+            userPhone != null &&
+            userPhone.isNotEmpty) {
+          final phoneCurrency = getCurrencyFromPhoneNumber(userPhone);
+
+          // Only override if phone gives us a non-NGN currency
+          if (phoneCurrency != 'NGN') {
+            derivedCurrency = phoneCurrency;
+            print("💰 Currency derived from phone '$userPhone': $derivedCurrency");
+          }
+        }
+
+        if (derivedCurrency != null) {
+          // Save the derived currency
+          await SecurePrefs.saveUserCurrency(derivedCurrency);
           await loadCurrency();
-          print("💵 Current currency in memory: $Cur");
+          print("✅ Currency saved and loaded: $Cur");
         } else {
-          print("⚠️ Failed to fetch user currency: ${currencyResult['error']}");
+          // Fallback to API if both country and phone are not available
+          print("⚠️ Country and phone not found, fetching from API...");
+          final currencyResult = await getUserCurrency(token);
+
+          if (currencyResult['success'] == true) {
+            print(
+              "✅ User currency fetched and saved: ${currencyResult['currency']}",
+            );
+            await loadCurrency();
+            print("💵 Current currency in memory: $Cur");
+          } else {
+            print("⚠️ Failed to fetch user currency: ${currencyResult['error']}");
+          }
         }
 
         // ✅ Flatten response before returning
@@ -203,7 +236,7 @@ class ApiService {
 
       print("💰 Currency fetched from API: $currency");
 
-      // ✅ Save currency to secure prefs
+      // ✅ Save currency to secure prefss
       await SecurePrefs.saveUserCurrency(currency);
 
       // ✅ Confirm it was saved

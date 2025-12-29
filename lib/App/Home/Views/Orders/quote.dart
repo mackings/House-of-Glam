@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hog/App/Banks/Api/BamkService.dart';
 import 'package:hog/App/Home/Api/paymentService.dart';
 import 'package:hog/App/Home/Api/useractivity.dart';
 import 'package:hog/App/Home/Model/reviewModel.dart';
@@ -79,6 +80,63 @@ class _QuotationState extends State<Quotation> {
     setState(() => isLoading = true);
 
     try {
+      // ✅ Check if vendor is from international country requiring Stripe
+      final vendorCountry = review.user.country?.toUpperCase() ?? '';
+      final isInternationalVendor = vendorCountry == 'UNITED STATES' ||
+          vendorCountry == 'US' ||
+          vendorCountry == 'USA' ||
+          vendorCountry == 'UNITED KINGDOM' ||
+          vendorCountry == 'UK' ||
+          vendorCountry == 'GB';
+
+      // ✅ For international vendors, use Stripe checkout
+      if (isInternationalVendor) {
+        String? amountToSend;
+        String? addressToSend;
+
+        if (paymentType == "part") {
+          // Part payment - send the amount
+          amountToSend = (partAmount?.replaceAll(",", "") ?? "0");
+        } else {
+          // Full payment - send remaining balance amount + address
+          if (review.amountPaid > 0) {
+            // Already made a part payment → pay remaining balance
+            amountToSend = review.amountToPay.toString();
+          } else {
+            // First time full payment
+            amountToSend = review.totalCost.toString();
+          }
+          addressToSend = review.user.address ?? ""; // Using user's saved address as fallback
+        }
+
+        final resp = await BankApiService.stripeCheckoutPayment(
+          reviewId: review.id,
+          shipmentMethod: shipment,
+          amount: amountToSend,
+          address: addressToSend,
+        );
+
+        if (resp["success"] == true) {
+          final checkoutUrl = resp["checkoutUrl"];
+          if (checkoutUrl != null && mounted) {
+            Navigator.of(
+              context,
+              rootNavigator: true,
+            ).popUntil((route) => route.isFirst);
+            _openCheckout(checkoutUrl);
+          } else {
+            print("❌ No Stripe checkout URL returned");
+          }
+        } else {
+          print("❌ Stripe payment failed: ${resp["error"]}");
+        }
+        if (mounted) {
+          setState(() => isLoading = false);
+        }
+        return;
+      }
+
+      // ✅ For local vendors (Nigeria), use Paystack
       late String amountToSend;
 
       if (paymentType == "part") {

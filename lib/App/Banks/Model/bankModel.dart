@@ -46,26 +46,70 @@ class Bank {
 
   factory Bank.fromJson(Map<String, dynamic> json) {
     return Bank(
-      id: json['_id'] ?? '',
-      bankName: json['bankName'] ?? '',
-      accountNumber: json['accountNumber'] ?? '',
+      id: json['_id'] ?? json['id'] ?? '',
+      bankName: json['bankName'] ?? json['bank_name'] ?? '',
+      accountNumber: json['accountNumber'] ?? json['last4'] ?? '',
       accountName: json['accountName'] ?? '',
       bankCode: json['bankCode'] ?? '',
       userId: json['userId'] ?? '',
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
-      
-      // ✅ NEW: Parse Stripe fields
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : DateTime.now(),
+
+      // ✅ Parse Stripe fields
       stripeAccountId: json['stripeAccountId'],
       stripeAccountType: json['stripeAccountType'],
       stripeOnboardingComplete: json['stripeOnboardingComplete'],
-      countryCode: json['countryCode'],
+      countryCode: json['countryCode'] ?? json['country'],
       currency: json['currency'],
       provider: json['provider'],
       routingNumber: json['routingNumber'],
       sortCode: json['sortCode'],
       iban: json['iban'],
       swiftCode: json['swiftCode'],
+    );
+  }
+
+  /// Factory for Stripe bank account from API response
+  factory Bank.fromStripeJson(Map<String, dynamic> json) {
+    return Bank(
+      id: json['id'] ?? '',
+      bankName: (json['bank_name'] ?? 'STRIPE TEST BANK').toString().toUpperCase(),
+      accountNumber: '****${json['last4'] ?? ''}',
+      accountName: json['account_holder_name'] ?? 'Stripe Account',
+      bankCode: '',
+      userId: '',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      stripeAccountId: json['id'],
+      countryCode: json['country']?.toString().toUpperCase(),
+      currency: json['currency']?.toString().toUpperCase(),
+      provider: 'stripe',
+      stripeOnboardingComplete: json['status'] == 'verified' || json['status'] == 'new',
+    );
+  }
+
+  /// Factory for local bank account from API response
+  factory Bank.fromLocalJson(Map<String, dynamic> json) {
+    return Bank(
+      id: json['_id'] ?? '',
+      bankName: json['bankName'] ?? '',
+      accountNumber: json['accountNumber'] ?? '',
+      accountName: json['accountName'] ?? '',
+      bankCode: json['bankCode'] ?? '',
+      userId: json['userId'] ?? '',
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : DateTime.now(),
+      provider: 'paystack',
+      countryCode: 'NG',
+      currency: 'NGN',
     );
   }
 
