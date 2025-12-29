@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/constants/api_config.dart';
 import 'package:http/http.dart' as http;
 
 class OfferService {
-  static const String _apiRoot = "https://hog-ymud.onrender.com/api/v1";
+  static const String _apiRoot = ApiConfig.apiBaseUrl;
 
   // 🔹 Helper method for logging API calls
   static void _logApi({

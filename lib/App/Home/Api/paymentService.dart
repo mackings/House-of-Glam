@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/constants/api_config.dart';
 import 'package:http/http.dart' as http;
 
 class PaymentService {
-  static const String localBaseURL = "https://hog-ymud.onrender.com/api/v1";
-  static const String liveBaseURL = "https://hog-ymud.onrender.com/api/v1";
+  static const String localBaseURL = ApiConfig.apiBaseUrl;
+  static const String liveBaseURL = ApiConfig.apiBaseUrl;
 
   /// Create Part Payment
   static Future<Map<String, dynamic>?> createPartPayment({

@@ -3,10 +3,11 @@ import 'dart:io';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Profile/Model/SellerListing.dart';
 import 'package:hog/App/Profile/Model/UploadedListings.dart';
+import 'package:hog/constants/api_config.dart';
 import 'package:http/http.dart' as http;
 
 class MarketplaceService {
-  static const String baseUrl = "https://hog-ymud.onrender.com/api/v1";
+  static const String baseUrl = ApiConfig.apiBaseUrl;
 
   /// 🔹 Fetch all seller listings
   static Future<SellerListingResponse?> getAllSellerListings() async {

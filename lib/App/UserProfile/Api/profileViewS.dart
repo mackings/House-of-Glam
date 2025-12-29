@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/UserProfile/model/profileViewModel.dart';
+import 'package:hog/constants/api_config.dart';
 import 'package:http/http.dart' as http;
 
 class UserProfileViewService {
-  static const String baseUrl = "https://hog-ymud.onrender.com/api/v1";
+  static const String baseUrl = ApiConfig.apiBaseUrl;
 
   static Future<UserProfile?> getProfile() async {
     try {

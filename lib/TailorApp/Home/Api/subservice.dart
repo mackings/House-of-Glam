@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/constants/api_config.dart';
 import 'package:hog/TailorApp/Home/Model/submodel.dart';
 import 'package:hog/TailorApp/Home/Model/subpay.dart';
 import 'package:http/http.dart' as http;
 
 class SubscriptionService {
-  final String baseUrl = "https://hog-ymud.onrender.com/api/v1/subscription";
+  final String baseUrl = "${ApiConfig.apiBaseUrl}/subscription";
 
   // ✅ Get all subscription plans
   Future<SubscriptionPlanResponse> getSubscriptionPlans() async {

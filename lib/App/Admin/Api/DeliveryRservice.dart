@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/constants/api_config.dart';
 import 'package:http/http.dart' as http;
 
 class DeliveryRateService {
-  static const String baseUrl =
-      "https://hog-ymud.onrender.com/api/v1/deliveryRate";
+  static const String baseUrl = "${ApiConfig.apiBaseUrl}/deliveryRate";
 
   /// 🧩 Helper for safe API requests with retry and timeout
   static Future<http.Response?> _safeRequest(
@@ -183,7 +183,7 @@ class DeliveryRateService {
     try {
       final token = await SecurePrefs.getToken();
       final url = Uri.parse(
-        "https://hog-ymud.onrender.com/api/v1/deliveryRate/deliveryCost/$userId",
+        "${ApiConfig.apiBaseUrl}/deliveryRate/deliveryCost/$userId",
       );
 
       print("➡️ POST $url");

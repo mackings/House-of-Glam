@@ -1,10 +1,11 @@
 import 'dart:convert';
 
 import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/constants/api_config.dart';
 import 'package:http/http.dart' as http;
 
 class BillingService {
-  static const String baseUrl = "https://hog-ymud.onrender.com/api/v1/admin";
+  static const String baseUrl = "${ApiConfig.apiBaseUrl}/admin";
 
   /// 🔹 Create or Update Listing Fee
   static Future<bool> setListingFee(double amount) async {

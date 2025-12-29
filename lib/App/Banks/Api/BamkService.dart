@@ -3,6 +3,7 @@ import 'dart:math' as developer;
 
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Banks/Model/bankModel.dart';
+import 'package:hog/constants/api_config.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -10,7 +11,7 @@ import 'dart:convert';
 
 
 class BankApiService {
-  static const String baseUrl = "https://hog-ymud.onrender.com";
+  static const String baseUrl = ApiConfig.baseUrl;
 
   /// 📝 Custom Logger
   static void _log(String message, {String level = 'INFO'}) {

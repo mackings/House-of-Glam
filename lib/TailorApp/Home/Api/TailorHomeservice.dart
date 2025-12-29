@@ -1,13 +1,14 @@
 import 'dart:convert';
 
 import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/constants/api_config.dart';
 import 'package:hog/TailorApp/Home/Model/AssignedMaterial.dart';
 import 'package:hog/TailorApp/Home/Model/materialModel.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:http/http.dart' as http;
 
 class TailorHomeService {
-  final String baseUrl = "https://hog-ymud.onrender.com/api/v1";
+  final String baseUrl = ApiConfig.apiBaseUrl;
 
   Future<TailorMaterialResponse> fetchTailorMaterials(String s) async {
     try {

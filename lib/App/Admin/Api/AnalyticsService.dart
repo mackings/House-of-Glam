@@ -2,10 +2,11 @@ import 'dart:convert';
 
 import 'package:hog/App/Admin/Model/AnalyticsModel.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/constants/api_config.dart';
 import 'package:http/http.dart' as http;
 
 class AnalyticsService {
-  static const String baseUrl = "https://hog-ymud.onrender.com/api/v1/admin";
+  static const String baseUrl = "${ApiConfig.apiBaseUrl}/admin";
 
   static Future<TotalUsersResponse?> getTotalUsers() async {
     return _fetchData(

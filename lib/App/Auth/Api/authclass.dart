@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/constants/api_config.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = "https://hog-ymud.onrender.com/api/v1";
+  static const String baseUrl = ApiConfig.apiBaseUrl;
 
   /// Generic POST request with body
   static Future<Map<String, dynamic>> postRequest(
