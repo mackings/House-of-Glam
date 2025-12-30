@@ -214,14 +214,14 @@ class QuotationCard extends StatelessWidget {
 
               // Payment Buttons
               if (isQuote)
-                // Show "Hire Designer" button for quotes
+                // Show "Make Offer" button for quotes (offer not yet accepted)
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: onHireDesigner,
-                    icon: const Icon(Icons.person_add, size: 18, color: Colors.white),
+                    icon: const Icon(Icons.handshake, size: 18, color: Colors.white),
                     label: const CustomText(
-                      "Hire Designer",
+                      "Hire",
                       fontSize: 14,
                       color: Colors.white,
                       fontWeight: FontWeight.w600,

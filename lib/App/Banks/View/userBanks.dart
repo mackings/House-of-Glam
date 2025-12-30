@@ -549,9 +549,10 @@ actions: [
 
 Widget _buildEmptyState() {
   return Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+    child: SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
         Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
@@ -642,6 +643,7 @@ Widget _buildEmptyState() {
           ),
         ),
       ],
+      ),
     ),
   );
 }

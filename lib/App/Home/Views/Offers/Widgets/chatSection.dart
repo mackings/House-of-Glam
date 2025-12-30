@@ -850,15 +850,62 @@ void _showAcceptOfferSheet(
   }
 
   void _confirmAction(BuildContext context, String action) async {
-    final rawMaterial = widget.materialCtrl.text.replaceAll(',', '').trim();
-    final rawWorkmanship = widget.workmanshipCtrl.text.replaceAll(',', '').trim();
+    // ✅ For accept action, amounts are auto-detected by backend - no need to validate here
+    // ✅ For counter/reject, we still need the amounts
+    if (action != "accepted") {
+      final rawMaterial = widget.materialCtrl.text.replaceAll(',', '').trim();
+      final rawWorkmanship = widget.workmanshipCtrl.text.replaceAll(',', '').trim();
 
-    final materialNGN = await CurrencyHelper.convertToNGN(
-      double.tryParse(rawMaterial) ?? 0,
-    );
-    final workNGN = await CurrencyHelper.convertToNGN(
-      double.tryParse(rawWorkmanship) ?? 0,
-    );
+      if (action == "countered" && (rawMaterial.isEmpty || rawWorkmanship.isEmpty)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: Colors.white),
+                SizedBox(width: 12),
+                Expanded(child: Text("Please enter counter offer amounts")),
+              ],
+            ),
+            backgroundColor: Colors.orange.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+        return;
+      }
+    }
+
+    // ✅ Show different confirmation dialogs based on action
+    Color actionColor;
+    IconData actionIcon;
+    String actionTitle;
+    String actionMessage;
+
+    switch (action) {
+      case "accepted":
+        actionColor = Colors.green.shade600;
+        actionIcon = Icons.check_circle;
+        actionTitle = "Accept Offer";
+        actionMessage = "Accept this offer? The review will be updated with these amounts.";
+        break;
+      case "rejected":
+        actionColor = Colors.red.shade600;
+        actionIcon = Icons.cancel;
+        actionTitle = "Reject Offer";
+        actionMessage = "Reject this offer? This action cannot be undone.";
+        break;
+      case "countered":
+        actionColor = Colors.orange.shade600;
+        actionIcon = Icons.swap_horiz;
+        actionTitle = "Counter Offer";
+        actionMessage = "Send counter offer with your proposed amounts?";
+        break;
+      default:
+        actionColor = Colors.purple;
+        actionIcon = Icons.help_outline;
+        actionTitle = "Confirm Action";
+        actionMessage = "Are you sure you want to proceed?";
+    }
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -869,39 +916,70 @@ void _showAcceptOfferSheet(
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.purple.shade50,
+                color: actionColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(Icons.help_outline, color: Colors.purple.shade700),
+              child: Icon(actionIcon, color: actionColor, size: 24),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                "Confirm ${action.toUpperCase()}",
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                actionTitle,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ],
         ),
-        content: Text(
-          "Are you sure you want to ${action.toLowerCase()} this offer?",
-          style: const TextStyle(fontSize: 14, color: Colors.black87),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              actionMessage,
+              style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
+            ),
+            if (action == "accepted") ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue.shade700, size: 18),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        "Amounts will be auto-detected from the latest offer",
+                        style: TextStyle(fontSize: 12, color: Colors.black87),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text("Cancel", style: TextStyle(color: Colors.black54)),
+            child: const Text("Cancel", style: TextStyle(color: Colors.black54, fontSize: 15)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple,
+              backgroundColor: actionColor,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              elevation: 0,
             ),
-            child: const Text(
-              "Yes, Proceed",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            child: Text(
+              action == "accepted" ? "Accept" : action == "rejected" ? "Reject" : "Send Counter",
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
             ),
           ),
         ],

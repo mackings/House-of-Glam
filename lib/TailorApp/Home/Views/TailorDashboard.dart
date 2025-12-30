@@ -7,6 +7,7 @@ import 'package:hog/TailorApp/Widgets/DetailsTaiioesheet.dart';
 import 'package:hog/TailorApp/Widgets/MaterialCard.dart';
 import 'package:hog/TailorApp/Widgets/tailorAppBar.dart';
 import 'package:hog/components/Navigator.dart';
+import 'package:hog/components/error_display.dart';
 import 'package:hog/components/texts.dart';
 
 class Tailordashboard extends StatefulWidget {
@@ -57,7 +58,10 @@ class _TailordashboardState extends State<Tailordashboard> {
                 child: CircularProgressIndicator(color: Colors.purple),
               );
             } else if (snapshot.hasError) {
-              return Center(child: CustomText("❌ Error: ${snapshot.error}"));
+              return ErrorDisplay(
+                error: snapshot.error,
+                onRetry: _refreshMaterials,
+              );
             } else if (!snapshot.hasData || snapshot.data!.data.isEmpty) {
               return const Center(child: CustomText("No materials found"));
             }

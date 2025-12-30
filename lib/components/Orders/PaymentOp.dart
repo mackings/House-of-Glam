@@ -7,7 +7,6 @@ import 'package:hog/App/Home/Model/reviewModel.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
-import 'package:hog/components/thousandformat.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:hog/constants/currencyHelper.dart';
 
@@ -55,7 +54,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     super.dispose();
   }
 
-  // ✅ Real-time conversion when user types amount
+  // ✅ Real-time conversion when user types amount (now converts FROM vendor currency TO NGN)
   Future<void> _onAmountChanged() async {
     final vendorCountry = widget.review.user.country?.toUpperCase() ?? '';
     final isInternationalVendor = vendorCountry == 'UNITED STATES' ||
@@ -76,9 +75,9 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     }
 
     try {
-      final userAmount = double.parse(amountController.text.replaceAll(",", ""));
+      final vendorCurrencyAmount = double.parse(amountController.text.replaceAll(",", ""));
 
-      // Determine target currency based on vendor country
+      // Determine vendor's currency
       String currency = 'USD';
       if (vendorCountry.contains('UNITED KINGDOM') || vendorCountry == 'UK' || vendorCountry == 'GB') {
         currency = 'GBP';
@@ -91,24 +90,12 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
         });
       }
 
-      // Get conversion from NGN to target currency
-      final ngnAmount = await CurrencyHelper.convertToNGN(userAmount);
-      final result = await ConversionApiService.getExchangeRate(
-        amount: ngnAmount.toDouble(),
-        targetCurrency: currency,
-      );
-
-      if (result['success'] == true && mounted) {
+      // Note: We're just setting the currency here, actual conversion happens during payment
+      if (mounted) {
         setState(() {
-          convertedAmount = result['convertedAmount'];
+          convertedAmount = vendorCurrencyAmount;
           isConverting = false;
         });
-      } else {
-        if (mounted) {
-          setState(() {
-            isConverting = false;
-          });
-        }
       }
     } catch (e) {
       if (mounted) {
@@ -146,10 +133,9 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
             );
             return;
           }
-          // Part payment - send NGN amount (backend will convert)
-          final userAmount = double.parse(amountController.text.replaceAll(",", ""));
-          final ngnAmount = await CurrencyHelper.convertToNGN(userAmount);
-          amountToSend = ngnAmount.toString();
+          // Part payment - user enters in vendor currency (USD/GBP), send as-is
+          final vendorCurrencyAmount = double.parse(amountController.text.replaceAll(",", ""));
+          amountToSend = vendorCurrencyAmount.toString();
         } else {
           // Full payment - send remaining balance amount + address
           if (addressController.text.trim().isEmpty) {
@@ -159,16 +145,35 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
             );
             return;
           }
-          // Calculate remaining balance in NGN
-          final remaining = widget.review.totalCost - widget.review.amountPaid;
-          if (remaining <= 0) {
+          // Calculate remaining balance in vendor currency (USD/GBP)
+          final remainingNGN = widget.review.totalCost - widget.review.amountPaid;
+          if (remainingNGN <= 0) {
             setState(() => isLoading = false);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("No balance left to pay")),
             );
             return;
           }
-          amountToSend = remaining.toString();
+          // Convert NGN balance to vendor currency using conversion API
+          final targetCurrency = vendorCountry.contains('UNITED STATES') || vendorCountry == 'US' || vendorCountry == 'USA'
+              ? 'USD'
+              : 'GBP';
+
+          final remainingVendorCurrency = await ConversionApiService.convertAmount(
+            amountInNGN: remainingNGN.toDouble(),
+            targetCurrency: targetCurrency,
+          );
+
+          if (remainingVendorCurrency != null && remainingVendorCurrency > 0) {
+            amountToSend = remainingVendorCurrency.toString();
+          } else {
+            // Fallback conversion if API fails
+            final fallbackAmount = targetCurrency == 'USD'
+                ? remainingNGN / 1425.0
+                : remainingNGN / 1800.0;
+            amountToSend = fallbackAmount.toString();
+          }
+
           addressToSend = addressController.text.trim();
         }
 
@@ -208,9 +213,8 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
           return;
         }
 
-        // ✅ Convert user input back to NGN if needed
-        final userAmount = double.parse(amountController.text.replaceAll(",", ""));
-        final ngnAmount = await CurrencyHelper.convertToNGN(userAmount);
+        // For local vendors, user enters in NGN directly - no conversion needed
+        final ngnAmount = double.parse(amountController.text.replaceAll(",", ""));
         amountToSend = ngnAmount.toString();
       } else {
         // Full payment - use original NGN amount
@@ -280,13 +284,58 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
       return currencySymbol; // Default to user's currency
     }
 
+    // Get target currency for international vendors
+    String getTargetCurrency() {
+      if (vendorCountry.contains('UNITED STATES') || vendorCountry == 'US' || vendorCountry == 'USA') {
+        return 'USD';
+      } else if (vendorCountry.contains('UNITED KINGDOM') || vendorCountry == 'UK' || vendorCountry == 'GB') {
+        return 'GBP';
+      }
+      return 'USD'; // Default
+    }
+
+    // Convert NGN to vendor's currency using the API
+    Future<double> convertToVendorCurrency(int ngnAmount) async {
+      final targetCurr = getTargetCurrency();
+
+      print('🔄 Converting ₦$ngnAmount to $targetCurr...');
+
+      final converted = await ConversionApiService.convertAmount(
+        amountInNGN: ngnAmount.toDouble(),
+        targetCurrency: targetCurr,
+      );
+
+      if (converted != null && converted > 0) {
+        print('✅ Converted ₦$ngnAmount to $targetCurr $converted');
+        return converted;
+      }
+
+      // Fallback: manual conversion if API fails
+      print('⚠️ API conversion failed, using fallback rate for $targetCurr');
+      if (targetCurr == 'USD') {
+        return ngnAmount / 1425.0; // Approximate USD rate
+      } else if (targetCurr == 'GBP') {
+        return ngnAmount / 1800.0; // Approximate GBP rate
+      }
+
+      print('❌ Conversion failed completely, returning NGN amount');
+      return ngnAmount.toDouble();
+    }
+
     return FutureBuilder<double>(
       future: isInternationalVendor
-          ? CurrencyHelper.convertFromNGN(widget.review.totalCost - widget.review.amountPaid)
+          ? convertToVendorCurrency(widget.review.totalCost - widget.review.amountPaid)
           : Future.value((widget.review.totalCost - widget.review.amountPaid).toDouble()),
       builder: (context, snapshot) {
+        // Show loading state while converting
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          print('⏳ Waiting for conversion...');
+        }
+
         final displayBalance = snapshot.data ??
             (widget.review.totalCost - widget.review.amountPaid).toDouble();
+
+        print('💰 Display balance: ${getCurrencySymbolForVendor()}$displayBalance');
 
         return Stack(
           children: [
@@ -368,11 +417,11 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.info_outline, size: 14, color: Colors.purple.shade700),
+                                Icon(Icons.swap_horiz, size: 14, color: Colors.purple.shade700),
                                 const SizedBox(width: 6),
                                 Flexible(
                                   child: Text(
-                                    "≈ $currencySymbol${(widget.review.totalCost - widget.review.amountPaid).toStringAsFixed(0)} NGN",
+                                    "Converted from ${CurrencyHelper.formatAmount((widget.review.totalCost - widget.review.amountPaid).toDouble())}",
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: Colors.purple.shade900,
@@ -415,69 +464,42 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
 
                   if (paymentType == "part") ...[
                     CustomTextField(
-                      title: "Amount ($currencySymbol)",
+                      title: isInternationalVendor
+                          ? "Amount (${getCurrencySymbolForVendor()})"
+                          : "Amount ($currencySymbol)",
                       fieldKey: "amount",
-                      hintText: "Enter amount",
+                      hintText: isInternationalVendor
+                          ? "Enter amount in ${getCurrencySymbolForVendor()}"
+                          : "Enter amount",
                       controller: amountController,
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[\d,.]')),
-                        ThousandsFormatter(),
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                       ],
                     ),
 
-                    // ✅ Show transparent conversion for international vendors
+                    // ✅ Show conversion note for international vendors
                     if (isInternationalVendor) ...[
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.green.shade50,
+                          color: Colors.blue.shade50,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.green.shade200),
+                          border: Border.all(color: Colors.blue.shade200),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.currency_exchange, color: Colors.green.shade700, size: 18),
+                            Icon(Icons.info_outline, color: Colors.blue.shade700, size: 18),
                             const SizedBox(width: 8),
                             Expanded(
-                              child: isConverting
-                                  ? Row(
-                                      children: [
-                                        SizedBox(
-                                          width: 14,
-                                          height: 14,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Colors.green.shade700,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          "Converting...",
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.green.shade900,
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : convertedAmount != null && targetCurrency != null
-                                      ? Text(
-                                          "≈ ${targetCurrency == 'USD' ? '\$' : '£'}${convertedAmount!.toStringAsFixed(2)} $targetCurrency",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.green.shade900,
-                                          ),
-                                        )
-                                      : Text(
-                                          "Enter amount to see conversion",
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.green.shade700,
-                                          ),
-                                        ),
+                              child: Text(
+                                "Enter amount in ${targetCurrency ?? (vendorCountry.contains('UNITED STATES') || vendorCountry == 'US' ? 'USD' : 'GBP')}. It will be converted automatically.",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.blue.shade900,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -534,6 +556,9 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     );
   }
 }
+
+
+
 
 
 

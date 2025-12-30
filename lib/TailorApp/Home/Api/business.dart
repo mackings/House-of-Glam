@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/TailorApp/Home/Api/TailorHomeservice.dart';
+import 'package:hog/utils/error_handler.dart';
 import 'package:http/http.dart' as http;
 
 extension TailorServiceExtension on TailorHomeService {
@@ -17,37 +18,48 @@ extension TailorServiceExtension on TailorHomeService {
     File? imageFile,
     String? businessRegNo,
   }) async {
-    final token = await SecurePrefs.getToken();
+    try {
+      final token = await SecurePrefs.getToken();
 
-    var uri = Uri.parse("$baseUrl/tailor/createTailor");
-    var request = http.MultipartRequest("POST", uri);
+      var uri = Uri.parse("$baseUrl/tailor/createTailor");
+      var request = http.MultipartRequest("POST", uri);
 
-    request.headers["Authorization"] = "Bearer $token";
+      request.headers["Authorization"] = "Bearer $token";
 
-    request.fields["address"] = address;
-    request.fields["businessName"] = businessName;
-    request.fields["businessEmail"] = businessEmail;
-    request.fields["businessPhone"] = businessPhone;
-    request.fields["city"] = city;
-    request.fields["state"] = state;
-    request.fields["yearOfExperience"] = yearOfExperience;
-    request.fields["description"] = description;
-    request.fields["businessRegistrationNumber"] = businessRegNo!;
-    request.fields["registeredIn"] = city;
+      request.fields["address"] = address;
+      request.fields["businessName"] = businessName;
+      request.fields["businessEmail"] = businessEmail;
+      request.fields["businessPhone"] = businessPhone;
+      request.fields["city"] = city;
+      request.fields["state"] = state;
+      request.fields["yearOfExperience"] = yearOfExperience;
+      request.fields["description"] = description;
 
-    if (imageFile != null) {
-      request.files.add(
-        await http.MultipartFile.fromPath("images", imageFile.path),
-      );
-    }
+      // Only add business registration number if provided
+      if (businessRegNo != null && businessRegNo.isNotEmpty) {
+        request.fields["businessRegistrationNumber"] = businessRegNo;
+      }
 
-    var response = await request.send();
+      request.fields["registeredIn"] = city;
 
-    final resBody = await response.stream.bytesToString();
-    print("⬅️ Response [${response.statusCode}]: $resBody");
+      if (imageFile != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath("images", imageFile.path),
+        );
+      }
 
-    if (response.statusCode != 201) {
-      throw Exception("Failed to create tailor: $resBody");
+      var response = await request.send();
+
+      final resBody = await response.stream.bytesToString();
+      print("⬅️ Response [${response.statusCode}]: $resBody");
+
+      if (response.statusCode != 201) {
+        final errorMessage = ErrorHandler.parseApiError(resBody, response.statusCode);
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      final friendlyMessage = ErrorHandler.getUserFriendlyMessage(e);
+      throw Exception(friendlyMessage);
     }
   }
 }

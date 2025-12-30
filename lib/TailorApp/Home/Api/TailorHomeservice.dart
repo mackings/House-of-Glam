@@ -5,6 +5,7 @@ import 'package:hog/constants/api_config.dart';
 import 'package:hog/TailorApp/Home/Model/AssignedMaterial.dart';
 import 'package:hog/TailorApp/Home/Model/materialModel.dart';
 import 'package:hog/components/Navigator.dart';
+import 'package:hog/utils/error_handler.dart';
 import 'package:http/http.dart' as http;
 
 class TailorHomeService {
@@ -12,13 +13,13 @@ class TailorHomeService {
 
   Future<TailorMaterialResponse> fetchTailorMaterials(String s) async {
     try {
-      final token = await SecurePrefs.getToken(); // 🔹 retrieve token
+      final token = await SecurePrefs.getToken();
 
       final response = await http.get(
         Uri.parse('$baseUrl/material/getAllMaterials'),
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer $token", // 🔹 attach token
+          "Authorization": "Bearer $token",
         },
       );
 
@@ -29,11 +30,13 @@ class TailorHomeService {
         final jsonData = json.decode(response.body);
         return TailorMaterialResponse.fromJson(jsonData);
       } else {
-        throw Exception("Failed to fetch tailor materials: ${response.body}");
+        final errorMessage = ErrorHandler.parseApiError(response.body, response.statusCode);
+        throw Exception(errorMessage);
       }
     } catch (e) {
       print("❌ Error fetching tailor materials: $e");
-      rethrow;
+      final friendlyMessage = ErrorHandler.getUserFriendlyMessage(e);
+      throw Exception(friendlyMessage);
     }
   }
 
@@ -46,84 +49,101 @@ class TailorHomeService {
     required String deliveryDate,
     required String reminderDate,
   }) async {
-    final token = await SecurePrefs.getToken();
+    try {
+      final token = await SecurePrefs.getToken();
 
-    final url = Uri.parse("$baseUrl/review/createReview/$materialId");
+      final url = Uri.parse("$baseUrl/review/createReview/$materialId");
 
-    final body = json.encode({
-      "comment": comment,
-      "materialTotalCost": materialTotalCost,
-      "workmanshipTotalCost": workmanshipTotalCost,
-      "deliveryDate": deliveryDate,
-      "reminderDate": reminderDate,
-    });
+      final body = json.encode({
+        "comment": comment,
+        "materialTotalCost": materialTotalCost,
+        "workmanshipTotalCost": workmanshipTotalCost,
+        "deliveryDate": deliveryDate,
+        "reminderDate": reminderDate,
+      });
 
-    final response = await http.post(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-      body: body,
-    );
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: body,
+      );
 
-    print("➡️ POST Request: $url");
-    print("⬅️ Response [${response.statusCode}]: ${response.body}");
+      print("➡️ POST Request: $url");
+      print("⬅️ Response [${response.statusCode}]: ${response.body}");
 
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception("Failed to submit quotation: ${response.body}");
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final errorMessage = ErrorHandler.parseApiError(response.body, response.statusCode);
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      final friendlyMessage = ErrorHandler.getUserFriendlyMessage(e);
+      throw Exception(friendlyMessage);
     }
   }
 
   // 🆕 Assigned Materials API
   Future<TailorAssignedMaterialsResponse> fetchAssignedMaterials() async {
-    final token = await SecurePrefs.getToken();
+    try {
+      final token = await SecurePrefs.getToken();
 
-    final response = await http.get(
-      Uri.parse('$baseUrl/tailor/getAllAssignedMaterials'),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-    );
+      final response = await http.get(
+        Uri.parse('$baseUrl/tailor/getAllAssignedMaterials'),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
 
-    print("➡️ GET Request: $baseUrl/tailor/getAllAssignedMaterials");
-    print("⬅️ Response [${response.statusCode}]: ${response.body}");
+      print("➡️ GET Request: $baseUrl/tailor/getAllAssignedMaterials");
+      print("⬅️ Response [${response.statusCode}]: ${response.body}");
 
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      return TailorAssignedMaterialsResponse.fromJson(jsonData);
-    } else {
-      throw Exception("Failed to fetch assigned materials: ${response.body}");
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        return TailorAssignedMaterialsResponse.fromJson(jsonData);
+      } else {
+        final errorMessage = ErrorHandler.parseApiError(response.body, response.statusCode);
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      final friendlyMessage = ErrorHandler.getUserFriendlyMessage(e);
+      throw Exception(friendlyMessage);
     }
   }
 
   // 🆕 Deliver Attire (Create Tracking)
   Future<String> deliverAttire(String materialId) async {
-    final token = await SecurePrefs.getToken();
+    try {
+      final token = await SecurePrefs.getToken();
 
-    final url = Uri.parse(
-      "$baseUrl/tracking/createTracking?materialId=$materialId",
-    );
+      final url = Uri.parse(
+        "$baseUrl/tracking/createTracking?materialId=$materialId",
+      );
 
-    final response = await http.post(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-    );
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
 
-    print("➡️ POST Request: $url");
-    print("⬅️ Response [${response.statusCode}]: ${response.body}");
+      print("➡️ POST Request: $url");
+      print("⬅️ Response [${response.statusCode}]: ${response.body}");
 
-    final responseData = json.decode(response.body);
+      final responseData = json.decode(response.body);
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return responseData["message"] ?? "Attire delivered successfully";
-    } else {
-      // 🔹 Return server message if available, otherwise fallback
-      throw Exception(responseData["message"] ?? "Failed to deliver attire");
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return responseData["message"] ?? "Attire delivered successfully";
+      } else {
+        final errorMessage = ErrorHandler.parseApiError(response.body, response.statusCode);
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      final friendlyMessage = ErrorHandler.getUserFriendlyMessage(e);
+      throw Exception(friendlyMessage);
     }
   }
 
@@ -135,36 +155,42 @@ class TailorHomeService {
     required String deliveryDate,
     required String reminderDate,
   }) async {
-    final token = await SecurePrefs.getToken();
-    final url = Uri.parse("$baseUrl/review/createReview/$materialId");
+    try {
+      final token = await SecurePrefs.getToken();
+      final url = Uri.parse("$baseUrl/review/createReview/$materialId");
 
-    final body = json.encode({
-      "comment": comment,
-      "materialTotalCost": materialTotalCost,
-      "workmanshipTotalCost": workmanshipTotalCost,
-      "deliveryDate": deliveryDate,
-      "reminderDate": reminderDate,
-    });
+      final body = json.encode({
+        "comment": comment,
+        "materialTotalCost": materialTotalCost,
+        "workmanshipTotalCost": workmanshipTotalCost,
+        "deliveryDate": deliveryDate,
+        "reminderDate": reminderDate,
+      });
 
-    final response = await http.post(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-      body: body,
-    );
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: body,
+      );
 
-    print("➡️ [Update] $url");
-    print("📦 Payload: $body");
-    print("⬅️ Response [${response.statusCode}]: ${response.body}");
+      print("➡️ [Update] $url");
+      print("📦 Payload: $body");
+      print("⬅️ Response [${response.statusCode}]: ${response.body}");
 
-    final responseData = json.decode(response.body);
+      final responseData = json.decode(response.body);
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return responseData["message"] ?? "Quotation updated successfully";
-    } else {
-      throw Exception(responseData["message"] ?? "Failed to update quotation");
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return responseData["message"] ?? "Quotation updated successfully";
+      } else {
+        final errorMessage = ErrorHandler.parseApiError(response.body, response.statusCode);
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      final friendlyMessage = ErrorHandler.getUserFriendlyMessage(e);
+      throw Exception(friendlyMessage);
     }
   }
 }

@@ -4,6 +4,7 @@ import 'package:hog/App/Home/Model/category.dart';
 import 'package:hog/App/Home/Model/tailor.dart';
 import 'package:hog/App/Home/Model/vendor.dart';
 import 'package:hog/constants/api_config.dart';
+import 'package:hog/utils/error_handler.dart';
 import 'package:http/http.dart' as http;
 
 class HomeApiService {

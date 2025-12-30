@@ -95,11 +95,11 @@ class Bank {
   /// Factory for local bank account from API response
   factory Bank.fromLocalJson(Map<String, dynamic> json) {
     return Bank(
-      id: json['_id'] ?? '',
-      bankName: json['bankName'] ?? '',
-      accountNumber: json['accountNumber'] ?? '',
-      accountName: json['accountName'] ?? '',
-      bankCode: json['bankCode'] ?? '',
+      id: json['_id'] ?? json['id'] ?? '',
+      bankName: json['bankName'] ?? json['bank_name'] ?? '',
+      accountNumber: json['accountNumber'] ?? json['account_number'] ?? json['last4'] ?? '',
+      accountName: json['accountName'] ?? json['account_holder_name'] ?? '',
+      bankCode: json['bankCode'] ?? json['bank_code'] ?? '',
       userId: json['userId'] ?? '',
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
@@ -107,9 +107,11 @@ class Bank {
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'])
           : DateTime.now(),
-      provider: 'paystack',
-      countryCode: 'NG',
-      currency: 'NGN',
+      provider: json['source'] ?? 'manual',
+      countryCode: json['country']?.toString().toUpperCase() ?? 'NG',
+      currency: json['currency']?.toString().toUpperCase() ?? 'NGN',
+      routingNumber: json['routing_number'],
+      sortCode: json['sort_code'],
     );
   }
 

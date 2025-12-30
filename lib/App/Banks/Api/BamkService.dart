@@ -375,24 +375,34 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
         final data = jsonData['data'] as Map<String, dynamic>;
         List<Bank> allBanks = [];
 
-        // ✅ Parse Stripe bank accounts
-        if (data['stripeBankAccounts'] != null && data['stripeBankAccounts'] is List) {
-          final List<dynamic> stripeAccounts = data['stripeBankAccounts'] as List<dynamic>;
-          final stripeBanks = stripeAccounts
-              .map((json) => Bank.fromStripeJson(json as Map<String, dynamic>))
-              .toList();
-          allBanks.addAll(stripeBanks);
-          _log('✅ Fetched ${stripeBanks.length} Stripe account(s)', level: 'SUCCESS');
+        // ✅ Parse banks array from new API structure
+        if (data['banks'] != null && data['banks'] is List) {
+          final List<dynamic> banksArray = data['banks'] as List<dynamic>;
+
+          for (var bankJson in banksArray) {
+            final bankData = bankJson as Map<String, dynamic>;
+            final source = bankData['source']?.toString().toLowerCase() ?? 'manual';
+
+            // Determine if it's a Stripe or local bank based on source
+            if (source == 'stripe') {
+              allBanks.add(Bank.fromStripeJson(bankData));
+            } else {
+              allBanks.add(Bank.fromLocalJson(bankData));
+            }
+          }
+
+          final stripeCount = allBanks.where((b) => b.isStripeAccount).length;
+          final localCount = allBanks.where((b) => b.isLocalBank).length;
+
+          _log('✅ Fetched $stripeCount Stripe account(s)', level: 'SUCCESS');
+          _log('✅ Fetched $localCount local bank account(s)', level: 'SUCCESS');
         }
 
-        // ✅ Parse Local bank accounts
-        if (data['localBankAccounts'] != null && data['localBankAccounts'] is List) {
-          final List<dynamic> localAccounts = data['localBankAccounts'] as List<dynamic>;
-          final localBanks = localAccounts
-              .map((json) => Bank.fromLocalJson(json as Map<String, dynamic>))
-              .toList();
-          allBanks.addAll(localBanks);
-          _log('✅ Fetched ${localBanks.length} local bank account(s)', level: 'SUCCESS');
+        // ✅ Also check summary for verification
+        if (data['summary'] != null) {
+          final summary = data['summary'] as Map<String, dynamic>;
+          final totalInSummary = summary['total'] ?? 0;
+          _log('📊 Summary: Total banks = $totalInSummary', level: 'INFO');
         }
 
         _log('✅ Total banks fetched: ${allBanks.length}', level: 'SUCCESS');
