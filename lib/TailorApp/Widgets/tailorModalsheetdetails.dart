@@ -5,16 +5,17 @@ import 'package:hog/TailorApp/Widgets/UpdateQuote.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/texts.dart';
-import 'package:hog/constants/currency.dart';
 import 'package:hog/constants/currencyHelper.dart';
 import 'package:intl/intl.dart';
+
+
+
 
 void showTailorMaterialDetails(
   BuildContext context,
   TailorAssignedMaterial item,
 ) {
   final material = item.material;
-  final formatter = NumberFormat("#,##0.##", "en_US"); // ✅ Allow decimals
   final service = TailorHomeService();
 
   showModalBottomSheet(
@@ -186,25 +187,25 @@ void showTailorMaterialDetails(
                       _buildSectionTitle("Costs & Payments"),
                       _buildInfoRow(
                         "Material Cost",
-                        "$currencySymbol${formatter.format(displayMaterialCost)}",
+                        CurrencyHelper.formatAmount(displayMaterialCost),
                       ),
                       _buildInfoRow(
                         "Workmanship",
-                        "$currencySymbol${formatter.format(displayWorkmanshipCost)}",
+                        CurrencyHelper.formatAmount(displayWorkmanshipCost),
                       ),
                       _buildInfoRow(
                         "Total",
-                        "$currencySymbol${formatter.format(displayTotalCost)}",
+                        CurrencyHelper.formatAmount(displayTotalCost),
                         bold: true,
                         color: Colors.purple,
                       ),
                       _buildInfoRow(
                         "Paid",
-                        "$currencySymbol${formatter.format(displayAmountPaid)}",
+                        CurrencyHelper.formatAmount(displayAmountPaid),
                       ),
                       _buildInfoRow(
                         "Balance",
-                        "$currencySymbol${formatter.format(displayAmountToPay)}",
+                        CurrencyHelper.formatAmount(displayAmountToPay),
                         color: Colors.redAccent,
                       ),
                       const Divider(),
@@ -277,14 +278,16 @@ void showTailorMaterialDetails(
   );
 }
 
-// ✅ Helper function to convert all amounts
+// ✅ No conversion needed - vendors see amounts in their own currency
 Future<Map<String, double>> _convertAllAmounts(TailorAssignedMaterial item) async {
+  // ✅ Vendors always see amounts in their own currency without conversion
+  // Amounts are already stored in the correct currency (NGN for Nigerian vendors, USD for US/UK vendors)
   return {
-    'materialCost': await CurrencyHelper.convertFromNGN(item.materialTotalCost),
-    'workmanshipCost': await CurrencyHelper.convertFromNGN(item.workmanshipTotalCost),
-    'totalCost': await CurrencyHelper.convertFromNGN(item.totalCost),
-    'amountPaid': await CurrencyHelper.convertFromNGN(item.amountPaid ?? 0),
-    'amountToPay': await CurrencyHelper.convertFromNGN(item.amountToPay ?? 0),
+    'materialCost': item.materialTotalCost.toDouble(),
+    'workmanshipCost': item.workmanshipTotalCost.toDouble(),
+    'totalCost': item.totalCost.toDouble(),
+    'amountPaid': (item.amountPaid ?? 0).toDouble(),
+    'amountToPay': (item.amountToPay ?? 0).toDouble(),
   };
 }
 

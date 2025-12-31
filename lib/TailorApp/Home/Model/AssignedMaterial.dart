@@ -31,8 +31,8 @@ class TailorAssignedMaterial {
   final int materialTotalCost;
   final int workmanshipTotalCost;
   final int totalCost;
-  final int? amountPaid;
-  final int? amountToPay;
+  final double? amountPaid; // ✅ Changed to double to handle decimal amounts
+  final double? amountToPay; // ✅ Changed to double to handle decimal amounts
   final DateTime? deliveryDate;
   final DateTime? reminderDate;
   final String? comment;
@@ -59,6 +59,15 @@ class TailorAssignedMaterial {
   });
 
   factory TailorAssignedMaterial.fromJson(Map<String, dynamic> json) {
+    // ✅ Helper to safely parse numeric values as double
+    double? parseDouble(dynamic value) {
+      if (value == null) return null;
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      if (value is String) return double.tryParse(value);
+      return null;
+    }
+
     return TailorAssignedMaterial(
       id: json['_id'] ?? '',
       user: User.fromJson(json['userId'] ?? {}),
@@ -67,8 +76,8 @@ class TailorAssignedMaterial {
       materialTotalCost: json['materialTotalCost'] ?? 0,
       workmanshipTotalCost: json['workmanshipTotalCost'] ?? 0,
       totalCost: json['totalCost'] ?? 0,
-      amountPaid: json['amountPaid'],
-      amountToPay: json['amountToPay'],
+      amountPaid: parseDouble(json['amountPaid']),
+      amountToPay: parseDouble(json['amountToPay']),
       deliveryDate:
           json['deliveryDate'] != null
               ? DateTime.tryParse(json['deliveryDate'])
@@ -90,12 +99,14 @@ class User {
   final String fullName;
   final String email;
   final String? image;
+  final String? country; // ✅ Added to check customer country
 
   User({
     required this.id,
     required this.fullName,
     required this.email,
     this.image,
+    this.country,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -104,6 +115,7 @@ class User {
       fullName: json['fullName'] ?? '',
       email: json['email'] ?? '',
       image: json['image'],
+      country: json['country'],
     );
   }
 }

@@ -7,18 +7,24 @@ class PaymentService {
   static const String localBaseURL = ApiConfig.apiBaseUrl;
   static const String liveBaseURL = ApiConfig.apiBaseUrl;
 
-  /// Create Part Payment
+  /// Create Part Payment (Using unified endpoint with paymentStatus)
   static Future<Map<String, dynamic>?> createPartPayment({
     required String reviewId,
     required String amount,
     required String shipmentMethod,
+    String? address,
   }) async {
     final token = await SecurePrefs.getToken();
     final url = Uri.parse(
-      "$localBaseURL/material/createPartPaymentOnline/$reviewId",
+      "$localBaseURL/material/createPaymentOnline/$reviewId",
     );
 
-    final payload = {"amount": amount, "shipmentMethod": shipmentMethod};
+    final payload = {
+      "amount": amount,
+      "shipmentMethod": shipmentMethod,
+      "paymentStatus": "part payment",
+      if (address != null) "address": address,
+    };
 
     print("➡️ Part Payment Request: $payload");
 
@@ -50,7 +56,7 @@ class PaymentService {
     }
   }
 
-  /// Create Full Payment
+  /// Create Full Payment (Using unified endpoint with paymentStatus)
   static Future<Map<String, dynamic>?> createFullPayment({
     required String reviewId,
     required String amount,
@@ -65,7 +71,8 @@ class PaymentService {
     final payload = {
       "amount": amount,
       "shipmentMethod": shipmentMethod,
-      "address": address,
+      "paymentStatus": "full payment",
+      if (address != null) "address": address,
     };
 
     print("➡️ Full Payment Request: $payload");

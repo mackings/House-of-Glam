@@ -555,6 +555,7 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
   static Future<Map<String, dynamic>> stripeCheckoutPayment({
     required String reviewId,
     required String shipmentMethod,
+    required String paymentStatus, // "full payment" or "part payment"
     String? amount, // For part payment
     String? address, // For full payment
   }) async {
@@ -574,6 +575,7 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
 
       // Build request body
       final body = {
+        "paymentStatus": paymentStatus,
         "shipmentMethod": shipmentMethod,
         if (amount != null) "amount": amount,
         if (address != null) "address": address,

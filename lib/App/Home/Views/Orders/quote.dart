@@ -112,6 +112,7 @@ class _QuotationState extends State<Quotation> {
         final resp = await BankApiService.stripeCheckoutPayment(
           reviewId: review.id,
           shipmentMethod: shipment,
+          paymentStatus: paymentType == "part" ? "part payment" : "full payment",
           amount: amountToSend,
           address: addressToSend,
         );
@@ -216,6 +217,8 @@ class _QuotationState extends State<Quotation> {
     ).then((_) {
       // ✅ Dispose controller when leaving WebView
       controller.clearCache();
+      // ✅ Refresh reviews after payment to get updated status
+      fetchReviews();
     });
   }
 
@@ -256,6 +259,7 @@ class _QuotationState extends State<Quotation> {
                   itemBuilder: (context, index) {
                     return QuotationCard(
                       review: reviews[index],
+                      onRefresh: fetchReviews, // ✅ Pass refresh callback
                       onHireDesigner: () {
                         print(reviews[index].id);
                         _showHireDesignerConfirmation(reviews[index]);

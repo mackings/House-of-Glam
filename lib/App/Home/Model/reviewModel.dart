@@ -30,15 +30,31 @@ class Review {
   final ReviewUser user;
   final String vendorId;
   final String materialId;
+
+  // ✅ NGN amounts (always present)
   final int materialTotalCost;
   final int workmanshipTotalCost;
   final int totalCost;
-  final int amountPaid; // ✅ new
-  final int amountToPay; // ✅ new
+  final double amountPaid;
+  final double amountToPay;
+
+  // ✅ USD amounts (only for international vendors)
+  final double materialTotalCostUSD;
+  final double workmanshipTotalCostUSD;
+  final double totalCostUSD;
+  final double amountPaidUSD;
+  final double amountToPayUSD;
+
+  // ✅ Currency metadata
+  final double exchangeRate;
+  final bool isInternationalVendor;
+
   final DateTime deliveryDate;
   final DateTime reminderDate;
   final String comment;
   final String status;
+  final bool hasAcceptedOffer;
+  final String? acceptedOfferId;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -52,32 +68,66 @@ class Review {
     required this.totalCost,
     required this.amountPaid,
     required this.amountToPay,
+    this.materialTotalCostUSD = 0.0,
+    this.workmanshipTotalCostUSD = 0.0,
+    this.totalCostUSD = 0.0,
+    this.amountPaidUSD = 0.0,
+    this.amountToPayUSD = 0.0,
+    this.exchangeRate = 0.0,
+    this.isInternationalVendor = false,
     required this.deliveryDate,
     required this.reminderDate,
     required this.comment,
     required this.status,
+    required this.hasAcceptedOffer,
+    this.acceptedOfferId,
     required this.createdAt,
     required this.updatedAt,
   });
 
 
   factory Review.fromJson(Map<String, dynamic> json) {
+    // ✅ Helper to safely parse numeric values as double
+    double _parseDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      if (value is String) return double.tryParse(value) ?? 0.0;
+      return 0.0;
+    }
+
     return Review(
       id: json['_id'] ?? '',
       user: ReviewUser.fromJson(json['userId']),
       vendorId: json['vendorId'] ?? '',
       materialId: json['materialId'] ?? '',
+
+      // ✅ NGN amounts
       materialTotalCost: json['materialTotalCost'] ?? 0,
       workmanshipTotalCost: json['workmanshipTotalCost'] ?? 0,
       totalCost: json['totalCost'] ?? 0,
-      amountPaid: json['amountPaid'] ?? 0,
-      amountToPay: json['amountToPay'] ?? 0,
+      amountPaid: _parseDouble(json['amountPaid']),
+      amountToPay: _parseDouble(json['amountToPay']),
+
+      // ✅ USD amounts (from backend)
+      materialTotalCostUSD: _parseDouble(json['materialTotalCostUSD']),
+      workmanshipTotalCostUSD: _parseDouble(json['workmanshipTotalCostUSD']),
+      totalCostUSD: _parseDouble(json['totalCostUSD']),
+      amountPaidUSD: _parseDouble(json['amountPaidUSD']),
+      amountToPayUSD: _parseDouble(json['amountToPayUSD']),
+
+      // ✅ Currency metadata
+      exchangeRate: _parseDouble(json['exchangeRate']),
+      isInternationalVendor: json['isInternationalVendor'] ?? false,
+
       deliveryDate:
           DateTime.tryParse(json['deliveryDate'] ?? '') ?? DateTime.now(),
       reminderDate:
           DateTime.tryParse(json['reminderDate'] ?? '') ?? DateTime.now(),
       comment: json['comment'] ?? '',
       status: json['status'] ?? '',
+      hasAcceptedOffer: json['hasAcceptedOffer'] ?? false,
+      acceptedOfferId: json['acceptedOfferId'],
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
     );

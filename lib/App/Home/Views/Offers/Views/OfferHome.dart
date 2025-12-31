@@ -63,30 +63,45 @@ class _OfferHomeState extends State<OfferHome> {
     final s = status.toLowerCase();
     Color bg;
     Color text;
+    IconData icon;
+
     if (s.contains('accepted')) {
       bg = Colors.green.shade100;
       text = Colors.green.shade800;
+      icon = Icons.check_circle;
     } else if (s.contains('rejected')) {
       bg = Colors.red.shade100;
       text = Colors.red.shade800;
+      icon = Icons.cancel;
     } else if (s.contains('counter')) {
       bg = Colors.orange.shade100;
       text = Colors.orange.shade800;
+      icon = Icons.swap_horiz;
     } else {
       bg = Colors.grey.shade100;
       text = Colors.black87;
+      icon = Icons.schedule;
     }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: text.withValues(alpha: 0.2), width: 1),
       ),
-      child: CustomText(
-        status.toString().toUpperCase(),
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        color: text,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: text),
+          const SizedBox(width: 4),
+          CustomText(
+            status.toString().toUpperCase(),
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: text,
+          ),
+        ],
       ),
     );
   }
@@ -113,13 +128,48 @@ class _OfferHomeState extends State<OfferHome> {
               onRefresh: loadOffers,
               child: offers.isEmpty
                   ? ListView(
-                      children: const [
-                        SizedBox(height: 180),
+                      children: [
+                        const SizedBox(height: 120),
                         Center(
-                          child: CustomText(
-                            "No offers yet",
-                            fontSize: 16,
-                            color: Colors.black54,
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(32),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.purple.shade50,
+                                      Colors.purple.shade100.withValues(alpha: 0.3),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.handshake_outlined,
+                                  size: 80,
+                                  color: Colors.purple.shade300,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              const CustomText(
+                                "No Offers Yet",
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                              const SizedBox(height: 8),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 48),
+                                child: CustomText(
+                                  "Your negotiations will appear here once you start making offers",
+                                  fontSize: 14,
+                                  color: Colors.black54,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],

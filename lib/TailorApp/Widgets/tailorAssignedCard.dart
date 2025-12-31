@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/TailorApp/Home/Model/AssignedMaterial.dart';
 import 'package:hog/components/texts.dart';
-import 'package:hog/constants/currency.dart';
 import 'package:hog/constants/currencyHelper.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -24,8 +23,6 @@ class TailorAssignedCard extends StatelessWidget {
         return Colors.grey;
     }
   }
-
-  final formatter = NumberFormat("#,##0.##", "en_US"); // ✅ Allow decimals
 
   @override
   Widget build(BuildContext context) {
@@ -140,12 +137,12 @@ class TailorAssignedCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     CustomText(
-                      "💰 Paid: $currencySymbol${formatter.format(displayAmountPaid)}",
+                      "💰 Paid: ${CurrencyHelper.formatAmount(displayAmountPaid)}",
                       fontSize: 13,
                       color: Colors.black,
                     ),
                     CustomText(
-                      "Balance: $currencySymbol${formatter.format(displayAmountToPay)}",
+                      "Balance: ${CurrencyHelper.formatAmount(displayAmountToPay)}",
                       fontSize: 13,
                       color: Colors.purple,
                     ),
@@ -178,11 +175,13 @@ class TailorAssignedCard extends StatelessWidget {
     );
   }
 
-  // ✅ Convert amounts once
+  // ✅ No conversion needed - vendors see amounts in their own currency
   Future<Map<String, double>> _convertAmounts() async {
+    // ✅ Vendors always see amounts in their own currency without conversion
+    // Amounts are already stored in the correct currency (NGN for Nigerian vendors, USD for US/UK vendors)
     return {
-      'amountPaid': await CurrencyHelper.convertFromNGN(item.amountPaid ?? 0),
-      'amountToPay': await CurrencyHelper.convertFromNGN(item.amountToPay ?? 0),
+      'amountPaid': (item.amountPaid ?? 0).toDouble(),
+      'amountToPay': (item.amountToPay ?? 0).toDouble(),
     };
   }
 }

@@ -4,17 +4,17 @@ class TransactionResponse {
   final String? vendorId;
   final String? materialId;
   final List<CartItem> cartItems;
-  final int? totalAmount;
+  final double? totalAmount; // ✅ Changed to double to handle decimal amounts
   final String? paymentMethod;
   final String? paymentReference;
   final String? deliveryAddress;
   final String? paymentStatus;
   final String? paymentCurrency;
   final String? orderStatus;
-  final int? amountPaid;
+  final double? amountPaid; // ✅ Changed to double to handle decimal amounts
   final String? createdAt;
   final String? updatedAt;
-  
+
   // ✅ Bank transfer fields
   final String? title;
   final String? accountName;
@@ -51,6 +51,15 @@ class TransactionResponse {
   });
 
   factory TransactionResponse.fromJson(Map<String, dynamic> json) {
+    // ✅ Helper to safely parse numeric values as double
+    double? parseDouble(dynamic value) {
+      if (value == null) return null;
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      if (value is String) return double.tryParse(value);
+      return null;
+    }
+
     return TransactionResponse(
       id: json["_id"],
       userId: json["userId"],
@@ -59,14 +68,14 @@ class TransactionResponse {
       cartItems: (json["cartItems"] as List? ?? [])
           .map((e) => CartItem.fromJson(e))
           .toList(),
-      totalAmount: json["totalAmount"],
+      totalAmount: parseDouble(json["totalAmount"]),
       paymentMethod: json["paymentMethod"],
       paymentReference: json["paymentReference"],
       deliveryAddress: json["deliveryAddress"],
       paymentStatus: json["paymentStatus"],
       paymentCurrency: json["paymentCurrency"],
       orderStatus: json["orderStatus"],
-      amountPaid: json["amountPaid"],
+      amountPaid: parseDouble(json["amountPaid"]),
       createdAt: json["createdAt"],
       updatedAt: json["updatedAt"],
       // ✅ Bank transfer fields

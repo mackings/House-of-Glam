@@ -49,22 +49,24 @@ class _TransactionsState extends State<Transactions> {
   Future<void> _convertAllAmounts() async {
     for (var txn in transactions) {
       // ✅ Use totalAmount for transfers, amountPaid for orders
-      final amount = txn.isBankTransfer 
-          ? (txn.totalAmount ?? 0)
-          : (txn.amountPaid ?? txn.totalAmount ?? 0);
-      
+      final amount = txn.isBankTransfer
+          ? (txn.totalAmount ?? 0.0)
+          : (txn.amountPaid ?? txn.totalAmount ?? 0.0);
+
       if (amount > 0) {
         try {
-          final converted = await CurrencyHelper.convertFromNGN(amount);
+          // ✅ Convert from NGN (amounts are already in NGN, not kobo)
+          final ngnAmount = amount.round();
+          final converted = await CurrencyHelper.convertFromNGN(ngnAmount);
           convertedAmounts[txn.id ?? ''] = converted;
         } catch (e) {
           print("❌ Error converting amount for ${txn.id}: $e");
-          // Fallback to original amount if conversion fails
-          convertedAmounts[txn.id ?? ''] = amount.toDouble();
+          // Fallback: use amount as-is
+          convertedAmounts[txn.id ?? ''] = amount;
         }
       }
     }
-    
+
     if (mounted) {
       setState(() {});
     }
