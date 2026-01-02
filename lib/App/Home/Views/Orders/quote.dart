@@ -80,31 +80,25 @@ class _QuotationState extends State<Quotation> {
     setState(() => isLoading = true);
 
     try {
-      // ✅ Check if vendor is from international country requiring Stripe
-      final vendorCountry = review.user.country?.toUpperCase() ?? '';
-      final isInternationalVendor = vendorCountry == 'UNITED STATES' ||
-          vendorCountry == 'US' ||
-          vendorCountry == 'USA' ||
-          vendorCountry == 'UNITED KINGDOM' ||
-          vendorCountry == 'UK' ||
-          vendorCountry == 'GB';
+      // ✅ Use backend's isInternationalVendor flag
+      final isInternationalVendor = review.isInternationalVendor;
 
-      // ✅ For international vendors, use Stripe checkout
+      // ✅ For international vendors, use Stripe checkout with USD amounts
       if (isInternationalVendor) {
         String? amountToSend;
         String? addressToSend;
 
         if (paymentType == "part") {
-          // Part payment - send the amount
+          // Part payment - send the USD amount
           amountToSend = (partAmount?.replaceAll(",", "") ?? "0");
         } else {
-          // Full payment - send remaining balance amount + address
-          if (review.amountPaid > 0) {
-            // Already made a part payment → pay remaining balance
-            amountToSend = review.amountToPay.toString();
+          // Full payment - send remaining balance in USD + address
+          if (review.amountPaidUSD > 0) {
+            // Already made a part payment → pay remaining USD balance
+            amountToSend = review.amountToPayUSD.toString();
           } else {
-            // First time full payment
-            amountToSend = review.totalCost.toString();
+            // First time full payment - use USD total
+            amountToSend = review.totalCostUSD.toString();
           }
           addressToSend = review.user.address ?? ""; // Using user's saved address as fallback
         }

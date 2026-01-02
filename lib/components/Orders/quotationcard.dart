@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Home/Model/reviewModel.dart';
-import 'package:hog/App/Home/Views/Offers/Api/OfferService.dart';
-import 'package:hog/App/Home/Views/Offers/Widgets/Offersheet.dart';
 import 'package:hog/components/Orders/PaymentOp.dart';
-import 'package:hog/components/button.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currencyHelper.dart';
 import 'package:intl/intl.dart';
@@ -47,24 +44,21 @@ class QuotationCard extends StatelessWidget {
     // ✅ After offer accepted, amountToPay becomes 0, so use totalCost for payment
     final bool canPay = hasAcceptedOffer && review.amountToPay == 0 && review.totalCost > 0;
 
-    // ✅ Backend now provides both NGN and USD amounts - no conversion needed!
-    // Display USD if international vendor, otherwise display NGN
-    final displayMaterial = review.isInternationalVendor
-        ? review.materialTotalCostUSD
-        : review.materialTotalCost.toDouble();
-    final displayWorkmanship = review.isInternationalVendor
-        ? review.workmanshipTotalCostUSD
-        : review.workmanshipTotalCost.toDouble();
-    final displayTotal = review.isInternationalVendor
-        ? review.totalCostUSD
-        : review.totalCost.toDouble();
+    // ✅ Backend provides both NGN and USD amounts
+    // Nigerian buyers always see NGN (converted amounts from backend)
+    // International buyers see their local currency (USD/GBP)
+    final displayMaterial = review.materialTotalCost;
+    final displayWorkmanship = review.workmanshipTotalCost;
+    final displayTotal = review.totalCost;
+    final displayAmountToPay = review.amountToPay > 0
+        ? review.amountToPay
+        : (review.hasAcceptedOffer ? displayTotal : displayTotal);
 
-    // ✅ Handle amountToPay = 0 case (when offer just accepted)
-    final effectiveAmountToPay = (review.hasAcceptedOffer && review.amountToPay == 0)
-        ? displayTotal
-        : (review.isInternationalVendor ? review.amountToPayUSD : review.amountToPay);
+    // ✅ Determine currency code - always NGN for now (buyer's currency)
+    final currencyCode = 'NGN';
 
-    final displayAmountToPay = effectiveAmountToPay;
+    // ✅ Show original USD amounts if international vendor (for reference)
+    final showOriginalUSD = review.isInternationalVendor && review.totalCostUSD > 0;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -153,7 +147,38 @@ class QuotationCard extends StatelessWidget {
                 ),
 
               // ✅ Display costs (no loading needed - backend provides both currencies)
-              _buildCosts(displayMaterial, displayWorkmanship, displayTotal),
+              _buildCosts(displayMaterial, displayWorkmanship, displayTotal, currencyCode: currencyCode),
+
+              // ✅ Show original USD price if international vendor
+              if (showOriginalUSD) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.info_outline, size: 14, color: Colors.blue.shade700),
+                      const SizedBox(width: 6),
+                      CustomText(
+                        "Original quote: ${CurrencyHelper.formatAmount(review.totalCostUSD, currencyCode: 'USD')} (USD)",
+                        fontSize: 11,
+                        color: Colors.blue.shade900,
+                      ),
+                      const SizedBox(width: 4),
+                      CustomText(
+                        "• Rate: ₦${review.exchangeRate.toStringAsFixed(2)}",
+                        fontSize: 10,
+                        color: Colors.blue.shade700,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
 
               const SizedBox(height: 20),
 
@@ -183,7 +208,7 @@ class QuotationCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             CustomText(
-                              "Balance: ${CurrencyHelper.formatAmount(displayAmountToPay)}",
+                              "Balance: ${CurrencyHelper.formatAmount(displayAmountToPay, currencyCode: currencyCode)}",
                               fontSize: 11,
                               color: Colors.orange.shade700,
                             ),
@@ -195,58 +220,8 @@ class QuotationCard extends StatelessWidget {
                 ),
 
               // ✅ FIXED BUTTON FLOW LOGIC
-              if (!hasAcceptedOffer) ...[
-                CustomButton(
-                  title: "Make Offer",
-                  onPressed: () async {
-                    final result = await ReusableOfferSheet.show(
-                      context,
-                      onSubmit: (comment, material, work) async {
-                        final res = await OfferService.makeOffer(
-                          reviewId: review.id,
-                          comment: comment,
-                          materialTotalCost: material,
-                          workmanshipTotalCost: work,
-                        );
-                        return res;
-                      },
-                    );
-
-                    if (result?["success"] == true && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Offer submitted successfully!"),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                      onRefresh?.call();
-                    }
-                  },
-                  isOutlined: true,
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.orange.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.orange.shade700, size: 18),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: CustomText(
-                          "Please negotiate and accept an offer before making payment",
-                          fontSize: 12,
-                          color: Colors.orange.shade900,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ] else if (isFullPayment) ...[
+              if (isFullPayment) ...[
+                // Fully Paid - Show disabled button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -274,7 +249,7 @@ class QuotationCard extends StatelessWidget {
                     onPressed: () => onCompletePayment(displayAmountToPay.round()),
                     icon: const Icon(Icons.payment, size: 18, color: Colors.white),
                     label: CustomText(
-                      "Pay Balance (${CurrencyHelper.formatAmount(displayAmountToPay)})",
+                      "Pay Balance (${CurrencyHelper.formatAmount(displayAmountToPay, currencyCode: currencyCode)})",
                       fontSize: 14,
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -289,7 +264,8 @@ class QuotationCard extends StatelessWidget {
                     ),
                   ),
                 ),
-              ] else ...[
+              ] else if (hasAcceptedOffer) ...[
+                // Offer accepted but not yet paid - show payment options
                 Column(
                   children: [
                     SizedBox(
@@ -298,7 +274,7 @@ class QuotationCard extends StatelessWidget {
                         onPressed: () => onCompletePayment(displayTotal.round()),
                         icon: const Icon(Icons.payment, size: 18, color: Colors.white),
                         label: CustomText(
-                          "Pay in Full (${CurrencyHelper.formatAmount(displayTotal)})",
+                          "Pay in Full (${CurrencyHelper.formatAmount(displayTotal, currencyCode: currencyCode)})",
                           fontSize: 14,
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
@@ -361,6 +337,29 @@ class QuotationCard extends StatelessWidget {
                     ),
                   ],
                 ),
+              ] else ...[
+                // Initial quote - show Hire Designer and Make Counter Offer
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: onHireDesigner,
+                    icon: const Icon(Icons.person_add, size: 18, color: Colors.white),
+                    label: CustomText(
+                      "Hire Designer (${CurrencyHelper.formatAmount(displayTotal, currencyCode: currencyCode)})",
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.purple,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                  ),
+                ),
               ],
             ],
           ),
@@ -369,7 +368,7 @@ class QuotationCard extends StatelessWidget {
   }
 
   // ✅ Build costs row - accepts doubles from backend
-  Widget _buildCosts(double material, double workmanship, double total) {
+  Widget _buildCosts(double material, double workmanship, double total, {required String currencyCode}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -381,7 +380,7 @@ class QuotationCard extends StatelessWidget {
               const SizedBox(width: 4),
               Flexible(
                 child: CustomText(
-                  CurrencyHelper.formatAmount(material),
+                  CurrencyHelper.formatAmount(material, currencyCode: currencyCode),
                   fontSize: 12,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -397,7 +396,7 @@ class QuotationCard extends StatelessWidget {
               const SizedBox(width: 4),
               Flexible(
                 child: CustomText(
-                  CurrencyHelper.formatAmount(workmanship),
+                  CurrencyHelper.formatAmount(workmanship, currencyCode: currencyCode),
                   fontSize: 12,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -413,7 +412,7 @@ class QuotationCard extends StatelessWidget {
               const SizedBox(width: 4),
               Flexible(
                 child: CustomText(
-                  CurrencyHelper.formatAmount(total),
+                  CurrencyHelper.formatAmount(total, currencyCode: currencyCode),
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   overflow: TextOverflow.ellipsis,
@@ -452,247 +451,3 @@ class QuotationCard extends StatelessWidget {
     });
   }
 
-  // ✅ NO CONVERSION FUNCTION NEEDED - Backend provides both NGN and USD!
-
-
-
-
-
-
-
-
-// class QuotationCard extends StatelessWidget {
-//   final Review review;
-//   final VoidCallback onHireDesigner; // ✅ keep existing
-//   final void Function(int amount) onCompletePayment; // ✅ new with amount
-
-//   const QuotationCard({
-//     super.key,
-//     required this.review,
-//     required this.onHireDesigner,
-//     required this.onCompletePayment,
-//   });
-
-//   String formatAmount(int amount) {
-//     final formatter = NumberFormat('#,###');
-//     return formatter.format(amount);
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final bool isPartPayment = review.status == "part payment";
-//     final bool isFullPayment = review.status == "full payment";
-//     final bool isQuote = review.status == "quote";
-
-//     // 🔹 decide amount
-//     int paymentAmount = 0;
-//     if (isPartPayment) {
-//       paymentAmount = review.amountToPay; // finishing balance
-//     } else if (isQuote) {
-//       paymentAmount = review.totalCost; // full cost
-//     }
-
-//     return Container(
-//       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-//       padding: const EdgeInsets.all(16),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(14),
-//         boxShadow: [
-//           BoxShadow(
-//             color: Colors.black12.withOpacity(0.05),
-//             blurRadius: 8,
-//             offset: const Offset(0, 4),
-//           ),
-//         ],
-//       ),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           // 🔹 Avatar + Name + Status
-//           Row(
-//             children: [
-//               CircleAvatar(
-//                 backgroundColor: Colors.purple.shade100,
-//                 child: Text(
-//                   review.user.fullName.isNotEmpty
-//                       ? review.user.fullName[0].toUpperCase()
-//                       : "?",
-//                   style: const TextStyle(
-//                     color: Colors.purple,
-//                     fontWeight: FontWeight.bold,
-//                   ),
-//                 ),
-//               ),
-//               const SizedBox(width: 10),
-//               Expanded(
-//                 child: CustomText(
-//                   review.user.fullName,
-//                   fontSize: 14,
-//                   fontWeight: FontWeight.w600,
-//                 ),
-//               ),
-//               Icon(
-//                 isQuote
-//                     ? Icons.schedule
-//                     : isPartPayment
-//                     ? Icons.check_circle_outline
-//                     : Icons.check_circle,
-//                 color:
-//                     isPartPayment
-//                         ? Colors.grey
-//                         : isFullPayment
-//                         ? Colors.purple
-//                         : Colors.green,
-//                 size: 18,
-//               ),
-//             ],
-//           ),
-//           const SizedBox(height: 10),
-
-//           // 🔹 Delivery & Reminder
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             children: [
-//               CustomText(
-//                 "Delivery: ${DateFormat("dd MMM yyyy").format(review.deliveryDate)}",
-//                 fontSize: 12,
-//                 color: Colors.black54,
-//               ),
-//               CustomText(
-//                 "Reminder: ${DateFormat("dd MMM yyyy").format(review.reminderDate)}",
-//                 fontSize: 12,
-//                 color: Colors.black54,
-//               ),
-//             ],
-//           ),
-
-//           const SizedBox(height: 10),
-
-//           // 🔹 Comment
-//           if (review.comment.isNotEmpty)
-//             Padding(
-//               padding: const EdgeInsets.only(bottom: 12),
-//               child: CustomText(
-//                 review.comment,
-//                 fontSize: 13,
-//                 overflow: TextOverflow.visible,
-//               ),
-//             ),
-
-//           // 🔹 Costs with icons
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             children: [
-//               Row(
-//                 children: [
-//                   const Icon(Icons.checkroom, size: 16, color: Colors.purple),
-//                   const SizedBox(width: 4),
-//                   CustomText(
-//                     "${currencySymbol}${formatAmount(review.materialTotalCost)}",
-//                     fontSize: 12,
-//                   ),
-//                 ],
-//               ),
-//               Row(
-//                 children: [
-//                   const Icon(Icons.handyman, size: 16, color: Colors.purple),
-//                   const SizedBox(width: 4),
-//                   CustomText(
-//                     "Charge: $currencySymbol${formatAmount(review.workmanshipTotalCost)}",
-//                     fontSize: 12,
-//                   ),
-//                 ],
-//               ),
-//               Row(
-//                 children: [
-//                   const Icon(
-//                     Icons.attach_money,
-//                     size: 16,
-//                     color: Colors.purple,
-//                   ),
-//                   const SizedBox(width: 4),
-//                   CustomText(
-//                     "Total: $currencySymbol${formatAmount(review.totalCost)}",
-//                     fontSize: 12,
-//                     fontWeight: FontWeight.w600,
-//                   ),
-//                 ],
-//               ),
-//             ],
-//           ),
-//           const SizedBox(height: 25),
-
-//           SizedBox(
-//             width: double.infinity,
-//             child: ElevatedButton(
-//               onPressed:
-//                   isFullPayment
-//                       ? null // disabled
-//                       : isQuote
-//                       ? onHireDesigner // hire first if it's still a quote
-//                       : () => onCompletePayment(
-//                         paymentAmount,
-//                       ), // pay balance / full
-//               style: ElevatedButton.styleFrom(
-//                 backgroundColor:
-//                     isFullPayment
-//                         ? Colors.grey
-//                         : isPartPayment
-//                         ? Colors.black
-//                         : Colors.purple,
-//                 padding: const EdgeInsets.symmetric(vertical: 10),
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(12),
-//                 ),
-//               ),
-//               child: CustomText(
-//                 isFullPayment
-//                     ? "Paid"
-//                     : isPartPayment
-//                     ? "Finish Payment (₦${formatAmount(review.amountToPay)})"
-//                     : isQuote
-//                     ? "Hire Designer"
-//                     : "Pay in Full (₦${formatAmount(review.totalCost)})",
-//                 fontSize: 14,
-//                 color: Colors.white,
-//                 fontWeight: FontWeight.w600,
-//               ),
-//             ),
-//           ),
-
-//           SizedBox(height: 10),
-
-//           CustomButton(
-//             title: "Make Offer",
-//             onPressed: () async {
-//               final result = await ReusableOfferSheet.show(
-//                 context,
-//                 onSubmit: (comment, material, work) async {
-//                   final res = await OfferService.makeOffer(
-//                     reviewId: review.id,
-//                     comment: comment,
-//                     materialTotalCost: material,
-//                     workmanshipTotalCost: work,
-//                   );
-//                   return res;
-//                 },
-//               );
-
-//               if (result?["success"] == true) {
-//                 ScaffoldMessenger.of(context).showSnackBar(
-//                   const SnackBar(
-//                     content: Text("Offer submitted successfully!"),
-//                     backgroundColor: Colors.green,
-//                   ),
-//                 );
-//               }
-//             },
-
-//             isOutlined: true,
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }

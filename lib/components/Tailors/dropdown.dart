@@ -47,21 +47,24 @@ class CustomDropdown extends StatelessWidget {
 class MeasurementField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
+  final bool isNumeric;
 
   const MeasurementField({
-    super.key,
+    Key? key,
     required this.label,
     required this.controller,
-  });
+    this.isNumeric = true, // default to numeric
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return CustomTextField(
-      title: label,
-      hintText: "Enter $label",
-      fieldKey: label.toLowerCase(),
+    return TextField(
       controller: controller,
-      keyboardType: TextInputType.number,
+      keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(),
+      ),
     );
   }
 }

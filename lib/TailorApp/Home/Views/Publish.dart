@@ -13,6 +13,8 @@ import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
 import 'package:image_picker/image_picker.dart';
 
+
+
 class PublishMaterial extends StatefulWidget {
   const PublishMaterial({super.key});
 
@@ -123,6 +125,13 @@ class _PublishMaterialState extends State<PublishMaterial> {
     setState(() => isLoading = false);
   }
 
+
+    void removeSampleImage(int index) {
+    setState(() {
+      sampleImages.removeAt(index);
+    });
+  }
+
   @override
   void dispose() {
     attireTypeController.dispose();
@@ -213,10 +222,11 @@ class _PublishMaterialState extends State<PublishMaterial> {
                       const SizedBox(height: 10),
 
                       // 🔹 Image Picker
-                      MultiImagePicker(
-                        images: sampleImages,
-                        onAddImage: pickSampleImage,
-                      ),
+              MultiImagePicker(
+                images: sampleImages,
+                onAddImage: pickSampleImage,
+                onRemoveImage: removeSampleImage,
+              ),
 
                       const SizedBox(height: 40),
                       CustomButton(title: "Publish", onPressed: _submitPublish),

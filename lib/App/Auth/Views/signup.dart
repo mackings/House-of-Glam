@@ -18,6 +18,8 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
 
+
+
 class Signup extends ConsumerStatefulWidget {
   const Signup({super.key});
 
@@ -42,15 +44,6 @@ class _SignupState extends ConsumerState<Signup> {
   // ✅ Track selected country code for phone
   String selectedCountryCode = '+234'; // default to Nigeria
 
-  // Future<void> loadCountries() async {
-  //   final String response = await rootBundle.loadString(
-  //     'assets/countries.json',
-  //   );
-  //   final List<dynamic> data = json.decode(response);
-  //   setState(() {
-  //     countries = data.cast<String>();
-  //   });
-  // }
 
   Future<void> loadCountries() async {
     final allCountries = CountryService().getAll();
@@ -58,23 +51,6 @@ class _SignupState extends ConsumerState<Signup> {
     setState(() {
       countries = names;
     });
-  }
-
-  String _getCountryNameFromCode(String code) {
-    try {
-      final allCountries = CountryService().getAll();
-      final cleanCode = code.replaceAll('+', '');
-      final match = allCountries.firstWhere(
-        (c) => c.phoneCode == cleanCode,
-        orElse:
-            () => allCountries.firstWhere(
-              (c) => c.countryCode == 'NG',
-            ), // fallback: Nigeria 🇳🇬
-      );
-      return match.name;
-    } catch (e) {
-      return 'Unknown';
-    }
   }
 
   @override
@@ -204,13 +180,6 @@ class _SignupState extends ConsumerState<Signup> {
                     onCountryChanged: (code) {
                       setState(() {
                         selectedCountryCode = code ?? '+234';
-                        countryController.text = _getCountryNameFromCode(
-                          code ?? '+234',
-                        );
-                        selectedCountry = countryController.text;
-
-                        print(selectedCountry);
-                        print(selectedCountryCode);
                       });
                     },
                   ),
@@ -238,12 +207,58 @@ class _SignupState extends ConsumerState<Signup> {
                               const SizedBox(width: 10),
 
                               Expanded(
-                                child: CustomTextField(
-                                  title: "Country",
-                                  hintText: "Select Country",
-                                  prefixIcon: Icons.public,
-                                  fieldKey: "country",
-                                  controller: countryController,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.only(bottom: 8.0),
+                                      child: CustomText(
+                                        "Country",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    DropdownButtonFormField<String>(
+                                      initialValue: selectedCountry,
+                                      isExpanded: true,
+                                      decoration: InputDecoration(
+                                        hintText: "Select Country",
+                                        prefixIcon: const Icon(Icons.public),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                          borderSide: BorderSide(color: Colors.grey.shade300),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                          borderSide: const BorderSide(color: Colors.black),
+                                        ),
+                                      ),
+                                      items: countries.map((country) {
+                                        return DropdownMenuItem<String>(
+                                          value: country,
+                                          child: Text(
+                                            country,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedCountry = value;
+                                          countryController.text = value ?? '';
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please select a country';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -262,12 +277,59 @@ class _SignupState extends ConsumerState<Signup> {
                             controller: addressController,
                           ),
 
-                          CustomTextField(
-                            title: "Country",
-                            hintText: "Select Country",
-                            prefixIcon: Icons.public,
-                            fieldKey: "country",
-                            controller: countryController,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(bottom: 8.0),
+                                child: CustomText(
+                                  "Country",
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              DropdownButtonFormField<String>(
+                                initialValue: selectedCountry,
+                                isExpanded: true,
+                                decoration: InputDecoration(
+                                  hintText: "Select Country",
+                                  prefixIcon: const Icon(Icons.public),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide(color: Colors.grey.shade300),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(color: Colors.black),
+                                  ),
+                                ),
+                                items: countries.map((country) {
+                                  return DropdownMenuItem<String>(
+                                    value: country,
+                                    child: Text(
+                                      country,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedCountry = value;
+                                    countryController.text = value ?? '';
+                                  });
+                                },
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please select a country';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                            ],
                           ),
                         ],
                       );

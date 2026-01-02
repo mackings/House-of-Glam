@@ -32,9 +32,9 @@ class Review {
   final String materialId;
 
   // ✅ NGN amounts (always present)
-  final int materialTotalCost;
-  final int workmanshipTotalCost;
-  final int totalCost;
+  final double materialTotalCost;
+  final double workmanshipTotalCost;
+  final double totalCost;
   final double amountPaid;
   final double amountToPay;
 
@@ -103,9 +103,9 @@ class Review {
       materialId: json['materialId'] ?? '',
 
       // ✅ NGN amounts
-      materialTotalCost: json['materialTotalCost'] ?? 0,
-      workmanshipTotalCost: json['workmanshipTotalCost'] ?? 0,
-      totalCost: json['totalCost'] ?? 0,
+      materialTotalCost: _parseDouble(json['materialTotalCost']),
+      workmanshipTotalCost: _parseDouble(json['workmanshipTotalCost']),
+      totalCost: _parseDouble(json['totalCost']),
       amountPaid: _parseDouble(json['amountPaid']),
       amountToPay: _parseDouble(json['amountToPay']),
 

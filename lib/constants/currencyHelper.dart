@@ -113,7 +113,7 @@ class CurrencyHelper {
   }
 
   /// Format amount with currency symbol
-  static String formatAmount(double amount) {
+  static String formatAmount(double amount, {String? currencyCode}) {
     // Round to 2 decimal places, but remove trailing zeros
     final rounded = (amount * 100).round() / 100;
 
@@ -122,6 +122,40 @@ class CurrencyHelper {
         ? NumberFormat('#,###')
         : NumberFormat('#,###.##');
 
-    return '$currencySymbol${formatter.format(rounded)}';
+    // Use provided currency code or default to user's currency
+    final symbol = currencyCode != null ? _getCurrencySymbol(currencyCode) : currencySymbol;
+
+    return '$symbol${formatter.format(rounded)}';
+  }
+
+  /// Get currency symbol from currency code
+  static String _getCurrencySymbol(String code) {
+    switch (code.toUpperCase()) {
+      case 'NGN':
+        return '₦';
+      case 'USD':
+        return '\$';
+      case 'GBP':
+        return '£';
+      case 'EUR':
+        return '€';
+      case 'INR':
+        return '₹';
+      case 'JPY':
+      case 'CNY':
+        return '¥';
+      case 'ZAR':
+        return 'R';
+      case 'GHS':
+        return 'GH₵';
+      case 'KES':
+        return 'KSh';
+      case 'AUD':
+        return 'A\$';
+      case 'CAD':
+        return 'C\$';
+      default:
+        return '$code ';
+    }
   }
 }

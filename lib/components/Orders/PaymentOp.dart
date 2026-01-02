@@ -44,7 +44,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     // Calculate half of the total amount to pay
     final totalToPay = widget.review.isInternationalVendor
         ? widget.review.totalCostUSD
-        : widget.review.totalCost.toDouble();
+        : widget.review.totalCost;
     final halfAmount = (totalToPay / 2).round();
     amountController.text = halfAmount.toString();
   }
