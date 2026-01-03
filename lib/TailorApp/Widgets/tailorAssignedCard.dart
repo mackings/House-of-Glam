@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hog/TailorApp/Home/Model/AssignedMaterial.dart';
-import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currencyHelper.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+
+
 
 class TailorAssignedCard extends StatelessWidget {
   final TailorAssignedMaterial item;
@@ -18,7 +18,6 @@ class TailorAssignedCard extends StatelessWidget {
     required this.onTap,
   });
 
-  // ✅ Get display amounts based on vendor country
   Map<String, double> _getDisplayAmounts() {
     final isInternational = item.isInternationalVendor || 
         (item.country != null && item.country!.toUpperCase() != 'NG');
@@ -44,434 +43,380 @@ class TailorAssignedCard extends StatelessWidget {
     final displayAmounts = _getDisplayAmounts();
     final isFullyPaid = displayAmounts['amountToPay']! <= 0;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
-            ),
-          ],
-          border: Border.all(
-            color: Colors.grey.shade100,
-            width: 1,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF6B21A8).withOpacity(0.08),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
           child: Column(
             children: [
-              // Header Section with gradient
+              // Purple Header Section
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Colors.purple.shade600,
-                      Colors.purple.shade800,
+                      const Color(0xFF6B21A8),
+                      const Color(0xFF7C3AED),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
                 ),
-                child: Row(
+                child: Column(
                   children: [
-                    // Material Image with modern styling
-                    Container(
-                      width: 68,
-                      height: 68,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
-                          width: 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: material.sampleImages.isNotEmpty
-                            ? Image.network(
-                                material.sampleImages.first,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    color: Colors.purple.shade900,
-                                    child: Icon(
-                                      Icons.checkroom_rounded,
-                                      color: Colors.white.withOpacity(0.5),
-                                      size: 30,
-                                    ),
-                                  );
-                                },
-                              )
-                            : Container(
-                                color: Colors.purple.shade900,
-                                child: Icon(
-                                  Icons.checkroom_rounded,
-                                  color: Colors.white.withOpacity(0.5),
-                                  size: 30,
-                                ),
-                              ),
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-
-                    // Title and Material Details
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            material.attireType,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: -0.5,
+                    Row(
+                      children: [
+                        // Material Image
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.2),
+                              width: 2,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.3),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Text(
-                                  material.clothMaterial,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white.withOpacity(0.95),
-                                    letterSpacing: 0.3,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: _getColorFromString(material.color),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 1.5,
-                                  ),
-                                ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ),
-
-                    // Status Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _statusColor(item.status),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: _statusColor(item.status).withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(14),
+                            child: material.sampleImages.isNotEmpty
+                                ? Image.network(
+                                    material.sampleImages.first,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        color: Colors.white.withOpacity(0.1),
+                                        child: Icon(
+                                          Icons.checkroom_rounded,
+                                          color: Colors.white.withOpacity(0.6),
+                                          size: 32,
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : Container(
+                                    color: Colors.white.withOpacity(0.1),
+                                    child: Icon(
+                                      Icons.checkroom_rounded,
+                                      color: Colors.white.withOpacity(0.6),
+                                      size: 32,
+                                    ),
+                                  ),
                           ),
-                        ],
-                      ),
-                      child: Text(
-                        _formatStatus(item.status),
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: 0.5,
                         ),
-                      ),
+                        const SizedBox(width: 16),
+      
+                        // Title and Details
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                material.attireType,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                  letterSpacing: -0.5,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.2),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      material.clothMaterial,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white,
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: _getColorFromString(material.color),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+      
+                        // Status Badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _statusBackgroundColor(item.status),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            _formatStatus(item.status),
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: _statusTextColor(item.status),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-
-              // Content Section
+      
+              // White Content Section
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    // Customer Info
+      
+                    const SizedBox(height: 5),
+      
+                    // Payment Card - Black Premium Style
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: Colors.grey.shade200,
-                          width: 1,
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFF1F2937),
+                            Color(0xFF111827),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.purple.shade400,
-                                  Colors.purple.shade600,
-                                ],
-                              ),
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.purple.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: item.user.image != null
-                                ? ClipOval(
-                                    child: Image.network(
-                                      item.user.image!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Center(
-                                          child: Text(
-                                            item.user.fullName.isNotEmpty
-                                                ? item.user.fullName[0].toUpperCase()
-                                                : "?",
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  )
-                                : Center(
-                                    child: Text(
-                                      item.user.fullName.isNotEmpty
-                                          ? item.user.fullName[0].toUpperCase()
-                                          : "?",
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                  ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.user.fullName,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.black,
-                                    letterSpacing: -0.3,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  item.user.email,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade600,
-                                    letterSpacing: -0.2,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            size: 14,
-                            color: Colors.grey.shade400,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    // Payment Info - Compact Black Card
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 12,
-                            offset: const Offset(0, 3),
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: Column(
                         children: [
-                          // Total Amount
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                "TOTAL AMOUNT",
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.grey.shade500,
-                                  letterSpacing: 1,
-                                ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "TOTAL AMOUNT",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white.withOpacity(0.5),
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    CurrencyHelper.formatAmount(
+                                      displayAmounts['totalCost']!,
+                                    ),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                CurrencyHelper.formatAmount(
-                                  displayAmounts['totalCost']!,
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF6B21A8).withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  letterSpacing: -0.5,
+                                child: const Icon(
+                                  Icons.account_balance_wallet_rounded,
+                                  color: Color(0xFF7C3AED),
+                                  size: 24,
                                 ),
                               ),
                             ],
                           ),
-
-                          const SizedBox(height: 12),
-
-                          // Divider
+      
+                          const SizedBox(height: 20),
+      
                           Container(
                             height: 1,
-                            color: Colors.grey.shade800,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.white.withOpacity(0.0),
+                                  Colors.white.withOpacity(0.1),
+                                  Colors.white.withOpacity(0.0),
+                                ],
+                              ),
+                            ),
                           ),
-
-                          const SizedBox(height: 12),
-
-                          // Paid and Balance Row
+      
+                          const SizedBox(height: 20),
+      
                           Row(
                             children: [
                               Expanded(
-                                child: Row(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Icon(
-                                      Icons.check_circle_rounded,
-                                      size: 14,
-                                      color: Colors.green.shade400,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                    Row(
                                       children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF10B981).withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: const Icon(
+                                            Icons.check_circle_rounded,
+                                            size: 14,
+                                            color: Color(0xFF10B981),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
                                         Text(
                                           "Paid",
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            color: Colors.grey.shade500,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 11,
+                                            color: Colors.white.withOpacity(0.6),
+                                            fontWeight: FontWeight.w500,
                                             letterSpacing: 0.3,
                                           ),
                                         ),
-                                        Text(
-                                          CurrencyHelper.formatAmount(
-                                            displayAmounts['amountPaid']!,
-                                          ),
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.green.shade400,
-                                            letterSpacing: -0.3,
-                                          ),
-                                        ),
                                       ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      CurrencyHelper.formatAmount(
+                                        displayAmounts['amountPaid']!,
+                                      ),
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFF10B981),
+                                        letterSpacing: -0.3,
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
                               Container(
                                 width: 1,
-                                height: 30,
-                                color: Colors.grey.shade800,
+                                height: 40,
+                                color: Colors.white.withOpacity(0.1),
                               ),
                               Expanded(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         Text(
                                           "Balance",
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            color: Colors.grey.shade500,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 11,
+                                            color: Colors.white.withOpacity(0.6),
+                                            fontWeight: FontWeight.w500,
                                             letterSpacing: 0.3,
                                           ),
                                         ),
-                                        Text(
-                                          CurrencyHelper.formatAmount(
-                                            displayAmounts['amountToPay']!,
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            color: (isFullyPaid 
+                                                ? Colors.white.withOpacity(0.1)
+                                                : const Color(0xFFF59E0B).withOpacity(0.15)),
+                                            borderRadius: BorderRadius.circular(6),
                                           ),
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
+                                          child: Icon(
+                                            isFullyPaid
+                                                ? Icons.check_circle_rounded
+                                                : Icons.schedule_rounded,
+                                            size: 14,
                                             color: isFullyPaid
-                                                ? Colors.grey.shade600
-                                                : Colors.orange.shade400,
-                                            letterSpacing: -0.3,
+                                                ? Colors.white.withOpacity(0.6)
+                                                : const Color(0xFFF59E0B),
                                           ),
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(width: 6),
-                                    Icon(
-                                      isFullyPaid
-                                          ? Icons.check_circle_outline_rounded
-                                          : Icons.pending_outlined,
-                                      size: 14,
-                                      color: isFullyPaid
-                                          ? Colors.grey.shade600
-                                          : Colors.orange.shade400,
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      CurrencyHelper.formatAmount(
+                                        displayAmounts['amountToPay']!,
+                                      ),
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: isFullyPaid
+                                            ? Colors.white.withOpacity(0.6)
+                                            : const Color(0xFFF59E0B),
+                                        letterSpacing: -0.3,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -481,45 +426,7 @@ class TailorAssignedCard extends StatelessWidget {
                         ],
                       ),
                     ),
-
-                    // Delivery Date
-                    if (item.deliveryDate != null) ...[
-                      const SizedBox(height: 14),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.purple.shade50,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: Colors.purple.shade100,
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.event_rounded,
-                              size: 15,
-                              color: Colors.purple.shade700,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              "Delivery: ${DateFormat('MMM dd, yyyy').format(item.deliveryDate!)}",
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.purple.shade700,
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+      
                   ],
                 ),
               ),
@@ -530,23 +437,40 @@ class TailorAssignedCard extends StatelessWidget {
     );
   }
 
-  Color _statusColor(String status) {
+  Color _statusBackgroundColor(String status) {
     switch (status.toLowerCase()) {
       case "full payment":
-        return Colors.green.shade600;
+        return Colors.white.withOpacity(0.2);
       case "part payment":
-        return Colors.orange.shade600;
+        return const Color(0xFFF59E0B).withOpacity(0.2);
       case "pending":
-        return Colors.grey.shade600;
+        return Colors.white.withOpacity(0.1);
       case "requesting":
-        return Colors.blue.shade600;
+        return const Color(0xFF3B82F6).withOpacity(0.2);
       default:
-        return Colors.grey.shade600;
+        return Colors.white.withOpacity(0.1);
+    }
+  }
+
+  Color _statusTextColor(String status) {
+    switch (status.toLowerCase()) {
+      case "full payment":
+        return Colors.white;
+      case "part payment":
+        return Colors.white;
+      case "pending":
+        return Colors.white.withOpacity(0.9);
+      case "requesting":
+        return Colors.white;
+      default:
+        return Colors.white.withOpacity(0.9);
     }
   }
 
   String _formatStatus(String status) {
-    return status.toUpperCase();
+    return status.split(' ').map((word) => 
+      word[0].toUpperCase() + word.substring(1).toLowerCase()
+    ).join(' ');
   }
 
   Color _getColorFromString(String colorName) {

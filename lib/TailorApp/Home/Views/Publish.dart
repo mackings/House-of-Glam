@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Home/Api/home.dart';
 import 'package:hog/App/Home/Model/category.dart';
@@ -26,11 +27,13 @@ class _PublishMaterialState extends State<PublishMaterial> {
   List<Category> categories = [];
   Category? selectedCategory;
 
-  final List<String> colors = ["Red", "Blue", "White", "Black", "Green"];
+  final List<String> colors = ["Red", "Blue", "White", "Black", "Green", "Yellow", "Purple", "Pink", "Orange", "Brown", "Gray", "Others"];
   String? selectedColor;
+  bool showCustomColorField = false;
 
   final TextEditingController attireTypeController = TextEditingController();
   final TextEditingController brandController = TextEditingController();
+  final TextEditingController customColorController = TextEditingController();
 
   final List<File> sampleImages = [];
   final ImagePicker _picker = ImagePicker();
@@ -44,7 +47,7 @@ class _PublishMaterialState extends State<PublishMaterial> {
     _loadCategories();
   }
 
-  // 🟣 Load categories via API (with fallback to cache)
+  // Load categories via API (with fallback to cache)
   Future<void> _loadCategories() async {
     setState(() => isLoading = true);
 
@@ -66,7 +69,12 @@ class _PublishMaterialState extends State<PublishMaterial> {
     } catch (e) {
       print("❌ Error loading categories: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to load categories")),
+        SnackBar(
+          content: Text("Failed to load categories", style: GoogleFonts.poppins()),
+          backgroundColor: const Color(0xFFEF4444),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
       );
     }
 
@@ -76,7 +84,12 @@ class _PublishMaterialState extends State<PublishMaterial> {
   Future<void> pickSampleImage() async {
     if (sampleImages.length >= 5) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("You can only upload up to 5 images.")),
+        SnackBar(
+          content: Text("You can only upload up to 5 images.", style: GoogleFonts.poppins()),
+          backgroundColor: const Color(0xFFF59E0B),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
       );
       return;
     }
@@ -86,13 +99,28 @@ class _PublishMaterialState extends State<PublishMaterial> {
     }
   }
 
+  // Get the final color value (either selected or custom)
+  String? _getFinalColorValue() {
+    if (selectedColor == "Others" && customColorController.text.isNotEmpty) {
+      return customColorController.text.trim();
+    }
+    return selectedColor != "Others" ? selectedColor : null;
+  }
+
   Future<void> _submitPublish() async {
+    final finalColor = _getFinalColorValue();
+
     if (selectedCategory == null ||
         attireTypeController.text.isEmpty ||
-        selectedColor == null ||
+        finalColor == null ||
         brandController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("⚠️ Please fill all required fields")),
+        SnackBar(
+          content: Text("⚠️ Please fill all required fields", style: GoogleFonts.poppins()),
+          backgroundColor: const Color(0xFFF59E0B),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
       );
       return;
     }
@@ -104,29 +132,39 @@ class _PublishMaterialState extends State<PublishMaterial> {
         categoryId: selectedCategory!.id,
         attireType: attireTypeController.text,
         clothPublished: selectedCategory!.name,
-        color: selectedColor!,
+        color: finalColor,
         brand: brandController.text,
         images: sampleImages,
       );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("✅ Material published successfully")),
+          SnackBar(
+            content: Text("✅ Material published successfully", style: GoogleFonts.poppins()),
+            backgroundColor: const Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
         );
+        Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("❌ Failed: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("❌ Failed: $e", style: GoogleFonts.poppins()),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
       }
     }
 
     setState(() => isLoading = false);
   }
 
-
-    void removeSampleImage(int index) {
+  void removeSampleImage(int index) {
     setState(() {
       sampleImages.removeAt(index);
     });
@@ -136,6 +174,7 @@ class _PublishMaterialState extends State<PublishMaterial> {
   void dispose() {
     attireTypeController.dispose();
     brandController.dispose();
+    customColorController.dispose();
     super.dispose();
   }
 
@@ -144,96 +183,392 @@ class _PublishMaterialState extends State<PublishMaterial> {
     return LoadingOverlay(
       isLoading: isLoading,
       child: Scaffold(
+        backgroundColor: Colors.grey.shade50,
         appBar: AppBar(
+          elevation: 0,
           iconTheme: const IconThemeData(color: Colors.white),
-          backgroundColor: Colors.purple,
-          title: const CustomText(
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF6B21A8), Color(0xFF7C3AED)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          title: Text(
             "Publish Material",
-            color: Colors.white,
-            fontSize: 18,
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-        body:
-            isLoading && categories.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CustomText(
-                        "Attire Details *",
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
+        body: isLoading && categories.isEmpty
+            ? const Center(child: CircularProgressIndicator(color: Color(0xFF6B21A8)))
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header Section
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF6B21A8), Color(0xFF7C3AED)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF6B21A8).withOpacity(0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
                       ),
-                      const Divider(),
-                      const SizedBox(height: 10),
-
-                      // 🔹 Category Dropdown
-                      CustomDropdown(
-                        label: "Select Category",
-                        options: categories.map((c) => c.name).toList(),
-                        selectedValue: selectedCategory?.name,
-                        onChanged: (val) {
-                          setState(() {
-                            selectedCategory = categories.firstWhere(
-                              (c) => c.name == val,
-                            );
-                          });
-                        },
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.checkroom_rounded,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Attire Details",
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "Fill in the material information",
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 10),
+                    ),
 
-                      // 🔹 Attire Type
-                      CustomTextField(
-                        title: "Attire Type",
-                        hintText: "e.g Agbada, Senator",
-                        fieldKey: "attireType",
-                        controller: attireTypeController,
+                    const SizedBox(height: 24),
+
+                    // Form Container
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Category Dropdown
+                          _buildFieldLabel("Category", true),
+                          CustomDropdown(
+                            label: "Select Category",
+                            options: categories.map((c) => c.name).toList(),
+                            selectedValue: selectedCategory?.name,
+                            onChanged: (val) {
+                              setState(() {
+                                selectedCategory = categories.firstWhere(
+                                  (c) => c.name == val,
+                                );
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 20),
 
-                      // 🔹 Color
-                      CustomDropdown(
-                        label: "Select Color",
-                        options: colors,
-                        selectedValue: selectedColor,
-                        onChanged: (val) => setState(() => selectedColor = val),
+                          // Attire Type
+                          _buildFieldLabel("Attire Type", true),
+                          CustomTextField(
+                            title: "",
+                            hintText: "e.g Agbada, Senator, Kaftan",
+                            fieldKey: "attireType",
+                            controller: attireTypeController,
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Color
+                          _buildFieldLabel("Color", true),
+                          CustomDropdown(
+                            label: "Select Color",
+                            options: colors,
+                            selectedValue: selectedColor,
+                            onChanged: (val) {
+                              setState(() {
+                                selectedColor = val;
+                                showCustomColorField = (val == "Others");
+                                if (val != "Others") {
+                                  customColorController.clear();
+                                }
+                              });
+                            },
+                          ),
+
+                          // Custom Color Field (appears when "Others" is selected)
+                          if (showCustomColorField) ...[
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFAF5FF),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: const Color(0xFF6B21A8).withOpacity(0.2),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.edit_rounded,
+                                        size: 16,
+                                        color: const Color(0xFF6B21A8),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        "Enter Custom Color",
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: const Color(0xFF6B21A8),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  CustomTextField(
+                                    title: "",
+                                    hintText: "e.g Navy Blue, Burgundy, Turquoise",
+                                    fieldKey: "customColor",
+                                    controller: customColorController,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+
+                          const SizedBox(height: 20),
+
+                          // Brand
+                          _buildFieldLabel("Brand", true),
+                          CustomTextField(
+                            title: "",
+                            hintText: "e.g Gucci, Versace, Louis Vuitton",
+                            fieldKey: "brand",
+                            controller: brandController,
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 10),
+                    ),
 
-                      // 🔹 Brand
-                      CustomTextField(
-                        title: "Brand",
-                        hintText: "Gucci, Versace...",
-                        fieldKey: "brand",
-                        controller: brandController,
+                    const SizedBox(height: 24),
+
+                    // Images Section
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 20),
-
-                      CustomText(
-                        "Upload Images *",
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF6B21A8).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.image_rounded,
+                                  size: 20,
+                                  color: Color(0xFF6B21A8),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Upload Images",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF1F2937),
+                                    ),
+                                  ),
+                                  Text(
+                                    "Add up to 5 images",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      color: const Color(0xFF6B7280),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF6B21A8).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  "${sampleImages.length}/5",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF6B21A8),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          MultiImagePicker(
+                            images: sampleImages,
+                            onAddImage: pickSampleImage,
+                            onRemoveImage: removeSampleImage,
+                          ),
+                        ],
                       ),
-                      const Divider(),
-                      const SizedBox(height: 10),
+                    ),
 
-                      // 🔹 Image Picker
-              MultiImagePicker(
-                images: sampleImages,
-                onAddImage: pickSampleImage,
-                onRemoveImage: removeSampleImage,
-              ),
+                    const SizedBox(height: 32),
 
-                      const SizedBox(height: 40),
-                      CustomButton(title: "Publish", onPressed: _submitPublish),
-                      const SizedBox(height: 30),
-                    ],
-                  ),
+                    // Publish Button
+                    Container(
+                      width: double.infinity,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF6B21A8), Color(0xFF7C3AED)],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF6B21A8).withOpacity(0.4),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: isLoading ? null : _submitPublish,
+                          borderRadius: BorderRadius.circular(16),
+                          child: Center(
+                            child: isLoading
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.publish_rounded,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        "Publish Material",
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+                  ],
                 ),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildFieldLabel(String label, bool required) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF1F2937),
+            ),
+          ),
+          if (required) ...[
+            const SizedBox(width: 4),
+            const Text(
+              "*",
+              style: TextStyle(
+                color: Color(0xFFEF4444),
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
