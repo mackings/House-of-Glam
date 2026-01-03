@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'dart:convert';
+
 class TailorAssignedMaterialsResponse {
   final bool success;
   final int count;
@@ -28,11 +30,19 @@ class TailorAssignedMaterial {
   final User user;
   final Vendor vendor;
   final MaterialItem material;
-  final int materialTotalCost;
-  final int workmanshipTotalCost;
-  final int totalCost;
-  final double? amountPaid; // ✅ Changed to double to handle decimal amounts
-  final double? amountToPay; // ✅ Changed to double to handle decimal amounts
+  final double materialTotalCost;
+  final double workmanshipTotalCost;
+  final double totalCost;
+  final double? amountPaid;
+  final double? amountToPay;
+  // USD amounts for international vendors
+  final double? materialTotalCostUSD;
+  final double? workmanshipTotalCostUSD;
+  final double? totalCostUSD;
+  final double? amountPaidUSD;
+  final double? amountToPayUSD;
+  final bool isInternationalVendor;
+  final String? country;
   final DateTime? deliveryDate;
   final DateTime? reminderDate;
   final String? comment;
@@ -50,6 +60,13 @@ class TailorAssignedMaterial {
     required this.totalCost,
     this.amountPaid,
     this.amountToPay,
+    this.materialTotalCostUSD,
+    this.workmanshipTotalCostUSD,
+    this.totalCostUSD,
+    this.amountPaidUSD,
+    this.amountToPayUSD,
+    this.isInternationalVendor = false,
+    this.country,
     this.deliveryDate,
     this.reminderDate,
     this.comment,
@@ -60,6 +77,14 @@ class TailorAssignedMaterial {
 
   factory TailorAssignedMaterial.fromJson(Map<String, dynamic> json) {
     // ✅ Helper to safely parse numeric values as double
+    double parseDoubleNonNull(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      if (value is String) return double.tryParse(value) ?? 0.0;
+      return 0.0;
+    }
+
     double? parseDouble(dynamic value) {
       if (value == null) return null;
       if (value is double) return value;
@@ -73,11 +98,18 @@ class TailorAssignedMaterial {
       user: User.fromJson(json['userId'] ?? {}),
       vendor: Vendor.fromJson(json['vendorId'] ?? {}),
       material: MaterialItem.fromJson(json['materialId'] ?? {}),
-      materialTotalCost: json['materialTotalCost'] ?? 0,
-      workmanshipTotalCost: json['workmanshipTotalCost'] ?? 0,
-      totalCost: json['totalCost'] ?? 0,
+      materialTotalCost: parseDoubleNonNull(json['materialTotalCost']),
+      workmanshipTotalCost: parseDoubleNonNull(json['workmanshipTotalCost']),
+      totalCost: parseDoubleNonNull(json['totalCost']),
       amountPaid: parseDouble(json['amountPaid']),
       amountToPay: parseDouble(json['amountToPay']),
+      materialTotalCostUSD: parseDouble(json['materialTotalCostUSD']),
+      workmanshipTotalCostUSD: parseDouble(json['workmanshipTotalCostUSD']),
+      totalCostUSD: parseDouble(json['totalCostUSD']),
+      amountPaidUSD: parseDouble(json['amountPaidUSD']),
+      amountToPayUSD: parseDouble(json['amountToPayUSD']),
+      isInternationalVendor: json['isInternationalVendor'] ?? false,
+      country: json['country'],
       deliveryDate:
           json['deliveryDate'] != null
               ? DateTime.tryParse(json['deliveryDate'])
@@ -99,7 +131,7 @@ class User {
   final String fullName;
   final String email;
   final String? image;
-  final String? country; // ✅ Added to check customer country
+  final String? country;
 
   User({
     required this.id,

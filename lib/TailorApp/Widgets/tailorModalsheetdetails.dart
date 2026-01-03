@@ -9,8 +9,6 @@ import 'package:hog/constants/currencyHelper.dart';
 import 'package:intl/intl.dart';
 
 
-
-
 void showTailorMaterialDetails(
   BuildContext context,
   TailorAssignedMaterial item,
@@ -55,221 +53,208 @@ void showTailorMaterialDetails(
               }
             }
 
-            // ✅ Convert all amounts at once
-            return FutureBuilder<Map<String, double>>(
-              future: _convertAllAmounts(item),
-              builder: (context, snapshot) {
-                // Default to original NGN values while loading
-                final displayMaterialCost = snapshot.data?['materialCost'] ?? 
-                    item.materialTotalCost.toDouble();
-                final displayWorkmanshipCost = snapshot.data?['workmanshipCost'] ?? 
-                    item.workmanshipTotalCost.toDouble();
-                final displayTotalCost = snapshot.data?['totalCost'] ?? 
-                    item.totalCost.toDouble();
-                final displayAmountPaid = snapshot.data?['amountPaid'] ?? 
-                    (item.amountPaid ?? 0).toDouble();
-                final displayAmountToPay = snapshot.data?['amountToPay'] ?? 
-                    (item.amountToPay ?? 0).toDouble();
+            // ✅ Get amounts based on vendor country
+            final displayAmounts = _getDisplayAmounts(item);
 
-                return SingleChildScrollView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            return SingleChildScrollView(
+              controller: scrollController,
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // drag handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.black26,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+
+                  // Sample images
+                  if (material.sampleImages.isNotEmpty)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.network(
+                        material.sampleImages.first,
+                        width: double.infinity,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+
+                  const SizedBox(height: 20),
+
+                  // Title + status
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // drag handle
-                      Center(
-                        child: Container(
-                          width: 40,
-                          height: 4,
-                          margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.black26,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-
-                      // Sample images
-                      if (material.sampleImages.isNotEmpty)
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.network(
-                            material.sampleImages.first,
-                            width: double.infinity,
-                            height: 200,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-
-                      const SizedBox(height: 20),
-
-                      // Title + status
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          CustomText(
-                            material.attireType,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.purple,
-                          ),
-                          Chip(
-                            label: Text(
-                              item.status,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                            backgroundColor: _statusColor(item.status),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      _buildSectionTitle("Material Details"),
-                      _buildInfoRow("Cloth", material.clothMaterial),
-                      _buildInfoRow("Color", material.color),
-                      _buildInfoRow("Brand", material.brand),
-                      _buildInfoRow(
-                        "Delivered",
-                        material.isDelivered ? "Yes" : "No",
-                      ),
-                      const Divider(),
-
-                      _buildSectionTitle("Customer"),
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundImage: item.user.image != null
-                                ? NetworkImage(item.user.image!)
-                                : null,
-                            child: item.user.image == null
-                                ? Text(
-                                    item.user.fullName.isNotEmpty
-                                        ? item.user.fullName[0].toUpperCase()
-                                        : "?",
-                                  )
-                                : null,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                CustomText(
-                                  item.user.fullName,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                CustomText(
-                                  item.user.email,
-                                  fontSize: 13,
-                                  color: Colors.grey[600],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Divider(),
-
-                      _buildSectionTitle("Vendor"),
-                      _buildInfoRow("Name", item.vendor.businessName),
-                      _buildInfoRow("Email", item.vendor.businessEmail),
-                      _buildInfoRow("Phone", item.vendor.businessPhone),
-                      const Divider(),
-
-                      // ✅ Costs & Payments with converted amounts
-                      _buildSectionTitle("Costs & Payments"),
-                      _buildInfoRow(
-                        "Material Cost",
-                        CurrencyHelper.formatAmount(displayMaterialCost),
-                      ),
-                      _buildInfoRow(
-                        "Workmanship",
-                        CurrencyHelper.formatAmount(displayWorkmanshipCost),
-                      ),
-                      _buildInfoRow(
-                        "Total",
-                        CurrencyHelper.formatAmount(displayTotalCost),
-                        bold: true,
+                      CustomText(
+                        material.attireType,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                         color: Colors.purple,
                       ),
-                      _buildInfoRow(
-                        "Paid",
-                        CurrencyHelper.formatAmount(displayAmountPaid),
-                      ),
-                      _buildInfoRow(
-                        "Balance",
-                        CurrencyHelper.formatAmount(displayAmountToPay),
-                        color: Colors.redAccent,
-                      ),
-                      const Divider(),
-
-                      _buildSectionTitle("Dates"),
-                      _buildInfoRow(
-                        "Created",
-                        DateFormat("dd MMM, yyyy").format(item.createdAt),
-                      ),
-                      if (item.deliveryDate != null)
-                        _buildInfoRow(
-                          "Delivery",
-                          DateFormat("dd MMM, yyyy").format(item.deliveryDate!),
+                      Chip(
+                        label: Text(
+                          item.status,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
                         ),
-                      if (item.reminderDate != null)
-                        _buildInfoRow(
-                          "Reminder",
-                          DateFormat("dd MMM, yyyy").format(item.reminderDate!),
-                        ),
-                      const Divider(),
-
-                      if (item.comment != null && item.comment!.isNotEmpty) ...[
-                        _buildSectionTitle("Comment"),
-                        CustomText(
-                          item.comment!,
-                          fontSize: 14,
-                          color: Colors.black87,
-                        ),
-                        const Divider(),
-                      ],
-
-                      const SizedBox(height: 20),
-
-                      CustomButton(
-                        title: item.status.toLowerCase() == "requesting"
-                            ? "Update Quotation"
-                            : "Deliver Attire",
-                        onPressed: () {
-                          if (item.status.toLowerCase() == "requesting") {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.white,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(20),
-                                ),
-                              ),
-                              builder: (_) => UpdateQuotationBottomSheet(
-                                materialId: material.id,
-                              ),
-                            );
-                          } else {
-                            _deliverAttire();
-                          }
-                        },
-                        isLoading: isLoading,
+                        backgroundColor: _statusColor(item.status),
                       ),
-
-                      const SizedBox(height: 16),
                     ],
                   ),
-                );
-              },
+
+                  const SizedBox(height: 16),
+
+                  _buildSectionTitle("Material Details"),
+                  _buildInfoRow("Cloth", material.clothMaterial),
+                  _buildInfoRow("Color", material.color),
+                  _buildInfoRow("Brand", material.brand),
+                  _buildInfoRow(
+                    "Delivered",
+                    material.isDelivered ? "Yes" : "No",
+                  ),
+                  const Divider(),
+
+                  _buildSectionTitle("Customer"),
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundImage: item.user.image != null
+                            ? NetworkImage(item.user.image!)
+                            : null,
+                        child: item.user.image == null
+                            ? Text(
+                                item.user.fullName.isNotEmpty
+                                    ? item.user.fullName[0].toUpperCase()
+                                    : "?",
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CustomText(
+                              item.user.fullName,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            CustomText(
+                              item.user.email,
+                              fontSize: 13,
+                              color: Colors.grey[600],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+
+                  _buildSectionTitle("Vendor"),
+                  _buildInfoRow("Name", item.vendor.businessName),
+                  _buildInfoRow("Email", item.vendor.businessEmail),
+                  _buildInfoRow("Phone", item.vendor.businessPhone),
+                  if (item.country != null)
+                    _buildInfoRow("Country", item.country!),
+                  const Divider(),
+
+                  // ✅ Costs & Payments with amounts based on vendor country
+                  _buildSectionTitle("Costs & Payments"),
+                  _buildInfoRow(
+                    "Material Cost",
+                    CurrencyHelper.formatAmount(displayAmounts['materialCost']!),
+                  ),
+                  _buildInfoRow(
+                    "Workmanship",
+                    CurrencyHelper.formatAmount(displayAmounts['workmanshipCost']!),
+                  ),
+                  _buildInfoRow(
+                    "Total",
+                    CurrencyHelper.formatAmount(displayAmounts['totalCost']!),
+                    bold: true,
+                    color: Colors.purple,
+                  ),
+                  _buildInfoRow(
+                    "Paid",
+                    CurrencyHelper.formatAmount(displayAmounts['amountPaid']!),
+                  ),
+                  _buildInfoRow(
+                    "Balance",
+                    CurrencyHelper.formatAmount(displayAmounts['amountToPay']!),
+                    color: Colors.redAccent,
+                  ),
+                  const Divider(),
+
+                  _buildSectionTitle("Dates"),
+                  _buildInfoRow(
+                    "Created",
+                    DateFormat("dd MMM, yyyy").format(item.createdAt),
+                  ),
+                  if (item.deliveryDate != null)
+                    _buildInfoRow(
+                      "Delivery",
+                      DateFormat("dd MMM, yyyy").format(item.deliveryDate!),
+                    ),
+                  if (item.reminderDate != null)
+                    _buildInfoRow(
+                      "Reminder",
+                      DateFormat("dd MMM, yyyy").format(item.reminderDate!),
+                    ),
+                  const Divider(),
+
+                  if (item.comment != null && item.comment!.isNotEmpty) ...[
+                    _buildSectionTitle("Comment"),
+                    CustomText(
+                      item.comment!,
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
+                    const Divider(),
+                  ],
+
+                  const SizedBox(height: 20),
+
+                  CustomButton(
+                    title: item.status.toLowerCase() == "requesting"
+                        ? "Update Quotation"
+                        : "Deliver Attire",
+                    onPressed: () {
+                      if (item.status.toLowerCase() == "requesting") {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(20),
+                            ),
+                          ),
+                          builder: (_) => UpdateQuotationBottomSheet(
+                            materialId: material.id,
+                          ),
+                        );
+                      } else {
+                        _deliverAttire();
+                      }
+                    },
+                    isLoading: isLoading,
+                  ),
+
+                  const SizedBox(height: 16),
+                ],
+              ),
             );
           },
         );
@@ -278,17 +263,33 @@ void showTailorMaterialDetails(
   );
 }
 
-// ✅ No conversion needed - vendors see amounts in their own currency
-Future<Map<String, double>> _convertAllAmounts(TailorAssignedMaterial item) async {
-  // ✅ Vendors always see amounts in their own currency without conversion
-  // Amounts are already stored in the correct currency (NGN for Nigerian vendors, USD for US/UK vendors)
-  return {
-    'materialCost': item.materialTotalCost.toDouble(),
-    'workmanshipCost': item.workmanshipTotalCost.toDouble(),
-    'totalCost': item.totalCost.toDouble(),
-    'amountPaid': (item.amountPaid ?? 0).toDouble(),
-    'amountToPay': (item.amountToPay ?? 0).toDouble(),
-  };
+// ✅ Get display amounts based on vendor country
+// International vendors (US, UK, etc.) see USD amounts
+// Nigerian vendors see NGN amounts
+Map<String, double> _getDisplayAmounts(TailorAssignedMaterial item) {
+  // Check if vendor is international (US, UK, etc.) or Nigerian
+  final isInternational = item.isInternationalVendor || 
+      (item.country != null && item.country!.toUpperCase() != 'NG');
+
+  if (isInternational) {
+    // Return USD amounts for international vendors
+    return {
+      'materialCost': item.materialTotalCostUSD ?? 0.0,
+      'workmanshipCost': item.workmanshipTotalCostUSD ?? 0.0,
+      'totalCost': item.totalCostUSD ?? 0.0,
+      'amountPaid': item.amountPaidUSD ?? 0.0,
+      'amountToPay': item.amountToPayUSD ?? 0.0,
+    };
+  } else {
+    // Return NGN amounts for Nigerian vendors
+    return {
+      'materialCost': item.materialTotalCost,
+      'workmanshipCost': item.workmanshipTotalCost,
+      'totalCost': item.totalCost,
+      'amountPaid': item.amountPaid ?? 0.0,
+      'amountToPay': item.amountToPay ?? 0.0,
+    };
+  }
 }
 
 Widget _buildSectionTitle(String title) {
