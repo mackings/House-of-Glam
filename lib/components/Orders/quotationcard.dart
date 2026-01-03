@@ -12,6 +12,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 class QuotationCard extends StatelessWidget {
   final Review review;
   final VoidCallback onHireDesigner;
+  final VoidCallback? onMakeOffer;
   final void Function(int amount) onCompletePayment;
   final VoidCallback? onRefresh;
 
@@ -19,6 +20,7 @@ class QuotationCard extends StatelessWidget {
     super.key,
     required this.review,
     required this.onHireDesigner,
+    this.onMakeOffer,
     required this.onCompletePayment,
     this.onRefresh,
   });
@@ -40,9 +42,6 @@ class QuotationCard extends StatelessWidget {
 
     // ✅ Check if user has made any payment
     final bool hasPartPayment = review.amountPaid > 0 && review.amountToPay > 0;
-
-    // ✅ After offer accepted, amountToPay becomes 0, so use totalCost for payment
-    final bool canPay = hasAcceptedOffer && review.amountToPay == 0 && review.totalCost > 0;
 
     // ✅ Backend provides both NGN and USD amounts
     // Nigerian buyers always see NGN (converted amounts from backend)
@@ -338,27 +337,52 @@ class QuotationCard extends StatelessWidget {
                   ],
                 ),
               ] else ...[
-                // Initial quote - show Hire Designer and Make Counter Offer
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: onHireDesigner,
-                    icon: const Icon(Icons.person_add, size: 18, color: Colors.white),
-                    label: CustomText(
-                      "Hire Designer (${CurrencyHelper.formatAmount(displayTotal, currencyCode: currencyCode)})",
-                      fontSize: 14,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                // Initial quote - show Hire Designer and Make Offer
+                Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: onHireDesigner,
+                        icon: const Icon(Icons.person_add, size: 18, color: Colors.white),
+                        label: CustomText(
+                          "Hire Designer (${CurrencyHelper.formatAmount(displayTotal, currencyCode: currencyCode)})",
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
                       ),
-                      elevation: 0,
                     ),
-                  ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: onMakeOffer,
+                        icon: Icon(Icons.local_offer_outlined, size: 18, color: Colors.purple.shade700),
+                        label: CustomText(
+                          "Make Offer",
+                          fontSize: 14,
+                          color: Colors.purple.shade700,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: BorderSide(color: Colors.purple.shade300, width: 1.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ],
