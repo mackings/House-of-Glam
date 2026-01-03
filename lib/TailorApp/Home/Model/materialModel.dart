@@ -66,7 +66,9 @@ class TailorMaterialItem {
   factory TailorMaterialItem.fromJson(Map<String, dynamic> json) {
     return TailorMaterialItem(
       id: json['_id'] ?? '',
-      userId: UserInfo.fromJson(json['userId']),
+      userId: json['userId'] != null
+          ? UserInfo.fromJson(json['userId'] as Map<String, dynamic>)
+          : UserInfo(id: '', fullName: 'Unknown User', email: ''),
       categoryId: json['categoryId'] ?? '',
       attireType: json['attireType'] ?? '',
       clothMaterial: json['clothMaterial'] ?? '',
