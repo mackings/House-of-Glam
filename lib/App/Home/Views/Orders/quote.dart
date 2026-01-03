@@ -4,7 +4,7 @@ import 'package:hog/App/Home/Api/paymentService.dart';
 import 'package:hog/App/Home/Api/useractivity.dart';
 import 'package:hog/App/Home/Model/reviewModel.dart';
 import 'package:hog/App/Home/Views/Offers/Views/OfferHome.dart';
-import 'package:hog/App/Home/Views/Offers/Widgets/offerdetail.dart';
+import 'package:hog/App/Home/Views/Offers/Widgets/createOffer.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/Orders/Hireconf.dart';
 import 'package:hog/components/Orders/PaymentOp.dart';
@@ -259,38 +259,18 @@ class _QuotationState extends State<Quotation> {
                         print(reviews[index].id);
                         _showHireDesignerConfirmation(reviews[index]);
                       },
-                      onMakeOffer: () async {
-                        // Navigate to offer detail page for negotiation
+                      onMakeOffer: () {
+                        // Show create offer sheet
                         final review = reviews[index];
-                        final offerData = {
-                          '_id': review.id,
-                          'userId': {
-                            '_id': review.user.id,
-                            'fullName': review.user.fullName,
-                            'email': review.user.email,
-                          },
-                          'vendorId': review.vendorId,
-                          'materialId': review.materialId,
-                          'materialTotalCost': review.materialTotalCost,
-                          'workmanshipTotalCost': review.workmanshipTotalCost,
-                          'totalCost': review.totalCost,
-                          'deliveryDate': review.deliveryDate.toIso8601String(),
-                          'reminderDate': review.reminderDate.toIso8601String(),
-                          'comment': review.comment,
-                          'status': review.status,
-                          'createdAt': review.createdAt.toIso8601String(),
-                          'updatedAt': review.updatedAt.toIso8601String(),
-                        };
-
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => OfferDetail(offer: offerData),
-                          ),
-                        );
-
-                        // Refresh after returning from offer page
-                        fetchReviews();
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => CreateOfferSheet(review: review),
+                        ).then((_) {
+                          // Refresh quotations list after returning
+                          fetchReviews();
+                        });
                       },
                       onCompletePayment: (int amount) {
                         final review = reviews[index];

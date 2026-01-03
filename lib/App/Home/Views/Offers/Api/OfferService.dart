@@ -201,4 +201,40 @@ class OfferService {
       return {"success": false, "message": "Invalid response"};
     }
   }
+
+  // 🔹 GET: Get specific offer by ID with full chat history
+  static Future<Map<String, dynamic>?> getOfferById(String offerId) async {
+    final token = await SecurePrefs.getToken();
+    final url = Uri.parse("$_apiRoot/makeOffer/getMakeOfferById/$offerId");
+
+    final headers = {
+      "Content-Type": "application/json",
+      if (token != null) "Authorization": "Bearer $token",
+    };
+
+    final start = DateTime.now();
+    final response = await http.get(url, headers: headers);
+    final duration = DateTime.now().difference(start);
+
+    _logApi(
+      method: "GET",
+      url: url,
+      headers: headers,
+      body: null,
+      response: response,
+      duration: duration,
+    );
+
+    if (response.statusCode == 200) {
+      try {
+        final jsonData = jsonDecode(response.body);
+        return jsonData;
+      } catch (e) {
+        print("OfferService.getOfferById parse error: $e");
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
 }

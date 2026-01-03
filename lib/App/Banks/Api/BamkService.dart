@@ -558,6 +558,7 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
     required String paymentStatus, // "full payment" or "part payment"
     String? amount, // For part payment
     String? address, // For full payment
+    double? exchangeRate, // Exchange rate for currency conversion
   }) async {
     final endpoint = "$baseUrl/api/v1/stripe/make-payment/$reviewId";
 
@@ -579,6 +580,7 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
         "shipmentMethod": shipmentMethod,
         if (amount != null) "amount": amount,
         if (address != null) "address": address,
+        if (exchangeRate != null) "ngnToUsdRate": exchangeRate,
       };
 
       _logRequest(
