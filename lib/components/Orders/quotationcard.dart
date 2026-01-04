@@ -8,7 +8,6 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 
 
-
 class QuotationCard extends StatelessWidget {
   final Review review;
   final VoidCallback onHireDesigner;
