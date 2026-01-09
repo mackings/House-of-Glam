@@ -26,6 +26,8 @@ class PublishMaterial extends StatefulWidget {
 class _PublishMaterialState extends State<PublishMaterial> {
   List<Category> categories = [];
   Category? selectedCategory;
+  String? selectedCategoryName;
+  bool showCustomCategoryField = false;
 
   final List<String> colors = ["Red", "Blue", "White", "Black", "Green", "Yellow", "Purple", "Pink", "Orange", "Brown", "Gray", "Others"];
   String? selectedColor;
@@ -34,6 +36,7 @@ class _PublishMaterialState extends State<PublishMaterial> {
   final TextEditingController attireTypeController = TextEditingController();
   final TextEditingController brandController = TextEditingController();
   final TextEditingController customColorController = TextEditingController();
+  final TextEditingController customCategoryController = TextEditingController();
 
   final List<File> sampleImages = [];
   final ImagePicker _picker = ImagePicker();
@@ -107,16 +110,38 @@ class _PublishMaterialState extends State<PublishMaterial> {
     return selectedColor != "Others" ? selectedColor : null;
   }
 
+  String? _getFinalCategoryName() {
+    if (selectedCategoryName == "Others" &&
+        customCategoryController.text.isNotEmpty) {
+      return customCategoryController.text.trim();
+    }
+    return selectedCategoryName == "Others" ? null : selectedCategory?.name;
+  }
+
   Future<void> _submitPublish() async {
     final finalColor = _getFinalColorValue();
+    final finalCategoryName = _getFinalCategoryName();
 
-    if (selectedCategory == null ||
+    if (selectedCategoryName == null ||
         attireTypeController.text.isEmpty ||
         finalColor == null ||
-        brandController.text.isEmpty) {
+        brandController.text.isEmpty ||
+        finalCategoryName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("⚠️ Please fill all required fields", style: GoogleFonts.poppins()),
+          backgroundColor: const Color(0xFFF59E0B),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
+    if (selectedCategory == null || selectedCategory!.id.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("⚠️ Selected category is unavailable. Please refresh.", style: GoogleFonts.poppins()),
           backgroundColor: const Color(0xFFF59E0B),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -131,7 +156,7 @@ class _PublishMaterialState extends State<PublishMaterial> {
       await _publishedService.createPublished(
         categoryId: selectedCategory!.id,
         attireType: attireTypeController.text,
-        clothPublished: selectedCategory!.name,
+        clothPublished: finalCategoryName,
         color: finalColor,
         brand: brandController.text,
         images: sampleImages,
@@ -175,6 +200,7 @@ class _PublishMaterialState extends State<PublishMaterial> {
     attireTypeController.dispose();
     brandController.dispose();
     customColorController.dispose();
+    customCategoryController.dispose();
     super.dispose();
   }
 
@@ -295,16 +321,87 @@ class _PublishMaterialState extends State<PublishMaterial> {
                           _buildFieldLabel("Category", true),
                           CustomDropdown(
                             label: "Select Category",
-                            options: categories.map((c) => c.name).toList(),
-                            selectedValue: selectedCategory?.name,
+                            options: [
+                              ...categories.map((c) => c.name),
+                              if (!categories.any(
+                                (c) => c.name.toLowerCase() == "others",
+                              ))
+                                "Others",
+                            ],
+                            selectedValue: selectedCategoryName,
                             onChanged: (val) {
                               setState(() {
-                                selectedCategory = categories.firstWhere(
-                                  (c) => c.name == val,
-                                );
+                                selectedCategoryName = val;
+                                if (val == "Others") {
+                                  selectedCategory = categories.firstWhere(
+                                    (c) =>
+                                        c.name.toLowerCase() == "others",
+                                    orElse:
+                                        () => Category(
+                                          id: "",
+                                          name: "Others",
+                                          description: "",
+                                          image:
+                                              "https://via.placeholder.com/150",
+                                          createdAt: "",
+                                          updatedAt: "",
+                                          v: 0,
+                                        ),
+                                  );
+                                  showCustomCategoryField = true;
+                                } else {
+                                  selectedCategory = categories.firstWhere(
+                                    (c) => c.name == val,
+                                  );
+                                  showCustomCategoryField = false;
+                                  customCategoryController.clear();
+                                }
                               });
                             },
                           ),
+                          if (showCustomCategoryField) ...[
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFAF5FF),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: const Color(0xFF6B21A8).withOpacity(0.2),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.edit_rounded,
+                                        size: 16,
+                                        color: const Color(0xFF6B21A8),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        "Enter Custom Category",
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: const Color(0xFF6B21A8),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  CustomTextField(
+                                    title: "",
+                                    hintText: "e.g Bespoke Gown, Bridal Wear",
+                                    fieldKey: "customCategory",
+                                    controller: customCategoryController,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 20),
 
                           // Attire Type

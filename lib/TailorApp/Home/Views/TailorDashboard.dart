@@ -10,6 +10,8 @@ import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/error_display.dart';
 import 'package:hog/components/texts.dart';
 
+
+
 class Tailordashboard extends StatefulWidget {
   const Tailordashboard({super.key});
 

@@ -7,6 +7,9 @@ import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:intl/intl.dart';
 
+
+
+
 class TailorMaterialDetailSheet extends StatefulWidget {
   final TailorMaterialItem material;
 
@@ -23,9 +26,14 @@ class _TailorMaterialDetailSheetState extends State<TailorMaterialDetailSheet> {
   @override
   Widget build(BuildContext context) {
     final material = widget.material;
-    String formattedDate = DateFormat(
-      "dd MMM, yyyy",
-    ).format(DateTime.parse(material.createdAt));
+    final formattedCreatedAt = _formatDate(material.createdAt);
+    final formattedUpdatedAt = _formatDate(material.updatedAt);
+    final formattedDeliveryDate = _formatDate(material.deliveryDate);
+    final formattedReminderDate = _formatDate(material.reminderDate);
+    final priceText =
+        material.price != null
+            ? "$currencySymbol ${NumberFormat('#,###').format(material.price)}"
+            : "TBD";
 
     return DraggableScrollableSheet(
       expand: false,
@@ -140,55 +148,129 @@ class _TailorMaterialDetailSheetState extends State<TailorMaterialDetailSheet> {
                   material.attireType,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
+                  textAlign: TextAlign.left,
                 ),
 
-                Divider(height: 24, thickness: 1, color: Colors.grey[300]),
-
-                // Details with icons
-                _buildDetailRow(Icons.store, "Brand", material.brand),
-                _buildDetailRow(Icons.color_lens, "Color", material.color),
-                _buildDetailRow(
-                  Icons.texture,
-                  "Material",
-                  material.clothMaterial,
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildTag(material.brand),
+                    _buildTag(material.color),
+                    _buildTag(material.clothMaterial),
+                  ],
                 ),
 
-                Divider(height: 24, thickness: 1, color: Colors.grey[300]),
+                const SizedBox(height: 20),
 
-                _buildDetailRow(
-                  Icons.person,
-                  "Customer",
-                  material.userId.fullName,
+                _buildSectionCard(
+                  title: "Customer",
+                  children: [
+                    _buildDetailRow(
+                      Icons.person,
+                      "Name",
+                      material.userId.fullName,
+                    ),
+                    // _buildDetailRow(
+                    //   Icons.email,
+                    //   "Email",
+                    //   material.userId.email.isNotEmpty
+                    //       ? material.userId.email
+                    //       : "N/A",
+                    // ),
+                  ],
                 ),
 
-                //  _buildDetailRow(Icons.email, "Email", material.userId.email),
-                Divider(height: 24, thickness: 1, color: Colors.grey[300]),
+                const SizedBox(height: 16),
 
-                _buildDetailRow(
-                  Icons.attach_money,
-                  "Price",
-                  "$currencySymbol ${material.price ?? 'TBD'}",
-                  valueColor: Colors.purple,
-                  isBold: true,
+                _buildSectionCard(
+                  title: "Attire Details",
+                  children: [
+                    _buildDetailRow(Icons.store, "Brand", material.brand),
+                    _buildDetailRow(Icons.color_lens, "Color", material.color),
+                    _buildDetailRow(
+                      Icons.texture,
+                      "Material",
+                      material.clothMaterial,
+                    ),
+                  ],
                 ),
-                _buildDetailRow(
-                  Icons.local_shipping,
-                  "Delivered",
-                  material.isDelivered ? "Yes" : "No",
+
+                const SizedBox(height: 16),
+
+                _buildSectionCard(
+                  title: "Measurements",
+                  children: [
+                    _buildMeasurements(material.measurement),
+                  ],
                 ),
-                _buildDetailRow(
-                  Icons.calendar_today,
-                  "Posted On",
-                  formattedDate,
+
+                const SizedBox(height: 16),
+
+                _buildSectionCard(
+                  title: "Pricing & Status",
+                  children: [
+                    _buildDetailRow(
+                      Icons.attach_money,
+                      "Price",
+                      priceText,
+                      valueColor: Colors.purple,
+                      isBold: true,
+                    ),
+                    _buildDetailRow(
+                      Icons.local_shipping,
+                      "Delivered",
+                      material.isDelivered ? "Yes" : "No",
+                    ),
+                    _buildDetailRow(
+                      Icons.account_balance_wallet,
+                      "Settlement",
+                      material.settlement.toString(),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                _buildSectionCard(
+                  title: "Timeline",
+                  children: [
+                    _buildDetailRow(
+                      Icons.calendar_today,
+                      "Posted On",
+                      formattedCreatedAt,
+                    ),
+                    _buildDetailRow(
+                      Icons.update,
+                      "Updated",
+                      formattedUpdatedAt,
+                    ),
+                    _buildDetailRow(
+                      Icons.event_available,
+                      "Delivery Date",
+                      formattedDeliveryDate,
+                    ),
+                    _buildDetailRow(
+                      Icons.alarm,
+                      "Reminder Date",
+                      formattedReminderDate,
+                    ),
+                  ],
                 ),
 
                 if (material.specialInstructions != null &&
                     material.specialInstructions!.isNotEmpty) ...[
-                  Divider(height: 24, thickness: 1, color: Colors.grey[300]),
-                  _buildDetailRow(
-                    Icons.note,
-                    "Notes",
-                    material.specialInstructions!,
+                  const SizedBox(height: 16),
+                  _buildSectionCard(
+                    title: "Notes",
+                    children: [
+                      _buildDetailRow(
+                        Icons.note,
+                        "Instructions",
+                        material.specialInstructions!,
+                      ),
+                    ],
                   ),
                 ],
 
@@ -316,10 +398,180 @@ class _TailorMaterialDetailSheetState extends State<TailorMaterialDetailSheet> {
               fontSize: 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               color: valueColor,
+              textAlign: TextAlign.left,
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildSectionCard({
+    required String title,
+    required List<Widget> children,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomText(
+            title,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            textAlign: TextAlign.left,
+          ),
+          const SizedBox(height: 10),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMeasurements(List<Measurement> measurements) {
+    final merged = <String, dynamic>{};
+    for (final measurement in measurements) {
+      measurement.values.forEach((key, value) {
+        if (value == null) return;
+        final text = value.toString();
+        if (text.trim().isEmpty) return;
+        merged.putIfAbsent(key, () => value);
+      });
+    }
+
+    if (merged.isEmpty) {
+      return CustomText(
+        "No measurements provided",
+        fontSize: 13,
+        color: Colors.grey[700],
+        textAlign: TextAlign.left,
+      );
+    }
+
+    final preferredOrder = [
+      "neck",
+      "shoulder",
+      "chest",
+      "waist",
+      "hip",
+      "sleevelength",
+      "armlength",
+      "aroundarm",
+      "wrist",
+      "collarfront",
+      "collarback",
+      "length",
+      "armType",
+    ];
+
+    final keys = merged.keys.toList()
+      ..sort((a, b) {
+        final indexA = preferredOrder.indexOf(a);
+        final indexB = preferredOrder.indexOf(b);
+        if (indexA == -1 && indexB == -1) {
+          return a.compareTo(b);
+        }
+        if (indexA == -1) return 1;
+        if (indexB == -1) return -1;
+        return indexA.compareTo(indexB);
+      });
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final key in keys)
+          _buildMeasurementChip(
+            _formatMeasurementKey(key),
+            _formatMeasurementValue(merged[key]),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildMeasurementChip(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: CustomText(
+        "$label: $value",
+        fontSize: 12,
+        color: Colors.grey[800],
+        textAlign: TextAlign.left,
+      ),
+    );
+  }
+
+  Widget _buildTag(String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.purple.shade50,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.purple.shade100),
+      ),
+      child: CustomText(
+        value.isNotEmpty ? value : "N/A",
+        fontSize: 12,
+        color: Colors.purple.shade700,
+        textAlign: TextAlign.left,
+      ),
+    );
+  }
+
+  String _formatDate(String? value) {
+    if (value == null || value.isEmpty) return "N/A";
+    final parsed = DateTime.tryParse(value);
+    if (parsed == null) return value;
+    return DateFormat("dd MMM, yyyy").format(parsed);
+  }
+
+  String _formatMeasurementKey(String key) {
+    switch (key) {
+      case "sleevelength":
+        return "Sleeve Length";
+      case "armlength":
+        return "Arm Length";
+      case "aroundarm":
+        return "Around Arm";
+      case "collarfront":
+        return "Collar Front";
+      case "collarback":
+        return "Collar Back";
+      case "armType":
+        return "Arm Type";
+      default:
+        final spaced = key.replaceAllMapped(
+          RegExp(r"([a-z])([A-Z])"),
+          (match) => "${match.group(1)} ${match.group(2)}",
+        );
+        return spaced
+            .split(RegExp(r"[_\\s]+"))
+            .map((part) {
+              if (part.isEmpty) return part;
+              return part[0].toUpperCase() + part.substring(1);
+            })
+            .join(" ");
+    }
+  }
+
+  String _formatMeasurementValue(dynamic value) {
+    if (value is num) {
+      if (value % 1 == 0) {
+        return value.toInt().toString();
+      }
+      return value.toString();
+    }
+    return value?.toString() ?? "N/A";
   }
 }

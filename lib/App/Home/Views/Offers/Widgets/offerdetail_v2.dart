@@ -28,6 +28,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
   final TextEditingController _commentCtrl = TextEditingController();
   final TextEditingController _materialCtrl = TextEditingController();
   final TextEditingController _workmanshipCtrl = TextEditingController();
+  final TextEditingController _totalCtrl = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
   MakeOffer? _offer;
@@ -49,6 +50,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
     _commentCtrl.dispose();
     _materialCtrl.dispose();
     _workmanshipCtrl.dispose();
+    _totalCtrl.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -120,8 +122,14 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
 
     // For counter offers, amounts are required
     if (action == "countered") {
-      if (_materialCtrl.text.trim().isEmpty || _workmanshipCtrl.text.trim().isEmpty) {
-        return _showSnack("Please enter material and workmanship costs", isError: true);
+      if (_userRole == "user") {
+        if (_totalCtrl.text.trim().isEmpty) {
+          return _showSnack("Please enter a total amount", isError: true);
+        }
+      } else {
+        if (_materialCtrl.text.trim().isEmpty || _workmanshipCtrl.text.trim().isEmpty) {
+          return _showSnack("Please enter material and workmanship costs", isError: true);
+        }
       }
     }
 
@@ -137,22 +145,37 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
         workmanshipCost = latestChat.counterWorkmanshipCost.toStringAsFixed(0);
       }
     } else if (action == "countered") {
-      // User enters amounts in their local currency
-      String enteredMaterial = _materialCtrl.text.replaceAll(',', '').trim();
-      String enteredWorkmanship = _workmanshipCtrl.text.replaceAll(',', '').trim();
-      
-      // If user is international (using USD), convert to NGN before sending
-      if (_useUSD && _offer!.exchangeRate > 0) {
-        double materialUSD = double.parse(enteredMaterial);
-        double workmanshipUSD = double.parse(enteredWorkmanship);
-        
-        // Convert USD to NGN: USD * exchangeRate = NGN
-        materialCost = (materialUSD * _offer!.exchangeRate).toStringAsFixed(0);
-        workmanshipCost = (workmanshipUSD * _offer!.exchangeRate).toStringAsFixed(0);
+      if (_userRole == "user") {
+        final enteredTotal = _totalCtrl.text.replaceAll(',', '').trim();
+        final totalValue = double.tryParse(enteredTotal);
+        if (totalValue == null || totalValue <= 0) {
+          return _showSnack("Please enter a valid total amount", isError: true);
+        }
+        final totalNgn = _useUSD && _offer!.exchangeRate > 0
+            ? (totalValue * _offer!.exchangeRate).round()
+            : totalValue.round();
+        final materialSplit = (totalNgn / 2).floor();
+        final workmanshipSplit = totalNgn - materialSplit;
+        materialCost = materialSplit.toString();
+        workmanshipCost = workmanshipSplit.toString();
       } else {
-        // Nigerian user - already in NGN
-        materialCost = enteredMaterial;
-        workmanshipCost = enteredWorkmanship;
+        // Vendor enters amounts in their local currency
+        String enteredMaterial = _materialCtrl.text.replaceAll(',', '').trim();
+        String enteredWorkmanship = _workmanshipCtrl.text.replaceAll(',', '').trim();
+        
+        // If vendor is international (using USD), convert to NGN before sending
+        if (_useUSD && _offer!.exchangeRate > 0) {
+          double materialUSD = double.parse(enteredMaterial);
+          double workmanshipUSD = double.parse(enteredWorkmanship);
+          
+          // Convert USD to NGN: USD * exchangeRate = NGN
+          materialCost = (materialUSD * _offer!.exchangeRate).toStringAsFixed(0);
+          workmanshipCost = (workmanshipUSD * _offer!.exchangeRate).toStringAsFixed(0);
+        } else {
+          // Nigerian vendor - already in NGN
+          materialCost = enteredMaterial;
+          workmanshipCost = enteredWorkmanship;
+        }
       }
     }
 
@@ -187,6 +210,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
       _commentCtrl.clear();
       _materialCtrl.clear();
       _workmanshipCtrl.clear();
+      _totalCtrl.clear();
       setState(() => _showAmountFields = false);
 
       // Reload data
@@ -280,7 +304,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF10B981), Color(0xFF059669)],
+          colors: [Color(0xFF6B21A8), Color(0xFF7C3AED)],
         ),
       ),
       child: Row(
@@ -303,19 +327,6 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                   fontSize: 14,
                 ),
               ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const CustomText(
-              "Proceed to Payment",
-              color: Color(0xFF10B981),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -357,6 +368,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
   Widget _buildChatBubble(OfferChat chat) {
     final isCustomer = chat.senderType == "customer";
     final isMyMessage = (_userRole == "user" && isCustomer) || (_userRole != "user" && !isCustomer);
+    final showBreakdown = _userRole != "user";
 
     return Align(
       alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
@@ -414,18 +426,20 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                       ),
                       child: Column(
                         children: [
-                          _buildAmountRow(
-                            "Material", 
-                            chat.counterMaterialCost,      // NGN
-                            chat.counterMaterialCostUSD    // USD (pre-calculated)
-                          ),
-                          const SizedBox(height: 4),
-                          _buildAmountRow(
-                            "Workmanship", 
-                            chat.counterWorkmanshipCost,     // NGN
-                            chat.counterWorkmanshipCostUSD   // USD (pre-calculated)
-                          ),
-                          const Divider(height: 12),
+                          if (showBreakdown) ...[
+                            _buildAmountRow(
+                              "Material", 
+                              chat.counterMaterialCost,      // NGN
+                              chat.counterMaterialCostUSD    // USD (pre-calculated)
+                            ),
+                            const SizedBox(height: 4),
+                            _buildAmountRow(
+                              "Workmanship", 
+                              chat.counterWorkmanshipCost,     // NGN
+                              chat.counterWorkmanshipCostUSD   // USD (pre-calculated)
+                            ),
+                            const Divider(height: 12),
+                          ],
                           _buildAmountRow(
                             "Total", 
                             chat.counterTotalCost,      // NGN
@@ -552,63 +566,89 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
           // Amount Fields (for counter offers)
           if (_showAmountFields) ...[
             const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _materialCtrl,
-                    decoration: InputDecoration(
-                      labelText: "Material Cost (${_useUSD ? 'USD' : 'NGN'})",
-                      labelStyle: const TextStyle(fontSize: 13, color: Colors.black54),
-                      filled: true,
-                      fillColor: Colors.grey.shade50,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF6B21A8), width: 2),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                    ),
-                    keyboardType: TextInputType.number,
-                    enabled: !_isSubmitting,
+            if (_userRole == "user")
+              TextField(
+                controller: _totalCtrl,
+                decoration: InputDecoration(
+                  labelText: "Total Amount (${_useUSD ? 'USD' : 'NGN'})",
+                  labelStyle: const TextStyle(fontSize: 13, color: Colors.black54),
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _workmanshipCtrl,
-                    decoration: InputDecoration(
-                      labelText: "Workmanship (${_useUSD ? 'USD' : 'NGN'})",
-                      labelStyle: const TextStyle(fontSize: 13, color: Colors.black54),
-                      filled: true,
-                      fillColor: Colors.grey.shade50,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF6B21A8), width: 2),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                    ),
-                    keyboardType: TextInputType.number,
-                    enabled: !_isSubmitting,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
                   ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF6B21A8), width: 2),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                 ),
-              ],
-            ),
+                keyboardType: TextInputType.number,
+                enabled: !_isSubmitting,
+              )
+            else
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _materialCtrl,
+                      decoration: InputDecoration(
+                        labelText: "Material Cost (${_useUSD ? 'USD' : 'NGN'})",
+                        labelStyle: const TextStyle(fontSize: 13, color: Colors.black54),
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFF6B21A8), width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                      ),
+                      keyboardType: TextInputType.number,
+                      enabled: !_isSubmitting,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _workmanshipCtrl,
+                      decoration: InputDecoration(
+                        labelText: "Workmanship (${_useUSD ? 'USD' : 'NGN'})",
+                        labelStyle: const TextStyle(fontSize: 13, color: Colors.black54),
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFF6B21A8), width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                      ),
+                      keyboardType: TextInputType.number,
+                      enabled: !_isSubmitting,
+                    ),
+                  ),
+                ],
+              ),
           ],
 
           const SizedBox(height: 16),

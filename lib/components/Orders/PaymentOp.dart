@@ -488,8 +488,10 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
 
               const SizedBox(height: 12),
 
-              const CustomText("Shipment Method", fontSize: 16),
-              const SizedBox(height: 6),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: const CustomText("Shipment Method", fontSize: 16)),
+              const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
@@ -508,12 +510,47 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                 ),
               ),
 
+                const SizedBox(height: 15),
+
               if (paymentType != "part")
-                CustomTextField(
-                  title: "Delivery Address",
-                  fieldKey: "address",
-                  hintText: "Enter address",
-                  controller: addressController,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: const CustomText("Delivery Address", fontSize: 16)),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: addressController,
+                      maxLines: 3,
+                      minLines: 3,
+                      decoration: InputDecoration(
+                        hintText:
+                            "24 Adeola Odeku St, Victoria Island, Lagos, Nigeria",
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
+                        ),
+                      ),
+                      keyboardType: TextInputType.streetAddress,
+                    ),
+                    const SizedBox(height: 6),
+                    const CustomText(
+                      "Include street, city, state, and country.",
+                      fontSize: 11,
+                      color: Colors.black54,
+                    ),
+                  ],
                 ),
 
               const SizedBox(height: 20),

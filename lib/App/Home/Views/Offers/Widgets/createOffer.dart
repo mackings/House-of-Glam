@@ -9,8 +9,9 @@ import 'package:intl/intl.dart';
 /// Modal bottom sheet for creating initial offer
 class CreateOfferSheet extends StatefulWidget {
   final Review review;
+  final VoidCallback? onOfferCreated;
 
-  const CreateOfferSheet({super.key, required this.review});
+  const CreateOfferSheet({super.key, required this.review, this.onOfferCreated});
 
   @override
   State<CreateOfferSheet> createState() => _CreateOfferSheetState();
@@ -18,8 +19,7 @@ class CreateOfferSheet extends StatefulWidget {
 
 class _CreateOfferSheetState extends State<CreateOfferSheet> {
   final TextEditingController _commentCtrl = TextEditingController();
-  final TextEditingController _materialCtrl = TextEditingController();
-  final TextEditingController _workmanshipCtrl = TextEditingController();
+  final TextEditingController _totalCtrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   bool _isSubmitting = false;
@@ -34,16 +34,14 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
   Future<void> _initializeAmounts() async {
     // Pre-fill with vendor's quoted amounts as starting point
     setState(() {
-      _materialCtrl.text = NumberFormat('#,###').format(widget.review.materialTotalCost);
-      _workmanshipCtrl.text = NumberFormat('#,###').format(widget.review.workmanshipTotalCost);
+      _totalCtrl.text = NumberFormat('#,###').format(widget.review.totalCost);
     });
   }
 
   @override
   void dispose() {
     _commentCtrl.dispose();
-    _materialCtrl.dispose();
-    _workmanshipCtrl.dispose();
+    _totalCtrl.dispose();
     super.dispose();
   }
 
@@ -75,12 +73,21 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
     if (!_formKey.currentState!.validate()) return;
 
     final comment = _commentCtrl.text.trim();
-    final materialStr = _materialCtrl.text.replaceAll(',', '').trim();
-    final workmanshipStr = _workmanshipCtrl.text.replaceAll(',', '').trim();
+    final totalStr = _totalCtrl.text.replaceAll(',', '').trim();
 
     if (comment.isEmpty) {
       return _showSnack("Please add a comment", isError: true);
     }
+    if (totalStr.isEmpty) {
+      return _showSnack("Please enter a total amount", isError: true);
+    }
+
+    final totalAmount = int.tryParse(totalStr);
+    if (totalAmount == null || totalAmount <= 0) {
+      return _showSnack("Please enter a valid amount", isError: true);
+    }
+    final materialAmount = (totalAmount / 2).floor();
+    final workmanshipAmount = totalAmount - materialAmount;
 
     setState(() => _isSubmitting = true);
 
@@ -88,8 +95,8 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
       final response = await OfferService.makeOffer(
         reviewId: widget.review.id,
         comment: comment,
-        materialTotalCost: materialStr,
-        workmanshipTotalCost: workmanshipStr,
+        materialTotalCost: materialAmount.toString(),
+        workmanshipTotalCost: workmanshipAmount.toString(),
       );
 
       setState(() => _isSubmitting = false);
@@ -98,6 +105,7 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
         final offerId = response["data"]?["_id"];
 
         if (offerId != null) {
+          widget.onOfferCreated?.call();
           // Close this sheet
           if (mounted) Navigator.pop(context);
 
@@ -127,8 +135,8 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final total = (double.tryParse(_materialCtrl.text.replaceAll(',', '')) ?? 0) +
-                  (double.tryParse(_workmanshipCtrl.text.replaceAll(',', '')) ?? 0);
+    final total =
+        double.tryParse(_totalCtrl.text.replaceAll(',', '')) ?? 0;
 
     return Container(
       decoration: const BoxDecoration(
@@ -278,19 +286,19 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Material Cost
+                          // Total Cost
                           const CustomText(
-                            "Material Cost (NGN)",
+                            "Total Amount (NGN)",
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF1F2937),
                           ),
                           const SizedBox(height: 8),
                           TextFormField(
-                            controller: _materialCtrl,
+                            controller: _totalCtrl,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
-                              hintText: "e.g., 45,000",
+                              hintText: "e.g., 75,000",
                               filled: true,
                               fillColor: Colors.white,
                               border: OutlineInputBorder(
@@ -308,48 +316,7 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                               // Format with commas
                               final formatted = _formatNumber(v);
                               if (formatted != v) {
-                                _materialCtrl.value = TextEditingValue(
-                                  text: formatted,
-                                  selection: TextSelection.collapsed(offset: formatted.length),
-                                );
-                              }
-                              setState(() {}); // Update total
-                            },
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          // Workmanship Cost
-                          const CustomText(
-                            "Workmanship Cost (NGN)",
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF1F2937),
-                          ),
-                          const SizedBox(height: 8),
-                          TextFormField(
-                            controller: _workmanshipCtrl,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              hintText: "e.g., 30,000",
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: Colors.grey.shade300),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: Colors.grey.shade300),
-                              ),
-                            ),
-                            validator: (v) => v == null || v.isEmpty ? "Required" : null,
-                            enabled: !_isSubmitting,
-                            onChanged: (v) {
-                              // Format with commas
-                              final formatted = _formatNumber(v);
-                              if (formatted != v) {
-                                _workmanshipCtrl.value = TextEditingValue(
+                                _totalCtrl.value = TextEditingValue(
                                   text: formatted,
                                   selection: TextSelection.collapsed(offset: formatted.length),
                                 );
@@ -379,6 +346,12 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                                 color: Color(0xFF6B21A8),
                               ),
                             ],
+                          ),
+                          const SizedBox(height: 6),
+                          const CustomText(
+                            "We split this into material and workmanship for processing.",
+                            fontSize: 11,
+                            color: Color(0xFF6B7280),
                           ),
                         ],
                       ),

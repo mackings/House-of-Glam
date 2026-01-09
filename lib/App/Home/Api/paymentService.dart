@@ -7,6 +7,28 @@ class PaymentService {
   static const String localBaseURL = ApiConfig.apiBaseUrl;
   static const String liveBaseURL = ApiConfig.apiBaseUrl;
 
+  static void _logPaymentResponse({
+    required String label,
+    required Uri url,
+    required Map<String, dynamic> payload,
+    required Map<String, String> headers,
+    required http.Response response,
+  }) {
+    print("➡️ $label Request URL: $url");
+    print("📦 $label Payload: $payload");
+    print("🧾 $label Headers: $headers");
+    print("⬅️ $label Response Status: ${response.statusCode}");
+    print("📨 $label Response Headers: ${response.headers}");
+    print("📨 $label Response Body: ${response.body}");
+  }
+
+  static Map<String, String> _buildHeaders(String? token) {
+    return {
+      "Authorization": "Bearer ${token ?? ''}",
+      "Content-Type": "application/json",
+    };
+  }
+
   /// Create Part Payment (Using unified endpoint with paymentStatus)
   static Future<Map<String, dynamic>?> createPartPayment({
     required String reviewId,
@@ -26,20 +48,20 @@ class PaymentService {
       if (address != null) "address": address,
     };
 
-    print("➡️ Part Payment Request: $payload");
-
     try {
+      final headers = _buildHeaders(token);
       final response = await http.post(
         url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
+        headers: headers,
         body: jsonEncode(payload),
       );
 
-      print(
-        "⬅️ Part Payment Response [${response.statusCode}]: ${response.body}",
+      _logPaymentResponse(
+        label: "Part Payment",
+        url: url,
+        payload: payload,
+        headers: headers,
+        response: response,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -75,20 +97,20 @@ class PaymentService {
       if (address != null) "address": address,
     };
 
-    print("➡️ Full Payment Request: $payload");
-
     try {
+      final headers = _buildHeaders(token);
       final response = await http.post(
         url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
+        headers: headers,
         body: jsonEncode(payload),
       );
 
-      print(
-        "⬅️ Full Payment Response [${response.statusCode}]: ${response.body}",
+      _logPaymentResponse(
+        label: "Full Payment",
+        url: url,
+        payload: payload,
+        headers: headers,
+        response: response,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {

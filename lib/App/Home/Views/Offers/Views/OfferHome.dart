@@ -500,21 +500,22 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
                             color: Colors.black87,
                           ),
                           const SizedBox(height: 3),
-                          Row(
-                            children: [
-                              Icon(
-                                isBuyer ? Icons.shopping_bag_outlined : Icons.store_outlined,
-                                size: 13,
-                                color: Colors.black45,
-                              ),
-                              const SizedBox(width: 4),
-                              CustomText(
-                                isBuyer ? "You're buying" : "You're selling",
-                                fontSize: 12,
-                                color: Colors.black54,
-                              ),
-                            ],
-                          ),
+                          if (isBuyer)
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.shopping_bag_outlined,
+                                  size: 13,
+                                  color: Colors.black45,
+                                ),
+                                const SizedBox(width: 4),
+                                const CustomText(
+                                  "You're buying",
+                                  fontSize: 12,
+                                  color: Colors.black54,
+                                ),
+                              ],
+                            ),
                         ],
                       ),
                     ),

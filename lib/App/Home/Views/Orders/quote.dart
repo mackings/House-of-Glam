@@ -12,6 +12,9 @@ import 'package:hog/components/Orders/quotationcard.dart';
 import 'package:hog/components/texts.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+
+
+
 class Quotation extends StatefulWidget {
   final String materialId;
 
@@ -24,6 +27,7 @@ class Quotation extends StatefulWidget {
 class _QuotationState extends State<Quotation> {
   bool isLoading = false;
   List<Review> reviews = [];
+  final Set<String> _submittedOfferReviewIds = {};
 
   @override
   void initState() {
@@ -255,6 +259,9 @@ class _QuotationState extends State<Quotation> {
                     return QuotationCard(
                       review: reviews[index],
                       onRefresh: fetchReviews, // ✅ Pass refresh callback
+                      hasSubmittedOffer: _submittedOfferReviewIds.contains(
+                        reviews[index].id,
+                      ),
                       onHireDesigner: () {
                         print(reviews[index].id);
                         _showHireDesignerConfirmation(reviews[index]);
@@ -266,7 +273,15 @@ class _QuotationState extends State<Quotation> {
                           context: context,
                           isScrollControlled: true,
                           backgroundColor: Colors.transparent,
-                          builder: (context) => CreateOfferSheet(review: review),
+                          builder:
+                              (context) => CreateOfferSheet(
+                                review: review,
+                                onOfferCreated: () {
+                                  setState(() {
+                                    _submittedOfferReviewIds.add(review.id);
+                                  });
+                                },
+                              ),
                         ).then((_) {
                           // Refresh quotations list after returning
                           fetchReviews();
