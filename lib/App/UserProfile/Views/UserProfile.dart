@@ -218,7 +218,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                         ),
                       ),
 
-                     GestureDetector(
+                      GestureDetector(
                         onTap: () {
                           Nav.push(context, Transactions());
                         },

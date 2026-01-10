@@ -5,9 +5,6 @@ import 'package:hog/constants/currencyHelper.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-
-
-
 class TailorAssignedCard extends StatelessWidget {
   final TailorAssignedMaterial item;
   final VoidCallback onTap;
@@ -19,7 +16,8 @@ class TailorAssignedCard extends StatelessWidget {
   });
 
   Map<String, double> _getDisplayAmounts() {
-    final isInternational = item.isInternationalVendor || 
+    final isInternational =
+        item.isInternationalVendor ||
         (item.country != null && item.country!.toUpperCase() != 'NG');
 
     if (isInternational) {
@@ -72,10 +70,7 @@ class TailorAssignedCard extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      const Color(0xFF6B21A8),
-                      const Color(0xFF7C3AED),
-                    ],
+                    colors: [const Color(0xFF6B21A8), const Color(0xFF7C3AED)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -108,33 +103,40 @@ class TailorAssignedCard extends StatelessWidget {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(14),
-                            child: material.sampleImages.isNotEmpty
-                                ? Image.network(
-                                    material.sampleImages.first,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        color: Colors.white.withOpacity(0.1),
-                                        child: Icon(
-                                          Icons.checkroom_rounded,
-                                          color: Colors.white.withOpacity(0.6),
-                                          size: 32,
-                                        ),
-                                      );
-                                    },
-                                  )
-                                : Container(
-                                    color: Colors.white.withOpacity(0.1),
-                                    child: Icon(
-                                      Icons.checkroom_rounded,
-                                      color: Colors.white.withOpacity(0.6),
-                                      size: 32,
+                            child:
+                                material.sampleImages.isNotEmpty
+                                    ? Image.network(
+                                      material.sampleImages.first,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (
+                                        context,
+                                        error,
+                                        stackTrace,
+                                      ) {
+                                        return Container(
+                                          color: Colors.white.withOpacity(0.1),
+                                          child: Icon(
+                                            Icons.checkroom_rounded,
+                                            color: Colors.white.withOpacity(
+                                              0.6,
+                                            ),
+                                            size: 32,
+                                          ),
+                                        );
+                                      },
+                                    )
+                                    : Container(
+                                      color: Colors.white.withOpacity(0.1),
+                                      child: Icon(
+                                        Icons.checkroom_rounded,
+                                        color: Colors.white.withOpacity(0.6),
+                                        size: 32,
+                                      ),
                                     ),
-                                  ),
                           ),
                         ),
                         const SizedBox(width: 16),
-      
+
                         // Title and Details
                         Expanded(
                           child: Column(
@@ -182,7 +184,9 @@ class TailorAssignedCard extends StatelessWidget {
                                     width: 8,
                                     height: 8,
                                     decoration: BoxDecoration(
-                                      color: _getColorFromString(material.color),
+                                      color: _getColorFromString(
+                                        material.color,
+                                      ),
                                       shape: BoxShape.circle,
                                       border: Border.all(
                                         color: Colors.white,
@@ -195,7 +199,7 @@ class TailorAssignedCard extends StatelessWidget {
                             ],
                           ),
                         ),
-      
+
                         // Status Badge
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -221,24 +225,20 @@ class TailorAssignedCard extends StatelessWidget {
                   ],
                 ),
               ),
-      
+
               // White Content Section
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-      
                     const SizedBox(height: 5),
-      
+
                     // Payment Card - Black Premium Style
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [
-                            Color(0xFF1F2937),
-                            Color(0xFF111827),
-                          ],
+                          colors: [Color(0xFF1F2937), Color(0xFF111827)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -286,7 +286,9 @@ class TailorAssignedCard extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF6B21A8).withOpacity(0.15),
+                                  color: const Color(
+                                    0xFF6B21A8,
+                                  ).withOpacity(0.15),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
@@ -297,9 +299,9 @@ class TailorAssignedCard extends StatelessWidget {
                               ),
                             ],
                           ),
-      
+
                           const SizedBox(height: 20),
-      
+
                           Container(
                             height: 1,
                             decoration: BoxDecoration(
@@ -312,9 +314,9 @@ class TailorAssignedCard extends StatelessWidget {
                               ),
                             ),
                           ),
-      
+
                           const SizedBox(height: 20),
-      
+
                           Row(
                             children: [
                               Expanded(
@@ -326,8 +328,12 @@ class TailorAssignedCard extends StatelessWidget {
                                         Container(
                                           padding: const EdgeInsets.all(4),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFF10B981).withOpacity(0.15),
-                                            borderRadius: BorderRadius.circular(6),
+                                            color: const Color(
+                                              0xFF10B981,
+                                            ).withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
                                           ),
                                           child: const Icon(
                                             Icons.check_circle_rounded,
@@ -340,7 +346,9 @@ class TailorAssignedCard extends StatelessWidget {
                                           "Paid",
                                           style: GoogleFonts.poppins(
                                             fontSize: 11,
-                                            color: Colors.white.withOpacity(0.6),
+                                            color: Colors.white.withOpacity(
+                                              0.6,
+                                            ),
                                             fontWeight: FontWeight.w500,
                                             letterSpacing: 0.3,
                                           ),
@@ -378,7 +386,9 @@ class TailorAssignedCard extends StatelessWidget {
                                           "Balance",
                                           style: GoogleFonts.poppins(
                                             fontSize: 11,
-                                            color: Colors.white.withOpacity(0.6),
+                                            color: Colors.white.withOpacity(
+                                              0.6,
+                                            ),
                                             fontWeight: FontWeight.w500,
                                             letterSpacing: 0.3,
                                           ),
@@ -387,19 +397,29 @@ class TailorAssignedCard extends StatelessWidget {
                                         Container(
                                           padding: const EdgeInsets.all(4),
                                           decoration: BoxDecoration(
-                                            color: (isFullyPaid 
-                                                ? Colors.white.withOpacity(0.1)
-                                                : const Color(0xFFF59E0B).withOpacity(0.15)),
-                                            borderRadius: BorderRadius.circular(6),
+                                            color:
+                                                (isFullyPaid
+                                                    ? Colors.white.withOpacity(
+                                                      0.1,
+                                                    )
+                                                    : const Color(
+                                                      0xFFF59E0B,
+                                                    ).withOpacity(0.15)),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
                                           ),
                                           child: Icon(
                                             isFullyPaid
                                                 ? Icons.check_circle_rounded
                                                 : Icons.schedule_rounded,
                                             size: 14,
-                                            color: isFullyPaid
-                                                ? Colors.white.withOpacity(0.6)
-                                                : const Color(0xFFF59E0B),
+                                            color:
+                                                isFullyPaid
+                                                    ? Colors.white.withOpacity(
+                                                      0.6,
+                                                    )
+                                                    : const Color(0xFFF59E0B),
                                           ),
                                         ),
                                       ],
@@ -412,9 +432,10 @@ class TailorAssignedCard extends StatelessWidget {
                                       style: GoogleFonts.poppins(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w700,
-                                        color: isFullyPaid
-                                            ? Colors.white.withOpacity(0.6)
-                                            : const Color(0xFFF59E0B),
+                                        color:
+                                            isFullyPaid
+                                                ? Colors.white.withOpacity(0.6)
+                                                : const Color(0xFFF59E0B),
                                         letterSpacing: -0.3,
                                       ),
                                     ),
@@ -426,7 +447,6 @@ class TailorAssignedCard extends StatelessWidget {
                         ],
                       ),
                     ),
-      
                   ],
                 ),
               ),
@@ -468,9 +488,10 @@ class TailorAssignedCard extends StatelessWidget {
   }
 
   String _formatStatus(String status) {
-    return status.split(' ').map((word) => 
-      word[0].toUpperCase() + word.substring(1).toLowerCase()
-    ).join(' ');
+    return status
+        .split(' ')
+        .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
+        .join(' ');
   }
 
   Color _getColorFromString(String colorName) {

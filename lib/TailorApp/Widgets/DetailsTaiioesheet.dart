@@ -7,9 +7,6 @@ import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:intl/intl.dart';
 
-
-
-
 class TailorMaterialDetailSheet extends StatefulWidget {
   final TailorMaterialItem material;
 
@@ -201,9 +198,7 @@ class _TailorMaterialDetailSheetState extends State<TailorMaterialDetailSheet> {
 
                 _buildSectionCard(
                   title: "Measurements",
-                  children: [
-                    _buildMeasurements(material.measurement),
-                  ],
+                  children: [_buildMeasurements(material.measurement)],
                 ),
 
                 const SizedBox(height: 16),
@@ -470,17 +465,17 @@ class _TailorMaterialDetailSheetState extends State<TailorMaterialDetailSheet> {
       "armType",
     ];
 
-    final keys = merged.keys.toList()
-      ..sort((a, b) {
-        final indexA = preferredOrder.indexOf(a);
-        final indexB = preferredOrder.indexOf(b);
-        if (indexA == -1 && indexB == -1) {
-          return a.compareTo(b);
-        }
-        if (indexA == -1) return 1;
-        if (indexB == -1) return -1;
-        return indexA.compareTo(indexB);
-      });
+    final keys =
+        merged.keys.toList()..sort((a, b) {
+          final indexA = preferredOrder.indexOf(a);
+          final indexB = preferredOrder.indexOf(b);
+          if (indexA == -1 && indexB == -1) {
+            return a.compareTo(b);
+          }
+          if (indexA == -1) return 1;
+          if (indexB == -1) return -1;
+          return indexA.compareTo(indexB);
+        });
 
     return Wrap(
       spacing: 8,

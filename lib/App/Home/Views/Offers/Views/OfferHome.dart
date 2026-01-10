@@ -9,8 +9,6 @@ import 'package:hog/constants/currencyHelper.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-
-
 class OfferHome extends StatefulWidget {
   const OfferHome({super.key});
 
@@ -18,7 +16,8 @@ class OfferHome extends StatefulWidget {
   State<OfferHome> createState() => _OfferHomeState();
 }
 
-class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMixin {
+class _OfferHomeState extends State<OfferHome>
+    with SingleTickerProviderStateMixin {
   List<MakeOffer> offers = [];
   String? userId;
   String? userRole;
@@ -50,7 +49,7 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
     final userData = await SecurePrefs.getUserData();
     userRole = userData?["role"];
     _userCountry = userData?["country"] ?? 'Nigeria'; // 🆕 Get user country
-    
+
     // 🆕 Determine if user should see USD
     setState(() {
       _useUSD = _userCountry != 'Nigeria';
@@ -88,12 +87,16 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
   }
 
   // 🆕 Helper method to get display amount based on user's location
-  String _getDisplayAmount(MakeOffer offer, double ngnAmount, double usdAmount) {
+  String _getDisplayAmount(
+    MakeOffer offer,
+    double ngnAmount,
+    double usdAmount,
+  ) {
     // If offer is not international, always show NGN
     if (!offer.isInternationalVendor) {
       return CurrencyHelper.formatAmount(ngnAmount, currencyCode: 'NGN');
     }
-    
+
     // If international offer, show based on user preference
     if (_useUSD) {
       return '\$${usdAmount.toStringAsFixed(2)}';
@@ -199,7 +202,12 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
               children: [
                 Icon(Icons.check_circle, size: 12, color: Color(0xFF10B981)),
                 SizedBox(width: 3),
-                CustomText("Buyer", fontSize: 9, fontWeight: FontWeight.w600, color: Color(0xFF10B981)),
+                CustomText(
+                  "Buyer",
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF10B981),
+                ),
               ],
             ),
           ),
@@ -218,7 +226,12 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
               children: [
                 Icon(Icons.check_circle, size: 12, color: Color(0xFF10B981)),
                 SizedBox(width: 3),
-                CustomText("Vendor", fontSize: 9, fontWeight: FontWeight.w600, color: Color(0xFF10B981)),
+                CustomText(
+                  "Vendor",
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF10B981),
+                ),
               ],
             ),
           ),
@@ -275,21 +288,25 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
           const SizedBox(width: 8),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.purple))
-          : RefreshIndicator(
-              onRefresh: loadOffers,
-              color: Colors.purple,
-              child: offers.isEmpty
-                  ? _buildEmptyState()
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: offers.length,
-                      itemBuilder: (context, index) {
-                        return _buildOfferCard(offers[index], index);
-                      },
-                    ),
-            ),
+      body:
+          isLoading
+              ? const Center(
+                child: CircularProgressIndicator(color: Colors.purple),
+              )
+              : RefreshIndicator(
+                onRefresh: loadOffers,
+                color: Colors.purple,
+                child:
+                    offers.isEmpty
+                        ? _buildEmptyState()
+                        : ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: offers.length,
+                          itemBuilder: (context, index) {
+                            return _buildOfferCard(offers[index], index);
+                          },
+                        ),
+              ),
     );
   }
 
@@ -345,7 +362,10 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
               ),
               const SizedBox(height: 32),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Colors.purple, Colors.purple.shade700],
@@ -362,7 +382,11 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.local_offer_rounded, color: Colors.white, size: 20),
+                    Icon(
+                      Icons.local_offer_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                     SizedBox(width: 8),
                     CustomText(
                       "Browse Quotations",
@@ -384,20 +408,29 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
     final isBuyer = isBuyerOffer(offer);
     final latestChat = offer.latestChat;
     final latestComment = latestChat?.comment ?? "No messages yet";
-    final displayName = isBuyer ? offer.vendor.businessName : offer.user.fullName;
+    final displayName =
+        isBuyer ? offer.vendor.businessName : offer.user.fullName;
 
-    final initials = displayName.isNotEmpty
-        ? displayName.split(" ").map((e) => e.isEmpty ? '' : e[0]).take(2).join().toUpperCase()
-        : "?";
+    final initials =
+        displayName.isNotEmpty
+            ? displayName
+                .split(" ")
+                .map((e) => e.isEmpty ? '' : e[0])
+                .take(2)
+                .join()
+                .toUpperCase()
+            : "?";
 
     // 🆕 Get the appropriate amounts based on mutual consent
-    final displayNGN = offer.mutualConsentAchieved
-        ? offer.finalTotalCost
-        : (latestChat?.counterTotalCost ?? 0.0);
-    
-    final displayUSD = offer.mutualConsentAchieved
-        ? offer.finalTotalCostUSD
-        : (latestChat?.counterTotalCostUSD ?? 0.0);
+    final displayNGN =
+        offer.mutualConsentAchieved
+            ? offer.finalTotalCost
+            : (latestChat?.counterTotalCost ?? 0.0);
+
+    final displayUSD =
+        offer.mutualConsentAchieved
+            ? offer.finalTotalCostUSD
+            : (latestChat?.counterTotalCostUSD ?? 0.0);
 
     final delay = index * 50;
 
@@ -408,19 +441,14 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
       builder: (context, value, child) {
         return Transform.translate(
           offset: Offset(0, 20 * (1 - value)),
-          child: Opacity(
-            opacity: value,
-            child: child,
-          ),
+          child: Opacity(opacity: value, child: child),
         );
       },
       child: GestureDetector(
         onTap: () async {
           await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => OfferDetailV2(offerId: offer.id),
-            ),
+            MaterialPageRoute(builder: (_) => OfferDetailV2(offerId: offer.id)),
           );
           await loadOffers();
         },
@@ -429,14 +457,16 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: offer.mutualConsentAchieved
-                ? Border.all(color: const Color(0xFF10B981), width: 2.5)
-                : null,
+            border:
+                offer.mutualConsentAchieved
+                    ? Border.all(color: const Color(0xFF10B981), width: 2.5)
+                    : null,
             boxShadow: [
               BoxShadow(
-                color: offer.mutualConsentAchieved
-                    ? const Color(0xFF10B981).withOpacity(0.15)
-                    : Colors.black.withOpacity(0.08),
+                color:
+                    offer.mutualConsentAchieved
+                        ? const Color(0xFF10B981).withOpacity(0.15)
+                        : Colors.black.withOpacity(0.08),
                 blurRadius: 15,
                 offset: const Offset(0, 5),
               ),
@@ -450,9 +480,13 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: offer.mutualConsentAchieved
-                        ? [const Color(0xFFF0FDF4), Colors.white]
-                        : [Colors.purple.shade50.withOpacity(0.3), Colors.white],
+                    colors:
+                        offer.mutualConsentAchieved
+                            ? [const Color(0xFFF0FDF4), Colors.white]
+                            : [
+                              Colors.purple.shade50.withOpacity(0.3),
+                              Colors.white,
+                            ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -467,7 +501,10 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: LinearGradient(
-                          colors: [Colors.purple.shade400, Colors.purple.shade600],
+                          colors: [
+                            Colors.purple.shade400,
+                            Colors.purple.shade600,
+                          ],
                         ),
                         boxShadow: [
                           BoxShadow(
@@ -593,9 +630,16 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: offer.mutualConsentAchieved
-                                    ? [const Color(0xFFD1FAE5), const Color(0xFFA7F3D0)]
-                                    : [Colors.purple.shade50, Colors.purple.shade100],
+                                colors:
+                                    offer.mutualConsentAchieved
+                                        ? [
+                                          const Color(0xFFD1FAE5),
+                                          const Color(0xFFA7F3D0),
+                                        ]
+                                        : [
+                                          Colors.purple.shade50,
+                                          Colors.purple.shade100,
+                                        ],
                               ),
                               borderRadius: BorderRadius.circular(14),
                             ),
@@ -607,30 +651,37 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
                                     Icon(
                                       Icons.payments_rounded,
                                       size: 14,
-                                      color: offer.mutualConsentAchieved
-                                          ? const Color(0xFF10B981)
-                                          : Colors.purple.shade700,
+                                      color:
+                                          offer.mutualConsentAchieved
+                                              ? const Color(0xFF10B981)
+                                              : Colors.purple.shade700,
                                     ),
                                     const SizedBox(width: 5),
                                     CustomText(
                                       "Current Amount",
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: offer.mutualConsentAchieved
-                                          ? const Color(0xFF10B981)
-                                          : Colors.purple.shade700,
+                                      color:
+                                          offer.mutualConsentAchieved
+                                              ? const Color(0xFF10B981)
+                                              : Colors.purple.shade700,
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 6),
                                 // 🆕 USE THE HELPER METHOD
                                 CustomText(
-                                  _getDisplayAmount(offer, displayNGN, displayUSD),
+                                  _getDisplayAmount(
+                                    offer,
+                                    displayNGN,
+                                    displayUSD,
+                                  ),
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: offer.mutualConsentAchieved
-                                      ? const Color(0xFF059669)
-                                      : Colors.purple.shade900,
+                                  color:
+                                      offer.mutualConsentAchieved
+                                          ? const Color(0xFF059669)
+                                          : Colors.purple.shade900,
                                 ),
                               ],
                             ),
@@ -650,7 +701,11 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.forum_rounded, size: 14, color: Colors.black38),
+                            Icon(
+                              Icons.forum_rounded,
+                              size: 14,
+                              color: Colors.black38,
+                            ),
                             const SizedBox(width: 5),
                             CustomText(
                               "${offer.chats.length} messages",
@@ -662,10 +717,17 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
                         ),
                         Row(
                           children: [
-                            Icon(Icons.access_time_rounded, size: 13, color: Colors.black38),
+                            Icon(
+                              Icons.access_time_rounded,
+                              size: 13,
+                              color: Colors.black38,
+                            ),
                             const SizedBox(width: 4),
                             CustomText(
-                              timeago.format(offer.updatedAt, locale: 'en_short'),
+                              timeago.format(
+                                offer.updatedAt,
+                                locale: 'en_short',
+                              ),
                               fontSize: 11,
                               color: Colors.black45,
                             ),
@@ -680,7 +742,10 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
               // Mutual Consent Footer
               if (offer.mutualConsentAchieved)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [Color(0xFF10B981), Color(0xFF059669)],
@@ -693,7 +758,11 @@ class _OfferHomeState extends State<OfferHome> with SingleTickerProviderStateMix
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.verified_rounded, color: Colors.white, size: 18),
+                      Icon(
+                        Icons.verified_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                       const SizedBox(width: 8),
                       const CustomText(
                         "Agreement Reached • Ready for Payment",

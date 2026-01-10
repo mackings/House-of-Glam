@@ -11,7 +11,11 @@ class CreateOfferSheet extends StatefulWidget {
   final Review review;
   final VoidCallback? onOfferCreated;
 
-  const CreateOfferSheet({super.key, required this.review, this.onOfferCreated});
+  const CreateOfferSheet({
+    super.key,
+    required this.review,
+    this.onOfferCreated,
+  });
 
   @override
   State<CreateOfferSheet> createState() => _CreateOfferSheetState();
@@ -60,7 +64,8 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
             Expanded(child: CustomText(msg, color: Colors.white, fontSize: 14)),
           ],
         ),
-        backgroundColor: isError ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+        backgroundColor:
+            isError ? const Color(0xFFEF4444) : const Color(0xFF10B981),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
@@ -125,7 +130,10 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
           _showSnack("Offer created but no ID returned", isError: true);
         }
       } else {
-        _showSnack(response["message"] ?? "Failed to create offer", isError: true);
+        _showSnack(
+          response["message"] ?? "Failed to create offer",
+          isError: true,
+        );
       }
     } catch (e) {
       setState(() => _isSubmitting = false);
@@ -135,8 +143,7 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final total =
-        double.tryParse(_totalCtrl.text.replaceAll(',', '')) ?? 0;
+    final total = double.tryParse(_totalCtrl.text.replaceAll(',', '')) ?? 0;
 
     return Container(
       decoration: const BoxDecoration(
@@ -237,7 +244,10 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                           ),
                           const SizedBox(height: 8),
                           CustomText(
-                            CurrencyHelper.formatAmount(widget.review.totalCost, currencyCode: 'NGN'),
+                            CurrencyHelper.formatAmount(
+                              widget.review.totalCost,
+                              currencyCode: 'NGN',
+                            ),
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF1F2937),
@@ -266,7 +276,9 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF6B21A8).withOpacity(0.1),
+                                  color: const Color(
+                                    0xFF6B21A8,
+                                  ).withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Icon(
@@ -303,14 +315,20 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                               fillColor: Colors.white,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: Colors.grey.shade300),
+                                borderSide: BorderSide(
+                                  color: Colors.grey.shade300,
+                                ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: Colors.grey.shade300),
+                                borderSide: BorderSide(
+                                  color: Colors.grey.shade300,
+                                ),
                               ),
                             ),
-                            validator: (v) => v == null || v.isEmpty ? "Required" : null,
+                            validator:
+                                (v) =>
+                                    v == null || v.isEmpty ? "Required" : null,
                             enabled: !_isSubmitting,
                             onChanged: (v) {
                               // Format with commas
@@ -318,7 +336,9 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                               if (formatted != v) {
                                 _totalCtrl.value = TextEditingValue(
                                   text: formatted,
-                                  selection: TextSelection.collapsed(offset: formatted.length),
+                                  selection: TextSelection.collapsed(
+                                    offset: formatted.length,
+                                  ),
                                 );
                               }
                               setState(() {}); // Update total
@@ -340,7 +360,10 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                                 color: Color(0xFF1F2937),
                               ),
                               CustomText(
-                                CurrencyHelper.formatAmount(total, currencyCode: 'NGN'),
+                                CurrencyHelper.formatAmount(
+                                  total,
+                                  currencyCode: 'NGN',
+                                ),
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF6B21A8),
@@ -379,7 +402,11 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                           borderSide: BorderSide.none,
                         ),
                       ),
-                      validator: (v) => v == null || v.isEmpty ? "Please add a comment" : null,
+                      validator:
+                          (v) =>
+                              v == null || v.isEmpty
+                                  ? "Please add a comment"
+                                  : null,
                       enabled: !_isSubmitting,
                     ),
 
@@ -391,16 +418,17 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                       height: 56,
                       child: ElevatedButton.icon(
                         onPressed: _isSubmitting ? null : _handleCreateOffer,
-                        icon: _isSubmitting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.send, color: Colors.white),
+                        icon:
+                            _isSubmitting
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                                : const Icon(Icons.send, color: Colors.white),
                         label: CustomText(
                           _isSubmitting ? "Sending..." : "Send Offer",
                           fontSize: 16,

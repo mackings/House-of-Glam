@@ -8,8 +8,6 @@ import 'package:hog/constants/currency.dart';
 import 'package:hog/constants/currencyHelper.dart';
 import 'package:intl/intl.dart';
 
-
-
 class OfferDetail extends StatefulWidget {
   final Map<String, dynamic> offer;
 
@@ -45,12 +43,16 @@ class _OfferDetailState extends State<OfferDetail> {
   }
 
   Future<void> _initializeAmounts() async {
-    final materialNGN = int.tryParse(offer["materialTotalCost"]?.toString() ?? "0") ?? 0;
-    final workmanshipNGN = int.tryParse(offer["workmanshipTotalCost"]?.toString() ?? "0") ?? 0;
+    final materialNGN =
+        int.tryParse(offer["materialTotalCost"]?.toString() ?? "0") ?? 0;
+    final workmanshipNGN =
+        int.tryParse(offer["workmanshipTotalCost"]?.toString() ?? "0") ?? 0;
 
     // ✅ Convert to user's currency for display
     final convertedMaterial = await CurrencyHelper.convertFromNGN(materialNGN);
-    final convertedWorkmanship = await CurrencyHelper.convertFromNGN(workmanshipNGN);
+    final convertedWorkmanship = await CurrencyHelper.convertFromNGN(
+      workmanshipNGN,
+    );
 
     setState(() {
       _materialCtrl.text = convertedMaterial.toStringAsFixed(2);
@@ -136,7 +138,8 @@ class _OfferDetailState extends State<OfferDetail> {
 
     final ok = (res["success"] == true);
     _showSnack(
-      res["message"] ?? (ok ? "Offer created successfully" : "Failed to create offer"),
+      res["message"] ??
+          (ok ? "Offer created successfully" : "Failed to create offer"),
       isError: !ok,
     );
     if (ok) Navigator.pop(context);
@@ -156,7 +159,8 @@ class _OfferDetailState extends State<OfferDetail> {
       return _showSnack("Please add a comment", isError: true);
     }
 
-    if (action == "accepted" && (counterMatDisplay.isEmpty || counterWorkDisplay.isEmpty)) {
+    if (action == "accepted" &&
+        (counterMatDisplay.isEmpty || counterWorkDisplay.isEmpty)) {
       return _showSnack(
         "Please enter amounts before accepting.",
         isError: true,
@@ -164,16 +168,18 @@ class _OfferDetailState extends State<OfferDetail> {
     }
 
     // ✅ Convert back to NGN
-    final counterMatNGN = counterMatDisplay.isEmpty
-        ? 0
-        : await CurrencyHelper.convertToNGN(
-            double.tryParse(counterMatDisplay.replaceAll(',', '')) ?? 0,
-          );
-    final counterWorkNGN = counterWorkDisplay.isEmpty
-        ? 0
-        : await CurrencyHelper.convertToNGN(
-            double.tryParse(counterWorkDisplay.replaceAll(',', '')) ?? 0,
-          );
+    final counterMatNGN =
+        counterMatDisplay.isEmpty
+            ? 0
+            : await CurrencyHelper.convertToNGN(
+              double.tryParse(counterMatDisplay.replaceAll(',', '')) ?? 0,
+            );
+    final counterWorkNGN =
+        counterWorkDisplay.isEmpty
+            ? 0
+            : await CurrencyHelper.convertToNGN(
+              double.tryParse(counterWorkDisplay.replaceAll(',', '')) ?? 0,
+            );
 
     setState(() => _isSubmitting = true);
     Map<String, dynamic> res;
@@ -200,7 +206,8 @@ class _OfferDetailState extends State<OfferDetail> {
 
     final ok = (res["success"] == true);
     _showSnack(
-      res["message"] ?? (ok ? "Reply sent successfully" : "Failed to send reply"),
+      res["message"] ??
+          (ok ? "Reply sent successfully" : "Failed to send reply"),
       isError: !ok,
     );
     if (ok) Navigator.pop(context);
@@ -224,119 +231,120 @@ class _OfferDetailState extends State<OfferDetail> {
         backgroundColor: Colors.purple,
         elevation: 0,
       ),
-      body: _userRole == null
-          ? const Center(child: CircularProgressIndicator())
-          : SafeArea(
-              child: Column(
-                children: [
-                  // ✅ Fintech-style gradient header
-                  // Container(
-                  //   width: double.infinity,
-                  //   decoration: BoxDecoration(
-                  //     gradient: LinearGradient(
-                  //       colors: [Colors.purple, Colors.purple.shade700],
-                  //       begin: Alignment.topLeft,
-                  //       end: Alignment.bottomRight,
-                  //     ),
-                  //   ),
-                  //   padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                  //   child: FutureBuilder<Map<String, double>>(
-                  //     future: _convertHeaderAmounts(),
-                  //     builder: (context, snapshot) {
-                  //       final displayMaterial = snapshot.data?['material'] ?? 0.0;
-                  //       final displayWorkmanship = snapshot.data?['workmanship'] ?? 0.0;
-                  //       final displayTotal = displayMaterial + displayWorkmanship;
+      body:
+          _userRole == null
+              ? const Center(child: CircularProgressIndicator())
+              : SafeArea(
+                child: Column(
+                  children: [
+                    // ✅ Fintech-style gradient header
+                    // Container(
+                    //   width: double.infinity,
+                    //   decoration: BoxDecoration(
+                    //     gradient: LinearGradient(
+                    //       colors: [Colors.purple, Colors.purple.shade700],
+                    //       begin: Alignment.topLeft,
+                    //       end: Alignment.bottomRight,
+                    //     ),
+                    //   ),
+                    //   padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                    //   child: FutureBuilder<Map<String, double>>(
+                    //     future: _convertHeaderAmounts(),
+                    //     builder: (context, snapshot) {
+                    //       final displayMaterial = snapshot.data?['material'] ?? 0.0;
+                    //       final displayWorkmanship = snapshot.data?['workmanship'] ?? 0.0;
+                    //       final displayTotal = displayMaterial + displayWorkmanship;
 
-                  //       return Column(
-                  //         children: [
-                  //           // Total amount
-                  //           CustomText(
-                  //             "Offer Amount",
-                  //             fontSize: 13,
-                  //             color: Colors.white70,
-                  //           ),
-                  //           const SizedBox(height: 4),
-                  //           CustomText(
-                  //             "$currencySymbol${formatAmount(displayTotal)}",
-                  //             fontSize: 32,
-                  //             fontWeight: FontWeight.bold,
-                  //             color: Colors.white,
-                  //           ),
-                  //           const SizedBox(height: 16),
-                            
-                  //           // Breakdown
-                  //           Container(
-                  //             padding: const EdgeInsets.all(16),
-                  //             decoration: BoxDecoration(
-                  //               color: Colors.white.withOpacity(0.15),
-                  //               borderRadius: BorderRadius.circular(12),
-                  //               border: Border.all(
-                  //                 color: Colors.white.withOpacity(0.3),
-                  //                 width: 1,
-                  //               ),
-                  //             ),
-                  //             child: Row(
-                  //               mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  //               children: [
-                  //                 _buildBreakdownItem(
-                  //                   "Material",
-                  //                   displayMaterial,
-                  //                   Icons.checkroom,
-                  //                 ),
-                  //                 Container(
-                  //                   width: 1,
-                  //                   height: 40,
-                  //                   color: Colors.white.withOpacity(0.3),
-                  //                 ),
-                  //                 _buildBreakdownItem(
-                  //                   "Workmanship",
-                  //                   displayWorkmanship,
-                  //                   Icons.handyman,
-                  //                 ),
-                  //               ],
-                  //             ),
-                  //           ),
-                  //         ],
-                  //       );
-                  //     },
-                  //   ),
-                  // ),
+                    //       return Column(
+                    //         children: [
+                    //           // Total amount
+                    //           CustomText(
+                    //             "Offer Amount",
+                    //             fontSize: 13,
+                    //             color: Colors.white70,
+                    //           ),
+                    //           const SizedBox(height: 4),
+                    //           CustomText(
+                    //             "$currencySymbol${formatAmount(displayTotal)}",
+                    //             fontSize: 32,
+                    //             fontWeight: FontWeight.bold,
+                    //             color: Colors.white,
+                    //           ),
+                    //           const SizedBox(height: 16),
 
-                  // Content
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        children: [
-                          // ✅ Fintech-style summary card
-                          // ChatSummaryCard(
-                          //   offer: offer,
-                          //   user: user,
-                          //   vendor: vendor,
-                          //   formatAmount: formatAmount,
-                          //   formatDate: formatDate,
-                          // ),
-                          const SizedBox(height: 12),
+                    //           // Breakdown
+                    //           Container(
+                    //             padding: const EdgeInsets.all(16),
+                    //             decoration: BoxDecoration(
+                    //               color: Colors.white.withOpacity(0.15),
+                    //               borderRadius: BorderRadius.circular(12),
+                    //               border: Border.all(
+                    //                 color: Colors.white.withOpacity(0.3),
+                    //                 width: 1,
+                    //               ),
+                    //             ),
+                    //             child: Row(
+                    //               mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    //               children: [
+                    //                 _buildBreakdownItem(
+                    //                   "Material",
+                    //                   displayMaterial,
+                    //                   Icons.checkroom,
+                    //                 ),
+                    //                 Container(
+                    //                   width: 1,
+                    //                   height: 40,
+                    //                   color: Colors.white.withOpacity(0.3),
+                    //                 ),
+                    //                 _buildBreakdownItem(
+                    //                   "Workmanship",
+                    //                   displayWorkmanship,
+                    //                   Icons.handyman,
+                    //                 ),
+                    //               ],
+                    //             ),
+                    //           ),
+                    //         ],
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
 
-                          Expanded(
-                            child: ChatSection(
-                              offer: offer,
-                              userRole: _userRole!,
-                              commentCtrl: _commentCtrl,
-                              materialCtrl: _materialCtrl,
-                              workmanshipCtrl: _workmanshipCtrl,
-                              isSubmitting: _isSubmitting,
-                              onReply: _replyOffer,
-                              onMakeOffer: _makeOffer,
+                    // Content
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          children: [
+                            // ✅ Fintech-style summary card
+                            // ChatSummaryCard(
+                            //   offer: offer,
+                            //   user: user,
+                            //   vendor: vendor,
+                            //   formatAmount: formatAmount,
+                            //   formatDate: formatDate,
+                            // ),
+                            const SizedBox(height: 12),
+
+                            Expanded(
+                              child: ChatSection(
+                                offer: offer,
+                                userRole: _userRole!,
+                                commentCtrl: _commentCtrl,
+                                materialCtrl: _materialCtrl,
+                                workmanshipCtrl: _workmanshipCtrl,
+                                isSubmitting: _isSubmitting,
+                                onReply: _replyOffer,
+                                onMakeOffer: _makeOffer,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
     );
   }
 
@@ -345,11 +353,7 @@ class _OfferDetailState extends State<OfferDetail> {
       children: [
         Icon(icon, color: Colors.white, size: 20),
         const SizedBox(height: 8),
-        CustomText(
-          label,
-          fontSize: 11,
-          color: Colors.white70,
-        ),
+        CustomText(label, fontSize: 11, color: Colors.white70),
         const SizedBox(height: 4),
         CustomText(
           "$currencySymbol${formatAmount(amount)}",
@@ -362,8 +366,10 @@ class _OfferDetailState extends State<OfferDetail> {
   }
 
   Future<Map<String, double>> _convertHeaderAmounts() async {
-    final materialNGN = int.tryParse(offer["materialTotalCost"]?.toString() ?? "0") ?? 0;
-    final workmanshipNGN = int.tryParse(offer["workmanshipTotalCost"]?.toString() ?? "0") ?? 0;
+    final materialNGN =
+        int.tryParse(offer["materialTotalCost"]?.toString() ?? "0") ?? 0;
+    final workmanshipNGN =
+        int.tryParse(offer["workmanshipTotalCost"]?.toString() ?? "0") ?? 0;
 
     return {
       'material': await CurrencyHelper.convertFromNGN(materialNGN),

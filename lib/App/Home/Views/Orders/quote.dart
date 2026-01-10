@@ -12,9 +12,6 @@ import 'package:hog/components/Orders/quotationcard.dart';
 import 'package:hog/components/texts.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-
-
-
 class Quotation extends StatefulWidget {
   final String materialId;
 
@@ -105,13 +102,16 @@ class _QuotationState extends State<Quotation> {
             // First time full payment - use USD total
             amountToSend = review.totalCostUSD.toString();
           }
-          addressToSend = review.user.address ?? ""; // Using user's saved address as fallback
+          addressToSend =
+              review.user.address ??
+              ""; // Using user's saved address as fallback
         }
 
         final resp = await BankApiService.stripeCheckoutPayment(
           reviewId: review.id,
           shipmentMethod: shipment,
-          paymentStatus: paymentType == "part" ? "part payment" : "full payment",
+          paymentStatus:
+              paymentType == "part" ? "part payment" : "full payment",
           amount: amountToSend,
           address: addressToSend,
         );

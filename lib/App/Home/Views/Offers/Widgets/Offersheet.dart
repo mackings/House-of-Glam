@@ -13,7 +13,8 @@ class ReusableOfferSheet {
       String comment,
       String materialCost,
       String workCost,
-    ) onSubmit,
+    )
+    onSubmit,
   }) async {
     final commentCtrl = TextEditingController();
     final materialCtrl = TextEditingController();
@@ -222,7 +223,8 @@ class ReusableOfferSheet {
                                 ),
 
                                 // ✅ Breakdown summary
-                                if (getMaterialAmount() > 0 || getWorkAmount() > 0) ...[
+                                if (getMaterialAmount() > 0 ||
+                                    getWorkAmount() > 0) ...[
                                   const SizedBox(height: 16),
                                   Container(
                                     padding: const EdgeInsets.all(12),
@@ -244,7 +246,9 @@ class ReusableOfferSheet {
                                           Icons.handyman,
                                         ),
                                         const Padding(
-                                          padding: EdgeInsets.symmetric(vertical: 8),
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 8,
+                                          ),
                                           child: Divider(height: 1),
                                         ),
                                         _buildSummaryRow(
@@ -267,86 +271,101 @@ class ReusableOfferSheet {
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: isLoading
-                                  ? null
-                                  : () async {
-                                      final comment = commentCtrl.text.trim();
-                                      final materialDisplay =
-                                          materialCtrl.text.replaceAll(',', '').trim();
-                                      final workDisplay =
-                                          workCtrl.text.replaceAll(',', '').trim();
+                              onPressed:
+                                  isLoading
+                                      ? null
+                                      : () async {
+                                        final comment = commentCtrl.text.trim();
+                                        final materialDisplay =
+                                            materialCtrl.text
+                                                .replaceAll(',', '')
+                                                .trim();
+                                        final workDisplay =
+                                            workCtrl.text
+                                                .replaceAll(',', '')
+                                                .trim();
 
-                                      if (comment.isEmpty ||
-                                          materialDisplay.isEmpty ||
-                                          workDisplay.isEmpty) {
-                                        _showSnack(
+                                        if (comment.isEmpty ||
+                                            materialDisplay.isEmpty ||
+                                            workDisplay.isEmpty) {
+                                          _showSnack(
+                                            context,
+                                            "Please fill all fields",
+                                            isError: true,
+                                          );
+                                          return;
+                                        }
+
+                                        // Confirm action
+                                        final confirmed = await _confirmAction(
                                           context,
-                                          "Please fill all fields",
-                                          isError: true,
                                         );
-                                        return;
-                                      }
+                                        if (confirmed != true) return;
 
-                                      // Confirm action
-                                      final confirmed = await _confirmAction(context);
-                                      if (confirmed != true) return;
+                                        setState(() => isLoading = true);
 
-                                      setState(() => isLoading = true);
+                                        // ✅ Convert to NGN before submitting
+                                        final materialNGN =
+                                            await CurrencyHelper.convertToNGN(
+                                              double.tryParse(
+                                                    materialDisplay,
+                                                  ) ??
+                                                  0,
+                                            );
+                                        final workNGN =
+                                            await CurrencyHelper.convertToNGN(
+                                              double.tryParse(workDisplay) ?? 0,
+                                            );
 
-                                      // ✅ Convert to NGN before submitting
-                                      final materialNGN =
-                                          await CurrencyHelper.convertToNGN(
-                                        double.tryParse(materialDisplay) ?? 0,
-                                      );
-                                      final workNGN = await CurrencyHelper.convertToNGN(
-                                        double.tryParse(workDisplay) ?? 0,
-                                      );
+                                        final result = await onSubmit(
+                                          comment,
+                                          materialNGN.toString(),
+                                          workNGN.toString(),
+                                        );
 
-                                      final result = await onSubmit(
-                                        comment,
-                                        materialNGN.toString(),
-                                        workNGN.toString(),
-                                      );
-
-                                      setState(() => isLoading = false);
-                                      Navigator.pop(context, result);
-                                    },
+                                        setState(() => isLoading = false);
+                                        Navigator.pop(context, result);
+                                      },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.purple,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 elevation: 0,
                               ),
-                              child: isLoading
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons.send_rounded,
+                              child:
+                                  isLoading
+                                      ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
                                           color: Colors.white,
-                                          size: 20,
+                                          strokeWidth: 2,
                                         ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          "Submit Offer • $currencySymbol${NumberFormat('#,###.##').format(getTotal())}",
-                                          style: const TextStyle(
+                                      )
+                                      : Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(
+                                            Icons.send_rounded,
                                             color: Colors.white,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
+                                            size: 20,
                                           ),
-                                        ),
-                                      ],
-                                    ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            "Submit Offer • $currencySymbol${NumberFormat('#,###.##').format(getTotal())}",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                             ),
                           ),
                         ],
@@ -408,9 +427,10 @@ class ReusableOfferSheet {
             onChanged: onChanged,
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             decoration: InputDecoration(
-              prefixIcon: icon != null
-                  ? Icon(icon, color: Colors.purple.shade400, size: 22)
-                  : null,
+              prefixIcon:
+                  icon != null
+                      ? Icon(icon, color: Colors.purple.shade400, size: 22)
+                      : null,
               hintText: hint ?? "Enter $label",
               hintStyle: TextStyle(
                 color: Colors.grey.shade400,
@@ -433,8 +453,12 @@ class ReusableOfferSheet {
     );
   }
 
-  static Widget _buildSummaryRow(String label, double amount, IconData icon,
-      {bool isBold = false}) {
+  static Widget _buildSummaryRow(
+    String label,
+    double amount,
+    IconData icon, {
+    bool isBold = false,
+  }) {
     return Row(
       children: [
         Icon(icon, size: 16, color: Colors.purple.shade400),
@@ -461,7 +485,11 @@ class ReusableOfferSheet {
     );
   }
 
-  static void _showSnack(BuildContext context, String msg, {bool isError = false}) {
+  static void _showSnack(
+    BuildContext context,
+    String msg, {
+    bool isError = false,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -488,50 +516,65 @@ class ReusableOfferSheet {
   static Future<bool?> _confirmAction(BuildContext context) async {
     return await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.purple.shade50,
-                borderRadius: BorderRadius.circular(10),
+      builder:
+          (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.shade50,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.help_outline,
+                    color: Colors.purple.shade700,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  "Confirm Submission",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+            content: const Text(
+              "Are you sure you want to submit this offer?",
+              style: TextStyle(fontSize: 14, color: Colors.black87),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(color: Colors.black54),
+                ),
               ),
-              child: Icon(Icons.help_outline, color: Colors.purple.shade700),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              "Confirm Submission",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
-        content: const Text(
-          "Are you sure you want to submit this offer?",
-          style: TextStyle(fontSize: 14, color: Colors.black87),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text("Cancel", style: TextStyle(color: Colors.black54)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+                child: const Text(
+                  "Yes, Submit",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            child: const Text(
-              "Yes, Submit",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-            ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }
@@ -544,7 +587,7 @@ class DecimalThousandsFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     String text = newValue.text.replaceAll(',', '');
-    
+
     // Allow only numbers and one decimal point
     if (text.isEmpty) return newValue;
     if (!RegExp(r'^\d*\.?\d*$').hasMatch(text)) {

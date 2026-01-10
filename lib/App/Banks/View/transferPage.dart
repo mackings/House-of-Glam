@@ -1,9 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hog/App/Banks/Api/BamkService.dart';
 import 'package:hog/App/Banks/Model/bankModel.dart';
-
 
 class BankTransferPage extends StatefulWidget {
   final Bank bank;

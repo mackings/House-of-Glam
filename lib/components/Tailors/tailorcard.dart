@@ -8,7 +8,7 @@ class TailorCard extends StatefulWidget {
   final VoidCallback? onTap;
 
   const TailorCard({Key? key, required this.tailor, this.onTap})
-      : super(key: key);
+    : super(key: key);
 
   @override
   State<TailorCard> createState() => _TailorCardState();
@@ -65,7 +65,7 @@ class _TailorCardState extends State<TailorCard> {
   Widget build(BuildContext context) {
     final tailor = widget.tailor;
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     // 📱 Calculate responsive sizes
     final cardWidth = (screenWidth - 64) / 2; // Accounting for padding
     final imageHeight = cardWidth * 0.7; // 70% of card width
@@ -95,38 +95,39 @@ class _TailorCardState extends State<TailorCard> {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(16),
                   ),
-                  child: (tailor.user?.image != null &&
-                          tailor.user!.image!.isNotEmpty)
-                      ? Image.network(
-                          tailor.user!.image!,
-                          height: imageHeight,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              height: imageHeight,
-                              width: double.infinity,
-                              color: Colors.grey[200],
-                              alignment: Alignment.center,
-                              child: Icon(
-                                Icons.person,
-                                size: imageHeight * 0.4,
-                                color: Colors.grey,
-                              ),
-                            );
-                          },
-                        )
-                      : Container(
-                          height: imageHeight,
-                          width: double.infinity,
-                          color: Colors.grey[200],
-                          alignment: Alignment.center,
-                          child: Icon(
-                            Icons.person,
-                            size: imageHeight * 0.4,
-                            color: Colors.grey,
+                  child:
+                      (tailor.user?.image != null &&
+                              tailor.user!.image!.isNotEmpty)
+                          ? Image.network(
+                            tailor.user!.image!,
+                            height: imageHeight,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                height: imageHeight,
+                                width: double.infinity,
+                                color: Colors.grey[200],
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  Icons.person,
+                                  size: imageHeight * 0.4,
+                                  color: Colors.grey,
+                                ),
+                              );
+                            },
+                          )
+                          : Container(
+                            height: imageHeight,
+                            width: double.infinity,
+                            color: Colors.grey[200],
+                            alignment: Alignment.center,
+                            child: Icon(
+                              Icons.person,
+                              size: imageHeight * 0.4,
+                              color: Colors.grey,
+                            ),
                           ),
-                        ),
                 ),
                 Positioned(
                   top: 8,

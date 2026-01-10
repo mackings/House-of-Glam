@@ -38,7 +38,7 @@ class ApiService {
   }
 
   /// 🔹 Login
-/// 🔹 Login
+  /// 🔹 Login
   static Future<Map<String, dynamic>> login({
     required String email,
     required String password,
@@ -95,7 +95,9 @@ class ApiService {
         // Try to derive from country first
         if (userCountry != null && userCountry.isNotEmpty) {
           derivedCurrency = getCurrencyFromCountry(userCountry);
-          print("💰 Currency derived from country '$userCountry': $derivedCurrency");
+          print(
+            "💰 Currency derived from country '$userCountry': $derivedCurrency",
+          );
         }
 
         // If country didn't work or returned default, try phone number
@@ -107,7 +109,9 @@ class ApiService {
           // Only override if phone gives us a non-NGN currency
           if (phoneCurrency != 'NGN') {
             derivedCurrency = phoneCurrency;
-            print("💰 Currency derived from phone '$userPhone': $derivedCurrency");
+            print(
+              "💰 Currency derived from phone '$userPhone': $derivedCurrency",
+            );
           }
         }
 
@@ -128,7 +132,9 @@ class ApiService {
             await loadCurrency();
             print("💵 Current currency in memory: $Cur");
           } else {
-            print("⚠️ Failed to fetch user currency: ${currencyResult['error']}");
+            print(
+              "⚠️ Failed to fetch user currency: ${currencyResult['error']}",
+            );
           }
         }
 
@@ -145,8 +151,6 @@ class ApiService {
     // fallback (error)
     return {"success": false, "error": result["error"] ?? "Login failed"};
   }
-
-
 
   /// 🔹 Sign up
   static Future<Map<String, dynamic>> signup({

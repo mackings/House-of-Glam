@@ -65,9 +65,10 @@ class TransactionResponse {
       userId: json["userId"],
       vendorId: json["vendorId"],
       materialId: json["materialId"],
-      cartItems: (json["cartItems"] as List? ?? [])
-          .map((e) => CartItem.fromJson(e))
-          .toList(),
+      cartItems:
+          (json["cartItems"] as List? ?? [])
+              .map((e) => CartItem.fromJson(e))
+              .toList(),
       totalAmount: parseDouble(json["totalAmount"]),
       paymentMethod: json["paymentMethod"],
       paymentReference: json["paymentReference"],
@@ -137,9 +138,10 @@ class CartItem {
       description: json["description"],
       condition: json["condition"],
       amount: json["amount"],
-      measurement: (json["measurement"] as List? ?? [])
-          .map((e) => Measurement.fromJson(e))
-          .toList(),
+      measurement:
+          (json["measurement"] as List? ?? [])
+              .map((e) => Measurement.fromJson(e))
+              .toList(),
       sampleImage: List<String>.from(json["sampleImage"] ?? []),
       images: List<String>.from(json["images"] ?? []),
     );
@@ -208,9 +210,10 @@ class TransactionListResponse {
   factory TransactionListResponse.fromJson(Map<String, dynamic> json) {
     return TransactionListResponse(
       message: json["message"] ?? "",
-      transactions: (json["data"] as List? ?? [])
-          .map((e) => TransactionResponse.fromJson(e))
-          .toList(),
+      transactions:
+          (json["data"] as List? ?? [])
+              .map((e) => TransactionResponse.fromJson(e))
+              .toList(),
     );
   }
 }

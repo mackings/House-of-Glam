@@ -70,66 +70,69 @@ class _UpdateQuotationBottomSheetState
 
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          "Confirm Update",
-          style: GoogleFonts.poppins(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1F2937),
-          ),
-        ),
-        content: Text(
-          "Are you sure you want to update this quotation with the new values?",
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            color: const Color(0xFF6B7280),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              "Cancel",
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Text(
+              "Confirm Update",
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1F2937),
+              ),
+            ),
+            content: Text(
+              "Are you sure you want to update this quotation with the new values?",
               style: GoogleFonts.poppins(
                 fontSize: 14,
-                fontWeight: FontWeight.w600,
                 color: const Color(0xFF6B7280),
               ),
             ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF6B21A8), Color(0xFF7C3AED)],
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => Navigator.pop(context, true),
-                borderRadius: BorderRadius.circular(10),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  "Cancel",
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF6B7280),
                   ),
-                  child: Text(
-                    "Yes, Update",
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF6B21A8), Color(0xFF7C3AED)],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => Navigator.pop(context, true),
+                    borderRadius: BorderRadius.circular(10),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
+                      child: Text(
+                        "Yes, Update",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (confirm != true) return;
@@ -166,10 +169,7 @@ class _UpdateQuotationBottomSheetState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              "❌ Error: $e",
-              style: GoogleFonts.poppins(),
-            ),
+            content: Text("❌ Error: $e", style: GoogleFonts.poppins()),
             backgroundColor: const Color(0xFFEF4444),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -278,8 +278,8 @@ class _UpdateQuotationBottomSheetState
                       controller: commentController,
                       hintText: "Enter your update notes",
                       fieldKey: "update_comment_field",
-                      validator: (v) =>
-                          v == null || v.isEmpty ? "Required" : null,
+                      validator:
+                          (v) => v == null || v.isEmpty ? "Required" : null,
                     ),
 
                     const SizedBox(height: 20),
@@ -302,8 +302,9 @@ class _UpdateQuotationBottomSheetState
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color:
-                                      const Color(0xFF6B21A8).withOpacity(0.1),
+                                  color: const Color(
+                                    0xFF6B21A8,
+                                  ).withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Icon(
@@ -342,8 +343,9 @@ class _UpdateQuotationBottomSheetState
                                 );
                               }
                             },
-                            validator: (v) =>
-                                v == null || v.isEmpty ? "Required" : null,
+                            validator:
+                                (v) =>
+                                    v == null || v.isEmpty ? "Required" : null,
                           ),
                           const SizedBox(height: 16),
                           _buildFieldLabel("Workmanship Cost", true),
@@ -356,8 +358,8 @@ class _UpdateQuotationBottomSheetState
                             onChanged: (v) {
                               final formatted = formatNumber(v);
                               if (formatted != v) {
-                                workmanshipCostController.value =
-                                    TextEditingValue(
+                                workmanshipCostController
+                                    .value = TextEditingValue(
                                   text: formatted,
                                   selection: TextSelection.collapsed(
                                     offset: formatted.length,
@@ -365,8 +367,9 @@ class _UpdateQuotationBottomSheetState
                                 );
                               }
                             },
-                            validator: (v) =>
-                                v == null || v.isEmpty ? "Required" : null,
+                            validator:
+                                (v) =>
+                                    v == null || v.isEmpty ? "Required" : null,
                           ),
                         ],
                       ),
@@ -392,8 +395,9 @@ class _UpdateQuotationBottomSheetState
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color:
-                                      const Color(0xFF6B21A8).withOpacity(0.1),
+                                  color: const Color(
+                                    0xFF6B21A8,
+                                  ).withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Icon(
@@ -423,9 +427,11 @@ class _UpdateQuotationBottomSheetState
                                 controller: deliveryDateController,
                                 hintText: "YYYY-MM-DD",
                                 fieldKey: "update_delivery_date_field",
-                                validator: (v) => v == null || v.isEmpty
-                                    ? "Required"
-                                    : null,
+                                validator:
+                                    (v) =>
+                                        v == null || v.isEmpty
+                                            ? "Required"
+                                            : null,
                               ),
                             ),
                           ),
@@ -439,9 +445,11 @@ class _UpdateQuotationBottomSheetState
                                 controller: reminderDateController,
                                 hintText: "YYYY-MM-DD",
                                 fieldKey: "update_reminder_date_field",
-                                validator: (v) => v == null || v.isEmpty
-                                    ? "Required"
-                                    : null,
+                                validator:
+                                    (v) =>
+                                        v == null || v.isEmpty
+                                            ? "Required"
+                                            : null,
                               ),
                             ),
                           ),
@@ -474,35 +482,37 @@ class _UpdateQuotationBottomSheetState
                           onTap: isLoading ? null : handleUpdate,
                           borderRadius: BorderRadius.circular(16),
                           child: Center(
-                            child: isLoading
-                                ? const SizedBox(
-                                    width: 24,
-                                    height: 24,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2.5,
-                                    ),
-                                  )
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(
-                                        Icons.check_circle_rounded,
+                            child:
+                                isLoading
+                                    ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
                                         color: Colors.white,
-                                        size: 20,
+                                        strokeWidth: 2.5,
                                       ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        "Update Quotation",
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
+                                    )
+                                    : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.check_circle_rounded,
                                           color: Colors.white,
-                                          letterSpacing: 0.5,
+                                          size: 20,
                                         ),
-                                      ),
-                                    ],
-                                  ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          "Update Quotation",
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                           ),
                         ),
                       ),
@@ -534,10 +544,7 @@ class _UpdateQuotationBottomSheetState
             const SizedBox(width: 4),
             const Text(
               "*",
-              style: TextStyle(
-                color: Color(0xFFEF4444),
-                fontSize: 13,
-              ),
+              style: TextStyle(color: Color(0xFFEF4444), fontSize: 13),
             ),
           ],
         ],

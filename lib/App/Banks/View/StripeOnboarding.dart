@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-
-
 class StripeOnboardingPage extends StatefulWidget {
   final String onboardingUrl;
   final Function(bool success, String message) onComplete;
@@ -28,30 +26,31 @@ class _StripeOnboardingPageState extends State<StripeOnboardingPage> {
   }
 
   void _initializeWebView() {
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (url) {
-            print("📍 Page started: $url");
-            
-            // Check if onboarding is complete
-            if (url.contains('/return') || url.contains('success')) {
-              _handleSuccess();
-            } else if (url.contains('/refresh') || url.contains('cancel')) {
-              _handleCancel();
-            }
-          },
-          onPageFinished: (url) {
-            setState(() => _isLoading = false);
-          },
-          onNavigationRequest: (request) {
-            print("🧭 Navigation: ${request.url}");
-            return NavigationDecision.navigate;
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse(widget.onboardingUrl));
+    _controller =
+        WebViewController()
+          ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..setNavigationDelegate(
+            NavigationDelegate(
+              onPageStarted: (url) {
+                print("📍 Page started: $url");
+
+                // Check if onboarding is complete
+                if (url.contains('/return') || url.contains('success')) {
+                  _handleSuccess();
+                } else if (url.contains('/refresh') || url.contains('cancel')) {
+                  _handleCancel();
+                }
+              },
+              onPageFinished: (url) {
+                setState(() => _isLoading = false);
+              },
+              onNavigationRequest: (request) {
+                print("🧭 Navigation: ${request.url}");
+                return NavigationDecision.navigate;
+              },
+            ),
+          )
+          ..loadRequest(Uri.parse(widget.onboardingUrl));
   }
 
   void _handleSuccess() {

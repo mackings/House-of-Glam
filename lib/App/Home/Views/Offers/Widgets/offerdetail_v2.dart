@@ -7,13 +7,9 @@ import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-
 /// WhatsApp-style Offer Negotiation Screen with Mutual Consent
 /// WhatsApp-style Offer Negotiation Screen with Mutual Consent
 /// UPDATED: Now uses pre-calculated USD amounts from backend
-
-
-
 
 class OfferDetailV2 extends StatefulWidget {
   final String offerId;
@@ -102,7 +98,8 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
             Expanded(child: CustomText(msg, color: Colors.white, fontSize: 14)),
           ],
         ),
-        backgroundColor: isError ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+        backgroundColor:
+            isError ? const Color(0xFFEF4444) : const Color(0xFF10B981),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
@@ -127,8 +124,12 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
           return _showSnack("Please enter a total amount", isError: true);
         }
       } else {
-        if (_materialCtrl.text.trim().isEmpty || _workmanshipCtrl.text.trim().isEmpty) {
-          return _showSnack("Please enter material and workmanship costs", isError: true);
+        if (_materialCtrl.text.trim().isEmpty ||
+            _workmanshipCtrl.text.trim().isEmpty) {
+          return _showSnack(
+            "Please enter material and workmanship costs",
+            isError: true,
+          );
         }
       }
     }
@@ -151,9 +152,10 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
         if (totalValue == null || totalValue <= 0) {
           return _showSnack("Please enter a valid total amount", isError: true);
         }
-        final totalNgn = _useUSD && _offer!.exchangeRate > 0
-            ? (totalValue * _offer!.exchangeRate).round()
-            : totalValue.round();
+        final totalNgn =
+            _useUSD && _offer!.exchangeRate > 0
+                ? (totalValue * _offer!.exchangeRate).round()
+                : totalValue.round();
         final materialSplit = (totalNgn / 2).floor();
         final workmanshipSplit = totalNgn - materialSplit;
         materialCost = materialSplit.toString();
@@ -161,16 +163,20 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
       } else {
         // Vendor enters amounts in their local currency
         String enteredMaterial = _materialCtrl.text.replaceAll(',', '').trim();
-        String enteredWorkmanship = _workmanshipCtrl.text.replaceAll(',', '').trim();
-        
+        String enteredWorkmanship =
+            _workmanshipCtrl.text.replaceAll(',', '').trim();
+
         // If vendor is international (using USD), convert to NGN before sending
         if (_useUSD && _offer!.exchangeRate > 0) {
           double materialUSD = double.parse(enteredMaterial);
           double workmanshipUSD = double.parse(enteredWorkmanship);
-          
+
           // Convert USD to NGN: USD * exchangeRate = NGN
-          materialCost = (materialUSD * _offer!.exchangeRate).toStringAsFixed(0);
-          workmanshipCost = (workmanshipUSD * _offer!.exchangeRate).toStringAsFixed(0);
+          materialCost = (materialUSD * _offer!.exchangeRate).toStringAsFixed(
+            0,
+          );
+          workmanshipCost = (workmanshipUSD * _offer!.exchangeRate)
+              .toStringAsFixed(0);
         } else {
           // Nigerian vendor - already in NGN
           materialCost = enteredMaterial;
@@ -226,75 +232,87 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
       backgroundColor: const Color(0xFFECE5DD), // WhatsApp-style background
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
-        title: _offer == null
-            ? const CustomText("Offer", color: Colors.white, fontSize: 18)
-            : Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.white24,
-                    radius: 18,
-                    child: Text(
-                      _userRole == "user"
-                          ? (_offer!.vendor.businessName.isNotEmpty ? _offer!.vendor.businessName[0] : "V")
-                          : (_offer!.user.fullName.isNotEmpty ? _offer!.user.fullName[0] : "U"),
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CustomText(
-                          _userRole == "user" ? _offer!.vendor.businessName : _offer!.user.fullName,
+        title:
+            _offer == null
+                ? const CustomText("Offer", color: Colors.white, fontSize: 18)
+                : Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.white24,
+                      radius: 18,
+                      child: Text(
+                        _userRole == "user"
+                            ? (_offer!.vendor.businessName.isNotEmpty
+                                ? _offer!.vendor.businessName[0]
+                                : "V")
+                            : (_offer!.user.fullName.isNotEmpty
+                                ? _offer!.user.fullName[0]
+                                : "U"),
+                        style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.bold,
                         ),
-                        if (_offer!.mutualConsentAchieved)
-                          const CustomText(
-                            "Agreement reached ✓",
-                            color: Colors.white70,
-                            fontSize: 12,
-                          ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomText(
+                            _userRole == "user"
+                                ? _offer!.vendor.businessName
+                                : _offer!.user.fullName,
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          if (_offer!.mutualConsentAchieved)
+                            const CustomText(
+                              "Agreement reached ✓",
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
         backgroundColor: Colors.purple,
         elevation: 0,
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _offer == null
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _offer == null
               ? const Center(child: CustomText("Offer not found"))
               : Column(
-                  children: [
-                    // Mutual Consent Banner
-                    if (_offer!.mutualConsentAchieved) _buildMutualConsentBanner(),
+                children: [
+                  // Mutual Consent Banner
+                  if (_offer!.mutualConsentAchieved)
+                    _buildMutualConsentBanner(),
 
-                    // Waiting for consent banner
-                    if (!_offer!.mutualConsentAchieved &&
-                        (_offer!.buyerConsent || _offer!.vendorConsent))
-                      _buildWaitingBanner(),
+                  // Waiting for consent banner
+                  if (!_offer!.mutualConsentAchieved &&
+                      (_offer!.buyerConsent || _offer!.vendorConsent))
+                    _buildWaitingBanner(),
 
-                    // Chat Messages
-                    Expanded(
-                      child: ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.all(12),
-                        itemCount: _offer!.chats.length,
-                        itemBuilder: (context, index) {
-                          return _buildChatBubble(_offer!.chats[index]);
-                        },
-                      ),
+                  // Chat Messages
+                  Expanded(
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(12),
+                      itemCount: _offer!.chats.length,
+                      itemBuilder: (context, index) {
+                        return _buildChatBubble(_offer!.chats[index]);
+                      },
                     ),
+                  ),
 
-                    // Action Buttons Area
-                    if (!_offer!.mutualConsentAchieved) _buildActionArea(),
-                  ],
-                ),
+                  // Action Buttons Area
+                  if (!_offer!.mutualConsentAchieved) _buildActionArea(),
+                ],
+              ),
     );
   }
 
@@ -336,8 +354,9 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
 
   Widget _buildWaitingBanner() {
     final waitingFor = _offer!.isWaitingForBuyerConsent ? "buyer" : "vendor";
-    final isUserWaiting = (_userRole == "user" && _offer!.isWaitingForBuyerConsent) ||
-                          (_userRole != "user" && _offer!.isWaitingForVendorConsent);
+    final isUserWaiting =
+        (_userRole == "user" && _offer!.isWaitingForBuyerConsent) ||
+        (_userRole != "user" && _offer!.isWaitingForVendorConsent);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -367,16 +386,21 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
 
   Widget _buildChatBubble(OfferChat chat) {
     final isCustomer = chat.senderType == "customer";
-    final isMyMessage = (_userRole == "user" && isCustomer) || (_userRole != "user" && !isCustomer);
+    final isMyMessage =
+        (_userRole == "user" && isCustomer) ||
+        (_userRole != "user" && !isCustomer);
     final showBreakdown = _userRole != "user";
 
     return Align(
       alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
+        ),
         child: Column(
-          crossAxisAlignment: isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment:
+              isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             Container(
               padding: const EdgeInsets.all(12),
@@ -401,11 +425,17 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                 children: [
                   // Action Badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: chat.actionBadgeColor.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: chat.actionBadgeColor, width: 1),
+                      border: Border.all(
+                        color: chat.actionBadgeColor,
+                        width: 1,
+                      ),
                     ),
                     child: CustomText(
                       chat.actionLabel,
@@ -428,23 +458,23 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                         children: [
                           if (showBreakdown) ...[
                             _buildAmountRow(
-                              "Material", 
-                              chat.counterMaterialCost,      // NGN
-                              chat.counterMaterialCostUSD    // USD (pre-calculated)
+                              "Material",
+                              chat.counterMaterialCost, // NGN
+                              chat.counterMaterialCostUSD, // USD (pre-calculated)
                             ),
                             const SizedBox(height: 4),
                             _buildAmountRow(
-                              "Workmanship", 
-                              chat.counterWorkmanshipCost,     // NGN
-                              chat.counterWorkmanshipCostUSD   // USD (pre-calculated)
+                              "Workmanship",
+                              chat.counterWorkmanshipCost, // NGN
+                              chat.counterWorkmanshipCostUSD, // USD (pre-calculated)
                             ),
                             const Divider(height: 12),
                           ],
                           _buildAmountRow(
-                            "Total", 
-                            chat.counterTotalCost,      // NGN
-                            chat.counterTotalCostUSD,   // USD (pre-calculated)
-                            isBold: true
+                            "Total",
+                            chat.counterTotalCost, // NGN
+                            chat.counterTotalCostUSD, // USD (pre-calculated)
+                            isBold: true,
                           ),
                         ],
                       ),
@@ -478,13 +508,19 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
   }
 
   // UPDATED: Now uses pre-calculated amounts instead of converting
-  Widget _buildAmountRow(String label, double ngnAmount, double usdAmount, {bool isBold = false}) {
+  Widget _buildAmountRow(
+    String label,
+    double ngnAmount,
+    double usdAmount, {
+    bool isBold = false,
+  }) {
     // Simply display the appropriate pre-calculated amount
     final displayAmount = _useUSD ? usdAmount : ngnAmount;
-    
-    final formattedAmount = _useUSD
-        ? '\$${displayAmount.toStringAsFixed(2)}'
-        : '₦${NumberFormat('#,###.##').format(displayAmount)}';
+
+    final formattedAmount =
+        _useUSD
+            ? '\$${displayAmount.toStringAsFixed(2)}'
+            : '₦${NumberFormat('#,###.##').format(displayAmount)}';
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -515,8 +551,9 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
   }
 
   Widget _buildActionArea() {
-    final canRespond = (_userRole == "user" && _offer!.buyerCanRespond) ||
-                       (_userRole != "user" && _offer!.vendorCanRespond);
+    final canRespond =
+        (_userRole == "user" && _offer!.buyerCanRespond) ||
+        (_userRole != "user" && _offer!.vendorCanRespond);
 
     if (!canRespond) {
       return Container(
@@ -557,7 +594,10 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
             maxLines: 2,
             enabled: !_isSubmitting,
@@ -571,7 +611,10 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                 controller: _totalCtrl,
                 decoration: InputDecoration(
                   labelText: "Total Amount (${_useUSD ? 'USD' : 'NGN'})",
-                  labelStyle: const TextStyle(fontSize: 13, color: Colors.black54),
+                  labelStyle: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.black54,
+                  ),
                   filled: true,
                   fillColor: Colors.grey.shade50,
                   border: OutlineInputBorder(
@@ -584,9 +627,15 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF6B21A8), width: 2),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF6B21A8),
+                      width: 2,
+                    ),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
                 ),
                 keyboardType: TextInputType.number,
                 enabled: !_isSubmitting,
@@ -599,7 +648,10 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                       controller: _materialCtrl,
                       decoration: InputDecoration(
                         labelText: "Material Cost (${_useUSD ? 'USD' : 'NGN'})",
-                        labelStyle: const TextStyle(fontSize: 13, color: Colors.black54),
+                        labelStyle: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                        ),
                         filled: true,
                         fillColor: Colors.grey.shade50,
                         border: OutlineInputBorder(
@@ -612,9 +664,15 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF6B21A8), width: 2),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF6B21A8),
+                            width: 2,
+                          ),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 14,
+                        ),
                       ),
                       keyboardType: TextInputType.number,
                       enabled: !_isSubmitting,
@@ -626,7 +684,10 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                       controller: _workmanshipCtrl,
                       decoration: InputDecoration(
                         labelText: "Workmanship (${_useUSD ? 'USD' : 'NGN'})",
-                        labelStyle: const TextStyle(fontSize: 13, color: Colors.black54),
+                        labelStyle: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                        ),
                         filled: true,
                         fillColor: Colors.grey.shade50,
                         border: OutlineInputBorder(
@@ -639,9 +700,15 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF6B21A8), width: 2),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF6B21A8),
+                            width: 2,
+                          ),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 14,
+                        ),
                       ),
                       keyboardType: TextInputType.number,
                       enabled: !_isSubmitting,
@@ -670,7 +737,11 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                   height: 52,
                   child: ElevatedButton.icon(
                     onPressed: () => _handleAction("countered"),
-                    icon: const Icon(Icons.send_rounded, size: 20, color: Colors.white),
+                    icon: const Icon(
+                      Icons.send_rounded,
+                      size: 20,
+                      color: Colors.white,
+                    ),
                     label: const CustomText(
                       "Send Counter Offer",
                       fontSize: 15,
@@ -680,7 +751,9 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF6B21A8),
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                 ),
@@ -692,7 +765,11 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                     onPressed: () {
                       setState(() => _showAmountFields = false);
                     },
-                    icon: const Icon(Icons.close, size: 18, color: Colors.black87),
+                    icon: const Icon(
+                      Icons.close,
+                      size: 18,
+                      color: Colors.black87,
+                    ),
                     label: const CustomText(
                       "Cancel",
                       fontSize: 14,
@@ -703,7 +780,9 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                       side: BorderSide(color: Colors.grey.shade300, width: 1.5),
                       backgroundColor: Colors.white,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                 ),
@@ -719,7 +798,11 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                   height: 52,
                   child: ElevatedButton.icon(
                     onPressed: () => _handleAction("accepted"),
-                    icon: const Icon(Icons.check_circle_rounded, size: 20, color: Colors.white),
+                    icon: const Icon(
+                      Icons.check_circle_rounded,
+                      size: 20,
+                      color: Colors.white,
+                    ),
                     label: const CustomText(
                       "Accept Offer",
                       fontSize: 15,
@@ -729,7 +812,9 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF6B21A8),
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                 ),
@@ -744,7 +829,11 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                         height: 48,
                         child: OutlinedButton.icon(
                           onPressed: () => _handleAction("rejected"),
-                          icon: const Icon(Icons.cancel_outlined, size: 18, color: Colors.black87),
+                          icon: const Icon(
+                            Icons.cancel_outlined,
+                            size: 18,
+                            color: Colors.black87,
+                          ),
                           label: const CustomText(
                             "Reject",
                             fontSize: 14,
@@ -752,10 +841,15 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                             color: Colors.black87,
                           ),
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+                            side: BorderSide(
+                              color: Colors.grey.shade300,
+                              width: 1.5,
+                            ),
                             backgroundColor: Colors.white,
                             elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
                         ),
                       ),
@@ -770,7 +864,11 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                           onPressed: () {
                             setState(() => _showAmountFields = true);
                           },
-                          icon: const Icon(Icons.swap_horiz_rounded, size: 18, color: Color(0xFF6B21A8)),
+                          icon: const Icon(
+                            Icons.swap_horiz_rounded,
+                            size: 18,
+                            color: Color(0xFF6B21A8),
+                          ),
                           label: const CustomText(
                             "Counter",
                             fontSize: 14,
@@ -782,7 +880,10 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
-                              side: const BorderSide(color: Color(0xFF6B21A8), width: 1),
+                              side: const BorderSide(
+                                color: Color(0xFF6B21A8),
+                                width: 1,
+                              ),
                             ),
                           ),
                         ),

@@ -8,7 +8,7 @@ class Bank {
   final String userId;
   final DateTime createdAt;
   final DateTime updatedAt;
-  
+
   // ✅ NEW: Stripe-specific fields
   final String? stripeAccountId;
   final String? stripeAccountType; // 'express', 'standard'
@@ -16,7 +16,7 @@ class Bank {
   final String? countryCode; // e.g., 'US', 'GB', 'NG'
   final String? currency; // e.g., 'USD', 'GBP', 'NGN'
   final String? provider; // 'paystack', 'stripe', 'flutterwave'
-  
+
   // ✅ NEW: International bank details
   final String? routingNumber; // US
   final String? sortCode; // UK
@@ -52,12 +52,14 @@ class Bank {
       accountName: json['accountName'] ?? '',
       bankCode: json['bankCode'] ?? '',
       userId: json['userId'] ?? '',
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
-          : DateTime.now(),
+      createdAt:
+          json['createdAt'] != null
+              ? DateTime.parse(json['createdAt'])
+              : DateTime.now(),
+      updatedAt:
+          json['updatedAt'] != null
+              ? DateTime.parse(json['updatedAt'])
+              : DateTime.now(),
 
       // ✅ Parse Stripe fields
       stripeAccountId: json['stripeAccountId'],
@@ -77,7 +79,8 @@ class Bank {
   factory Bank.fromStripeJson(Map<String, dynamic> json) {
     return Bank(
       id: json['id'] ?? '',
-      bankName: (json['bank_name'] ?? 'STRIPE TEST BANK').toString().toUpperCase(),
+      bankName:
+          (json['bank_name'] ?? 'STRIPE TEST BANK').toString().toUpperCase(),
       accountNumber: '****${json['last4'] ?? ''}',
       accountName: json['account_holder_name'] ?? 'Stripe Account',
       bankCode: '',
@@ -88,7 +91,8 @@ class Bank {
       countryCode: json['country']?.toString().toUpperCase(),
       currency: json['currency']?.toString().toUpperCase(),
       provider: 'stripe',
-      stripeOnboardingComplete: json['status'] == 'verified' || json['status'] == 'new',
+      stripeOnboardingComplete:
+          json['status'] == 'verified' || json['status'] == 'new',
     );
   }
 
@@ -97,16 +101,22 @@ class Bank {
     return Bank(
       id: json['_id'] ?? json['id'] ?? '',
       bankName: json['bankName'] ?? json['bank_name'] ?? '',
-      accountNumber: json['accountNumber'] ?? json['account_number'] ?? json['last4'] ?? '',
+      accountNumber:
+          json['accountNumber'] ??
+          json['account_number'] ??
+          json['last4'] ??
+          '',
       accountName: json['accountName'] ?? json['account_holder_name'] ?? '',
       bankCode: json['bankCode'] ?? json['bank_code'] ?? '',
       userId: json['userId'] ?? '',
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
-          : DateTime.now(),
+      createdAt:
+          json['createdAt'] != null
+              ? DateTime.parse(json['createdAt'])
+              : DateTime.now(),
+      updatedAt:
+          json['updatedAt'] != null
+              ? DateTime.parse(json['updatedAt'])
+              : DateTime.now(),
       provider: json['source'] ?? 'manual',
       countryCode: json['country']?.toString().toUpperCase() ?? 'NG',
       currency: json['currency']?.toString().toUpperCase() ?? 'NGN',
@@ -125,11 +135,12 @@ class Bank {
       'userId': userId,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
-      
+
       // ✅ NEW: Include Stripe fields if present
       if (stripeAccountId != null) 'stripeAccountId': stripeAccountId,
       if (stripeAccountType != null) 'stripeAccountType': stripeAccountType,
-      if (stripeOnboardingComplete != null) 'stripeOnboardingComplete': stripeOnboardingComplete,
+      if (stripeOnboardingComplete != null)
+        'stripeOnboardingComplete': stripeOnboardingComplete,
       if (countryCode != null) 'countryCode': countryCode,
       if (currency != null) 'currency': currency,
       if (provider != null) 'provider': provider,
@@ -139,12 +150,14 @@ class Bank {
       if (swiftCode != null) 'swiftCode': swiftCode,
     };
   }
-  
+
   // ✅ NEW: Helper getters
   bool get isStripeAccount => provider?.toLowerCase() == 'stripe';
-  bool get isLocalBank => provider?.toLowerCase() == 'paystack' || provider?.toLowerCase() == 'flutterwave';
+  bool get isLocalBank =>
+      provider?.toLowerCase() == 'paystack' ||
+      provider?.toLowerCase() == 'flutterwave';
   bool get isStripeOnboardingComplete => stripeOnboardingComplete ?? false;
-  
+
   String get displayProvider {
     if (provider == null) return 'Local Bank';
     switch (provider!.toLowerCase()) {
@@ -158,7 +171,7 @@ class Bank {
         return 'Local Bank';
     }
   }
-  
+
   String get displayCurrency => currency ?? 'NGN';
   String get displayCountry => countryCode ?? 'NG';
 }

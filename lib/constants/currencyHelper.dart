@@ -13,7 +13,7 @@ class CurrencyHelper {
     try {
       final userData = await SecurePrefs.getUserData();
       final country = userData?['country'] as String?;
-      
+
       print("🌍 User country from prefs: $country");
       return country;
     } catch (e) {
@@ -118,12 +118,16 @@ class CurrencyHelper {
     final rounded = (amount * 100).round() / 100;
 
     // If the rounded amount is a whole number, don't show decimals
-    final formatter = rounded == rounded.roundToDouble()
-        ? NumberFormat('#,###')
-        : NumberFormat('#,###.##');
+    final formatter =
+        rounded == rounded.roundToDouble()
+            ? NumberFormat('#,###')
+            : NumberFormat('#,###.##');
 
     // Use provided currency code or default to user's currency
-    final symbol = currencyCode != null ? _getCurrencySymbol(currencyCode) : currencySymbol;
+    final symbol =
+        currencyCode != null
+            ? _getCurrencySymbol(currencyCode)
+            : currencySymbol;
 
     return '$symbol${formatter.format(rounded)}';
   }

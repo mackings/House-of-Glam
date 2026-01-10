@@ -54,7 +54,10 @@ extension TailorServiceExtension on TailorHomeService {
       print("⬅️ Response [${response.statusCode}]: $resBody");
 
       if (response.statusCode != 201) {
-        final errorMessage = ErrorHandler.parseApiError(resBody, response.statusCode);
+        final errorMessage = ErrorHandler.parseApiError(
+          resBody,
+          response.statusCode,
+        );
         throw Exception(errorMessage);
       }
     } catch (e) {

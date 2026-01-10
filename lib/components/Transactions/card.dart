@@ -4,10 +4,6 @@ import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:intl/intl.dart';
 
-
-
-
-
 class TransactionCard extends StatelessWidget {
   final TransactionResponse txn;
   final double convertedAmount;
@@ -55,8 +51,9 @@ class TransactionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // ✅ Handle both paymentStatus and status fields
     final statusField = txn.paymentStatus ?? txn.status ?? "pending";
-    final isSuccess = statusField.toLowerCase() == "success" || 
-                      statusField.toLowerCase() == "successfull";
+    final isSuccess =
+        statusField.toLowerCase() == "success" ||
+        statusField.toLowerCase() == "successfull";
 
     return InkWell(
       onTap: onTap,
@@ -102,7 +99,7 @@ class TransactionCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                   const SizedBox(height: 6),
-                  
+
                   // ✅ Transaction title
                   CustomText(
                     getTransactionTitle(),
@@ -111,7 +108,7 @@ class TransactionCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                   const SizedBox(height: 2),
-                  
+
                   // ✅ Subtitle
                   CustomText(
                     getSubtitle(),
@@ -140,7 +137,6 @@ class TransactionCard extends StatelessWidget {
               ),
             ),
 
-
             // Status Badge
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -155,8 +151,6 @@ class TransactionCard extends StatelessWidget {
                 fontSize: 12,
               ),
             ),
-
-
           ],
         ),
       ),

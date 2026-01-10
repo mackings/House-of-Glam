@@ -1,7 +1,6 @@
 /// 🌐 API Configuration
 
 class ApiConfig {
-  
   // 🔗 Base URL for all API endpoints
   //  static const String baseUrl = "https://hog-ymud.onrender.com";
 

@@ -30,7 +30,10 @@ class TailorHomeService {
         final jsonData = json.decode(response.body);
         return TailorMaterialResponse.fromJson(jsonData);
       } else {
-        final errorMessage = ErrorHandler.parseApiError(response.body, response.statusCode);
+        final errorMessage = ErrorHandler.parseApiError(
+          response.body,
+          response.statusCode,
+        );
         throw Exception(errorMessage);
       }
     } catch (e) {
@@ -75,7 +78,10 @@ class TailorHomeService {
       print("⬅️ Response [${response.statusCode}]: ${response.body}");
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        final errorMessage = ErrorHandler.parseApiError(response.body, response.statusCode);
+        final errorMessage = ErrorHandler.parseApiError(
+          response.body,
+          response.statusCode,
+        );
         throw Exception(errorMessage);
       }
     } catch (e) {
@@ -104,7 +110,10 @@ class TailorHomeService {
         final jsonData = json.decode(response.body);
         return TailorAssignedMaterialsResponse.fromJson(jsonData);
       } else {
-        final errorMessage = ErrorHandler.parseApiError(response.body, response.statusCode);
+        final errorMessage = ErrorHandler.parseApiError(
+          response.body,
+          response.statusCode,
+        );
         throw Exception(errorMessage);
       }
     } catch (e) {
@@ -138,7 +147,10 @@ class TailorHomeService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return responseData["message"] ?? "Attire delivered successfully";
       } else {
-        final errorMessage = ErrorHandler.parseApiError(response.body, response.statusCode);
+        final errorMessage = ErrorHandler.parseApiError(
+          response.body,
+          response.statusCode,
+        );
         throw Exception(errorMessage);
       }
     } catch (e) {
@@ -185,7 +197,10 @@ class TailorHomeService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return responseData["message"] ?? "Quotation updated successfully";
       } else {
-        final errorMessage = ErrorHandler.parseApiError(response.body, response.statusCode);
+        final errorMessage = ErrorHandler.parseApiError(
+          response.body,
+          response.statusCode,
+        );
         throw Exception(errorMessage);
       }
     } catch (e) {

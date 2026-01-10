@@ -1,4 +1,3 @@
-
 import 'dart:math' as developer;
 
 import 'package:hog/App/Auth/Api/secure.dart';
@@ -7,9 +6,6 @@ import 'package:hog/constants/api_config.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-
-
-
 class BankApiService {
   static const String baseUrl = ApiConfig.baseUrl;
 
@@ -17,7 +13,7 @@ class BankApiService {
   static void _log(String message, {String level = 'INFO'}) {
     final timestamp = DateTime.now().toIso8601String();
     final logMessage = '[$timestamp] [$level] $message';
-   // developer.log(logMessage as num, name: 'BankApiService');
+    // developer.log(logMessage as num, name: 'BankApiService');
     print(logMessage);
   }
 
@@ -54,12 +50,18 @@ class BankApiService {
     required String endpoint,
   }) {
     _log('📥 RESPONSE: $endpoint');
-    _log('📊 Status Code: $statusCode', level: statusCode >= 200 && statusCode < 300 ? 'SUCCESS' : 'ERROR');
-    
+    _log(
+      '📊 Status Code: $statusCode',
+      level: statusCode >= 200 && statusCode < 300 ? 'SUCCESS' : 'ERROR',
+    );
+
     try {
       final jsonBody = jsonDecode(body);
       _log('📄 Response Body:', level: 'DEBUG');
-      _log('   ${JsonEncoder.withIndent('  ').convert(jsonBody)}', level: 'DEBUG');
+      _log(
+        '   ${JsonEncoder.withIndent('  ').convert(jsonBody)}',
+        level: 'DEBUG',
+      );
     } catch (e) {
       _log('📄 Response Body (Raw):', level: 'DEBUG');
       _log('   $body', level: 'DEBUG');
@@ -67,196 +69,169 @@ class BankApiService {
     _log('═══════════════════════════════════════════════════════');
   }
 
+  /// 🌍 Create Stripe Connected Account
+  static Future<Map<String, dynamic>> createStripeAccount() async {
+    final endpoint = "$baseUrl/api/v1/stripe/create-account";
 
+    try {
+      final token = await SecurePrefs.getToken();
+      if (token == null) {
+        _log('❌ No authentication token found', level: 'ERROR');
+        return {"success": false, "error": "No authentication token found"};
+      }
 
-
-/// 🌍 Create Stripe Connected Account
-static Future<Map<String, dynamic>> createStripeAccount() async {
-  final endpoint = "$baseUrl/api/v1/stripe/create-account";
-  
-  try {
-    final token = await SecurePrefs.getToken();
-    if (token == null) {
-      _log('❌ No authentication token found', level: 'ERROR');
-      return {"success": false, "error": "No authentication token found"};
-    }
-
-    final headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token",
-    };
-
-    _logRequest(
-      method: 'POST',
-      endpoint: endpoint,
-      headers: headers,
-    );
-
-    final response = await http.post(
-      Uri.parse(endpoint),
-      headers: headers,
-    );
-
-    _logResponse(
-      statusCode: response.statusCode,
-      body: response.body,
-      endpoint: endpoint,
-    );
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = jsonDecode(response.body);
-      _log('✅ Stripe account creation initiated', level: 'SUCCESS');
-      return {
-        "success": true,
-        "stripeAccountId": data['data']['stripeAccountId'],
-        "onboardingUrl": data['data']['onboardingUrl'],
-        "data": data,
+      final headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
       };
-    } else {
-      final error = jsonDecode(response.body);
-      _log('❌ Failed to create Stripe account: ${error['message']}', level: 'ERROR');
-      return {
-        "success": false,
-        "error": error['message'] ?? "Failed to create Stripe account",
-      };
+
+      _logRequest(method: 'POST', endpoint: endpoint, headers: headers);
+
+      final response = await http.post(Uri.parse(endpoint), headers: headers);
+
+      _logResponse(
+        statusCode: response.statusCode,
+        body: response.body,
+        endpoint: endpoint,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        _log('✅ Stripe account creation initiated', level: 'SUCCESS');
+        return {
+          "success": true,
+          "stripeAccountId": data['data']['stripeAccountId'],
+          "onboardingUrl": data['data']['onboardingUrl'],
+          "data": data,
+        };
+      } else {
+        final error = jsonDecode(response.body);
+        _log(
+          '❌ Failed to create Stripe account: ${error['message']}',
+          level: 'ERROR',
+        );
+        return {
+          "success": false,
+          "error": error['message'] ?? "Failed to create Stripe account",
+        };
+      }
+    } catch (e, stackTrace) {
+      _log('❌ Exception creating Stripe account: $e', level: 'ERROR');
+      _log('Stack trace: $stackTrace', level: 'DEBUG');
+      return {"success": false, "error": "Network error: $e"};
     }
-  } catch (e, stackTrace) {
-    _log('❌ Exception creating Stripe account: $e', level: 'ERROR');
-    _log('Stack trace: $stackTrace', level: 'DEBUG');
-    return {"success": false, "error": "Network error: $e"};
   }
-}
 
-/// 💸 Stripe Transfer to Connected Account
-static Future<Map<String, dynamic>> stripeTransfer({
-  required String bankId,
-  required double amount,
-}) async {
-  final endpoint = "$baseUrl/api/v1/stripe/make-stripe-transfer";
-  
-  try {
-    final token = await SecurePrefs.getToken();
-    if (token == null) {
-      _log('❌ No authentication token found', level: 'ERROR');
-      return {"success": false, "error": "No authentication token found"};
-    }
+  /// 💸 Stripe Transfer to Connected Account
+  static Future<Map<String, dynamic>> stripeTransfer({
+    required String bankId,
+    required double amount,
+  }) async {
+    final endpoint = "$baseUrl/api/v1/stripe/make-stripe-transfer";
 
-    final headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token",
-    };
+    try {
+      final token = await SecurePrefs.getToken();
+      if (token == null) {
+        _log('❌ No authentication token found', level: 'ERROR');
+        return {"success": false, "error": "No authentication token found"};
+      }
 
-    final body = {
-      "amount": amount,
-      "bankId": bankId, // Optional: if backend needs it
-    };
-
-    _logRequest(
-      method: 'POST',
-      endpoint: endpoint,
-      headers: headers,
-      body: body,
-    );
-
-    final response = await http.post(
-      Uri.parse(endpoint),
-      headers: headers,
-      body: jsonEncode(body),
-    );
-
-    _logResponse(
-      statusCode: response.statusCode,
-      body: response.body,
-      endpoint: endpoint,
-    );
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = jsonDecode(response.body);
-      _log('✅ Stripe transfer successful. Amount: \$${amount}', level: 'SUCCESS');
-      return {
-        "success": true,
-        "message": "Transfer successful",
-        "data": data,
+      final headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
       };
-    } else {
-      final error = jsonDecode(response.body);
-      _log('❌ Stripe transfer failed: ${error['message']}', level: 'ERROR');
-      return {
-        "success": false,
-        "error": error['message'] ?? "Transfer failed",
+
+      final body = {
+        "amount": amount,
+        "bankId": bankId, // Optional: if backend needs it
       };
+
+      _logRequest(
+        method: 'POST',
+        endpoint: endpoint,
+        headers: headers,
+        body: body,
+      );
+
+      final response = await http.post(
+        Uri.parse(endpoint),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      _logResponse(
+        statusCode: response.statusCode,
+        body: response.body,
+        endpoint: endpoint,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        _log(
+          '✅ Stripe transfer successful. Amount: \$${amount}',
+          level: 'SUCCESS',
+        );
+        return {
+          "success": true,
+          "message": "Transfer successful",
+          "data": data,
+        };
+      } else {
+        final error = jsonDecode(response.body);
+        _log('❌ Stripe transfer failed: ${error['message']}', level: 'ERROR');
+        return {
+          "success": false,
+          "error": error['message'] ?? "Transfer failed",
+        };
+      }
+    } catch (e, stackTrace) {
+      _log('❌ Exception during Stripe transfer: $e', level: 'ERROR');
+      _log('Stack trace: $stackTrace', level: 'DEBUG');
+      return {"success": false, "error": "Network error: $e"};
     }
-  } catch (e, stackTrace) {
-    _log('❌ Exception during Stripe transfer: $e', level: 'ERROR');
-    _log('Stack trace: $stackTrace', level: 'DEBUG');
-    return {"success": false, "error": "Network error: $e"};
   }
-}
 
-/// ✅ Check Stripe Account Status
-static Future<Map<String, dynamic>> getStripeAccountStatus() async {
-  final endpoint = "$baseUrl/api/v1/stripe/account-status";
-  
-  try {
-    final token = await SecurePrefs.getToken();
-    if (token == null) {
-      _log('❌ No authentication token found', level: 'ERROR');
-      return {"success": false, "error": "No authentication token found"};
-    }
+  /// ✅ Check Stripe Account Status
+  static Future<Map<String, dynamic>> getStripeAccountStatus() async {
+    final endpoint = "$baseUrl/api/v1/stripe/account-status";
 
-    final headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token",
-    };
+    try {
+      final token = await SecurePrefs.getToken();
+      if (token == null) {
+        _log('❌ No authentication token found', level: 'ERROR');
+        return {"success": false, "error": "No authentication token found"};
+      }
 
-    _logRequest(
-      method: 'GET',
-      endpoint: endpoint,
-      headers: headers,
-    );
-
-    final response = await http.get(
-      Uri.parse(endpoint),
-      headers: headers,
-    );
-
-    _logResponse(
-      statusCode: response.statusCode,
-      body: response.body,
-      endpoint: endpoint,
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return {
-        "success": true,
-        "data": data,
+      final headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
       };
-    } else {
-      final error = jsonDecode(response.body);
-      return {
-        "success": false,
-        "error": error['message'] ?? "Failed to get status",
-      };
+
+      _logRequest(method: 'GET', endpoint: endpoint, headers: headers);
+
+      final response = await http.get(Uri.parse(endpoint), headers: headers);
+
+      _logResponse(
+        statusCode: response.statusCode,
+        body: response.body,
+        endpoint: endpoint,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {"success": true, "data": data};
+      } else {
+        final error = jsonDecode(response.body);
+        return {
+          "success": false,
+          "error": error['message'] ?? "Failed to get status",
+        };
+      }
+    } catch (e, stackTrace) {
+      _log('❌ Exception getting Stripe status: $e', level: 'ERROR');
+      return {"success": false, "error": "Network error: $e"};
     }
-  } catch (e, stackTrace) {
-    _log('❌ Exception getting Stripe status: $e', level: 'ERROR');
-    return {"success": false, "error": "Network error: $e"};
   }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   /// 🏦 Create Bank Account
   static Future<Map<String, dynamic>> createBankAccount({
@@ -266,7 +241,7 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
     required String bankCode,
   }) async {
     final endpoint = "$baseUrl/api/v1/bank/create";
-    
+
     try {
       final token = await SecurePrefs.getToken();
       if (token == null) {
@@ -315,7 +290,10 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
         };
       } else {
         final error = jsonDecode(response.body);
-        _log('❌ Failed to create bank account: ${error['message']}', level: 'ERROR');
+        _log(
+          '❌ Failed to create bank account: ${error['message']}',
+          level: 'ERROR',
+        );
         return {
           "success": false,
           "error": error['message'] ?? "Failed to add bank account",
@@ -327,8 +305,6 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
       return {"success": false, "error": "Network error: $e"};
     }
   }
-
-
 
   /// 🏦 Get All Banks (Stripe + Local)
   static Future<List<Bank>> getAllBanks() async {
@@ -346,16 +322,9 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
         "Authorization": "Bearer $token",
       };
 
-      _logRequest(
-        method: 'GET',
-        endpoint: endpoint,
-        headers: headers,
-      );
+      _logRequest(method: 'GET', endpoint: endpoint, headers: headers);
 
-      final response = await http.get(
-        Uri.parse(endpoint),
-        headers: headers,
-      );
+      final response = await http.get(Uri.parse(endpoint), headers: headers);
 
       _logResponse(
         statusCode: response.statusCode,
@@ -381,7 +350,8 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
 
           for (var bankJson in banksArray) {
             final bankData = bankJson as Map<String, dynamic>;
-            final source = bankData['source']?.toString().toLowerCase() ?? 'manual';
+            final source =
+                bankData['source']?.toString().toLowerCase() ?? 'manual';
 
             // Determine if it's a Stripe or local bank based on source
             if (source == 'stripe') {
@@ -408,7 +378,10 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
         _log('✅ Total banks fetched: ${allBanks.length}', level: 'SUCCESS');
         return allBanks;
       } else {
-        _log('❌ Failed to fetch banks. Status: ${response.statusCode}', level: 'ERROR');
+        _log(
+          '❌ Failed to fetch banks. Status: ${response.statusCode}',
+          level: 'ERROR',
+        );
         return [];
       }
     } catch (e, stackTrace) {
@@ -418,8 +391,6 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
     }
   }
 
-
-
   /// 💸 Bank Transfer
   static Future<Map<String, dynamic>> bankTransfer({
     required String bankId,
@@ -427,7 +398,7 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
     String? pin,
   }) async {
     final endpoint = "$baseUrl/api/v1/bank/transfer/$bankId";
-    
+
     try {
       final token = await SecurePrefs.getToken();
       if (token == null) {
@@ -452,10 +423,7 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
         body: body,
       );
 
-      final actualBody = {
-        "amount": amount,
-        if (pin != null) "pin": pin,
-      };
+      final actualBody = {"amount": amount, if (pin != null) "pin": pin};
 
       final response = await http.post(
         Uri.parse(endpoint),
@@ -468,7 +436,6 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
         body: response.body,
         endpoint: endpoint,
       );
-
 
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
@@ -498,7 +465,8 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
     required String accountNumber,
     required String bankCode,
   }) async {
-    final endpoint = "$baseUrl/api/v1/bank/verify?accountNumber=$accountNumber&bankCode=$bankCode";
+    final endpoint =
+        "$baseUrl/api/v1/bank/verify?accountNumber=$accountNumber&bankCode=$bankCode";
 
     try {
       final token = await SecurePrefs.getToken();
@@ -512,16 +480,9 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
         "Authorization": "Bearer $token",
       };
 
-      _logRequest(
-        method: 'GET',
-        endpoint: endpoint,
-        headers: headers,
-      );
+      _logRequest(method: 'GET', endpoint: endpoint, headers: headers);
 
-      final response = await http.post(
-        Uri.parse(endpoint),
-        headers: headers,
-      );
+      final response = await http.post(Uri.parse(endpoint), headers: headers);
 
       _logResponse(
         statusCode: response.statusCode,
@@ -534,11 +495,13 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
         _log('✅ Account verified successfully', level: 'SUCCESS');
 
         // Return the data directly since it already has the correct structure
-        return data;  // ✅ CHANGED: Don't wrap it again
-
+        return data; // ✅ CHANGED: Don't wrap it again
       } else {
         final error = jsonDecode(response.body);
-        _log('❌ Account verification failed: ${error['message']}', level: 'ERROR');
+        _log(
+          '❌ Account verification failed: ${error['message']}',
+          level: 'ERROR',
+        );
         return {
           "success": false,
           "error": error['message'] ?? "Verification failed",
@@ -643,16 +606,9 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
         "Authorization": "Bearer $token",
       };
 
-      _logRequest(
-        method: 'GET',
-        endpoint: endpoint,
-        headers: headers,
-      );
+      _logRequest(method: 'GET', endpoint: endpoint, headers: headers);
 
-      final response = await http.get(
-        Uri.parse(endpoint),
-        headers: headers,
-      );
+      final response = await http.get(Uri.parse(endpoint), headers: headers);
 
       _logResponse(
         statusCode: response.statusCode,
@@ -665,14 +621,13 @@ static Future<Map<String, dynamic>> getStripeAccountStatus() async {
         // ✅ Fix: Extract from data.wallet instead of balance
         final balance = (data['data']?['wallet'] ?? 0).toDouble();
         _log('✅ Wallet balance fetched: ₦$balance', level: 'SUCCESS');
-        return {
-          "success": true,
-          "balance": balance,
-          "data": data,
-        };
+        return {"success": true, "balance": balance, "data": data};
       } else {
         final error = jsonDecode(response.body);
-        _log('❌ Failed to fetch wallet balance: ${error['message']}', level: 'ERROR');
+        _log(
+          '❌ Failed to fetch wallet balance: ${error['message']}',
+          level: 'ERROR',
+        );
         return {
           "success": false,
           "error": error['message'] ?? "Failed to fetch balance",

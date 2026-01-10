@@ -60,9 +60,9 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error picking image: $e")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error picking image: $e")));
       }
     }
   }
@@ -101,7 +101,8 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
         yearOfExperience: yearController.text.trim(),
         description: descriptionController.text.trim(),
         imageFile: _selectedImage,
-        businessRegNo: _isRegisteredBusiness ? businessRegNoController.text.trim() : null,
+        businessRegNo:
+            _isRegisteredBusiness ? businessRegNoController.text.trim() : null,
       );
 
       setState(() => isLoading = false);
@@ -186,10 +187,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                     SizedBox(height: 8),
                     Text(
                       "Join our network of professional tailors and grow your business",
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ],
                 ),
@@ -225,7 +223,9 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                       if (value == null || value.trim().isEmpty) {
                         return "Business email is required";
                       }
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                      if (!RegExp(
+                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      ).hasMatch(value)) {
                         return "Please enter a valid email";
                       }
                       return null;
@@ -334,7 +334,8 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                   const SizedBox(height: 16),
                   CustomTextField(
                     title: "Description",
-                    hintText: "Describe your tailoring services and specialties",
+                    hintText:
+                        "Describe your tailoring services and specialties",
                     fieldKey: "description",
                     controller: descriptionController,
                     keyboardType: TextInputType.multiline,
@@ -369,7 +370,11 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                         RadioListTile<bool>(
                           title: Row(
                             children: const [
-                              Icon(Icons.verified, color: Colors.purple, size: 20),
+                              Icon(
+                                Icons.verified,
+                                color: Colors.purple,
+                                size: 20,
+                              ),
                               SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -383,7 +388,10 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                             padding: EdgeInsets.only(left: 28, top: 4),
                             child: Text(
                               "I have official business registration",
-                              style: TextStyle(fontSize: 12, color: Colors.grey),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
                             ),
                           ),
                           value: true,
@@ -397,7 +405,11 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                         RadioListTile<bool>(
                           title: Row(
                             children: const [
-                              Icon(Icons.person_outline, color: Colors.purple, size: 20),
+                              Icon(
+                                Icons.person_outline,
+                                color: Colors.purple,
+                                size: 20,
+                              ),
                               SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -411,7 +423,10 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                             padding: EdgeInsets.only(left: 28, top: 4),
                             child: Text(
                               "Individual tailor without registration",
-                              style: TextStyle(fontSize: 12, color: Colors.grey),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
                             ),
                           ),
                           value: false,
@@ -430,9 +445,10 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                   // Conditional Fields
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
-                    child: _isRegisteredBusiness
-                        ? _buildRegisteredBusinessSection()
-                        : _buildUnregisteredBusinessSection(),
+                    child:
+                        _isRegisteredBusiness
+                            ? _buildRegisteredBusinessSection()
+                            : _buildUnregisteredBusinessSection(),
                   ),
                 ],
               ),
@@ -515,7 +531,8 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
           controller: businessRegNoController,
           keyboardType: TextInputType.text,
           validator: (value) {
-            if (_isRegisteredBusiness && (value == null || value.trim().isEmpty)) {
+            if (_isRegisteredBusiness &&
+                (value == null || value.trim().isEmpty)) {
               return "Registration number is required for registered businesses";
             }
             return null;
@@ -601,72 +618,75 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
             style: BorderStyle.solid,
           ),
         ),
-        child: _selectedImage != null
-            ? Column(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.file(
-                      _selectedImage!,
-                      height: 150,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.check_circle, color: Colors.green, size: 20),
-                      SizedBox(width: 8),
-                      Text(
-                        "Document uploaded successfully",
-                        style: TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.w500,
-                        ),
+        child:
+            _selectedImage != null
+                ? Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(
+                        _selectedImage!,
+                        height: 150,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  TextButton.icon(
-                    onPressed: _pickImage,
-                    icon: const Icon(Icons.refresh, size: 18),
-                    label: const Text("Change Document"),
-                    style: TextButton.styleFrom(foregroundColor: Colors.purple),
-                  ),
-                ],
-              )
-            : Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.purple.shade50,
-                      shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      Icons.cloud_upload_outlined,
-                      size: 40,
-                      color: Colors.purple.shade300,
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.check_circle, color: Colors.green, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          "Document uploaded successfully",
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Tap to upload document",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      onPressed: _pickImage,
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: const Text("Change Document"),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.purple,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    "PNG, JPG up to 5MB",
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                ],
-              ),
+                  ],
+                )
+                : Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.shade50,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.cloud_upload_outlined,
+                        size: 40,
+                        color: Colors.purple.shade300,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Tap to upload document",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      "PNG, JPG up to 5MB",
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
       ),
     );
   }

@@ -6,8 +6,6 @@ import 'package:hog/constants/currencyHelper.dart';
 import 'package:intl/intl.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-
-
 class QuotationCard extends StatelessWidget {
   final Review review;
   final VoidCallback onHireDesigner;
@@ -45,10 +43,11 @@ class QuotationCard extends StatelessWidget {
     final bool hasPartPayment = review.amountPaid > 0 && review.amountToPay > 0;
 
     // 🔥 FIX: Use final negotiated prices if offer was accepted, otherwise use original quote
-    final displayTotal = hasAcceptedOffer && review.finalTotalCost != null
-        ? review.finalTotalCost!
-        : review.totalCost;
-    
+    final displayTotal =
+        hasAcceptedOffer && review.finalTotalCost != null
+            ? review.finalTotalCost!
+            : review.totalCost;
+
     // 🔥 FIX: Properly calculate amount to pay
     final displayAmountToPay = review.amountToPay;
 
@@ -56,9 +55,10 @@ class QuotationCard extends StatelessWidget {
     final currencyCode = 'NGN';
 
     // ✅ Get USD amounts for display
-    final displayTotalUSD = hasAcceptedOffer && review.finalTotalCostUSD != null
-        ? review.finalTotalCostUSD!
-        : review.totalCostUSD;
+    final displayTotalUSD =
+        hasAcceptedOffer && review.finalTotalCostUSD != null
+            ? review.finalTotalCostUSD!
+            : review.totalCostUSD;
 
     // ✅ Show original USD amounts if international vendor (for reference)
     final showOriginalUSD = review.isInternationalVendor && displayTotalUSD > 0;
@@ -131,11 +131,12 @@ class QuotationCard extends StatelessWidget {
                 isQuote
                     ? Icons.schedule
                     : isPartPayment
-                        ? Icons.check_circle_outline
-                        : Icons.check_circle,
-                color: isPartPayment
-                    ? Colors.grey
-                    : isFullPayment
+                    ? Icons.check_circle_outline
+                    : Icons.check_circle,
+                color:
+                    isPartPayment
+                        ? Colors.grey
+                        : isFullPayment
                         ? Colors.purple
                         : Colors.green,
                 size: 18,
@@ -143,7 +144,6 @@ class QuotationCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-
 
           // Delivery & Reminder
           Row(
@@ -162,7 +162,6 @@ class QuotationCard extends StatelessWidget {
             ],
           ),
 
-
           const SizedBox(height: 10),
 
           if (review.comment.isNotEmpty)
@@ -176,20 +175,15 @@ class QuotationCard extends StatelessWidget {
             ),
 
           // 🔥 Show badge if price was negotiated
-          if (hasAcceptedOffer && review.finalTotalCost != null && 
-              review.finalTotalCost! < review.totalCost) ...[
-
-          ],
-
+          if (hasAcceptedOffer &&
+              review.finalTotalCost != null &&
+              review.finalTotalCost! < review.totalCost)
+            ...[],
 
           // Display total cost only
           _buildTotalCost(displayTotal, currencyCode: currencyCode),
           const SizedBox(height: 6),
-          CustomText(
-            "Excluding VAT",
-            fontSize: 11,
-            color: Colors.black54,
-          ),
+          CustomText("Excluding VAT", fontSize: 11, color: Colors.black54),
 
           // Show USD conversion info if international vendor
           if (showOriginalUSD) ...[
@@ -204,7 +198,11 @@ class QuotationCard extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.info_outline, size: 14, color: Colors.blue.shade700),
+                  Icon(
+                    Icons.info_outline,
+                    size: 14,
+                    color: Colors.blue.shade700,
+                  ),
                   const SizedBox(width: 6),
                   CustomText(
                     "USD: ${CurrencyHelper.formatAmount(displayTotalUSD, currencyCode: 'USD')}",
@@ -236,7 +234,11 @@ class QuotationCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.orange.shade700, size: 18),
+                  Icon(
+                    Icons.info_outline,
+                    color: Colors.orange.shade700,
+                    size: 18,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
@@ -319,7 +321,11 @@ class QuotationCard extends StatelessWidget {
                       print('   Amount: ₦${displayTotal.round()}');
                       onCompletePayment(displayTotal.round());
                     },
-                    icon: const Icon(Icons.payment, size: 18, color: Colors.white),
+                    icon: const Icon(
+                      Icons.payment,
+                      size: 18,
+                      color: Colors.white,
+                    ),
                     label: CustomText(
                       "Pay in Full (${CurrencyHelper.formatAmount(displayTotal, currencyCode: currencyCode)})",
                       fontSize: 14,
@@ -367,7 +373,11 @@ class QuotationCard extends StatelessWidget {
                         },
                       );
                     },
-                    icon: Icon(Icons.payments_outlined, size: 18, color: Colors.purple.shade700),
+                    icon: Icon(
+                      Icons.payments_outlined,
+                      size: 18,
+                      color: Colors.purple.shade700,
+                    ),
                     label: CustomText(
                       "Pay Half (Part Payment)",
                       fontSize: 14,
@@ -376,7 +386,10 @@ class QuotationCard extends StatelessWidget {
                     ),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: Colors.purple.shade300, width: 1.5),
+                      side: BorderSide(
+                        color: Colors.purple.shade300,
+                        width: 1.5,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -393,7 +406,11 @@ class QuotationCard extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: onHireDesigner,
-                    icon: const Icon(Icons.person_add, size: 18, color: Colors.white),
+                    icon: const Icon(
+                      Icons.person_add,
+                      size: 18,
+                      color: Colors.white,
+                    ),
                     label: CustomText(
                       "Hire Designer (${CurrencyHelper.formatAmount(displayTotal, currencyCode: currencyCode)})",
                       fontSize: 14,
@@ -471,25 +488,27 @@ class QuotationCard extends StatelessWidget {
   }
 
   void _openCheckout(BuildContext context, String url) {
-    final controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse(url));
+    final controller =
+        WebViewController()
+          ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..loadRequest(Uri.parse(url));
 
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.purple,
-            title: const CustomText(
-              "Payments",
-              color: Colors.white,
-              fontSize: 18,
+        builder:
+            (_) => Scaffold(
+              appBar: AppBar(
+                backgroundColor: Colors.purple,
+                title: const CustomText(
+                  "Payments",
+                  color: Colors.white,
+                  fontSize: 18,
+                ),
+                iconTheme: const IconThemeData(color: Colors.white),
+              ),
+              body: WebViewWidget(controller: controller),
             ),
-            iconTheme: const IconThemeData(color: Colors.white),
-          ),
-          body: WebViewWidget(controller: controller),
-        ),
       ),
     ).then((_) {
       controller.clearCache();

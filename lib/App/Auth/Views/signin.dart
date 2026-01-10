@@ -177,24 +177,27 @@ class _SigninState extends ConsumerState<Signin> {
                   onPressed: _handleSignin,
                 ),
 
-                 const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-                 Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const CustomText("New user? "),
-                      const SizedBox(width: 10),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (_) => const Signup()),
-                          );
-                        },
-                        child: CustomText("Create account", fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CustomText("New user? "),
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const Signup()),
+                        );
+                      },
+                      child: CustomText(
+                        "Create account",
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),

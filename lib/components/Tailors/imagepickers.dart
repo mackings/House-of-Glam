@@ -62,7 +62,10 @@ class MultiImagePicker extends StatelessWidget {
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, style: BorderStyle.solid),
+                    border: Border.all(
+                      color: Colors.grey,
+                      style: BorderStyle.solid,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(Icons.add_a_photo, size: 40, color: Colors.grey),

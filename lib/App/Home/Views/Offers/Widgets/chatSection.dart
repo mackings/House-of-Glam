@@ -35,7 +35,7 @@ class _ChatSectionState extends State<ChatSection> {
 
   String _formatTimestamp(dynamic timestamp) {
     if (timestamp == null || timestamp.toString().isEmpty) return '';
-    
+
     try {
       final DateTime dt = DateTime.parse(timestamp.toString());
       final now = DateTime.now();
@@ -47,7 +47,9 @@ class _ChatSectionState extends State<ChatSection> {
         return '${difference.inMinutes}m ago';
       } else if (difference.inHours < 6) {
         return '${difference.inHours}h ago';
-      } else if (dt.day == now.day && dt.month == now.month && dt.year == now.year) {
+      } else if (dt.day == now.day &&
+          dt.month == now.month &&
+          dt.year == now.year) {
         return 'Today, ${DateFormat('h:mm a').format(dt)}';
       } else if (difference.inDays == 1) {
         return 'Yesterday, ${DateFormat('h:mm a').format(dt)}';
@@ -72,56 +74,57 @@ class _ChatSectionState extends State<ChatSection> {
         Column(
           children: [
             Expanded(
-              child: chats.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: Colors.purple.shade50,
-                              shape: BoxShape.circle,
+              child:
+                  chats.isEmpty
+                      ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.purple.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.chat_bubble_outline,
+                                size: 48,
+                                color: Colors.purple.shade300,
+                              ),
                             ),
-                            child: Icon(
-                              Icons.chat_bubble_outline,
-                              size: 48,
-                              color: Colors.purple.shade300,
+                            const SizedBox(height: 16),
+                            Text(
+                              "No conversations yet",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            "No conversations yet",
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.w500,
+                            const SizedBox(height: 8),
+                            Text(
+                              "Start the conversation below",
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade500,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            "Start the conversation below",
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey.shade500,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
+                      )
+                      : ListView.builder(
+                        itemCount: chats.length,
+                        padding: EdgeInsets.only(
+                          top: 10,
+                          bottom: _showReplyForm ? 10 : 80,
+                          left: 10,
+                          right: 10,
+                        ),
+                        itemBuilder: (context, i) {
+                          final chat = chats[i];
+                          return _buildChatBubble(chat);
+                        },
                       ),
-                    )
-                  : ListView.builder(
-                      itemCount: chats.length,
-                      padding: EdgeInsets.only(
-                        top: 10,
-                        bottom: _showReplyForm ? 10 : 80,
-                        left: 10,
-                        right: 10,
-                      ),
-                      itemBuilder: (context, i) {
-                        final chat = chats[i];
-                        return _buildChatBubble(chat);
-                      },
-                    ),
             ),
             if (_showReplyForm) _buildReplyForm(context),
           ],
@@ -152,16 +155,21 @@ class _ChatSectionState extends State<ChatSection> {
 
   Widget _buildChatBubble(Map<String, dynamic> chat) {
     final isUser = chat["senderType"] == "customer";
-    final alignment = isUser ? CrossAxisAlignment.start : CrossAxisAlignment.end;
-    
-    final materialNGN = int.tryParse(chat["counterMaterialCost"]?.toString() ?? "0") ?? 0;
-    final workmanshipNGN = int.tryParse(chat["counterWorkmanshipCost"]?.toString() ?? "0") ?? 0;
+    final alignment =
+        isUser ? CrossAxisAlignment.start : CrossAxisAlignment.end;
+
+    final materialNGN =
+        int.tryParse(chat["counterMaterialCost"]?.toString() ?? "0") ?? 0;
+    final workmanshipNGN =
+        int.tryParse(chat["counterWorkmanshipCost"]?.toString() ?? "0") ?? 0;
 
     return FutureBuilder<Map<String, double>>(
       future: _convertChatAmounts(materialNGN, workmanshipNGN),
       builder: (context, snapshot) {
-        final displayMaterial = snapshot.data?['material'] ?? materialNGN.toDouble();
-        final displayWorkmanship = snapshot.data?['workmanship'] ?? workmanshipNGN.toDouble();
+        final displayMaterial =
+            snapshot.data?['material'] ?? materialNGN.toDouble();
+        final displayWorkmanship =
+            snapshot.data?['workmanship'] ?? workmanshipNGN.toDouble();
         final total = displayMaterial + displayWorkmanship;
 
         return Padding(
@@ -176,7 +184,7 @@ class _ChatSectionState extends State<ChatSection> {
                 children: [
                   if (isUser) _buildAvatar(isUser),
                   if (isUser) const SizedBox(width: 10),
-                  
+
                   Flexible(
                     child: Container(
                       constraints: BoxConstraints(
@@ -185,9 +193,13 @@ class _ChatSectionState extends State<ChatSection> {
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: isUser
-                              ? [Colors.white, Colors.grey.shade50]
-                              : [Colors.purple.shade50, Colors.purple.shade100.withOpacity(0.5)],
+                          colors:
+                              isUser
+                                  ? [Colors.white, Colors.grey.shade50]
+                                  : [
+                                    Colors.purple.shade50,
+                                    Colors.purple.shade100.withOpacity(0.5),
+                                  ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -198,9 +210,10 @@ class _ChatSectionState extends State<ChatSection> {
                           bottomRight: Radius.circular(isUser ? 20 : 4),
                         ),
                         border: Border.all(
-                          color: isUser
-                              ? Colors.grey.shade200
-                              : Colors.purple.shade200,
+                          color:
+                              isUser
+                                  ? Colors.grey.shade200
+                                  : Colors.purple.shade200,
                           width: 1,
                         ),
                         boxShadow: [
@@ -221,12 +234,15 @@ class _ChatSectionState extends State<ChatSection> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: isUser ? Colors.purple.shade700 : Colors.purple.shade900,
+                              color:
+                                  isUser
+                                      ? Colors.purple.shade700
+                                      : Colors.purple.shade900,
                             ),
                           ),
-                          
+
                           const SizedBox(height: 10),
-                          
+
                           // Comment
                           Text(
                             chat["comment"] ?? '',
@@ -236,9 +252,9 @@ class _ChatSectionState extends State<ChatSection> {
                               color: Colors.black87,
                             ),
                           ),
-                          
+
                           const SizedBox(height: 12),
-                          
+
                           // Cost breakdown
                           Container(
                             padding: const EdgeInsets.all(10),
@@ -260,14 +276,17 @@ class _ChatSectionState extends State<ChatSection> {
                                   displayWorkmanship,
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 6,
+                                  ),
                                   child: Divider(
                                     height: 1,
                                     color: Colors.grey.shade300,
                                   ),
                                 ),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
                                       children: [
@@ -299,40 +318,43 @@ class _ChatSectionState extends State<ChatSection> {
                               ],
                             ),
                           ),
-                          
-                         // Replace the Accept Offer Button section in _buildChatBubble with this:
 
-const SizedBox(height: 12),
+                          // Replace the Accept Offer Button section in _buildChatBubble with this:
+                          const SizedBox(height: 12),
 
-// ✅ Accept Offer Button (show for both user and designer - they see each other's offers)
-if ((isUser && widget.userRole == "tailor") || (!isUser && widget.userRole == "user"))
-  SizedBox(
-    width: double.infinity,
-    child: ElevatedButton.icon(
-      onPressed: () => _showAcceptOfferSheet(
-        context,
-        displayMaterial,
-        displayWorkmanship,
-      ),
-      icon: const Icon(Icons.check_circle, size: 18),
-      label: const Text(
-        "Accept This Offer",
-        style: TextStyle(fontWeight: FontWeight.w600),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.green.shade600,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        elevation: 0,
-      ),
-    ),
-  ),
+                          // ✅ Accept Offer Button (show for both user and designer - they see each other's offers)
+                          if ((isUser && widget.userRole == "tailor") ||
+                              (!isUser && widget.userRole == "user"))
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed:
+                                    () => _showAcceptOfferSheet(
+                                      context,
+                                      displayMaterial,
+                                      displayWorkmanship,
+                                    ),
+                                icon: const Icon(Icons.check_circle, size: 18),
+                                label: const Text(
+                                  "Accept This Offer",
+                                  style: TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green.shade600,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 10,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  elevation: 0,
+                                ),
+                              ),
+                            ),
 
-const SizedBox(height: 8),
-                          
+                          const SizedBox(height: 8),
+
                           // Timestamp
                           Row(
                             children: [
@@ -355,7 +377,7 @@ const SizedBox(height: 8),
                       ),
                     ),
                   ),
-                  
+
                   if (!isUser) const SizedBox(width: 10),
                   if (!isUser) _buildAvatar(isUser),
                 ],
@@ -368,197 +390,196 @@ const SizedBox(height: 8),
   }
 
   // ✅ Accept Offer Bottom Sheet
-// ✅ Accept Offer Bottom Sheet
-void _showAcceptOfferSheet(
-  BuildContext context,
-  double materialAmount,
-  double workmanshipAmount,
-) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (ctx) {
-      return Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          left: 20,
-          right: 20,
-          top: 24,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Drag handle
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            
-            const SizedBox(height: 20),
-            
-            // Header
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.check_circle,
-                    color: Colors.green.shade700,
-                    size: 28,
-                  ),
+  // ✅ Accept Offer Bottom Sheet
+  void _showAcceptOfferSheet(
+    BuildContext context,
+    double materialAmount,
+    double workmanshipAmount,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            left: 20,
+            right: 20,
+            top: 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag handle
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Accept Offer",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        "Review the offer details",
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // Cost breakdown
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200),
               ),
-              child: Column(
+
+              const SizedBox(height: 20),
+
+              // Header
+              Row(
                 children: [
-                  _buildSummaryRow("Material Cost", materialAmount),
-                  const SizedBox(height: 12),
-                  _buildSummaryRow("Workmanship Cost", workmanshipAmount),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Divider(height: 1, color: Colors.grey.shade300),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.check_circle,
+                      color: Colors.green.shade700,
+                      size: 28,
+                    ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Total Amount",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Accept Offer",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        "$currencySymbol${NumberFormat('#,###.##').format(materialAmount + workmanshipAmount)}",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.purple.shade700,
+                        Text(
+                          "Review the offer details",
+                          style: TextStyle(fontSize: 13, color: Colors.black54),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // Action buttons
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: BorderSide(color: Colors.grey.shade300),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+
+              const SizedBox(height: 24),
+
+              // Cost breakdown
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  children: [
+                    _buildSummaryRow("Material Cost", materialAmount),
+                    const SizedBox(height: 12),
+                    _buildSummaryRow("Workmanship Cost", workmanshipAmount),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Divider(height: 1, color: Colors.grey.shade300),
                     ),
-                    child: const Text(
-                      "Cancel",
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w600,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Total Amount",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "$currencySymbol${NumberFormat('#,###.##').format(materialAmount + workmanshipAmount)}",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.purple.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Action buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      Navigator.pop(ctx);
-                      
-                      // ✅ Set a default comment if empty
-                      if (widget.commentCtrl.text.trim().isEmpty) {
-                        widget.commentCtrl.text = "I accept this offer";
-                      }
-                      
-                      // Set the amounts in the text fields
-                      widget.materialCtrl.text = NumberFormat('#,###.##').format(materialAmount);
-                      widget.workmanshipCtrl.text = NumberFormat('#,###.##').format(workmanshipAmount);
-                      
-                      // Call the accept action
-                       _confirmAction(context, "accepted");
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green.shade600,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.pop(ctx);
+
+                        // ✅ Set a default comment if empty
+                        if (widget.commentCtrl.text.trim().isEmpty) {
+                          widget.commentCtrl.text = "I accept this offer";
+                        }
+
+                        // Set the amounts in the text fields
+                        widget.materialCtrl.text = NumberFormat(
+                          '#,###.##',
+                        ).format(materialAmount);
+                        widget.workmanshipCtrl.text = NumberFormat(
+                          '#,###.##',
+                        ).format(workmanshipAmount);
+
+                        // Call the accept action
+                        _confirmAction(context, "accepted");
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green.shade600,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
                       ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      "Accept Offer",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                      child: const Text(
+                        "Accept Offer",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
-
-
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   Widget _buildSummaryRow(String label, double amount) {
     return Row(
@@ -566,10 +587,7 @@ void _showAcceptOfferSheet(
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade700,
-          ),
+          style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
         ),
         Text(
           "$currencySymbol${NumberFormat('#,###.##').format(amount)}",
@@ -616,10 +634,7 @@ void _showAcceptOfferSheet(
             const SizedBox(width: 6),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade700,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
             ),
           ],
         ),
@@ -657,10 +672,16 @@ void _showAcceptOfferSheet(
             children: [
               Row(
                 children: [
-                  Icon(Icons.reply_rounded, color: Colors.purple.shade700, size: 20),
+                  Icon(
+                    Icons.reply_rounded,
+                    color: Colors.purple.shade700,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Text(
-                    widget.userRole == "user" ? "Make Your Offer" : "Reply to Buyer",
+                    widget.userRole == "user"
+                        ? "Make Your Offer"
+                        : "Reply to Buyer",
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -677,9 +698,9 @@ void _showAcceptOfferSheet(
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           TextField(
             controller: widget.commentCtrl,
             maxLines: 3,
@@ -687,7 +708,10 @@ void _showAcceptOfferSheet(
               hintText: "Write your message...",
               filled: true,
               fillColor: Colors.grey.shade50,
-              prefixIcon: Icon(Icons.comment_outlined, color: Colors.purple.shade400),
+              prefixIcon: Icon(
+                Icons.comment_outlined,
+                color: Colors.purple.shade400,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
                 borderSide: BorderSide(color: Colors.grey.shade200),
@@ -702,9 +726,9 @@ void _showAcceptOfferSheet(
               ),
             ),
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           Row(
             children: [
               Expanded(
@@ -713,7 +737,10 @@ void _showAcceptOfferSheet(
                   keyboardType: TextInputType.number,
                   inputFormatters: [DecimalThousandsFormatter()],
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.checkroom, color: Colors.purple.shade400),
+                    prefixIcon: Icon(
+                      Icons.checkroom,
+                      color: Colors.purple.shade400,
+                    ),
                     hintText: "Material ($currencySymbol)",
                     filled: true,
                     fillColor: Colors.grey.shade50,
@@ -731,7 +758,10 @@ void _showAcceptOfferSheet(
                   keyboardType: TextInputType.number,
                   inputFormatters: [DecimalThousandsFormatter()],
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.handyman, color: Colors.purple.shade400),
+                    prefixIcon: Icon(
+                      Icons.handyman,
+                      color: Colors.purple.shade400,
+                    ),
                     hintText: "Work ($currencySymbol)",
                     filled: true,
                     fillColor: Colors.grey.shade50,
@@ -744,9 +774,9 @@ void _showAcceptOfferSheet(
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           _buildButtons(context),
         ],
       ),
@@ -785,13 +815,22 @@ void _showAcceptOfferSheet(
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  icon: const Icon(Icons.swap_horiz, size: 18, color: Colors.white),
+                  icon: const Icon(
+                    Icons.swap_horiz,
+                    size: 18,
+                    color: Colors.white,
+                  ),
                   label: const Text(
                     "Counter",
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   style: btnStyle.copyWith(
-                    backgroundColor: WidgetStateProperty.all(Colors.orange.shade600),
+                    backgroundColor: WidgetStateProperty.all(
+                      Colors.orange.shade600,
+                    ),
                   ),
                   onPressed:
                       widget.isSubmitting
@@ -805,10 +844,15 @@ void _showAcceptOfferSheet(
                   icon: const Icon(Icons.check, size: 18, color: Colors.white),
                   label: const Text(
                     "Accept",
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   style: btnStyle.copyWith(
-                    backgroundColor: WidgetStateProperty.all(Colors.green.shade600),
+                    backgroundColor: WidgetStateProperty.all(
+                      Colors.green.shade600,
+                    ),
                   ),
                   onPressed:
                       widget.isSubmitting
@@ -854,9 +898,11 @@ void _showAcceptOfferSheet(
     // ✅ For counter/reject, we still need the amounts
     if (action != "accepted") {
       final rawMaterial = widget.materialCtrl.text.replaceAll(',', '').trim();
-      final rawWorkmanship = widget.workmanshipCtrl.text.replaceAll(',', '').trim();
+      final rawWorkmanship =
+          widget.workmanshipCtrl.text.replaceAll(',', '').trim();
 
-      if (action == "countered" && (rawMaterial.isEmpty || rawWorkmanship.isEmpty)) {
+      if (action == "countered" &&
+          (rawMaterial.isEmpty || rawWorkmanship.isEmpty)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Row(
@@ -868,7 +914,9 @@ void _showAcceptOfferSheet(
             ),
             backgroundColor: Colors.orange.shade600,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
         return;
@@ -886,7 +934,8 @@ void _showAcceptOfferSheet(
         actionColor = Colors.green.shade600;
         actionIcon = Icons.check_circle;
         actionTitle = "Accept Offer";
-        actionMessage = "Accept this offer? The review will be updated with these amounts.";
+        actionMessage =
+            "Accept this offer? The review will be updated with these amounts.";
         break;
       case "rejected":
         actionColor = Colors.red.shade600;
@@ -909,81 +958,113 @@ void _showAcceptOfferSheet(
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: actionColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(actionIcon, color: actionColor, size: 24),
+      builder:
+          (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                actionTitle,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              actionMessage,
-              style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
-            ),
-            if (action == "accepted") ...[
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.blue.shade200),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: actionColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(actionIcon, color: actionColor, size: 24),
                 ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, color: Colors.blue.shade700, size: 18),
-                    const SizedBox(width: 8),
-                    const Expanded(
-                      child: Text(
-                        "Amounts will be auto-detected from the latest offer",
-                        style: TextStyle(fontSize: 12, color: Colors.black87),
-                      ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    actionTitle,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  actionMessage,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                    height: 1.5,
+                  ),
+                ),
+                if (action == "accepted") ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.blue.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: Colors.blue.shade700,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            "Amounts will be auto-detected from the latest offer",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(color: Colors.black54, fontSize: 15),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: actionColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  action == "accepted"
+                      ? "Accept"
+                      : action == "rejected"
+                      ? "Reject"
+                      : "Send Counter",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                  ),
                 ),
               ),
             ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text("Cancel", style: TextStyle(color: Colors.black54, fontSize: 15)),
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: actionColor,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              elevation: 0,
-            ),
-            child: Text(
-              action == "accepted" ? "Accept" : action == "rejected" ? "Reject" : "Send Counter",
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
-            ),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
@@ -992,7 +1073,10 @@ void _showAcceptOfferSheet(
     }
   }
 
-  Future<Map<String, double>> _convertChatAmounts(int materialNGN, int workmanshipNGN) async {
+  Future<Map<String, double>> _convertChatAmounts(
+    int materialNGN,
+    int workmanshipNGN,
+  ) async {
     return {
       'material': await CurrencyHelper.convertFromNGN(materialNGN),
       'workmanship': await CurrencyHelper.convertFromNGN(workmanshipNGN),
@@ -1007,7 +1091,7 @@ class DecimalThousandsFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     String text = newValue.text.replaceAll(',', '');
-    
+
     if (text.isEmpty) return newValue;
     if (!RegExp(r'^\d*\.?\d*$').hasMatch(text)) {
       return oldValue;

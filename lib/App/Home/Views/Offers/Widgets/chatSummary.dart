@@ -27,15 +27,19 @@ class ChatSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final materialNGN = int.tryParse(offer["materialTotalCost"]?.toString() ?? "0") ?? 0;
-    final workmanshipNGN = int.tryParse(offer["workmanshipTotalCost"]?.toString() ?? "0") ?? 0;
+    final materialNGN =
+        int.tryParse(offer["materialTotalCost"]?.toString() ?? "0") ?? 0;
+    final workmanshipNGN =
+        int.tryParse(offer["workmanshipTotalCost"]?.toString() ?? "0") ?? 0;
     final status = offer["status"]?.toString() ?? "pending";
 
     return FutureBuilder<Map<String, double>>(
       future: _convertAmounts(materialNGN, workmanshipNGN),
       builder: (context, snapshot) {
-        final displayMaterial = snapshot.data?['material'] ?? materialNGN.toDouble();
-        final displayWorkmanship = snapshot.data?['workmanship'] ?? workmanshipNGN.toDouble();
+        final displayMaterial =
+            snapshot.data?['material'] ?? materialNGN.toDouble();
+        final displayWorkmanship =
+            snapshot.data?['workmanship'] ?? workmanshipNGN.toDouble();
 
         return Container(
           padding: const EdgeInsets.all(12),
@@ -169,7 +173,7 @@ class ChatSummaryCard extends StatelessWidget {
                         offer["comment"] ?? "No comment provided",
                         fontSize: 13.5,
                         color: Colors.black87,
-                       // height: 1.4,
+                        // height: 1.4,
                       ),
 
                       const SizedBox(height: 12),
@@ -319,7 +323,10 @@ class ChatSummaryCard extends StatelessWidget {
     );
   }
 
-  Future<Map<String, double>> _convertAmounts(int materialNGN, int workmanshipNGN) async {
+  Future<Map<String, double>> _convertAmounts(
+    int materialNGN,
+    int workmanshipNGN,
+  ) async {
     return {
       'material': await CurrencyHelper.convertFromNGN(materialNGN),
       'workmanship': await CurrencyHelper.convertFromNGN(workmanshipNGN),

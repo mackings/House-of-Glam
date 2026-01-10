@@ -1,10 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hog/App/Banks/Api/BamkService.dart';
 import 'package:hog/App/Banks/Model/BankCodes.dart';
 import 'package:hog/components/texts.dart';
-
 
 class AddBankAccountPage extends StatefulWidget {
   const AddBankAccountPage({Key? key}) : super(key: key);
@@ -17,7 +15,7 @@ class _AddBankAccountPageState extends State<AddBankAccountPage> {
   final _formKey = GlobalKey<FormState>();
   final _accountNumberController = TextEditingController();
   final _searchController = TextEditingController();
-  
+
   NigerianBank? _selectedBank;
   String _accountName = "";
   bool _isVerifying = false;
@@ -31,71 +29,69 @@ class _AddBankAccountPageState extends State<AddBankAccountPage> {
     super.dispose();
   }
 
-Future<void> _verifyAccount() async {
-  if (_accountNumberController.text.isEmpty || _selectedBank == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Please enter account number and select a bank"),
-        backgroundColor: Colors.red,
-      ),
-    );
-    return;
-  }
+  Future<void> _verifyAccount() async {
+    if (_accountNumberController.text.isEmpty || _selectedBank == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter account number and select a bank"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
-  setState(() {
-    _isVerifying = true;
-    _isVerified = false;
-    _accountName = ""; // Clear previous account name
-  });
-
-  final result = await BankApiService.verifyAccountDetails(
-    accountNumber: _accountNumberController.text.trim(),
-    bankCode: _selectedBank!.code,
-  );
-
-  setState(() {
-    _isVerifying = false;
-  });
-
-  if (!mounted) return;
-
-  if (result['success'] == true) {
-    // Debug print to see what we're getting
-    print('DEBUG: Full result = $result');
-    print('DEBUG: result[data] = ${result['data']}');
-    print('DEBUG: Type of result[data] = ${result['data'].runtimeType}');
-    
-    // Try to extract account_name
-    final accountName = result['data']['account_name']?.toString() ?? '';
-    print('DEBUG: Extracted account name = $accountName');
-    
     setState(() {
-      _accountName = accountName;
-      _isVerified = true;
+      _isVerifying = true;
+      _isVerified = false;
+      _accountName = ""; // Clear previous account name
     });
 
-    print('DEBUG: _accountName in state = $_accountName');
-    print('DEBUG: _isVerified = $_isVerified');
+    final result = await BankApiService.verifyAccountDetails(
+      accountNumber: _accountNumberController.text.trim(),
+      bankCode: _selectedBank!.code,
+    );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("✅ Account verified successfully"),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
-      ),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(result['error'] ?? "Verification failed"),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    setState(() {
+      _isVerifying = false;
+    });
+
+    if (!mounted) return;
+
+    if (result['success'] == true) {
+      // Debug print to see what we're getting
+      print('DEBUG: Full result = $result');
+      print('DEBUG: result[data] = ${result['data']}');
+      print('DEBUG: Type of result[data] = ${result['data'].runtimeType}');
+
+      // Try to extract account_name
+      final accountName = result['data']['account_name']?.toString() ?? '';
+      print('DEBUG: Extracted account name = $accountName');
+
+      setState(() {
+        _accountName = accountName;
+        _isVerified = true;
+      });
+
+      print('DEBUG: _accountName in state = $_accountName');
+      print('DEBUG: _isVerified = $_isVerified');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("✅ Account verified successfully"),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['error'] ?? "Verification failed"),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
-}
-
-
 
   Future<void> _submitBankAccount() async {
     if (!_formKey.currentState!.validate()) return;
@@ -149,16 +145,17 @@ Future<void> _verifyAccount() async {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _BankSelectionSheet(
-        selectedBank: _selectedBank,
-        onBankSelected: (bank) {
-          setState(() {
-            _selectedBank = bank;
-            _isVerified = false;
-          });
-          Navigator.pop(context);
-        },
-      ),
+      builder:
+          (context) => _BankSelectionSheet(
+            selectedBank: _selectedBank,
+            onBankSelected: (bank) {
+              setState(() {
+                _selectedBank = bank;
+                _isVerified = false;
+              });
+              Navigator.pop(context);
+            },
+          ),
     );
   }
 
@@ -177,7 +174,11 @@ Future<void> _verifyAccount() async {
               color: Colors.grey[100],
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 16),
+            child: const Icon(
+              Icons.arrow_back_ios_new,
+              color: Colors.black,
+              size: 16,
+            ),
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -215,7 +216,11 @@ Future<void> _verifyAccount() async {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Icon(Icons.info_outline, color: Colors.purple[700], size: 20),
+                      child: Icon(
+                        Icons.info_outline,
+                        color: Colors.purple[700],
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -236,7 +241,7 @@ Future<void> _verifyAccount() async {
 
               // Bank Selection Field
               const CustomText(
-               "Select Bank",
+                "Select Bank",
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -244,12 +249,18 @@ Future<void> _verifyAccount() async {
               GestureDetector(
                 onTap: _showBankSelectionBottomSheet,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 18,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: _selectedBank != null ? Colors.purple : Colors.grey[300]!,
+                      color:
+                          _selectedBank != null
+                              ? Colors.purple
+                              : Colors.grey[300]!,
                       width: _selectedBank != null ? 2 : 1,
                     ),
                     boxShadow: [
@@ -265,12 +276,18 @@ Future<void> _verifyAccount() async {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: _selectedBank != null ? Colors.purple[50] : Colors.grey[100],
+                          color:
+                              _selectedBank != null
+                                  ? Colors.purple[50]
+                                  : Colors.grey[100],
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
                           Icons.account_balance,
-                          color: _selectedBank != null ? Colors.purple[700] : Colors.grey[600],
+                          color:
+                              _selectedBank != null
+                                  ? Colors.purple[700]
+                                  : Colors.grey[600],
                           size: 20,
                         ),
                       ),
@@ -280,8 +297,14 @@ Future<void> _verifyAccount() async {
                           _selectedBank?.name ?? "Select your bank",
                           style: TextStyle(
                             fontSize: 15,
-                            fontWeight: _selectedBank != null ? FontWeight.w600 : FontWeight.normal,
-                            color: _selectedBank != null ? Colors.black87 : Colors.grey[600],
+                            fontWeight:
+                                _selectedBank != null
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                            color:
+                                _selectedBank != null
+                                    ? Colors.black87
+                                    : Colors.grey[600],
                           ),
                         ),
                       ),
@@ -299,7 +322,7 @@ Future<void> _verifyAccount() async {
 
               // Account Number Field
               const CustomText(
-               "Account Number",
+                "Account Number",
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -330,7 +353,10 @@ Future<void> _verifyAccount() async {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: Colors.purple, width: 2),
+                    borderSide: const BorderSide(
+                      color: Colors.purple,
+                      width: 2,
+                    ),
                   ),
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -381,30 +407,31 @@ Future<void> _verifyAccount() async {
                     elevation: 0,
                     shadowColor: Colors.purple.withOpacity(0.3),
                   ),
-                  child: _isVerifying
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2.5,
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(Icons.verified_outlined, size: 20),
-                            SizedBox(width: 8),
-                            Text(
-                              "Verify Account",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                  child:
+                      _isVerifying
+                          ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
                             ),
-                          ],
-                        ),
+                          )
+                          : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.verified_outlined, size: 20),
+                              SizedBox(width: 8),
+                              Text(
+                                "Verify Account",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
                 ),
               ),
 
@@ -458,7 +485,7 @@ Future<void> _verifyAccount() async {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        
+
                         // Title
                         Text(
                           "Account Verified",
@@ -477,9 +504,9 @@ Future<void> _verifyAccount() async {
                             color: Colors.grey[600],
                           ),
                         ),
-                        
+
                         const SizedBox(height: 24),
-                        
+
                         // Account Name Display
                         Container(
                           width: double.infinity,
@@ -539,30 +566,31 @@ Future<void> _verifyAccount() async {
                       ),
                       elevation: 0,
                     ),
-                    child: _isSubmitting
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2.5,
-                            ),
-                          )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.add_circle_outline, size: 20),
-                              SizedBox(width: 8),
-                              Text(
-                                "Add Bank Account",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+                    child:
+                        _isSubmitting
+                            ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
                               ),
-                            ],
-                          ),
+                            )
+                            : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.add_circle_outline, size: 20),
+                                SizedBox(width: 8),
+                                Text(
+                                  "Add Bank Account",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
                   ),
                 ),
               ],
@@ -634,10 +662,7 @@ class _BankSelectionSheetState extends State<_BankSelectionSheet> {
               children: [
                 const Text(
                   'Select Bank',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 IconButton(
@@ -657,15 +682,16 @@ class _BankSelectionSheetState extends State<_BankSelectionSheet> {
               decoration: InputDecoration(
                 hintText: 'Search banks...',
                 prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _filterBanks('');
-                        },
-                      )
-                    : null,
+                suffixIcon:
+                    _searchController.text.isNotEmpty
+                        ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            _filterBanks('');
+                          },
+                        )
+                        : null,
                 filled: true,
                 fillColor: Colors.grey[100],
                 border: OutlineInputBorder(
@@ -698,29 +724,43 @@ class _BankSelectionSheetState extends State<_BankSelectionSheet> {
                     ),
                   ),
                   child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     leading: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: isSelected ? Colors.purple[100] : Colors.grey[100],
+                        color:
+                            isSelected ? Colors.purple[100] : Colors.grey[100],
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.account_balance,
-                        color: isSelected ? Colors.purple[700] : Colors.grey[600],
+                        color:
+                            isSelected ? Colors.purple[700] : Colors.grey[600],
                         size: 24,
                       ),
                     ),
                     title: Text(
                       bank.name,
                       style: TextStyle(
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.w600,
                         fontSize: 15,
                       ),
                     ),
-                    trailing: isSelected
-                        ? Icon(Icons.check_circle, color: Colors.purple[700])
-                        : const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                    trailing:
+                        isSelected
+                            ? Icon(
+                              Icons.check_circle,
+                              color: Colors.purple[700],
+                            )
+                            : const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
                     onTap: () => widget.onBankSelected(bank),
                   ),
                 );

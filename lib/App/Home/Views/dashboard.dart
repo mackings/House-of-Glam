@@ -16,8 +16,6 @@ import 'package:hog/components/slideritem.dart';
 import 'package:hog/components/sliders.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 class Home extends ConsumerStatefulWidget {
   const Home({super.key});
 
@@ -128,31 +126,31 @@ class _HomeState extends ConsumerState<Home> {
 
                 const SizedBox(height: 30),
 
-CarouselSlider(
-  height: 170,
-  items: const [
-    // 🆕 First card shows bank details
-    BankDetailsCard(),
-    
-    // Rest of your existing cards
-    CarouselItemWidget(
-      title: "",
-      assetImage: 'assets/Img/agbada.png',
-    ),
-    CarouselItemWidget(
-      title: "",
-      assetImage: 'assets/Img/gele.png',
-    ),
-    CarouselItemWidget(
-      title: "",
-      assetImage: 'assets/Img/kaftan.png',
-    ),
-    CarouselItemWidget(
-      title: "",
-      assetImage: 'assets/Img/suits.png',
-    ),
-  ],
-),
+                CarouselSlider(
+                  height: 170,
+                  items: const [
+                    // 🆕 First card shows bank details
+                    BankDetailsCard(),
+
+                    // Rest of your existing cards
+                    CarouselItemWidget(
+                      title: "",
+                      assetImage: 'assets/Img/agbada.png',
+                    ),
+                    CarouselItemWidget(
+                      title: "",
+                      assetImage: 'assets/Img/gele.png',
+                    ),
+                    CarouselItemWidget(
+                      title: "",
+                      assetImage: 'assets/Img/kaftan.png',
+                    ),
+                    CarouselItemWidget(
+                      title: "",
+                      assetImage: 'assets/Img/suits.png',
+                    ),
+                  ],
+                ),
 
                 const SizedBox(height: 30),
 

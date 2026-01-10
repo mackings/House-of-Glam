@@ -18,8 +18,6 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
 
-
-
 class Signup extends ConsumerStatefulWidget {
   const Signup({super.key});
 
@@ -43,7 +41,6 @@ class _SignupState extends ConsumerState<Signup> {
 
   // ✅ Track selected country code for phone
   String selectedCountryCode = '+234'; // default to Nigeria
-
 
   Future<void> loadCountries() async {
     final allCountries = CountryService().getAll();
@@ -225,26 +222,37 @@ class _SignupState extends ConsumerState<Signup> {
                                         hintText: "Select Country",
                                         prefixIcon: const Icon(Icons.public),
                                         border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                         enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(10),
-                                          borderSide: BorderSide(color: Colors.grey.shade300),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                          borderSide: BorderSide(
+                                            color: Colors.grey.shade300,
+                                          ),
                                         ),
                                         focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(10),
-                                          borderSide: const BorderSide(color: Colors.black),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                          borderSide: const BorderSide(
+                                            color: Colors.black,
+                                          ),
                                         ),
                                       ),
-                                      items: countries.map((country) {
-                                        return DropdownMenuItem<String>(
-                                          value: country,
-                                          child: Text(
-                                            country,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        );
-                                      }).toList(),
+                                      items:
+                                          countries.map((country) {
+                                            return DropdownMenuItem<String>(
+                                              value: country,
+                                              child: Text(
+                                                country,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            );
+                                          }).toList(),
                                       onChanged: (value) {
                                         setState(() {
                                           selectedCountry = value;
@@ -299,22 +307,27 @@ class _SignupState extends ConsumerState<Signup> {
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(color: Colors.grey.shade300),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.shade300,
+                                    ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
-                                    borderSide: const BorderSide(color: Colors.black),
+                                    borderSide: const BorderSide(
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ),
-                                items: countries.map((country) {
-                                  return DropdownMenuItem<String>(
-                                    value: country,
-                                    child: Text(
-                                      country,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  );
-                                }).toList(),
+                                items:
+                                    countries.map((country) {
+                                      return DropdownMenuItem<String>(
+                                        value: country,
+                                        child: Text(
+                                          country,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      );
+                                    }).toList(),
                                 onChanged: (value) {
                                   setState(() {
                                     selectedCountry = value;

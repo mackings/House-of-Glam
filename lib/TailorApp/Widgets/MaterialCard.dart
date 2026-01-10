@@ -24,9 +24,10 @@ class TailorMaterialCard extends StatelessWidget {
         material.userId.fullName.isNotEmpty
             ? material.userId.fullName
             : "Unknown Customer";
-    final measurementCount = material.measurement.isNotEmpty
-        ? material.measurement.first.values.length
-        : 0;
+    final measurementCount =
+        material.measurement.isNotEmpty
+            ? material.measurement.first.values.length
+            : 0;
 
     return InkWell(
       onTap: onTap,

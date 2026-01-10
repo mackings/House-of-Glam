@@ -1,4 +1,3 @@
-
 class ReviewResponse {
   final bool success;
   final int count;
@@ -142,7 +141,9 @@ class Review {
       finalWorkmanshipCost: _parseNullableDouble(json['finalWorkmanshipCost']),
       finalTotalCost: _parseNullableDouble(json['finalTotalCost']),
       finalMaterialCostUSD: _parseNullableDouble(json['finalMaterialCostUSD']),
-      finalWorkmanshipCostUSD: _parseNullableDouble(json['finalWorkmanshipCostUSD']),
+      finalWorkmanshipCostUSD: _parseNullableDouble(
+        json['finalWorkmanshipCostUSD'],
+      ),
       finalTotalCostUSD: _parseNullableDouble(json['finalTotalCostUSD']),
 
       // ✅ Currency metadata
@@ -192,9 +193,8 @@ class ReviewUser {
   }
 }
 
-
 // class ReviewResponse {
-  
+
 //   final bool success;
 //   final int count;
 //   final List<Review> reviews;
@@ -217,7 +217,6 @@ class ReviewUser {
 //     );
 //   }
 // }
-
 
 // class Review {
 //   final String id;
@@ -279,7 +278,6 @@ class ReviewUser {
 //     required this.updatedAt,
 //   });
 
-
 //   factory Review.fromJson(Map<String, dynamic> json) {
 //     // ✅ Helper to safely parse numeric values as double
 //     double _parseDouble(dynamic value) {
@@ -327,7 +325,6 @@ class ReviewUser {
 //     );
 //   }
 // }
-
 
 // class ReviewUser {
 //   final String id;

@@ -61,10 +61,13 @@ class _PlaceOrderState extends State<PlaceOrder> {
   String? selectedColor;
 
   final TextEditingController brandingController = TextEditingController();
-  final TextEditingController specialInstructionsController = TextEditingController();
-  final TextEditingController customMaterialController = TextEditingController();
+  final TextEditingController specialInstructionsController =
+      TextEditingController();
+  final TextEditingController customMaterialController =
+      TextEditingController();
   final TextEditingController customAttireController = TextEditingController();
-  final TextEditingController customColorController = TextEditingController(); // NEW
+  final TextEditingController customColorController =
+      TextEditingController(); // NEW
 
   String? selectedAttireType;
 
@@ -161,7 +164,8 @@ class _PlaceOrderState extends State<PlaceOrder> {
                   padding: const EdgeInsets.only(left: 8.0),
                   child: MeasurementField(
                     label: measurementFields[i + 1],
-                    controller: measurementControllers[measurementFields[i + 1]]!,
+                    controller:
+                        measurementControllers[measurementFields[i + 1]]!,
                     isNumeric: measurementFields[i + 1] != "Arm Type",
                   ),
                 ),
@@ -176,21 +180,26 @@ class _PlaceOrderState extends State<PlaceOrder> {
 
   Future<void> _submitOrder() async {
     // Handle "Others" for material and attire type
-    final String finalMaterial = selectedMaterial == "Others"
-        ? customMaterialController.text.trim()
-        : selectedMaterial ?? '';
+    final String finalMaterial =
+        selectedMaterial == "Others"
+            ? customMaterialController.text.trim()
+            : selectedMaterial ?? '';
 
-    final String finalAttireType = (selectedCategory == null && selectedAttireType == "Others")
-        ? customAttireController.text.trim()
-        : selectedCategory?.name ?? '';
+    final String finalAttireType =
+        (selectedCategory == null && selectedAttireType == "Others")
+            ? customAttireController.text.trim()
+            : selectedCategory?.name ?? '';
 
     // Handle "Others" for color - NEW
-    final String finalColor = selectedColor == "Others"
-        ? customColorController.text.trim()
-        : selectedColor ?? '';
+    final String finalColor =
+        selectedColor == "Others"
+            ? customColorController.text.trim()
+            : selectedColor ?? '';
 
     // Validation - UPDATED
-    if (finalAttireType.isEmpty || finalMaterial.isEmpty || finalColor.isEmpty) {
+    if (finalAttireType.isEmpty ||
+        finalMaterial.isEmpty ||
+        finalColor.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Please select or specify attire, material, and color"),
@@ -229,13 +238,13 @@ class _PlaceOrderState extends State<PlaceOrder> {
 
     // Feedback
     if (response != null && response.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("✅ ${response.message}")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("✅ ${response.message}")));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Failed to submit order")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("❌ Failed to submit order")));
     }
   }
 
@@ -311,7 +320,9 @@ class _PlaceOrderState extends State<PlaceOrder> {
                     if (val == "Others") {
                       selectedCategory = null;
                     } else {
-                      selectedCategory = categories.firstWhere((c) => c.name == val);
+                      selectedCategory = categories.firstWhere(
+                        (c) => c.name == val,
+                      );
                     }
                     selectedAttireType = val;
                   });

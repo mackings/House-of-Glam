@@ -1,7 +1,6 @@
 import 'dart:ui';
 
- import 'package:flutter/material.dart';
-
+import 'package:flutter/material.dart';
 
 // ============================================================================
 // OFFER THREAD MODELS (for list view)
@@ -110,31 +109,31 @@ class MakeOffer {
   final MaterialItem material;
   final Review review;
   final String status;
-  
+
   // Consent tracking
   final bool buyerConsent;
   final bool vendorConsent;
   final bool mutualConsentAchieved;
-  
+
   // Final agreed amounts (NGN)
   final double finalMaterialCost;
   final double finalWorkmanshipCost;
   final double finalTotalCost;
-  
+
   // Final agreed amounts (USD)
   final double finalMaterialCostUSD;
   final double finalWorkmanshipCostUSD;
   final double finalTotalCostUSD;
-  
+
   // Currency information
   final bool isInternationalVendor;
   final double exchangeRate;
   final String buyerCountry;
   final String vendorCountry;
-  
+
   // Chat history
   final List<OfferChat> chats;
-  
+
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -171,57 +170,64 @@ class MakeOffer {
       material: MaterialItem.fromJson(json['materialId'] ?? {}),
       review: Review.fromJson(json['reviewId'] ?? {}),
       status: json['status'] ?? 'pending',
-      
+
       // Consent
       buyerConsent: json['buyerConsent'] ?? false,
       vendorConsent: json['vendorConsent'] ?? false,
       mutualConsentAchieved: json['mutualConsentAchieved'] ?? false,
-      
+
       // Final amounts NGN
       finalMaterialCost: (json['finalMaterialCost'] ?? 0).toDouble(),
       finalWorkmanshipCost: (json['finalWorkmanshipCost'] ?? 0).toDouble(),
       finalTotalCost: (json['finalTotalCost'] ?? 0).toDouble(),
-      
+
       // Final amounts USD
       finalMaterialCostUSD: (json['finalMaterialCostUSD'] ?? 0).toDouble(),
-      finalWorkmanshipCostUSD: (json['finalWorkmanshipCostUSD'] ?? 0).toDouble(),
+      finalWorkmanshipCostUSD:
+          (json['finalWorkmanshipCostUSD'] ?? 0).toDouble(),
       finalTotalCostUSD: (json['finalTotalCostUSD'] ?? 0).toDouble(),
-      
+
       // Currency info
       isInternationalVendor: json['isInternationalVendor'] ?? false,
       exchangeRate: (json['exchangeRate'] ?? 0).toDouble(),
       buyerCountry: json['buyerCountry'] ?? 'Nigeria',
       vendorCountry: json['vendorCountry'] ?? 'Nigeria',
-      
+
       // Chats
-      chats: (json['chats'] as List<dynamic>?)
-          ?.map((e) => OfferChat.fromJson(e))
-          .toList() ?? [],
-      
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+      chats:
+          (json['chats'] as List<dynamic>?)
+              ?.map((e) => OfferChat.fromJson(e))
+              .toList() ??
+          [],
+
+      createdAt: DateTime.parse(
+        json['createdAt'] ?? DateTime.now().toIso8601String(),
+      ),
+      updatedAt: DateTime.parse(
+        json['updatedAt'] ?? DateTime.now().toIso8601String(),
+      ),
     );
   }
 
   // Helper getters for UI logic
   OfferChat? get latestChat => chats.isNotEmpty ? chats.last : null;
-  
+
   bool get buyerCanRespond {
     if (chats.isEmpty) return false;
     final lastChat = chats.last;
     return lastChat.senderType == 'vendor' && !mutualConsentAchieved;
   }
-  
+
   bool get vendorCanRespond {
     if (chats.isEmpty) return true;
     final lastChat = chats.last;
     return lastChat.senderType == 'customer' && !mutualConsentAchieved;
   }
-  
+
   bool get isWaitingForBuyerConsent {
     return vendorConsent && !buyerConsent && !mutualConsentAchieved;
   }
-  
+
   bool get isWaitingForVendorConsent {
     return buyerConsent && !vendorConsent && !mutualConsentAchieved;
   }
@@ -336,17 +342,17 @@ class OfferChat {
   final String id;
   final String senderType; // "customer" or "vendor"
   final String action; // "incoming", "countered", "accepted", "rejected"
-  
+
   // NGN amounts (always present)
   final double counterMaterialCost;
   final double counterWorkmanshipCost;
   final double counterTotalCost;
-  
+
   // USD amounts (for international vendors)
   final double counterMaterialCostUSD;
   final double counterWorkmanshipCostUSD;
   final double counterTotalCostUSD;
-  
+
   final String comment;
   final DateTime timestamp;
 
@@ -375,7 +381,8 @@ class OfferChat {
       counterTotalCost: (json['counterTotalCost'] ?? 0).toDouble(),
       // USD amounts
       counterMaterialCostUSD: (json['counterMaterialCostUSD'] ?? 0).toDouble(),
-      counterWorkmanshipCostUSD: (json['counterWorkmanshipCostUSD'] ?? 0).toDouble(),
+      counterWorkmanshipCostUSD:
+          (json['counterWorkmanshipCostUSD'] ?? 0).toDouble(),
       counterTotalCostUSD: (json['counterTotalCostUSD'] ?? 0).toDouble(),
       comment: json['comment'] ?? '',
       timestamp: DateTime.parse(json['timestamp']),
@@ -450,10 +457,13 @@ class OfferChat {
       senderType: senderType ?? this.senderType,
       action: action ?? this.action,
       counterMaterialCost: counterMaterialCost ?? this.counterMaterialCost,
-      counterWorkmanshipCost: counterWorkmanshipCost ?? this.counterWorkmanshipCost,
+      counterWorkmanshipCost:
+          counterWorkmanshipCost ?? this.counterWorkmanshipCost,
       counterTotalCost: counterTotalCost ?? this.counterTotalCost,
-      counterMaterialCostUSD: counterMaterialCostUSD ?? this.counterMaterialCostUSD,
-      counterWorkmanshipCostUSD: counterWorkmanshipCostUSD ?? this.counterWorkmanshipCostUSD,
+      counterMaterialCostUSD:
+          counterMaterialCostUSD ?? this.counterMaterialCostUSD,
+      counterWorkmanshipCostUSD:
+          counterWorkmanshipCostUSD ?? this.counterWorkmanshipCostUSD,
       counterTotalCostUSD: counterTotalCostUSD ?? this.counterTotalCostUSD,
       comment: comment ?? this.comment,
       timestamp: timestamp ?? this.timestamp,
@@ -489,14 +499,6 @@ class ChatSummary {
     );
   }
 }
-
-
-
-
-
-
-
-
 
 // class OfferThreadResponse {
 //   final bool success;
@@ -671,23 +673,21 @@ class ChatSummary {
 //   }
 // }
 
-
-
 // class OfferChat {
 //   final String id;
 //   final String senderType; // "customer" or "vendor"
 //   final String action; // "incoming", "countered", "accepted", "rejected"
-  
+
 //   // NGN amounts (always present)
 //   final double counterMaterialCost;
 //   final double counterWorkmanshipCost;
 //   final double counterTotalCost;
-  
+
 //   // USD amounts (for international vendors)
 //   final double counterMaterialCostUSD;
 //   final double counterWorkmanshipCostUSD;
 //   final double counterTotalCostUSD;
-  
+
 //   final String comment;
 //   final DateTime timestamp;
 
@@ -816,8 +816,6 @@ class ChatSummary {
 //   @override
 //   int get hashCode => id.hashCode;
 // }
-
-
 
 // class ChatSummary {
 //   final int totalMessages;

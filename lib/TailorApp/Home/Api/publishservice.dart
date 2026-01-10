@@ -5,8 +5,6 @@ import 'package:hog/constants/api_config.dart';
 import 'package:hog/TailorApp/Home/Model/PublishedModel.dart';
 import 'package:http/http.dart' as http;
 
-
-
 class PublishedService {
   final String baseUrl = ApiConfig.apiBaseUrl;
 

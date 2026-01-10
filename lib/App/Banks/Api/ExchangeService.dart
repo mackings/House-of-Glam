@@ -40,12 +40,18 @@ class ConversionApiService {
     required String endpoint,
   }) {
     _log('📥 RESPONSE: $endpoint');
-    _log('📊 Status Code: $statusCode', level: statusCode >= 200 && statusCode < 300 ? 'SUCCESS' : 'ERROR');
-    
+    _log(
+      '📊 Status Code: $statusCode',
+      level: statusCode >= 200 && statusCode < 300 ? 'SUCCESS' : 'ERROR',
+    );
+
     try {
       final jsonBody = jsonDecode(body);
       _log('📄 Response Body:', level: 'DEBUG');
-      _log('   ${JsonEncoder.withIndent('  ').convert(jsonBody)}', level: 'DEBUG');
+      _log(
+        '   ${JsonEncoder.withIndent('  ').convert(jsonBody)}',
+        level: 'DEBUG',
+      );
     } catch (e) {
       _log('📄 Response Body (Raw):', level: 'DEBUG');
       _log('   $body', level: 'DEBUG');
@@ -58,8 +64,9 @@ class ConversionApiService {
     required double amount,
     required String targetCurrency,
   }) async {
-    final endpoint = "$baseUrl/api/v1/conversion/naira-exchange-rate?amount=$amount&currency=$targetCurrency";
-    
+    final endpoint =
+        "$baseUrl/api/v1/conversion/naira-exchange-rate?amount=$amount&currency=$targetCurrency";
+
     try {
       final token = await SecurePrefs.getToken();
       if (token == null) {
@@ -72,16 +79,9 @@ class ConversionApiService {
         "Authorization": "Bearer $token",
       };
 
-      _logRequest(
-        method: 'GET',
-        endpoint: endpoint,
-        headers: headers,
-      );
+      _logRequest(method: 'GET', endpoint: endpoint, headers: headers);
 
-      final response = await http.get(
-        Uri.parse(endpoint),
-        headers: headers,
-      );
+      final response = await http.get(Uri.parse(endpoint), headers: headers);
 
       _logResponse(
         statusCode: response.statusCode,
@@ -91,7 +91,10 @@ class ConversionApiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        _log('✅ Exchange rate fetched: ${data['baseCurrency']} → ${data['targetCurrency']} = ${data['exchangeRate']}', level: 'SUCCESS');
+        _log(
+          '✅ Exchange rate fetched: ${data['baseCurrency']} → ${data['targetCurrency']} = ${data['exchangeRate']}',
+          level: 'SUCCESS',
+        );
         return {
           "success": true,
           "message": data['message'],
@@ -103,7 +106,10 @@ class ConversionApiService {
         };
       } else {
         final error = jsonDecode(response.body);
-        _log('❌ Failed to fetch exchange rate: ${error['message']}', level: 'ERROR');
+        _log(
+          '❌ Failed to fetch exchange rate: ${error['message']}',
+          level: 'ERROR',
+        );
         return {
           "success": false,
           "error": error['message'] ?? "Failed to fetch exchange rate",
@@ -129,7 +135,7 @@ class ConversionApiService {
     if (result['success'] == true) {
       return result['convertedAmount'];
     }
-    
+
     _log('❌ Conversion failed, returning null', level: 'ERROR');
     return null;
   }
@@ -146,7 +152,7 @@ class ConversionApiService {
     if (result['success'] == true) {
       return result['exchangeRate'];
     }
-    
+
     _log('❌ Failed to get exchange rate', level: 'ERROR');
     return null;
   }

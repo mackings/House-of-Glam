@@ -25,11 +25,7 @@ class ErrorDisplay extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 72,
-              color: Colors.orange.shade400,
-            ),
+            Icon(Icons.error_outline, size: 72, color: Colors.orange.shade400),
             const SizedBox(height: 20),
             CustomText(
               errorMessage,
@@ -84,11 +80,8 @@ class CompactErrorDisplay extends StatelessWidget {
   final dynamic error;
   final VoidCallback? onRetry;
 
-  const CompactErrorDisplay({
-    Key? key,
-    required this.error,
-    this.onRetry,
-  }) : super(key: key);
+  const CompactErrorDisplay({Key? key, required this.error, this.onRetry})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -112,10 +105,7 @@ class CompactErrorDisplay extends StatelessWidget {
               children: [
                 const Text(
                   "Error",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -167,11 +157,7 @@ class CustomErrorDisplay extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 72,
-              color: iconColor ?? Colors.orange.shade400,
-            ),
+            Icon(icon, size: 72, color: iconColor ?? Colors.orange.shade400),
             const SizedBox(height: 20),
             if (title != null) ...[
               Text(
