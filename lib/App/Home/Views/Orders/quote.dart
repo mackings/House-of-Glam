@@ -56,13 +56,19 @@ class _QuotationState extends State<Quotation> {
 
   // Show Payment Options Modal
 
-  void _showPaymentOptions(Review review) {
+  void _showPaymentOptions(
+    Review review, {
+    String initialPaymentType = "part",
+    bool allowPaymentTypeSwitch = true,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder:
           (context) => PaymentOptionsModal(
             review: review,
+            initialPaymentType: initialPaymentType,
+            allowPaymentTypeSwitch: allowPaymentTypeSwitch,
             onCheckout: (String url) async {
               // wait until modal is closed before navigating
               await Future.delayed(const Duration(milliseconds: 250));
@@ -292,10 +298,18 @@ class _QuotationState extends State<Quotation> {
 
                         if (review.status == "part payment") {
                           // ✅ User already made a part payment → finish balance
-                          _initiatePayment(review, "full");
+                          _showPaymentOptions(
+                            review,
+                            initialPaymentType: "full",
+                            allowPaymentTypeSwitch: false,
+                          );
                         } else if (review.status == "quote") {
                           // ✅ First payment (pay full cost)
-                          _initiatePayment(review, "full");
+                          _showPaymentOptions(
+                            review,
+                            initialPaymentType: "full",
+                            allowPaymentTypeSwitch: false,
+                          );
                         } else if (review.status == "full payment") {
                           // ✅ Already fully paid, just ignore
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -307,7 +321,11 @@ class _QuotationState extends State<Quotation> {
                           );
                         } else {
                           // ✅ Default: treat as full payment
-                          _initiatePayment(review, "full");
+                          _showPaymentOptions(
+                            review,
+                            initialPaymentType: "full",
+                            allowPaymentTypeSwitch: false,
+                          );
                         }
                       },
                     );

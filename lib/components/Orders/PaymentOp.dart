@@ -12,11 +12,15 @@ import 'package:hog/constants/currencyHelper.dart';
 class PaymentOptionsModal extends StatefulWidget {
   final Review review;
   final Function(String url) onCheckout;
+  final String initialPaymentType;
+  final bool allowPaymentTypeSwitch;
 
   const PaymentOptionsModal({
     super.key,
     required this.review,
     required this.onCheckout,
+    this.initialPaymentType = "part",
+    this.allowPaymentTypeSwitch = true,
   });
 
   @override
@@ -30,12 +34,16 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
   final TextEditingController amountController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   bool isLoading = false;
+  bool showAddressError = false;
 
   @override
   void initState() {
     super.initState();
-    // Auto-fill half payment amount
-    _autoFillHalfPayment();
+    paymentType = widget.initialPaymentType;
+    if (paymentType == "part") {
+      // Auto-fill half payment amount
+      _autoFillHalfPayment();
+    }
   }
 
   void _autoFillHalfPayment() {
@@ -106,13 +114,28 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
       print('   Shipment Method: $shipment');
       print('');
 
+      final addressToSend = addressController.text.trim();
+      if (addressToSend.isEmpty) {
+        setState(() {
+          isLoading = false;
+          showAddressError = true;
+        });
+        print('❌ ERROR: Delivery address is empty');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please enter delivery address")),
+        );
+        return;
+      }
+      if (showAddressError) {
+        setState(() => showAddressError = false);
+      }
+
       // ✅ FOR INTERNATIONAL VENDORS - Use Stripe
       if (isInternationalVendor) {
         print('🌍 INTERNATIONAL VENDOR DETECTED - Using Stripe');
         print('');
 
         String? amountToSend;
-        String? addressToSend;
 
         // Determine vendor's target currency
         final targetCurrency =
@@ -176,15 +199,6 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
           // ✅ Full payment - backend uses review.amountToPay, NO amount needed
           print('💰 FULL PAYMENT PROCESSING:');
 
-          if (addressController.text.trim().isEmpty) {
-            setState(() => isLoading = false);
-            print('❌ ERROR: Delivery address is empty');
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Please enter delivery address")),
-            );
-            return;
-          }
-
           print('   Total Cost (stored): ${widget.review.totalCost}');
           print('   Amount Paid (stored): ${widget.review.amountPaid}');
           print('   Amount To Pay (stored): ${widget.review.amountToPay}');
@@ -201,7 +215,6 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
 
           // ✅ For full payment, send NULL - backend uses review.amountToPay
           amountToSend = null;
-          addressToSend = addressController.text.trim();
 
           print('✅ FULL PAYMENT - No amount sent');
           print('   Backend will use: review.amountToPay from database');
@@ -215,7 +228,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
         print('   Review ID: ${widget.review.id}');
         print('   Shipment Method: $shipment');
         print('   Amount: $targetCurrency $amountToSend');
-        print('   Address: ${addressToSend ?? "N/A (part payment)"}');
+        print('   Address: $addressToSend');
         print('───────────────────────────────────────────────────────────');
         print('');
 
@@ -315,15 +328,6 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
         // Full payment
         print('💰 FULL PAYMENT PROCESSING:');
 
-        if (addressController.text.trim().isEmpty) {
-          setState(() => isLoading = false);
-          print('❌ ERROR: Delivery address is empty');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Please enter delivery address")),
-          );
-          return;
-        }
-
         // Amounts are stored in NGN (vendor currency)
         final remainingNGN = widget.review.totalCost - widget.review.amountPaid;
 
@@ -363,12 +367,13 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                 reviewId: widget.review.id,
                 amount: amountToSend,
                 shipmentMethod: shipment,
+                address: addressToSend,
               )
               : await PaymentService.createFullPayment(
                 reviewId: widget.review.id,
                 amount: amountToSend,
                 shipmentMethod: shipment,
-                address: addressController.text.trim(),
+                address: addressToSend,
               );
 
       print('📥 PAYSTACK RESPONSE:');
@@ -473,27 +478,29 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
 
               if (isInternationalVendor) const SizedBox(height: 12),
 
-              Row(
-                children: [
-                  Radio(
-                    value: "full",
-                    groupValue: paymentType,
-                    onChanged: (val) => setState(() => paymentType = val!),
-                  ),
-                  const Text("Full Payment"),
-                  Radio(
-                    value: "part",
-                    groupValue: paymentType,
-                    onChanged: (val) {
-                      setState(() {
-                        paymentType = val as String;
-                        amountController.clear();
-                      });
-                    },
-                  ),
-                  const Text("Part Payment"),
-                ],
-              ),
+              if (widget.allowPaymentTypeSwitch)
+                Row(
+                  children: [
+                    Radio(
+                      value: "full",
+                      groupValue: paymentType,
+                      onChanged:
+                          (val) => setState(() => paymentType = val as String),
+                    ),
+                    const Text("Full Payment"),
+                    Radio(
+                      value: "part",
+                      groupValue: paymentType,
+                      onChanged: (val) {
+                        setState(() {
+                          paymentType = val as String;
+                          _autoFillHalfPayment();
+                        });
+                      },
+                    ),
+                    const Text("Part Payment"),
+                  ],
+                ),
 
               if (paymentType == "part") ...[
                 CustomTextField(
@@ -549,47 +556,63 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
 
               const SizedBox(height: 15),
 
-              if (paymentType != "part")
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: const CustomText("Delivery Address", fontSize: 16),
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: addressController,
-                      maxLines: 3,
-                      minLines: 3,
-                      decoration: InputDecoration(
-                        hintText:
-                            "24 Adeola Odeku St, Victoria Island, Lagos, Nigeria",
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 14,
-                        ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: const CustomText("Delivery Address", fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: addressController,
+                    maxLines: 3,
+                    minLines: 3,
+                    decoration: InputDecoration(
+                      hintText:
+                          "24 Adeola Odeku St, Victoria Island, Lagos, Nigeria",
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                      errorText:
+                          showAddressError
+                              ? "Delivery address is required"
+                              : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
                       ),
-                      keyboardType: TextInputType.streetAddress,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.redAccent),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.redAccent),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
                     ),
-                    const SizedBox(height: 6),
-                    const CustomText(
-                      "Include street, city, state, and country.",
-                      fontSize: 11,
-                      color: Colors.black54,
-                    ),
-                  ],
-                ),
+                    keyboardType: TextInputType.streetAddress,
+                    onChanged: (value) {
+                      if (showAddressError && value.trim().isNotEmpty) {
+                        setState(() => showAddressError = false);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 6),
+                  const CustomText(
+                    "Required for all payments. Include street, city, state, and country.",
+                    fontSize: 11,
+                    color: Colors.black54,
+                  ),
+                ],
+              ),
 
               const SizedBox(height: 20),
               CustomButton(title: "Make Payment", onPressed: _makePayment),
