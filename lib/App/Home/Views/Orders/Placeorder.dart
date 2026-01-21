@@ -234,18 +234,85 @@ class _PlaceOrderState extends State<PlaceOrder> {
       measurement: measurement,
     );
 
+    if (!mounted) return;
     setState(() => isLoading = false);
 
     // Feedback
     if (response != null && response.success) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("✅ ${response.message}")));
+      _resetForm();
+      _showOrderSubmittedSheet(response.message);
     } else {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("❌ Failed to submit order")));
     }
+  }
+
+  void _resetForm() {
+    setState(() {
+      selectedCategory = null;
+      selectedMaterial = null;
+      selectedColor = null;
+      selectedAttireType = null;
+      sampleImages.clear();
+    });
+    brandingController.clear();
+    specialInstructionsController.clear();
+    customMaterialController.clear();
+    customAttireController.clear();
+    customColorController.clear();
+    for (final controller in measurementControllers.values) {
+      controller.clear();
+    }
+  }
+
+  void _showOrderSubmittedSheet(String message) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const Icon(Icons.check_circle, color: Colors.green, size: 48),
+                const SizedBox(height: 12),
+                const CustomText(
+                  "Order Submitted",
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  message.isNotEmpty ? message : "Your order was submitted successfully.",
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                CustomButton(
+                  title: "Done",
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -359,7 +426,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
 
               const SizedBox(height: 20),
               CustomText(
-                "Brand and Budget *",
+                "Brand *",
                 color: Colors.black,
                 fontSize: 18,
                 fontWeight: FontWeight.w500,

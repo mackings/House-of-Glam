@@ -7,6 +7,8 @@ import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:intl/intl.dart';
 
+
+
 class TailorMaterialDetailSheet extends StatefulWidget {
   final TailorMaterialItem material;
 
@@ -551,7 +553,7 @@ class _TailorMaterialDetailSheetState extends State<TailorMaterialDetailSheet> {
           (match) => "${match.group(1)} ${match.group(2)}",
         );
         return spaced
-            .split(RegExp(r"[_\\s]+"))
+            .split(RegExp(r"[_\s]+"))
             .map((part) {
               if (part.isEmpty) return part;
               return part[0].toUpperCase() + part.substring(1);

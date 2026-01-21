@@ -119,6 +119,7 @@ class _SignupState extends ConsumerState<Signup> {
             fontWeight: FontWeight.w500,
           ),
         ),
+
         TextFormField(
           controller: countryController,
           readOnly: true,
@@ -160,6 +161,7 @@ class _SignupState extends ConsumerState<Signup> {
               },
             );
           },
+          
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please select a country';
@@ -167,6 +169,8 @@ class _SignupState extends ConsumerState<Signup> {
             return null;
           },
         ),
+
+
       ],
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/TailorApp/Home/Api/TailorHomeservice.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
@@ -25,6 +26,36 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
 
   bool isLoading = false;
   final service = TailorHomeService();
+  String _currencyCode = "NGN";
+  String _currencyPrefix = "NGN";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTailorCurrency();
+  }
+
+  Future<void> _loadTailorCurrency() async {
+    final user = await SecurePrefs.getUserData();
+    final country =
+        user?["country"]?.toString().trim().toUpperCase();
+    final isNigeria =
+        country == "NG" || country == "NGA" || country == "NIGERIA";
+    final savedCurrency = await SecurePrefs.getUserCurrency();
+
+    String nextCurrency;
+    if (country == null || country.isEmpty) {
+      nextCurrency = savedCurrency ?? "NGN";
+    } else {
+      nextCurrency = isNigeria ? "NGN" : "USD";
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _currencyCode = nextCurrency;
+      _currencyPrefix = nextCurrency == "USD" ? "\$" : nextCurrency;
+    });
+  }
 
   // Format numbers for UI display (e.g., 12000 → 12,000)
   String formatNumber(String value) {
@@ -138,9 +169,9 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
               ),
 
               CustomTextField(
-                title: "Material Cost",
+                title: "Material Cost ($_currencyCode)",
                 controller: materialCostController,
-                hintText: "e.g. 23,000",
+                hintText: "e.g. $_currencyPrefix 23,000",
                 fieldKey: "material_cost_field",
                 keyboardType: TextInputType.number,
                 onChanged: (v) {
@@ -158,9 +189,9 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
               ),
 
               CustomTextField(
-                title: "Workmanship Cost",
+                title: "Workmanship Cost ($_currencyCode)",
                 controller: workmanshipCostController,
-                hintText: "e.g. 23,000",
+                hintText: "e.g. $_currencyPrefix 23,000",
                 fieldKey: "workmanship_cost_field",
                 keyboardType: TextInputType.number,
                 onChanged: (v) {
