@@ -111,6 +111,15 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
   Future<void> _handleAction(String action) async {
     if (_offer == null) return;
 
+    if (_isBuyer &&
+        action == "countered" &&
+        _hasUserCountered()) {
+      return _showSnack(
+        "You can only counter once. Please accept or reject.",
+        isError: true,
+      );
+    }
+
     final comment = _commentCtrl.text.trim();
 
     if (comment.isEmpty) {
@@ -119,7 +128,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
 
     // For counter offers, amounts are required
     if (action == "countered") {
-      if (_userRole == "user") {
+      if (_isBuyer) {
         if (_totalCtrl.text.trim().isEmpty) {
           return _showSnack("Please enter a total amount", isError: true);
         }
@@ -146,7 +155,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
         workmanshipCost = latestChat.counterWorkmanshipCost.toStringAsFixed(0);
       }
     } else if (action == "countered") {
-      if (_userRole == "user") {
+      if (_isBuyer) {
         final enteredTotal = _totalCtrl.text.replaceAll(',', '').trim();
         final totalValue = double.tryParse(enteredTotal);
         if (totalValue == null || totalValue <= 0) {
@@ -189,7 +198,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
 
     Map<String, dynamic> response;
 
-    if (_userRole == "user") {
+    if (_isBuyer) {
       response = await OfferService.buyerReplyOffer(
         offerId: widget.offerId,
         comment: comment,
@@ -241,7 +250,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                       backgroundColor: Colors.white24,
                       radius: 18,
                       child: Text(
-                        _userRole == "user"
+                        _isBuyer
                             ? (_offer!.vendor.businessName.isNotEmpty
                                 ? _offer!.vendor.businessName[0]
                                 : "V")
@@ -260,7 +269,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CustomText(
-                            _userRole == "user"
+                            _isBuyer
                                 ? _offer!.vendor.businessName
                                 : _offer!.user.fullName,
                             color: Colors.white,
@@ -299,13 +308,17 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
 
                   // Chat Messages
                   Expanded(
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(12),
-                      itemCount: _offer!.chats.length,
-                      itemBuilder: (context, index) {
-                        return _buildChatBubble(_offer!.chats[index]);
-                      },
+                    child: RefreshIndicator(
+                      onRefresh: _loadData,
+                      color: const Color(0xFF6B21A8),
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(12),
+                        itemCount: _offer!.chats.length,
+                        itemBuilder: (context, index) {
+                          return _buildChatBubble(_offer!.chats[index]);
+                        },
+                      ),
                     ),
                   ),
 
@@ -317,6 +330,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
   }
 
   Widget _buildMutualConsentBanner() {
+    final acceptedTotals = _getAcceptedTotals();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -340,7 +354,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                   fontWeight: FontWeight.bold,
                 ),
                 CustomText(
-                  "Final amount: ${_getDisplayAmount(_offer!.finalTotalCost, _offer!.finalTotalCostUSD)}",
+                  "Final amount: ${_getDisplayAmount(acceptedTotals["ngn"]!, acceptedTotals["usd"]!)}",
                   color: Colors.white,
                   fontSize: 14,
                 ),
@@ -355,8 +369,8 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
   Widget _buildWaitingBanner() {
     final waitingFor = _offer!.isWaitingForBuyerConsent ? "buyer" : "vendor";
     final isUserWaiting =
-        (_userRole == "user" && _offer!.isWaitingForBuyerConsent) ||
-        (_userRole != "user" && _offer!.isWaitingForVendorConsent);
+        (_isBuyer && _offer!.isWaitingForBuyerConsent) ||
+        (!_isBuyer && _offer!.isWaitingForVendorConsent);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -385,11 +399,13 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
   }
 
   Widget _buildChatBubble(OfferChat chat) {
-    final isCustomer = chat.senderType == "customer";
+    final isCustomer = chat.senderType == "customer" ||
+        chat.senderType == "user" ||
+        chat.senderType == "buyer";
     final isMyMessage =
-        (_userRole == "user" && isCustomer) ||
-        (_userRole != "user" && !isCustomer);
-    final showBreakdown = _userRole != "user";
+        (_isBuyer && isCustomer) ||
+        (!_isBuyer && !isCustomer);
+    final showBreakdown = !_isBuyer;
 
     return Align(
       alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
@@ -550,10 +566,46 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
     }
   }
 
+  Map<String, double> _getAcceptedTotals() {
+    if (_offer == null) {
+      return {"ngn": 0, "usd": 0};
+    }
+
+    for (final chat in _offer!.chats.reversed) {
+      if (chat.action == "accepted") {
+        if (chat.counterTotalCost > 0 || chat.counterTotalCostUSD > 0) {
+          return {
+            "ngn": chat.counterTotalCost,
+            "usd": chat.counterTotalCostUSD,
+          };
+        }
+        break;
+      }
+    }
+
+    final finalNgn = _offer!.finalTotalCost;
+    final finalUsd = _offer!.finalTotalCostUSD;
+    if (finalNgn > 0 || finalUsd > 0) {
+      return {"ngn": finalNgn, "usd": finalUsd};
+    }
+
+    for (final chat in _offer!.chats.reversed) {
+      if (chat.action == "countered" || chat.action == "incoming") {
+        return {
+          "ngn": chat.counterTotalCost,
+          "usd": chat.counterTotalCostUSD,
+        };
+      }
+    }
+
+    return {"ngn": 0, "usd": 0};
+  }
+
   Widget _buildActionArea() {
     final canRespond =
-        (_userRole == "user" && _offer!.buyerCanRespond) ||
-        (_userRole != "user" && _offer!.vendorCanRespond);
+        (_isBuyer && _offer!.buyerCanRespond) ||
+        (!_isBuyer && _offer!.vendorCanRespond);
+    final hasCountered = _isBuyer ? _hasUserCountered() : false;
 
     if (!canRespond) {
       return Container(
@@ -606,7 +658,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
           // Amount Fields (for counter offers)
           if (_showAmountFields) ...[
             const SizedBox(height: 12),
-            if (_userRole == "user")
+            if (_isBuyer)
               TextField(
                 controller: _totalCtrl,
                 decoration: InputDecoration(
@@ -854,47 +906,72 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    if (!hasCountered) ...[
+                      const SizedBox(width: 10),
 
-                    // Counter Button (Filled with lighter purple)
-                    Expanded(
-                      child: SizedBox(
-                        height: 48,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() => _showAmountFields = true);
-                          },
-                          icon: const Icon(
-                            Icons.swap_horiz_rounded,
-                            size: 18,
-                            color: Color(0xFF6B21A8),
-                          ),
-                          label: const CustomText(
-                            "Counter",
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF6B21A8),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFF3E8FF),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              side: const BorderSide(
-                                color: Color(0xFF6B21A8),
-                                width: 1,
+                      // Counter Button (Filled with lighter purple)
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              setState(() => _showAmountFields = true);
+                            },
+                            icon: const Icon(
+                              Icons.swap_horiz_rounded,
+                              size: 18,
+                              color: Color(0xFF6B21A8),
+                            ),
+                            label: const CustomText(
+                              "Counter",
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF6B21A8),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFF3E8FF),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                side: const BorderSide(
+                                  color: Color(0xFF6B21A8),
+                                  width: 1,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
+                if (hasCountered) ...[
+                  const SizedBox(height: 8),
+                  const CustomText(
+                    "Counter already used. You can only accept or reject.",
+                    fontSize: 12,
+                    color: Colors.black54,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ],
             ),
         ],
       ),
+    );
+  }
+
+  bool get _isBuyer =>
+      _userRole == "user" || _userRole == "customer" || _userRole == "buyer";
+
+  bool _hasUserCountered() {
+    if (_offer == null) return false;
+    if (!_isBuyer) return false;
+    const buyerSenderTypes = {"customer", "user", "buyer"};
+    return _offer!.chats.any(
+      (chat) =>
+          buyerSenderTypes.contains(chat.senderType) &&
+          chat.action == "countered",
     );
   }
 }

@@ -109,6 +109,7 @@ class MakeOffer {
   final MaterialItem material;
   final Review review;
   final String status;
+  final double total; // Legacy field
 
   // Consent tracking
   final bool buyerConsent;
@@ -144,6 +145,7 @@ class MakeOffer {
     required this.material,
     required this.review,
     required this.status,
+    this.total = 0.0,
     this.buyerConsent = false,
     this.vendorConsent = false,
     this.mutualConsentAchieved = false,
@@ -170,6 +172,7 @@ class MakeOffer {
       material: MaterialItem.fromJson(json['materialId'] ?? {}),
       review: Review.fromJson(json['reviewId'] ?? {}),
       status: json['status'] ?? 'pending',
+      total: (json['total'] ?? 0).toDouble(),
 
       // Consent
       buyerConsent: json['buyerConsent'] ?? false,
@@ -312,28 +315,78 @@ class MaterialItem {
 class Review {
   final String id;
   final String comment;
+
+  // Cost breakdown
   final double materialTotalCost;
   final double workmanshipTotalCost;
+  final double subTotalCost;
   final double totalCost;
+  final double tax;
+  final double commission;
+
+  // Payment tracking
+  final double amountPaid;
+  final double amountToPay;
+
+  // Offer agreement totals
+  final double? vendorBaseTotal;
+  final double? userPayableTotal;
+
   final String status;
+  final bool hasAcceptedOffer;
+  final String? acceptedOfferId;
 
   Review({
     required this.id,
     required this.comment,
     required this.materialTotalCost,
     required this.workmanshipTotalCost,
+    required this.subTotalCost,
     required this.totalCost,
+    required this.tax,
+    required this.commission,
+    required this.amountPaid,
+    required this.amountToPay,
+    this.vendorBaseTotal,
+    this.userPayableTotal,
     required this.status,
+    this.hasAcceptedOffer = false,
+    this.acceptedOfferId,
   });
 
   factory Review.fromJson(Map<String, dynamic> json) {
+    double _parseDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      if (value is String) return double.tryParse(value) ?? 0.0;
+      return 0.0;
+    }
+
+    double? _parseNullableDouble(dynamic value) {
+      if (value == null) return null;
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      if (value is String) return double.tryParse(value);
+      return null;
+    }
+
     return Review(
       id: json['_id'] ?? '',
       comment: json['comment'] ?? '',
-      materialTotalCost: (json['materialTotalCost'] ?? 0).toDouble(),
-      workmanshipTotalCost: (json['workmanshipTotalCost'] ?? 0).toDouble(),
-      totalCost: (json['totalCost'] ?? 0).toDouble(),
+      materialTotalCost: _parseDouble(json['materialTotalCost']),
+      workmanshipTotalCost: _parseDouble(json['workmanshipTotalCost']),
+      subTotalCost: _parseDouble(json['subTotalCost']),
+      totalCost: _parseDouble(json['totalCost']),
+      tax: _parseDouble(json['tax']),
+      commission: _parseDouble(json['commission']),
+      amountPaid: _parseDouble(json['amountPaid']),
+      amountToPay: _parseDouble(json['amountToPay']),
+      vendorBaseTotal: _parseNullableDouble(json['vendorBaseTotal']),
+      userPayableTotal: _parseNullableDouble(json['userPayableTotal']),
       status: json['status'] ?? '',
+      hasAcceptedOffer: json['hasAcceptedOffer'] ?? false,
+      acceptedOfferId: json['acceptedOfferId'],
     );
   }
 }
@@ -371,6 +424,7 @@ class OfferChat {
   });
 
   factory OfferChat.fromJson(Map<String, dynamic> json) {
+    final parsedTimestamp = DateTime.tryParse(json['timestamp'] ?? '');
     return OfferChat(
       id: json['_id'] ?? '',
       senderType: json['senderType'] ?? '',
@@ -385,7 +439,7 @@ class OfferChat {
           (json['counterWorkmanshipCostUSD'] ?? 0).toDouble(),
       counterTotalCostUSD: (json['counterTotalCostUSD'] ?? 0).toDouble(),
       comment: json['comment'] ?? '',
-      timestamp: DateTime.parse(json['timestamp']),
+      timestamp: parsedTimestamp ?? DateTime.now(),
     );
   }
 
@@ -412,6 +466,8 @@ class OfferChat {
     switch (action) {
       case 'incoming':
         return 'Initial Offer';
+      case 'pending':
+        return 'Pending';
       case 'countered':
         return 'Counter Offer';
       case 'accepted':
@@ -427,6 +483,8 @@ class OfferChat {
     switch (action) {
       case 'incoming':
         return const Color(0xFF3B82F6);
+      case 'pending':
+        return const Color(0xFFF59E0B);
       case 'countered':
         return const Color(0xFFF59E0B);
       case 'accepted':

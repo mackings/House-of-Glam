@@ -28,12 +28,21 @@ class Review {
   final String vendorId;
   final String materialId;
 
-  // ✅ NGN amounts (original quote)
+  // ✅ Cost breakdown (base quote)
   final double materialTotalCost;
   final double workmanshipTotalCost;
+  final double subTotalCost;
   final double totalCost;
+  final double tax;
+  final double commission;
+
+  // ✅ Payment tracking
   final double amountPaid;
   final double amountToPay;
+
+  // ✅ Agreed totals (set after offer acceptance)
+  final double? vendorBaseTotal;
+  final double? userPayableTotal;
 
   // ✅ USD amounts (original quote - only for international vendors)
   final double materialTotalCostUSD;
@@ -41,14 +50,6 @@ class Review {
   final double totalCostUSD;
   final double amountPaidUSD;
   final double amountToPayUSD;
-
-  // 🔥 NEW: Final negotiated amounts (when offer is accepted)
-  final double? finalMaterialCost;
-  final double? finalWorkmanshipCost;
-  final double? finalTotalCost;
-  final double? finalMaterialCostUSD;
-  final double? finalWorkmanshipCostUSD;
-  final double? finalTotalCostUSD;
 
   // ✅ Currency metadata
   final double exchangeRate;
@@ -63,6 +64,16 @@ class Review {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+// ---------------------------------------------------------------------------
+// Legacy negotiated fields (deprecated in v2 offer flow)
+// ---------------------------------------------------------------------------
+//  final double? finalMaterialCost;
+//  final double? finalWorkmanshipCost;
+//  final double? finalTotalCost;
+//  final double? finalMaterialCostUSD;
+//  final double? finalWorkmanshipCostUSD;
+//  final double? finalTotalCostUSD;
+
   Review({
     required this.id,
     required this.user,
@@ -70,21 +81,19 @@ class Review {
     required this.materialId,
     required this.materialTotalCost,
     required this.workmanshipTotalCost,
+    required this.subTotalCost,
     required this.totalCost,
+    required this.tax,
+    required this.commission,
     required this.amountPaid,
     required this.amountToPay,
+    this.vendorBaseTotal,
+    this.userPayableTotal,
     this.materialTotalCostUSD = 0.0,
     this.workmanshipTotalCostUSD = 0.0,
     this.totalCostUSD = 0.0,
     this.amountPaidUSD = 0.0,
     this.amountToPayUSD = 0.0,
-    // 🔥 NEW: Final amounts
-    this.finalMaterialCost,
-    this.finalWorkmanshipCost,
-    this.finalTotalCost,
-    this.finalMaterialCostUSD,
-    this.finalWorkmanshipCostUSD,
-    this.finalTotalCostUSD,
     this.exchangeRate = 0.0,
     this.isInternationalVendor = false,
     required this.deliveryDate,
@@ -122,12 +131,19 @@ class Review {
       vendorId: json['vendorId'] ?? '',
       materialId: json['materialId'] ?? '',
 
-      // ✅ NGN amounts (original)
+      // ✅ Cost breakdown (base quote)
       materialTotalCost: _parseDouble(json['materialTotalCost']),
       workmanshipTotalCost: _parseDouble(json['workmanshipTotalCost']),
+      subTotalCost: _parseDouble(json['subTotalCost']),
       totalCost: _parseDouble(json['totalCost']),
+      tax: _parseDouble(json['tax']),
+      commission: _parseDouble(json['commission']),
       amountPaid: _parseDouble(json['amountPaid']),
       amountToPay: _parseDouble(json['amountToPay']),
+
+      // ✅ Agreed totals (after offer acceptance)
+      vendorBaseTotal: _parseNullableDouble(json['vendorBaseTotal']),
+      userPayableTotal: _parseNullableDouble(json['userPayableTotal']),
 
       // ✅ USD amounts (original)
       materialTotalCostUSD: _parseDouble(json['materialTotalCostUSD']),
@@ -135,16 +151,6 @@ class Review {
       totalCostUSD: _parseDouble(json['totalCostUSD']),
       amountPaidUSD: _parseDouble(json['amountPaidUSD']),
       amountToPayUSD: _parseDouble(json['amountToPayUSD']),
-
-      // 🔥 NEW: Final negotiated amounts
-      finalMaterialCost: _parseNullableDouble(json['finalMaterialCost']),
-      finalWorkmanshipCost: _parseNullableDouble(json['finalWorkmanshipCost']),
-      finalTotalCost: _parseNullableDouble(json['finalTotalCost']),
-      finalMaterialCostUSD: _parseNullableDouble(json['finalMaterialCostUSD']),
-      finalWorkmanshipCostUSD: _parseNullableDouble(
-        json['finalWorkmanshipCostUSD'],
-      ),
-      finalTotalCostUSD: _parseNullableDouble(json['finalTotalCostUSD']),
 
       // ✅ Currency metadata
       exchangeRate: _parseDouble(json['exchangeRate']),

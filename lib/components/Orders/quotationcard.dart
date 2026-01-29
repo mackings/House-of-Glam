@@ -42,11 +42,9 @@ class QuotationCard extends StatelessWidget {
     // ✅ Check if user has made any payment
     final bool hasPartPayment = review.amountPaid > 0 && review.amountToPay > 0;
 
-    // 🔥 FIX: Use final negotiated prices if offer was accepted, otherwise use original quote
-    final displayTotal =
-        hasAcceptedOffer && review.finalTotalCost != null
-            ? review.finalTotalCost!
-            : review.totalCost;
+    // 🔥 Use agreed totals if offer was accepted, otherwise use original quote
+    final agreedTotal = review.userPayableTotal ?? review.totalCost;
+    final displayTotal = hasAcceptedOffer ? agreedTotal : review.totalCost;
 
     // 🔥 FIX: Properly calculate amount to pay
     final displayAmountToPay = review.amountToPay;
@@ -54,11 +52,8 @@ class QuotationCard extends StatelessWidget {
     // ✅ Determine currency code
     final currencyCode = 'NGN';
 
-    // ✅ Get USD amounts for display
-    final displayTotalUSD =
-        hasAcceptedOffer && review.finalTotalCostUSD != null
-            ? review.finalTotalCostUSD!
-            : review.totalCostUSD;
+    // ✅ Get USD amounts for display (reference only)
+    final displayTotalUSD = review.totalCostUSD;
 
     // ✅ Show original USD amounts if international vendor (for reference)
     final showOriginalUSD = review.isInternationalVendor && displayTotalUSD > 0;
@@ -69,11 +64,10 @@ class QuotationCard extends StatelessWidget {
     print('   Has Accepted Offer: $hasAcceptedOffer');
     print('   Accepted Offer ID: ${review.acceptedOfferId ?? 'None'}');
     print('   Status: ${review.status}');
-    if (hasAcceptedOffer && review.finalTotalCost != null) {
-      print('   ✅ Using Final Negotiated Prices:');
-      print('   Final Material Cost: ₦${review.finalMaterialCost}');
-      print('   Final Workmanship Cost: ₦${review.finalWorkmanshipCost}');
-      print('   Final Total Cost: ₦${review.finalTotalCost}');
+    if (hasAcceptedOffer && review.userPayableTotal != null) {
+      print('   ✅ Using Agreed Prices:');
+      print('   Vendor Base Total: ₦${review.vendorBaseTotal}');
+      print('   User Payable Total: ₦${review.userPayableTotal}');
     } else {
       print('   ⚠️ Using Original Quote Prices:');
       print('   Material Cost: ₦${review.materialTotalCost}');
@@ -176,14 +170,18 @@ class QuotationCard extends StatelessWidget {
 
           // 🔥 Show badge if price was negotiated
           if (hasAcceptedOffer &&
-              review.finalTotalCost != null &&
-              review.finalTotalCost! < review.totalCost)
+              review.userPayableTotal != null &&
+              review.userPayableTotal! < review.totalCost)
             ...[],
 
           // Display total cost only
           _buildTotalCost(displayTotal, currencyCode: currencyCode),
           const SizedBox(height: 6),
-          CustomText("Excluding VAT", fontSize: 11, color: Colors.black54),
+          CustomText(
+            hasAcceptedOffer ? "Including VAT" : "Excluding VAT",
+            fontSize: 11,
+            color: Colors.black54,
+          ),
 
           // Show USD conversion info if international vendor
           if (showOriginalUSD) ...[

@@ -497,25 +497,64 @@ void showTailorMaterialDetails(
 }
 
 Map<String, double> _getDisplayAmounts(TailorAssignedMaterial item) {
+  final countryCode = item.country?.trim().toUpperCase();
   final isInternational =
       item.isInternationalVendor ||
-      (item.country != null && item.country!.toUpperCase() != 'NG');
+      (countryCode != null &&
+          countryCode != 'NG' &&
+          countryCode != 'NIGERIA');
 
   if (isInternational) {
+    final material = item.materialTotalCostUSD ?? 0.0;
+    final workmanship = item.workmanshipTotalCostUSD ?? 0.0;
+    final total =
+        (item.totalCostUSD ?? 0.0) > 0
+            ? item.totalCostUSD!
+            : (material + workmanship > 0
+                ? material + workmanship
+                : (item.amountPaidUSD ?? 0.0) + (item.amountToPayUSD ?? 0.0));
+    final paid =
+        (item.amountPaidUSD ?? 0.0) > 0
+            ? item.amountPaidUSD!
+            : (total > 0 && (item.amountToPayUSD ?? 0.0) > 0
+                ? (total - (item.amountToPayUSD ?? 0.0))
+                : 0.0);
+    final toPay =
+        (item.amountToPayUSD ?? 0.0) > 0
+            ? item.amountToPayUSD!
+            : (total > 0 && paid > 0 ? (total - paid) : 0.0);
     return {
-      'materialCost': item.materialTotalCostUSD ?? 0.0,
-      'workmanshipCost': item.workmanshipTotalCostUSD ?? 0.0,
-      'totalCost': item.totalCostUSD ?? 0.0,
-      'amountPaid': item.amountPaidUSD ?? 0.0,
-      'amountToPay': item.amountToPayUSD ?? 0.0,
+      'materialCost': material,
+      'workmanshipCost': workmanship,
+      'totalCost': total,
+      'amountPaid': paid,
+      'amountToPay': toPay,
     };
   } else {
+    final material = item.materialTotalCost;
+    final workmanship = item.workmanshipTotalCost;
+    final total =
+        item.totalCost > 0
+            ? item.totalCost
+            : (material + workmanship > 0
+                ? material + workmanship
+                : (item.amountPaid ?? 0.0) + (item.amountToPay ?? 0.0));
+    final paid =
+        (item.amountPaid ?? 0.0) > 0
+            ? item.amountPaid!
+            : (total > 0 && (item.amountToPay ?? 0.0) > 0
+                ? (total - (item.amountToPay ?? 0.0))
+                : 0.0);
+    final toPay =
+        (item.amountToPay ?? 0.0) > 0
+            ? item.amountToPay!
+            : (total > 0 && paid > 0 ? (total - paid) : 0.0);
     return {
-      'materialCost': item.materialTotalCost,
-      'workmanshipCost': item.workmanshipTotalCost,
-      'totalCost': item.totalCost,
-      'amountPaid': item.amountPaid ?? 0.0,
-      'amountToPay': item.amountToPay ?? 0.0,
+      'materialCost': material,
+      'workmanshipCost': workmanship,
+      'totalCost': total,
+      'amountPaid': paid,
+      'amountToPay': toPay,
     };
   }
 }

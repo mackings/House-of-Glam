@@ -5,7 +5,6 @@ import 'package:hog/App/Home/Views/Offers/Api/OfferService.dart';
 import 'package:hog/App/Home/Views/Offers/Model/offerThread.dart';
 import 'package:hog/App/Home/Views/Offers/Widgets/offerdetail_v2.dart';
 import 'package:hog/components/texts.dart';
-import 'package:hog/constants/currencyHelper.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -86,25 +85,6 @@ class _OfferHomeState extends State<OfferHome>
     return DateFormat('dd MMM yyyy • hh:mm a').format(dateTime.toLocal());
   }
 
-  // 🆕 Helper method to get display amount based on user's location
-  String _getDisplayAmount(
-    MakeOffer offer,
-    double ngnAmount,
-    double usdAmount,
-  ) {
-    // If offer is not international, always show NGN
-    if (!offer.isInternationalVendor) {
-      return CurrencyHelper.formatAmount(ngnAmount, currencyCode: 'NGN');
-    }
-
-    // If international offer, show based on user preference
-    if (_useUSD) {
-      return '\$${usdAmount.toStringAsFixed(2)}';
-    } else {
-      return CurrencyHelper.formatAmount(ngnAmount, currencyCode: 'NGN');
-    }
-  }
-
   Widget _buildStatusBadge(MakeOffer offer) {
     Color bgColor;
     Color borderColor;
@@ -112,8 +92,8 @@ class _OfferHomeState extends State<OfferHome>
     String label;
 
     if (offer.mutualConsentAchieved) {
-      bgColor = const Color(0xFFD1FAE5);
-      borderColor = const Color(0xFF10B981);
+      bgColor = const Color(0xFFEDE9FE);
+      borderColor = const Color(0xFF7C3AED);
       icon = Icons.check_circle_rounded;
       label = "Ready";
     } else if (offer.status == "accepted" && !offer.mutualConsentAchieved) {
@@ -167,7 +147,7 @@ class _OfferHomeState extends State<OfferHome>
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF10B981), Color(0xFF059669)],
+            colors: [Color(0xFF7C3AED), Color(0xFF6D28D9)],
           ),
           borderRadius: BorderRadius.circular(12),
         ),
@@ -193,20 +173,20 @@ class _OfferHomeState extends State<OfferHome>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFFD1FAE5),
+              color: const Color(0xFFEDE9FE),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF10B981), width: 1),
+              border: Border.all(color: const Color(0xFF7C3AED), width: 1),
             ),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.check_circle, size: 12, color: Color(0xFF10B981)),
+                Icon(Icons.check_circle, size: 12, color: Color(0xFF7C3AED)),
                 SizedBox(width: 3),
                 CustomText(
                   "Buyer",
                   fontSize: 9,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF10B981),
+                  color: Color(0xFF7C3AED),
                 ),
               ],
             ),
@@ -217,20 +197,20 @@ class _OfferHomeState extends State<OfferHome>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFFD1FAE5),
+              color: const Color(0xFFEDE9FE),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF10B981), width: 1),
+              border: Border.all(color: const Color(0xFF7C3AED), width: 1),
             ),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.check_circle, size: 12, color: Color(0xFF10B981)),
+                Icon(Icons.check_circle, size: 12, color: Color(0xFF7C3AED)),
                 SizedBox(width: 3),
                 CustomText(
                   "Vendor",
                   fontSize: 9,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF10B981),
+                  color: Color(0xFF7C3AED),
                 ),
               ],
             ),
@@ -421,17 +401,6 @@ class _OfferHomeState extends State<OfferHome>
                 .toUpperCase()
             : "?";
 
-    // 🆕 Get the appropriate amounts based on mutual consent
-    final displayNGN =
-        offer.mutualConsentAchieved
-            ? offer.finalTotalCost
-            : (latestChat?.counterTotalCost ?? 0.0);
-
-    final displayUSD =
-        offer.mutualConsentAchieved
-            ? offer.finalTotalCostUSD
-            : (latestChat?.counterTotalCostUSD ?? 0.0);
-
     final delay = index * 50;
 
     return TweenAnimationBuilder<double>(
@@ -459,13 +428,13 @@ class _OfferHomeState extends State<OfferHome>
             borderRadius: BorderRadius.circular(20),
             border:
                 offer.mutualConsentAchieved
-                    ? Border.all(color: const Color(0xFF10B981), width: 2.5)
+                    ? Border.all(color: const Color(0xFF7C3AED), width: 2.5)
                     : null,
             boxShadow: [
               BoxShadow(
                 color:
                     offer.mutualConsentAchieved
-                        ? const Color(0xFF10B981).withOpacity(0.15)
+                        ? const Color(0xFF7C3AED).withOpacity(0.15)
                         : Colors.black.withOpacity(0.08),
                 blurRadius: 15,
                 offset: const Offset(0, 5),
@@ -619,79 +588,8 @@ class _OfferHomeState extends State<OfferHome>
 
                     const SizedBox(height: 16),
 
-                    // Amount & Consent Row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Amount - 🆕 UPDATED TO USE HELPER METHOD
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors:
-                                    offer.mutualConsentAchieved
-                                        ? [
-                                          const Color(0xFFD1FAE5),
-                                          const Color(0xFFA7F3D0),
-                                        ]
-                                        : [
-                                          Colors.purple.shade50,
-                                          Colors.purple.shade100,
-                                        ],
-                              ),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.payments_rounded,
-                                      size: 14,
-                                      color:
-                                          offer.mutualConsentAchieved
-                                              ? const Color(0xFF10B981)
-                                              : Colors.purple.shade700,
-                                    ),
-                                    const SizedBox(width: 5),
-                                    CustomText(
-                                      "Current Amount",
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color:
-                                          offer.mutualConsentAchieved
-                                              ? const Color(0xFF10B981)
-                                              : Colors.purple.shade700,
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 6),
-                                // 🆕 USE THE HELPER METHOD
-                                CustomText(
-                                  _getDisplayAmount(
-                                    offer,
-                                    displayNGN,
-                                    displayUSD,
-                                  ),
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      offer.mutualConsentAchieved
-                                          ? const Color(0xFF059669)
-                                          : Colors.purple.shade900,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Consent
-                        _buildConsentIndicators(offer),
-                      ],
-                    ),
+                    // Consent
+                    _buildConsentIndicators(offer),
 
                     const SizedBox(height: 14),
 
@@ -748,7 +646,7 @@ class _OfferHomeState extends State<OfferHome>
                   ),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF10B981), Color(0xFF059669)],
+                      colors: [Color(0xFF7C3AED), Color(0xFF6D28D9)],
                     ),
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(20),
