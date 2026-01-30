@@ -82,10 +82,21 @@ class TailorAssignedCard extends StatelessWidget {
     final displayAmounts = _getDisplayAmounts();
     final totalAmount = displayAmounts['totalCost']!;
     final paidAmount = displayAmounts['amountPaid']!;
-    final paidDisplay = paidAmount > 0 ? totalAmount : 0.0;
-    final payableBalance = totalAmount * 0.90;
     final outstandingUserPayment = displayAmounts['amountToPay']! > 0;
-    final isFullyPaid = paidAmount > 0 && !outstandingUserPayment;
+    final isPartPayment = item.status.toLowerCase() == "part payment";
+    final paidDisplayRaw =
+        isPartPayment || outstandingUserPayment ? paidAmount : totalAmount;
+    final isFullPayment = item.status.toLowerCase() == "full payment";
+    final paidDisplay =
+        isFullPayment ? totalAmount : (paidDisplayRaw * 0.80);
+    final payableBalanceRaw =
+        isPartPayment || outstandingUserPayment
+            ? displayAmounts['amountToPay']!
+            : totalAmount * 0.90;
+    final payableBalance = payableBalanceRaw.abs();
+    final balanceLabel =
+        isPartPayment || outstandingUserPayment ? "Balance" : "Payable Balance";
+    final isFullyPaid = !outstandingUserPayment;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -485,9 +496,7 @@ class TailorAssignedCard extends StatelessWidget {
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         Text(
-                                          outstandingUserPayment
-                                              ? "Balance"
-                                              : "Payable Balance",
+                                          balanceLabel,
                                           style: GoogleFonts.poppins(
                                             fontSize: 11,
                                             color: Colors.white.withOpacity(
