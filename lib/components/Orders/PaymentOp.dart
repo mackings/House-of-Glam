@@ -594,7 +594,9 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                       child: Text("Cargo (1–15 days)"),
                     ),
                   ],
-                  onChanged: (val) => setState(() => shipment = val!),
+                  onChanged: (val) {
+                    setState(() => shipment = val!);
+                  },
                 ),
               ),
 
@@ -659,6 +661,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
               ),
 
               const SizedBox(height: 20),
+              const SizedBox(height: 12),
               CustomButton(title: "Make Payment", onPressed: _makePayment),
               const SizedBox(height: 40),
             ],

@@ -29,6 +29,52 @@ class PaymentService {
     };
   }
 
+  /// Calculate Delivery Cost
+  static Future<Map<String, dynamic>?> calculateDeliveryCost({
+    required String reviewId,
+    required String shipmentMethod,
+    required String address,
+  }) async {
+    final token = await SecurePrefs.getToken();
+    final url = Uri.parse(
+      "$localBaseURL/deliveryRate/deliveryCost/$reviewId",
+    );
+
+    final payload = {
+      "shipmentMethod": shipmentMethod,
+      "address": address,
+    };
+
+    try {
+      final headers = _buildHeaders(token);
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode(payload),
+      );
+
+      _logPaymentResponse(
+        label: "Delivery Cost",
+        url: url,
+        payload: payload,
+        headers: headers,
+        response: response,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        print("✅ Delivery Cost Parsed Response: $data");
+        return data;
+      } else {
+        print("❌ Delivery Cost Failed: ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("❌ Error Delivery Cost: $e");
+      return null;
+    }
+  }
+
   /// Create Part Payment (Using unified endpoint with paymentStatus)
   static Future<Map<String, dynamic>?> createPartPayment({
     required String reviewId,

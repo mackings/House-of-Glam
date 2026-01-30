@@ -324,235 +324,124 @@ class TailorAssignedCard extends StatelessWidget {
                       ),
                     ],
 
-                    // Payment Card - Black Premium Style
+                    // Payment Summary - Light Modern Style
                     Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF1F2937), Color(0xFF111827)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: const Color(0xFFE2E8F0),
                         ),
-                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
-                            blurRadius: 16,
-                            offset: const Offset(0, 4),
+                            color: const Color(0xFF6B21A8).withOpacity(0.08),
+                            blurRadius: 14,
+                            offset: const Offset(0, 6),
                           ),
                         ],
                       ),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "TOTAL AMOUNT",
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.white.withOpacity(0.5),
-                                      letterSpacing: 1.2,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    CurrencyHelper.formatAmount(
-                                      totalAmount,
-                                    ),
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                      letterSpacing: -0.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
                               Container(
-                                padding: const EdgeInsets.all(12),
+                                padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF6B21A8,
-                                  ).withOpacity(0.15),
+                                  color: const Color(0xFF7C3AED)
+                                      .withOpacity(0.12),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
                                   Icons.account_balance_wallet_rounded,
-                                  color: Color(0xFF7C3AED),
-                                  size: 24,
+                                  color: Color(0xFF6B21A8),
+                                  size: 20,
                                 ),
                               ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.info_outline,
-                                size: 14,
-                                color: Colors.white.withOpacity(0.65),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Total Amount",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF64748B),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    CurrencyHelper.formatAmount(totalAmount),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF111827),
+                                      letterSpacing: -0.3,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 6),
-                              Expanded(
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isFullyPaid
+                                      ? const Color(0xFFDCFCE7)
+                                      : const Color(0xFFFFEDD5),
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
                                 child: Text(
-                                  "10% commission deducted from total.",
+                                  isFullyPaid ? "Paid" : "Outstanding",
                                   style: GoogleFonts.poppins(
                                     fontSize: 11,
-                                    color: Colors.white.withOpacity(0.6),
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w600,
+                                    color: isFullyPaid
+                                        ? const Color(0xFF16A34A)
+                                        : const Color(0xFFEA580C),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-
-                          const SizedBox(height: 20),
-
+                          const SizedBox(height: 16),
                           Container(
                             height: 1,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.white.withOpacity(0.0),
-                                  Colors.white.withOpacity(0.1),
-                                  Colors.white.withOpacity(0.0),
-                                ],
-                              ),
-                            ),
+                            color: const Color(0xFFE2E8F0),
                           ),
-
-                          const SizedBox(height: 20),
-
+                          const SizedBox(height: 16),
                           Row(
                             children: [
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(4),
-                                          decoration: BoxDecoration(
-                                            color: const Color(
-                                              0xFF10B981,
-                                            ).withOpacity(0.15),
-                                            borderRadius: BorderRadius.circular(
-                                              6,
-                                            ),
-                                          ),
-                                          child: const Icon(
-                                            Icons.check_circle_rounded,
-                                            size: 14,
-                                            color: Color(0xFF10B981),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          "Paid",
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 11,
-                                            color: Colors.white.withOpacity(
-                                              0.6,
-                                            ),
-                                            fontWeight: FontWeight.w500,
-                                            letterSpacing: 0.3,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      CurrencyHelper.formatAmount(
-                                        paidDisplay,
-                                      ),
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        color: const Color(0xFF10B981),
-                                        letterSpacing: -0.3,
-                                      ),
-                                    ),
-                                  ],
+                                child: _paymentStat(
+                                  label: "Paid",
+                                  value: CurrencyHelper.formatAmount(
+                                    paidDisplay,
+                                  ),
+                                  color: const Color(0xFF16A34A),
+                                  icon: Icons.check_circle_rounded,
                                 ),
                               ),
-                              Container(
-                                width: 1,
-                                height: 40,
-                                color: Colors.white.withOpacity(0.1),
-                              ),
+                              const SizedBox(width: 12),
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          balanceLabel,
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 11,
-                                            color: Colors.white.withOpacity(
-                                              0.6,
-                                            ),
-                                            fontWeight: FontWeight.w500,
-                                            letterSpacing: 0.3,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.all(4),
-                                          decoration: BoxDecoration(
-                                            color:
-                                                (isFullyPaid
-                                                    ? Colors.white.withOpacity(
-                                                      0.1,
-                                                    )
-                                                    : const Color(
-                                                      0xFFF59E0B,
-                                                    ).withOpacity(0.15)),
-                                            borderRadius: BorderRadius.circular(
-                                              6,
-                                            ),
-                                          ),
-                                          child: Icon(
-                                            isFullyPaid
-                                                ? Icons.check_circle_rounded
-                                                : Icons.schedule_rounded,
-                                            size: 14,
-                                            color:
-                                                isFullyPaid
-                                                    ? Colors.white.withOpacity(
-                                                      0.6,
-                                                    )
-                                                    : const Color(0xFFF59E0B),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      CurrencyHelper.formatAmount(
-                                        payableBalance,
-                                      ),
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        color:
-                                            isFullyPaid
-                                                ? Colors.white.withOpacity(0.6)
-                                                : const Color(0xFFF59E0B),
-                                        letterSpacing: -0.3,
-                                      ),
-                                    ),
-                                  ],
+                                child: _paymentStat(
+                                  label: balanceLabel,
+                                  value: CurrencyHelper.formatAmount(
+                                    payableBalance,
+                                  ),
+                                  color:
+                                      isFullyPaid
+                                          ? const Color(0xFF64748B)
+                                          : const Color(0xFFF59E0B),
+                                  icon:
+                                      isFullyPaid
+                                          ? Icons.check_circle_rounded
+                                          : Icons.schedule_rounded,
+                                  alignEnd: true,
                                 ),
                               ),
                             ],
@@ -605,6 +494,48 @@ class TailorAssignedCard extends StatelessWidget {
         .split(' ')
         .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
         .join(' ');
+  }
+
+  Widget _paymentStat({
+    required String label,
+    required String value,
+    required Color color,
+    required IconData icon,
+    bool alignEnd = false,
+  }) {
+    return Column(
+      crossAxisAlignment:
+          alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment:
+              alignEnd ? MainAxisAlignment.end : MainAxisAlignment.start,
+          children: [
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: 11,
+                color: const Color(0xFF64748B),
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: GoogleFonts.poppins(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: color,
+            letterSpacing: -0.2,
+          ),
+        ),
+      ],
+    );
   }
 
   Color _getColorFromString(String colorName) {
