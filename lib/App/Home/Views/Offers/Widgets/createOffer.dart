@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hog/App/Home/Model/reviewModel.dart';
 import 'package:hog/App/Home/Views/Offers/Api/OfferService.dart';
 import 'package:hog/App/Home/Views/Offers/Widgets/offerdetail_v2.dart';
@@ -288,15 +289,46 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                                 ),
                               ),
                               const SizedBox(width: 10),
-                              const CustomText(
-                                "Your Proposed Price",
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF1F2937),
-                              ),
-                            ],
+                          const CustomText(
+                            "Your Proposed Price",
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1F2937),
                           ),
-                          const SizedBox(height: 16),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF7ED),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: const Color(0xFFF59E0B).withOpacity(0.4),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.info_outline,
+                              size: 18,
+                              color: Color(0xFFF59E0B),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                "You can only make one offer for this quote.",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: const Color(0xFF92400E),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
 
                           // Total Cost
                           const CustomText(

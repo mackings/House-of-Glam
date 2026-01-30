@@ -5,6 +5,8 @@ import 'package:hog/constants/currencyHelper.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+
+
 class TailorAssignedCard extends StatelessWidget {
   final TailorAssignedMaterial item;
   final VoidCallback onTap;
@@ -78,7 +80,12 @@ class TailorAssignedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final material = item.material;
     final displayAmounts = _getDisplayAmounts();
-    final isFullyPaid = displayAmounts['amountToPay']! <= 0;
+    final totalAmount = displayAmounts['totalCost']!;
+    final paidAmount = displayAmounts['amountPaid']!;
+    final paidDisplay = paidAmount > 0 ? totalAmount : 0.0;
+    final payableBalance = totalAmount * 0.90;
+    final outstandingUserPayment = displayAmounts['amountToPay']! > 0;
+    final isFullyPaid = paidAmount > 0 && !outstandingUserPayment;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -272,6 +279,40 @@ class TailorAssignedCard extends StatelessWidget {
                   children: [
                     const SizedBox(height: 5),
 
+                    if (outstandingUserPayment) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF59E0B).withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: const Color(0xFFF59E0B).withOpacity(0.4),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.info_outline,
+                              size: 18,
+                              color: Color(0xFFF59E0B),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                "User has an outstanding payment to complete.",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: const Color(0xFF92400E),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
                     // Payment Card - Black Premium Style
                     Container(
                       padding: const EdgeInsets.all(20),
@@ -311,7 +352,7 @@ class TailorAssignedCard extends StatelessWidget {
                                   const SizedBox(height: 4),
                                   Text(
                                     CurrencyHelper.formatAmount(
-                                      displayAmounts['totalCost']!,
+                                      totalAmount,
                                     ),
                                     style: GoogleFonts.poppins(
                                       fontSize: 28,
@@ -334,6 +375,28 @@ class TailorAssignedCard extends StatelessWidget {
                                   Icons.account_balance_wallet_rounded,
                                   color: Color(0xFF7C3AED),
                                   size: 24,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                size: 14,
+                                color: Colors.white.withOpacity(0.65),
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  "10% commission deducted from total.",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    color: Colors.white.withOpacity(0.6),
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
                             ],
@@ -397,7 +460,7 @@ class TailorAssignedCard extends StatelessWidget {
                                     const SizedBox(height: 8),
                                     Text(
                                       CurrencyHelper.formatAmount(
-                                        displayAmounts['amountPaid']!,
+                                        paidDisplay,
                                       ),
                                       style: GoogleFonts.poppins(
                                         fontSize: 16,
@@ -422,7 +485,9 @@ class TailorAssignedCard extends StatelessWidget {
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         Text(
-                                          "Balance",
+                                          outstandingUserPayment
+                                              ? "Balance"
+                                              : "Payable Balance",
                                           style: GoogleFonts.poppins(
                                             fontSize: 11,
                                             color: Colors.white.withOpacity(
@@ -466,7 +531,7 @@ class TailorAssignedCard extends StatelessWidget {
                                     const SizedBox(height: 8),
                                     Text(
                                       CurrencyHelper.formatAmount(
-                                        displayAmounts['amountToPay']!,
+                                        payableBalance,
                                       ),
                                       style: GoogleFonts.poppins(
                                         fontSize: 16,

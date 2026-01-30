@@ -8,6 +8,7 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:hog/constants/currencyHelper.dart';
+import 'package:intl/intl.dart';
 
 class PaymentOptionsModal extends StatefulWidget {
   final Review review;
@@ -35,13 +36,27 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
   final TextEditingController addressController = TextEditingController();
   bool isLoading = false;
   bool showAddressError = false;
+  bool _isUserInNigeria = true;
 
   @override
   void initState() {
     super.initState();
     paymentType = widget.initialPaymentType;
+    _loadUserCountry();
     if (paymentType == "part") {
       // Auto-fill half payment amount
+      _autoFillHalfPayment();
+    }
+  }
+
+  Future<void> _loadUserCountry() async {
+    final userCountry = await CurrencyHelper.getUserCountry();
+    final isNigeria =
+        userCountry?.toUpperCase() == 'NIGERIA' ||
+        userCountry?.toUpperCase() == 'NG';
+    if (!mounted) return;
+    setState(() => _isUserInNigeria = isNigeria);
+    if (paymentType == "part") {
       _autoFillHalfPayment();
     }
   }
@@ -52,8 +67,31 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
         widget.review.isInternationalVendor
             ? widget.review.totalCostUSD
             : widget.review.totalCost;
-    final halfAmount = (totalToPay / 2).round();
-    amountController.text = halfAmount.toString();
+    final halfAmount = totalToPay / 2;
+    amountController.text = _formatAmount(halfAmount);
+  }
+
+  String _formatAmount(double value) {
+    if (_isUserInNigeria) {
+      return NumberFormat('#,###').format(value.round());
+    }
+    return NumberFormat('#,##0.##').format(value);
+  }
+
+  void _handleAmountChange(String value) {
+    final cleaned = value.replaceAll(',', '');
+    if (cleaned.isEmpty) return;
+    final parsed =
+        _isUserInNigeria
+            ? double.tryParse(cleaned)?.roundToDouble()
+            : double.tryParse(cleaned);
+    if (parsed == null) return;
+    final formatted = _formatAmount(parsed);
+    if (formatted == value) return;
+    amountController.value = TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
   }
 
   @override
@@ -504,18 +542,24 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
 
               if (paymentType == "part") ...[
                 CustomTextField(
-                  title: "Amount ($currencySymbol)",
+                  title: _isUserInNigeria ? "Amount (NGN)" : "Amount (USD)",
                   fieldKey: "amount",
-                  hintText: "Enter amount in your currency",
+                  hintText:
+                      _isUserInNigeria
+                          ? "Enter amount e.g., 23,000"
+                          : "Enter amount e.g., 120.50",
                   controller: amountController,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d+\.?\d{0,2}'),
+                      _isUserInNigeria
+                          ? RegExp(r'^[0-9,]*$')
+                          : RegExp(r'^[0-9,]*\.?\d{0,2}$'),
                     ),
                   ],
+                  onChanged: _handleAmountChange,
                 ),
                 const SizedBox(height: 8),
               ],

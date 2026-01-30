@@ -5,6 +5,7 @@ import 'package:hog/App/Home/Views/Offers/Api/OfferService.dart';
 import 'package:hog/App/Home/Views/Offers/Model/offerThread.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
 import 'package:timeago/timeago.dart' as timeago;
 
 /// WhatsApp-style Offer Negotiation Screen with Mutual Consent
@@ -22,31 +23,27 @@ class OfferDetailV2 extends StatefulWidget {
 
 class _OfferDetailV2State extends State<OfferDetailV2> {
   final TextEditingController _commentCtrl = TextEditingController();
-  final TextEditingController _materialCtrl = TextEditingController();
-  final TextEditingController _workmanshipCtrl = TextEditingController();
-  final TextEditingController _totalCtrl = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
   MakeOffer? _offer;
   bool _isLoading = true;
   bool _isSubmitting = false;
   String? _userRole;
-  bool _showAmountFields = false;
   String _userCountry = 'Nigeria'; // Default to Nigeria
   bool _useUSD = false; // Whether to display USD instead of NGN
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _startPolling();
   }
 
   @override
   void dispose() {
+    _pollTimer?.cancel();
     _commentCtrl.dispose();
-    _materialCtrl.dispose();
-    _workmanshipCtrl.dispose();
-    _totalCtrl.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -83,6 +80,26 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
     }
   }
 
+  Future<void> _refreshOfferSilently() async {
+    final response = await OfferService.getOfferById(widget.offerId);
+    if (response != null && response["success"] == true) {
+      final offer = MakeOffer.fromJson(response["data"]);
+      if (!mounted) return;
+      setState(() {
+        _offer = offer;
+      });
+    }
+  }
+
+  void _startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (!_isSubmitting) {
+        _refreshOfferSilently();
+      }
+    });
+  }
+
   void _showSnack(String msg, {bool isError = false}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -111,11 +128,9 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
   Future<void> _handleAction(String action) async {
     if (_offer == null) return;
 
-    if (_isBuyer &&
-        action == "countered" &&
-        _hasUserCountered()) {
+    if (action == "countered") {
       return _showSnack(
-        "You can only counter once. Please accept or reject.",
+        "Counter offers are not allowed here. Please accept or reject.",
         isError: true,
       );
     }
@@ -126,22 +141,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
       return _showSnack("Please add a comment", isError: true);
     }
 
-    // For counter offers, amounts are required
-    if (action == "countered") {
-      if (_isBuyer) {
-        if (_totalCtrl.text.trim().isEmpty) {
-          return _showSnack("Please enter a total amount", isError: true);
-        }
-      } else {
-        if (_materialCtrl.text.trim().isEmpty ||
-            _workmanshipCtrl.text.trim().isEmpty) {
-          return _showSnack(
-            "Please enter material and workmanship costs",
-            isError: true,
-          );
-        }
-      }
-    }
+    // Counter offers are disabled in this screen.
 
     // For accept action, use the latest chat amounts
     String materialCost = "0";
@@ -153,44 +153,6 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
       if (latestChat != null) {
         materialCost = latestChat.counterMaterialCost.toStringAsFixed(0);
         workmanshipCost = latestChat.counterWorkmanshipCost.toStringAsFixed(0);
-      }
-    } else if (action == "countered") {
-      if (_isBuyer) {
-        final enteredTotal = _totalCtrl.text.replaceAll(',', '').trim();
-        final totalValue = double.tryParse(enteredTotal);
-        if (totalValue == null || totalValue <= 0) {
-          return _showSnack("Please enter a valid total amount", isError: true);
-        }
-        final totalNgn =
-            _useUSD && _offer!.exchangeRate > 0
-                ? (totalValue * _offer!.exchangeRate).round()
-                : totalValue.round();
-        final materialSplit = (totalNgn / 2).floor();
-        final workmanshipSplit = totalNgn - materialSplit;
-        materialCost = materialSplit.toString();
-        workmanshipCost = workmanshipSplit.toString();
-      } else {
-        // Vendor enters amounts in their local currency
-        String enteredMaterial = _materialCtrl.text.replaceAll(',', '').trim();
-        String enteredWorkmanship =
-            _workmanshipCtrl.text.replaceAll(',', '').trim();
-
-        // If vendor is international (using USD), convert to NGN before sending
-        if (_useUSD && _offer!.exchangeRate > 0) {
-          double materialUSD = double.parse(enteredMaterial);
-          double workmanshipUSD = double.parse(enteredWorkmanship);
-
-          // Convert USD to NGN: USD * exchangeRate = NGN
-          materialCost = (materialUSD * _offer!.exchangeRate).toStringAsFixed(
-            0,
-          );
-          workmanshipCost = (workmanshipUSD * _offer!.exchangeRate)
-              .toStringAsFixed(0);
-        } else {
-          // Nigerian vendor - already in NGN
-          materialCost = enteredMaterial;
-          workmanshipCost = enteredWorkmanship;
-        }
       }
     }
 
@@ -223,10 +185,6 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
 
       // Clear inputs
       _commentCtrl.clear();
-      _materialCtrl.clear();
-      _workmanshipCtrl.clear();
-      _totalCtrl.clear();
-      setState(() => _showAmountFields = false);
 
       // Reload data
       await _loadData();
@@ -310,7 +268,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                   Expanded(
                     child: RefreshIndicator(
                       onRefresh: _loadData,
-                      color: const Color(0xFF6B21A8),
+                      color: const Color.fromARGB(255, 11, 6, 16),
                       child: ListView.builder(
                         controller: _scrollController,
                         padding: const EdgeInsets.all(12),
@@ -605,7 +563,6 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
     final canRespond =
         (_isBuyer && _offer!.buyerCanRespond) ||
         (!_isBuyer && _offer!.vendorCanRespond);
-    final hasCountered = _isBuyer ? _hasUserCountered() : false;
 
     if (!canRespond) {
       return Container(
@@ -655,120 +612,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
             enabled: !_isSubmitting,
           ),
 
-          // Amount Fields (for counter offers)
-          if (_showAmountFields) ...[
-            const SizedBox(height: 12),
-            if (_isBuyer)
-              TextField(
-                controller: _totalCtrl,
-                decoration: InputDecoration(
-                  labelText: "Total Amount (${_useUSD ? 'USD' : 'NGN'})",
-                  labelStyle: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.black54,
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF6B21A8),
-                      width: 2,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 14,
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-                enabled: !_isSubmitting,
-              )
-            else
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _materialCtrl,
-                      decoration: InputDecoration(
-                        labelText: "Material Cost (${_useUSD ? 'USD' : 'NGN'})",
-                        labelStyle: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF6B21A8),
-                            width: 2,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 14,
-                        ),
-                      ),
-                      keyboardType: TextInputType.number,
-                      enabled: !_isSubmitting,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: _workmanshipCtrl,
-                      decoration: InputDecoration(
-                        labelText: "Workmanship (${_useUSD ? 'USD' : 'NGN'})",
-                        labelStyle: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF6B21A8),
-                            width: 2,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 14,
-                        ),
-                      ),
-                      keyboardType: TextInputType.number,
-                      enabled: !_isSubmitting,
-                    ),
-                  ),
-                ],
-              ),
-          ],
+          // Counter amount fields removed (counters disabled)
 
           const SizedBox(height: 16),
 
@@ -779,66 +623,6 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                 padding: EdgeInsets.all(16.0),
                 child: CircularProgressIndicator(color: Color(0xFF6B21A8)),
               ),
-            )
-          else if (_showAmountFields)
-            // Show Send Counter and Cancel buttons when amount fields are active
-            Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    onPressed: () => _handleAction("countered"),
-                    icon: const Icon(
-                      Icons.send_rounded,
-                      size: 20,
-                      color: Colors.white,
-                    ),
-                    label: const CustomText(
-                      "Send Counter Offer",
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6B21A8),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      setState(() => _showAmountFields = false);
-                    },
-                    icon: const Icon(
-                      Icons.close,
-                      size: 18,
-                      color: Colors.black87,
-                    ),
-                    label: const CustomText(
-                      "Cancel",
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.grey.shade300, width: 1.5),
-                      backgroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             )
           else
             // Show Accept, Reject, Counter buttons
@@ -872,7 +656,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                 ),
                 const SizedBox(height: 10),
 
-                // Secondary Row: Reject and Counter
+                // Secondary Row: Reject
                 Row(
                   children: [
                     // Reject Button (Outlined)
@@ -906,54 +690,8 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                         ),
                       ),
                     ),
-                    if (!hasCountered) ...[
-                      const SizedBox(width: 10),
-
-                      // Counter Button (Filled with lighter purple)
-                      Expanded(
-                        child: SizedBox(
-                          height: 48,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              setState(() => _showAmountFields = true);
-                            },
-                            icon: const Icon(
-                              Icons.swap_horiz_rounded,
-                              size: 18,
-                              color: Color(0xFF6B21A8),
-                            ),
-                            label: const CustomText(
-                              "Counter",
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF6B21A8),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFF3E8FF),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                side: const BorderSide(
-                                  color: Color(0xFF6B21A8),
-                                  width: 1,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                   ],
                 ),
-                if (hasCountered) ...[
-                  const SizedBox(height: 8),
-                  const CustomText(
-                    "Counter already used. You can only accept or reject.",
-                    fontSize: 12,
-                    color: Colors.black54,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
               ],
             ),
         ],
@@ -964,14 +702,4 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
   bool get _isBuyer =>
       _userRole == "user" || _userRole == "customer" || _userRole == "buyer";
 
-  bool _hasUserCountered() {
-    if (_offer == null) return false;
-    if (!_isBuyer) return false;
-    const buyerSenderTypes = {"customer", "user", "buyer"};
-    return _offer!.chats.any(
-      (chat) =>
-          buyerSenderTypes.contains(chat.senderType) &&
-          chat.action == "countered",
-    );
-  }
 }

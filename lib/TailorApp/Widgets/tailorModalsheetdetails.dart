@@ -67,6 +67,13 @@ void showTailorMaterialDetails(
                 }
 
                 final displayAmounts = _getDisplayAmounts(item);
+                final totalAmount = displayAmounts['totalCost'] ?? 0.0;
+                final paidAmount = displayAmounts['amountPaid'] ?? 0.0;
+                final paidDisplay = paidAmount > 0 ? totalAmount : 0.0;
+                final payableBalance = totalAmount * 0.90;
+                final outstandingUserPayment =
+                    (displayAmounts['amountToPay'] ?? 0.0) > 0;
+                final isFullyPaid = paidAmount > 0 && !outstandingUserPayment;
 
                 return Container(
                   decoration: const BoxDecoration(
@@ -217,6 +224,46 @@ void showTailorMaterialDetails(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
+                                          if (outstandingUserPayment) ...[
+                                            Container(
+                                              padding: const EdgeInsets.all(12),
+                                              margin: const EdgeInsets.only(
+                                                bottom: 12,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFF59E0B)
+                                                    .withOpacity(0.12),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                                border: Border.all(
+                                                  color: const Color(0xFFF59E0B)
+                                                      .withOpacity(0.4),
+                                                ),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.info_outline,
+                                                    size: 18,
+                                                    color: Color(0xFFF59E0B),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  Expanded(
+                                                    child: Text(
+                                                      "User has an outstanding payment to complete.",
+                                                      style: GoogleFonts.poppins(
+                                                        fontSize: 12,
+                                                        color:
+                                                            const Color(0xFF92400E),
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
                                           Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
@@ -279,8 +326,32 @@ void showTailorMaterialDetails(
                                           const SizedBox(height: 16),
                                           _buildFinancialRow(
                                             "Total",
-                                            displayAmounts['totalCost']!,
+                                            totalAmount,
                                             true,
+                                          ),
+                                          const SizedBox(height: 10),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.info_outline,
+                                                size: 14,
+                                                color: Colors.white.withOpacity(
+                                                  0.6,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Expanded(
+                                                child: Text(
+                                                  "10% commission deducted from total.",
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: 11,
+                                                    color: Colors.white
+                                                        .withOpacity(0.6),
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                           const SizedBox(height: 20),
                                           Row(
@@ -288,7 +359,7 @@ void showTailorMaterialDetails(
                                               Expanded(
                                                 child: _buildPaymentStatus(
                                                   "Paid",
-                                                  displayAmounts['amountPaid']!,
+                                                  paidDisplay,
                                                   const Color(0xFF10B981),
                                                   Icons.check_circle_rounded,
                                                 ),
@@ -296,15 +367,15 @@ void showTailorMaterialDetails(
                                               const SizedBox(width: 12),
                                               Expanded(
                                                 child: _buildPaymentStatus(
-                                                  "Balance",
-                                                  displayAmounts['amountToPay']!,
-                                                  displayAmounts['amountToPay']! <=
-                                                          0
+                                                  outstandingUserPayment
+                                                      ? "Balance"
+                                                      : "Payable Balance",
+                                                  payableBalance,
+                                                  isFullyPaid
                                                       ? Colors.white
                                                           .withOpacity(0.6)
                                                       : const Color(0xFFF59E0B),
-                                                  displayAmounts['amountToPay']! <=
-                                                          0
+                                                  isFullyPaid
                                                       ? Icons
                                                           .check_circle_rounded
                                                       : Icons.schedule_rounded,
