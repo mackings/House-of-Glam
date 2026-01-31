@@ -2,9 +2,9 @@
 
 class ApiConfig {
   // 🔗 Base URL for all API endpoints
-  //  static const String baseUrl = "https://hog-ymud.onrender.com";
+   static const String baseUrl = "https://hog-fyic.onrender.com";
 
-  static const String baseUrl = "https://hogbackend.vercel.app";
+  //static const String baseUrl = "https://hogbackend.vercel.app";
 
   // 📡 API Version
   static const String apiVersion = "v1";
