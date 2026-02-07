@@ -175,12 +175,10 @@ class QuotationCard extends StatelessWidget {
             ...[],
 
           // Display total cost only
-          _buildTotalCost(displayTotal, currencyCode: currencyCode),
-          const SizedBox(height: 6),
-          CustomText(
-            hasAcceptedOffer ? "Including VAT" : "Excluding VAT",
-            fontSize: 11,
-            color: Colors.black54,
+          _buildTotalCost(
+            displayTotal,
+            currencyCode: currencyCode,
+            includesVat: hasAcceptedOffer,
           ),
 
           // Show USD conversion info if international vendor
@@ -470,16 +468,41 @@ class QuotationCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTotalCost(double total, {required String currencyCode}) {
+  Widget _buildTotalCost(
+    double total, {
+    required String currencyCode,
+    required bool includesVat,
+  }) {
+    final vatLabel = includesVat ? "Including VAT" : "Excluding VAT";
     return Row(
       children: [
         const Icon(Icons.attach_money, size: 16, color: Colors.purple),
         const SizedBox(width: 6),
-        CustomText(
-          "Total: ${CurrencyHelper.formatAmount(total, currencyCode: currencyCode)}",
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          overflow: TextOverflow.ellipsis,
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text:
+                      "Total: ${CurrencyHelper.formatAmount(total, currencyCode: currencyCode)} ",
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+                TextSpan(
+                  text: vatLabel,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
         ),
       ],
     );

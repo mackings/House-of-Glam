@@ -43,14 +43,7 @@ class OfferService {
     final response = await http.get(url, headers: headers);
     final duration = DateTime.now().difference(start);
 
-    _logApi(
-      method: "GET",
-      url: url,
-      headers: headers,
-      body: null,
-      response: response,
-      duration: duration,
-    );
+    // Intentionally omit logging for silent refresh calls.
 
     if (response.statusCode == 200) {
       final jsonData = jsonDecode(response.body);

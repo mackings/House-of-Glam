@@ -219,4 +219,208 @@ class DeliveryRateService {
       return null;
     }
   }
+
+  /// 🔹 Get pricing config (Tax/VAT)
+  static Future<Map<String, dynamic>?> getPricingConfig() async {
+    try {
+      final token = await SecurePrefs.getToken();
+      final url = Uri.parse("${ApiConfig.apiBaseUrl}/pricing/getPricingConfig");
+
+      print("➡️ GET $url");
+
+      final response = await _safeRequest(
+        () => http.get(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      if (response == null) return null;
+      print("⬅️ Response [${response.statusCode}]: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return Map<String, dynamic>.from(data["data"] ?? {});
+      }
+      return null;
+    } catch (e) {
+      print("❌ Error fetching pricing config: $e");
+      return null;
+    }
+  }
+
+  /// 🔹 Update pricing config (Tax/VAT)
+  static Future<bool> updatePricingConfig({
+    required double quotationTaxPercent,
+    required double vatPercent,
+  }) async {
+    try {
+      final token = await SecurePrefs.getToken();
+      final url = Uri.parse("${ApiConfig.apiBaseUrl}/pricing/updatePricingConfig");
+
+      final payload = {
+        "quotationTaxPercent": quotationTaxPercent,
+        "vatPercent": vatPercent,
+      };
+
+      print("➡️ PUT $url");
+      print("📦 Payload: $payload");
+
+      final response = await _safeRequest(
+        () => http.put(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(payload),
+        ),
+      );
+
+      if (response == null) return false;
+      print("⬅️ Response [${response.statusCode}]: ${response.body}");
+      return response.statusCode == 200;
+    } catch (e) {
+      print("❌ Error updating pricing config: $e");
+      return false;
+    }
+  }
+
+  /// 🔹 Get full pickup hierarchy
+  static Future<List<Map<String, dynamic>>> getPickupHierarchy() async {
+    try {
+      final token = await SecurePrefs.getToken();
+      final url = Uri.parse("${ApiConfig.apiBaseUrl}/deliveryRate/pickup/hierarchy");
+
+      print("➡️ GET $url");
+
+      final response = await _safeRequest(
+        () => http.get(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      if (response == null) return [];
+      print("⬅️ Response [${response.statusCode}]: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final list = data["data"] as List? ?? [];
+        return List<Map<String, dynamic>>.from(list);
+      }
+      return [];
+    } catch (e) {
+      print("❌ Error fetching pickup hierarchy: $e");
+      return [];
+    }
+  }
+
+  /// 🔹 Create pickup country
+  static Future<bool> createPickupCountry({required String name}) async {
+    try {
+      final token = await SecurePrefs.getToken();
+      final url = Uri.parse("${ApiConfig.apiBaseUrl}/deliveryRate/pickup/countries");
+      final payload = {"name": name};
+
+      print("➡️ POST $url");
+      print("📦 Payload: $payload");
+
+      final response = await _safeRequest(
+        () => http.post(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(payload),
+        ),
+      );
+
+      if (response == null) return false;
+      print("⬅️ Response [${response.statusCode}]: ${response.body}");
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      print("❌ Error creating pickup country: $e");
+      return false;
+    }
+  }
+
+  /// 🔹 Create pickup state
+  static Future<bool> createPickupState({
+    required String countryId,
+    required String name,
+  }) async {
+    try {
+      final token = await SecurePrefs.getToken();
+      final url = Uri.parse(
+        "${ApiConfig.apiBaseUrl}/deliveryRate/pickup/countries/$countryId/states",
+      );
+      final payload = {"name": name};
+
+      print("➡️ POST $url");
+      print("📦 Payload: $payload");
+
+      final response = await _safeRequest(
+        () => http.post(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(payload),
+        ),
+      );
+
+      if (response == null) return false;
+      print("⬅️ Response [${response.statusCode}]: ${response.body}");
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      print("❌ Error creating pickup state: $e");
+      return false;
+    }
+  }
+
+  /// 🔹 Create pickup location
+  static Future<bool> createPickupLocation({
+    required String countryId,
+    required String stateId,
+    required String name,
+    required String address,
+  }) async {
+    try {
+      final token = await SecurePrefs.getToken();
+      final url = Uri.parse(
+        "${ApiConfig.apiBaseUrl}/deliveryRate/pickup/countries/$countryId/states/$stateId/locations",
+      );
+      final payload = {"name": name, "address": address};
+
+      print("➡️ POST $url");
+      print("📦 Payload: $payload");
+
+      final response = await _safeRequest(
+        () => http.post(
+          url,
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(payload),
+        ),
+      );
+
+      if (response == null) return false;
+      print("⬅️ Response [${response.statusCode}]: ${response.body}");
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      print("❌ Error creating pickup location: $e");
+      return false;
+    }
+  }
 }

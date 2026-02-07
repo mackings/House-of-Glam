@@ -521,6 +521,9 @@ class BankApiService {
     required String paymentStatus, // "full payment" or "part payment"
     String? amount, // For part payment
     String? address, // For full payment
+    String? pickupCountryId,
+    String? pickupStateId,
+    String? pickupLocationId,
     double? exchangeRate, // Exchange rate for currency conversion
   }) async {
     final endpoint = "$baseUrl/api/v1/stripe/make-payment/$reviewId";
@@ -543,6 +546,9 @@ class BankApiService {
         "shipmentMethod": shipmentMethod,
         if (amount != null) "amount": amount,
         if (address != null) "address": address,
+        if (pickupCountryId != null) "pickupCountryId": pickupCountryId,
+        if (pickupStateId != null) "pickupStateId": pickupStateId,
+        if (pickupLocationId != null) "pickupLocationId": pickupLocationId,
         if (exchangeRate != null) "ngnToUsdRate": exchangeRate,
       };
 

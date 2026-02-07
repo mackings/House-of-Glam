@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Admin/Views/DeliverySettings.dart';
+import 'package:hog/App/Admin/Views/PickupSettings.dart';
+import 'package:hog/App/Admin/Views/PricingSettings.dart';
+import 'package:hog/App/Admin/Views/SubscriptionSettings.dart';
 import 'package:hog/App/Admin/Views/adminHome.dart';
 import 'package:hog/App/Admin/Views/analytics.dart';
 import 'package:hog/App/Admin/Views/billing.dart';
@@ -9,6 +12,7 @@ import 'package:hog/App/Profile/Views/SellerDeliverylog.dart';
 import 'package:hog/App/Profile/Views/UserListings.dart';
 import 'package:hog/App/Profile/Views/marketPlace.dart';
 import 'package:hog/App/Profile/widgets/profileMenu.dart';
+import 'package:hog/TailorApp/Home/Views/Subscription.dart';
 import 'package:hog/components/Navigator.dart';
 
 class UserProfile extends StatefulWidget {
@@ -36,7 +40,15 @@ class _UserProfileState extends State<UserProfile> {
     });
   }
 
-  bool get isAdmin => userRole == 'admin';
+  bool get isAdmin {
+    final role = (userRole ?? '').trim().toLowerCase();
+    return role.contains('admin');
+  }
+
+  bool get isTailor {
+    final role = (userRole ?? '').trim().toLowerCase();
+    return role.contains('tailor');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -111,15 +123,15 @@ class _UserProfileState extends State<UserProfile> {
                   },
                 ),
 
-              // ✅ Only show for admins
-              if (isAdmin)
-                ProfileMenuItem(
-                  icon: Icons.money,
-                  text: "Commission",
-                  onTap: () {
-                    Nav.push(context, const SetBilling());
-                  },
-                ),
+              // Commission hidden from marketplace menu for now
+              // if (isAdmin)
+              //   ProfileMenuItem(
+              //     icon: Icons.money,
+              //     text: "Commission",
+              //     onTap: () {
+              //       Nav.push(context, const SetBilling());
+              //     },
+              //   ),
 
               if (isAdmin)
                 ProfileMenuItem(
@@ -127,6 +139,42 @@ class _UserProfileState extends State<UserProfile> {
                   text: "Delivery Settings",
                   onTap: () {
                     Nav.push(context, const DeliverySettings());
+                  },
+                ),
+
+              if (isAdmin)
+                ProfileMenuItem(
+                  icon: Icons.pin_drop_outlined,
+                  text: "Set Pickup Location",
+                  onTap: () {
+                    Nav.push(context, const PickupSettings());
+                  },
+                ),
+
+              if (isAdmin)
+                ProfileMenuItem(
+                  icon: Icons.percent_outlined,
+                  text: "Tax & VAT",
+                  onTap: () {
+                    Nav.push(context, const PricingSettings());
+                  },
+                ),
+
+              if (isAdmin)
+                ProfileMenuItem(
+                  icon: Icons.subscriptions_outlined,
+                  text: "Subscription Settings",
+                  onTap: () {
+                    Nav.push(context, const SubscriptionSettings());
+                  },
+                ),
+
+              if (isTailor)
+                ProfileMenuItem(
+                  icon: Icons.workspace_premium_outlined,
+                  text: "My Subscription",
+                  onTap: () {
+                    Nav.push(context, const Subscription());
                   },
                 ),
             ],

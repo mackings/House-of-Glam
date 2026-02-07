@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Home/Model/offerModel.dart';
 import 'package:hog/App/Home/Views/Offers/Api/OfferService.dart';
 import 'package:hog/App/Home/Views/Offers/Model/offerThread.dart';
+import 'package:hog/components/thousandformat.dart';
 import 'package:hog/components/texts.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
@@ -23,6 +25,7 @@ class OfferDetailV2 extends StatefulWidget {
 
 class _OfferDetailV2State extends State<OfferDetailV2> {
   final TextEditingController _commentCtrl = TextEditingController();
+  final TextEditingController _amountCtrl = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
   MakeOffer? _offer;
@@ -44,6 +47,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
   void dispose() {
     _pollTimer?.cancel();
     _commentCtrl.dispose();
+    _amountCtrl.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -129,10 +133,12 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
     if (_offer == null) return;
 
     if (action == "countered") {
-      return _showSnack(
-        "Counter offers are not allowed here. Please accept or reject.",
-        isError: true,
-      );
+      if (!_canVendorCounter) {
+        return _showSnack(
+          "You can only counter once. Please accept or reject.",
+          isError: true,
+        );
+      }
     }
 
     final comment = _commentCtrl.text.trim();
@@ -141,11 +147,36 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
       return _showSnack("Please add a comment", isError: true);
     }
 
-    // Counter offers are disabled in this screen.
-
     // For accept action, use the latest chat amounts
     String materialCost = "0";
     String workmanshipCost = "0";
+
+    if (action == "countered") {
+      final amountDisplay = _amountCtrl.text.trim();
+
+      if (amountDisplay.isEmpty) {
+        return _showSnack(
+          "Please enter an amount.",
+          isError: true,
+        );
+      }
+
+      final normalized = amountDisplay
+          .toUpperCase()
+          .replaceAll(',', '')
+          .replaceAll('\$', '')
+          .replaceAll('USD', '')
+          .replaceAll('NGN', '')
+          .replaceAll('₦', '')
+          .trim();
+      final totalAmount = (double.tryParse(normalized) ?? 0).toStringAsFixed(0);
+      final totalAsInt = int.tryParse(totalAmount) ?? 0;
+      final splitMaterial = (totalAsInt / 2).floor();
+      final splitWorkmanship = totalAsInt - splitMaterial;
+
+      materialCost = splitMaterial.toString();
+      workmanshipCost = splitWorkmanship.toString();
+    }
 
     if (action == "accepted") {
       // Use latest chat amounts (always send NGN to backend)
@@ -185,6 +216,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
 
       // Clear inputs
       _commentCtrl.clear();
+      _amountCtrl.clear();
 
       // Reload data
       await _loadData();
@@ -363,7 +395,6 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
     final isMyMessage =
         (_isBuyer && isCustomer) ||
         (!_isBuyer && !isCustomer);
-    final showBreakdown = !_isBuyer;
 
     return Align(
       alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
@@ -430,20 +461,6 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                       ),
                       child: Column(
                         children: [
-                          if (showBreakdown) ...[
-                            _buildAmountRow(
-                              "Material",
-                              chat.counterMaterialCost, // NGN
-                              chat.counterMaterialCostUSD, // USD (pre-calculated)
-                            ),
-                            const SizedBox(height: 4),
-                            _buildAmountRow(
-                              "Workmanship",
-                              chat.counterWorkmanshipCost, // NGN
-                              chat.counterWorkmanshipCostUSD, // USD (pre-calculated)
-                            ),
-                            const Divider(height: 12),
-                          ],
                           _buildAmountRow(
                             "Total",
                             chat.counterTotalCost, // NGN
@@ -563,6 +580,7 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
     final canRespond =
         (_isBuyer && _offer!.buyerCanRespond) ||
         (!_isBuyer && _offer!.vendorCanRespond);
+    final counterAvailable = canRespond && _canVendorCounter;
 
     if (!canRespond) {
       return Container(
@@ -612,7 +630,37 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
             enabled: !_isSubmitting,
           ),
 
-          // Counter amount fields removed (counters disabled)
+          if (counterAvailable) ...[
+            const SizedBox(height: 12),
+            TextField(
+              controller: _amountCtrl,
+              keyboardType:
+                  _useUSD
+                      ? const TextInputType.numberWithOptions(decimal: true)
+                      : TextInputType.number,
+              inputFormatters:
+                  _useUSD
+                      ? null
+                      : <TextInputFormatter>[ThousandsFormatter()],
+              decoration: InputDecoration(
+                hintText:
+                    _useUSD
+                        ? "Enter amount (e.g. 12 USD)"
+                        : "Enter amount (e.g. 23,000)",
+                filled: true,
+                fillColor: Colors.grey.shade100,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+              enabled: !_isSubmitting,
+            ),
+          ],
 
           const SizedBox(height: 16),
 
@@ -625,78 +673,119 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
               ),
             )
           else
-            // Show Accept, Reject, Counter buttons
+            // Show Counter once for vendor, otherwise Accept/Reject
             Column(
               children: [
-                // Primary Accept Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    onPressed: () => _handleAction("accepted"),
-                    icon: const Icon(
-                      Icons.check_circle_rounded,
-                      size: 20,
-                      color: Colors.white,
+                if (counterAvailable)
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _handleAction("countered"),
+                      icon: const Icon(
+                        Icons.swap_horiz_rounded,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                      label: const CustomText(
+                        "Send Counter Offer",
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6B21A8),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
                     ),
-                    label: const CustomText(
-                      "Accept Offer",
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6B21A8),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                  )
+                else ...[
+                  // Primary Accept Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _handleAction("accepted"),
+                      icon: const Icon(
+                        Icons.check_circle_rounded,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                      label: const CustomText(
+                        "Accept Offer",
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6B21A8),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
-                // Secondary Row: Reject
-                Row(
-                  children: [
-                    // Reject Button (Outlined)
-                    Expanded(
-                      child: SizedBox(
-                        height: 48,
-                        child: OutlinedButton.icon(
-                          onPressed: () => _handleAction("rejected"),
-                          icon: const Icon(
-                            Icons.cancel_outlined,
-                            size: 18,
-                            color: Colors.black87,
-                          ),
-                          label: const CustomText(
-                            "Reject",
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: Colors.grey.shade300,
-                              width: 1.5,
+                  // Secondary Row: Reject
+                  Row(
+                    children: [
+                      // Reject Button (Outlined)
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: OutlinedButton.icon(
+                            onPressed: () => _handleAction("rejected"),
+                            icon: const Icon(
+                              Icons.cancel_outlined,
+                              size: 18,
+                              color: Colors.black87,
                             ),
-                            backgroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                            label: const CustomText(
+                              "Reject",
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87,
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: Colors.grey.shade300,
+                                width: 1.5,
+                              ),
+                              backgroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ],
             ),
         ],
       ),
     );
+  }
+
+  bool get _canVendorCounter {
+    if (_offer == null || _isBuyer) return false;
+    for (final chat in _offer!.chats) {
+      final isCustomer = chat.senderType == "customer" ||
+          chat.senderType == "user" ||
+          chat.senderType == "buyer";
+      if (!isCustomer && chat.action == "countered") {
+        return false;
+      }
+    }
+    return true;
   }
 
   bool get _isBuyer =>

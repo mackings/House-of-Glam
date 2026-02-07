@@ -4,7 +4,6 @@ import 'package:hog/TailorApp/Home/Api/subservice.dart';
 import 'package:hog/TailorApp/Home/Model/submodel.dart';
 import 'package:hog/TailorApp/Home/Views/payment.dart';
 import 'package:hog/components/texts.dart';
-import 'package:hog/constants/currency.dart';
 
 import 'package:intl/intl.dart';
 
@@ -64,18 +63,19 @@ class _SubscriptionState extends State<Subscription> {
     }
   }
 
-  Future<void> subscribe(String plan, String amount, String billTerm) async {
+  Future<void> subscribe(SubscriptionPlan plan) async {
     try {
-      final response = await _service.subscribeToPlan(
-        plan: plan,
-        amount: amount,
-        billTerm: billTerm,
-      );
-      if (response.authorizationUrl.isNotEmpty) {
+      final response = await _service.subscribeToPlan(planId: plan.id);
+      final checkoutLink =
+          response.authorizationUrl.isNotEmpty
+              ? response.authorizationUrl
+              : response.checkoutUrl;
+
+      if (checkoutLink.isNotEmpty) {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => WebViewScreen(url: response.authorizationUrl),
+            builder: (_) => WebViewScreen(url: checkoutLink),
           ),
         );
       }
@@ -87,6 +87,7 @@ class _SubscriptionState extends State<Subscription> {
   @override
   Widget build(BuildContext context) {
     final formatter = NumberFormat("#,##0"); // For 2,000 formatting
+    final formatter2 = NumberFormat("#,##0.##");
 
     // Group plans by name (Premium, Standard, Enterprise)
     final groupedPlans = <String, List<SubscriptionPlan>>{};
@@ -235,9 +236,20 @@ class _SubscriptionState extends State<Subscription> {
                             // Display each duration card under this plan name
                             ...planList.map((plan) {
                               final isActive = plan.name == currentPlan;
-                              final formattedAmount = formatter.format(
-                                plan.amount,
-                              );
+                              final currencyCode =
+                                  plan.displayCurrency.isNotEmpty
+                                      ? plan.displayCurrency.toUpperCase()
+                                      : "NGN";
+                              final amountToShow =
+                                  plan.displayAmount > 0
+                                      ? plan.displayAmount
+                                      : plan.amount.toDouble();
+                              final currencyPrefix =
+                                  currencyCode == "USD" ? "\$" : "₦";
+                              final formattedAmount =
+                                  currencyCode == "USD"
+                                      ? formatter2.format(amountToShow)
+                                      : formatter.format(amountToShow);
 
                               return Container(
                                 margin: const EdgeInsets.symmetric(vertical: 8),
@@ -270,8 +282,7 @@ class _SubscriptionState extends State<Subscription> {
                                     ),
                                     const SizedBox(height: 6),
                                     CustomText(
-                                      // "₦$formattedAmount",
-                                      "${currencySymbol} $formattedAmount",
+                                      "$currencyPrefix$formattedAmount ($currencyCode)",
                                       fontSize: 15,
                                       color: Colors.purple,
                                       fontWeight: FontWeight.bold,
@@ -300,11 +311,7 @@ class _SubscriptionState extends State<Subscription> {
                                             elevation: 3,
                                           ),
                                           onPressed:
-                                              () => subscribe(
-                                                plan.name,
-                                                plan.amount.toString(),
-                                                plan.duration,
-                                              ),
+                                              () => subscribe(plan),
                                           child: const CustomText(
                                             "Subscribe",
                                             color: Colors.white,

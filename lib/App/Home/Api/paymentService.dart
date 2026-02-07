@@ -3,6 +3,109 @@ import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/constants/api_config.dart';
 import 'package:http/http.dart' as http;
 
+class PickupLocationOption {
+  final String id;
+  final String name;
+  final String address;
+  final bool isActive;
+
+  const PickupLocationOption({
+    required this.id,
+    required this.name,
+    required this.address,
+    required this.isActive,
+  });
+
+  factory PickupLocationOption.fromJson(Map<String, dynamic> json) {
+    return PickupLocationOption(
+      id: json["_id"]?.toString() ?? "",
+      name: json["name"]?.toString() ?? "",
+      address: json["address"]?.toString() ?? "",
+      isActive: json["isActive"] == true,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PickupLocationOption &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+}
+
+class PickupStateOption {
+  final String id;
+  final String name;
+  final List<PickupLocationOption> locations;
+
+  const PickupStateOption({
+    required this.id,
+    required this.name,
+    required this.locations,
+  });
+
+  factory PickupStateOption.fromJson(Map<String, dynamic> json) {
+    final rawLocations = (json["locations"] as List?) ?? const [];
+    return PickupStateOption(
+      id: json["_id"]?.toString() ?? "",
+      name: json["name"]?.toString() ?? "",
+      locations:
+          rawLocations
+              .whereType<Map>()
+              .map((e) => PickupLocationOption.fromJson(Map<String, dynamic>.from(e)))
+              .toList(),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PickupStateOption &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+}
+
+class PickupCountryOption {
+  final String id;
+  final String name;
+  final List<PickupStateOption> states;
+
+  const PickupCountryOption({
+    required this.id,
+    required this.name,
+    required this.states,
+  });
+
+  factory PickupCountryOption.fromJson(Map<String, dynamic> json) {
+    final rawStates = (json["states"] as List?) ?? const [];
+    return PickupCountryOption(
+      id: json["_id"]?.toString() ?? "",
+      name: json["name"]?.toString() ?? "",
+      states:
+          rawStates
+              .whereType<Map>()
+              .map((e) => PickupStateOption.fromJson(Map<String, dynamic>.from(e)))
+              .toList(),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PickupCountryOption &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+}
+
 class PaymentService {
   static const String localBaseURL = ApiConfig.apiBaseUrl;
   static const String liveBaseURL = ApiConfig.apiBaseUrl;
@@ -33,7 +136,10 @@ class PaymentService {
   static Future<Map<String, dynamic>?> calculateDeliveryCost({
     required String reviewId,
     required String shipmentMethod,
-    required String address,
+    String? address,
+    String? pickupCountryId,
+    String? pickupStateId,
+    String? pickupLocationId,
   }) async {
     final token = await SecurePrefs.getToken();
     final url = Uri.parse(
@@ -42,7 +148,10 @@ class PaymentService {
 
     final payload = {
       "shipmentMethod": shipmentMethod,
-      "address": address,
+      if (address != null && address.isNotEmpty) "address": address,
+      if (pickupCountryId != null) "pickupCountryId": pickupCountryId,
+      if (pickupStateId != null) "pickupStateId": pickupStateId,
+      if (pickupLocationId != null) "pickupLocationId": pickupLocationId,
     };
 
     try {
@@ -75,12 +184,47 @@ class PaymentService {
     }
   }
 
+  /// Get full pickup hierarchy (country -> state -> locations)
+  static Future<List<PickupCountryOption>> getPickupHierarchy() async {
+    final token = await SecurePrefs.getToken();
+    final url = Uri.parse("$localBaseURL/deliveryRate/pickup/hierarchy");
+
+    try {
+      final headers = _buildHeaders(token);
+      final response = await http.get(url, headers: headers);
+
+      _logPaymentResponse(
+        label: "Pickup Hierarchy",
+        url: url,
+        payload: const <String, dynamic>{},
+        headers: headers,
+        response: response,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final decoded = jsonDecode(response.body);
+        final raw = (decoded["data"] as List?) ?? const [];
+        return raw
+            .whereType<Map>()
+            .map((e) => PickupCountryOption.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      }
+      return const [];
+    } catch (e) {
+      print("❌ Error fetching pickup hierarchy: $e");
+      return const [];
+    }
+  }
+
   /// Create Part Payment (Using unified endpoint with paymentStatus)
   static Future<Map<String, dynamic>?> createPartPayment({
     required String reviewId,
     required String amount,
     required String shipmentMethod,
     String? address,
+    String? pickupCountryId,
+    String? pickupStateId,
+    String? pickupLocationId,
   }) async {
     final token = await SecurePrefs.getToken();
     final url = Uri.parse(
@@ -92,6 +236,9 @@ class PaymentService {
       "shipmentMethod": shipmentMethod,
       "paymentStatus": "part payment",
       if (address != null) "address": address,
+      if (pickupCountryId != null) "pickupCountryId": pickupCountryId,
+      if (pickupStateId != null) "pickupStateId": pickupStateId,
+      if (pickupLocationId != null) "pickupLocationId": pickupLocationId,
     };
 
     try {
@@ -130,6 +277,9 @@ class PaymentService {
     required String amount,
     required String shipmentMethod,
     String? address,
+    String? pickupCountryId,
+    String? pickupStateId,
+    String? pickupLocationId,
   }) async {
     final token = await SecurePrefs.getToken();
     final url = Uri.parse(
@@ -141,6 +291,9 @@ class PaymentService {
       "shipmentMethod": shipmentMethod,
       "paymentStatus": "full payment",
       if (address != null) "address": address,
+      if (pickupCountryId != null) "pickupCountryId": pickupCountryId,
+      if (pickupStateId != null) "pickupStateId": pickupStateId,
+      if (pickupLocationId != null) "pickupLocationId": pickupLocationId,
     };
 
     try {
