@@ -6,7 +6,6 @@ import 'package:hog/TailorApp/Widgets/tailorAssignedCard.dart';
 import 'package:hog/TailorApp/Widgets/tailorModalsheetdetails.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/texts.dart';
-import 'package:intl/intl.dart';
 
 class AssignedMaterials extends StatefulWidget {
   const AssignedMaterials({super.key});
@@ -97,7 +96,12 @@ class _AssignedMaterialsState extends State<AssignedMaterials> {
                   final item = materials[index];
                   return TailorAssignedCard(
                     item: item,
-                    onTap: () => showTailorMaterialDetails(context, item),
+                    onTap:
+                        () => showTailorMaterialDetails(
+                          context,
+                          item,
+                          () => _loadMaterials(),
+                        ),
                   );
                 },
               ),

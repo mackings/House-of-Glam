@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
-import 'package:hog/App/Home/Model/offerModel.dart';
 import 'package:hog/App/Home/Views/Offers/Api/OfferService.dart';
 import 'package:hog/App/Home/Views/Offers/Model/offerThread.dart';
 import 'package:hog/components/thousandformat.dart';
@@ -595,8 +594,10 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
       );
     }
 
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.fromLTRB(12, 12, 12, 12 + bottomInset),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -673,10 +674,9 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
               ),
             )
           else
-            // Show Counter once for vendor, otherwise Accept/Reject
             Column(
               children: [
-                if (counterAvailable)
+                if (counterAvailable) ...[
                   SizedBox(
                     width: double.infinity,
                     height: 52,
@@ -701,73 +701,63 @@ class _OfferDetailV2State extends State<OfferDetailV2> {
                         ),
                       ),
                     ),
-                  )
-                else ...[
-                  // Primary Accept Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _handleAction("accepted"),
-                      icon: const Icon(
-                        Icons.check_circle_rounded,
-                        size: 20,
-                        color: Colors.white,
-                      ),
-                      label: const CustomText(
-                        "Accept Offer",
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF6B21A8),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                // Always allow direct accept/reject when it's your turn.
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _handleAction("accepted"),
+                    icon: const Icon(
+                      Icons.check_circle_rounded,
+                      size: 20,
+                      color: Color(0xFF6B21A8),
+                    ),
+                    label: const CustomText(
+                      "Accept Offer",
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF6B21A8),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFF6B21A8), width: 1.5),
+                      backgroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
-
-                  // Secondary Row: Reject
-                  Row(
-                    children: [
-                      // Reject Button (Outlined)
-                      Expanded(
-                        child: SizedBox(
-                          height: 48,
-                          child: OutlinedButton.icon(
-                            onPressed: () => _handleAction("rejected"),
-                            icon: const Icon(
-                              Icons.cancel_outlined,
-                              size: 18,
-                              color: Colors.black87,
-                            ),
-                            label: const CustomText(
-                              "Reject",
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black87,
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(
-                                color: Colors.grey.shade300,
-                                width: 1.5,
-                              ),
-                              backgroundColor: Colors.white,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                          ),
-                        ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _handleAction("rejected"),
+                    icon: const Icon(
+                      Icons.cancel_rounded,
+                      size: 20,
+                      color: Color(0xFFDC2626),
+                    ),
+                    label: const CustomText(
+                      "Reject Offer",
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFFDC2626),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFFDC2626), width: 1.5),
+                      backgroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                    ],
+                    ),
                   ),
-                ],
+                ),
               ],
             ),
         ],

@@ -4,7 +4,6 @@ import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/constants/api_config.dart';
 import 'package:hog/TailorApp/Home/Model/AssignedMaterial.dart';
 import 'package:hog/TailorApp/Home/Model/materialModel.dart';
-import 'package:hog/components/Navigator.dart';
 import 'package:hog/utils/error_handler.dart';
 import 'package:http/http.dart' as http;
 
@@ -122,8 +121,45 @@ class TailorHomeService {
     }
   }
 
-  // 🆕 Deliver Attire (Create Tracking)
-  Future<String> deliverAttire(String materialId) async {
+  // 🆕 Deliver Attire (Mark delivered via tracking number)
+  Future<String> deliverAttire(int trackingNumber) async {
+    try {
+      final token = await SecurePrefs.getToken();
+
+      final url = Uri.parse(
+        "$baseUrl/tracking/updateMaterialThroughTracking?trackingNumber=$trackingNumber",
+      );
+
+      final response = await http.put(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      print("➡️ PUT Request: $url");
+      print("⬅️ Response [${response.statusCode}]: ${response.body}");
+
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return responseData["message"] ?? "Attire delivered successfully";
+      } else {
+        final errorMessage = ErrorHandler.parseApiError(
+          response.body,
+          response.statusCode,
+        );
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      final friendlyMessage = ErrorHandler.getUserFriendlyMessage(e);
+      throw Exception(friendlyMessage);
+    }
+  }
+
+  // 🆕 Deliver Attire from assigned materials (creates tracking by material ID)
+  Future<String> deliverAssignedMaterial(String materialId) async {
     try {
       final token = await SecurePrefs.getToken();
 
@@ -145,7 +181,7 @@ class TailorHomeService {
       final responseData = json.decode(response.body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return responseData["message"] ?? "Attire delivered successfully";
+        return responseData["message"] ?? "Attire sent for delivery";
       } else {
         final errorMessage = ErrorHandler.parseApiError(
           response.body,

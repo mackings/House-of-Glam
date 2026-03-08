@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hog/TailorApp/Home/Model/AssignedMaterial.dart';
 import 'package:hog/constants/currencyHelper.dart';
-import 'package:intl/intl.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 
 
@@ -80,23 +78,21 @@ class TailorAssignedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final material = item.material;
     final displayAmounts = _getDisplayAmounts();
-    final totalAmount = displayAmounts['totalCost']!;
-    final paidAmount = displayAmounts['amountPaid']!;
+    final fallbackTotalAmount = displayAmounts['totalCost']!;
+    final payoutBaseRaw =
+        item.isInternationalVendor
+            ? ((item.materialTotalCostUSD ?? 0.0) +
+                (item.workmanshipTotalCostUSD ?? 0.0))
+            : (item.materialTotalCost + item.workmanshipTotalCost);
+    final payoutBase =
+        payoutBaseRaw > 0 ? payoutBaseRaw : fallbackTotalAmount;
+    final agreedAmount = payoutBase;
     final outstandingUserPayment = displayAmounts['amountToPay']! > 0;
-    final isPartPayment = item.status.toLowerCase() == "part payment";
-    final paidDisplayRaw =
-        isPartPayment || outstandingUserPayment ? paidAmount : totalAmount;
-    final isFullPayment = item.status.toLowerCase() == "full payment";
-    final paidDisplay =
-        isFullPayment ? totalAmount : (paidDisplayRaw * 0.80);
-    final payableBalanceRaw =
-        isPartPayment || outstandingUserPayment
-            ? displayAmounts['amountToPay']!
-            : totalAmount * 0.90;
+    final payableBalanceRaw = payoutBase * 0.90;
     final payableBalance = payableBalanceRaw.abs();
-    final balanceLabel =
-        isPartPayment || outstandingUserPayment ? "Balance" : "Payable Balance";
+    final balanceLabel = "Tailor Payable";
     final isFullyPaid = !outstandingUserPayment;
+    final paidDisplay = isFullyPaid ? agreedAmount : 0.0;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -373,7 +369,7 @@ class TailorAssignedCard extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    CurrencyHelper.formatAmount(totalAmount),
+                                    CurrencyHelper.formatAmount(agreedAmount),
                                     style: GoogleFonts.poppins(
                                       fontSize: 22,
                                       fontWeight: FontWeight.w700,

@@ -3,21 +3,18 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hog/TailorApp/Home/Api/TailorHomeservice.dart';
 import 'package:hog/TailorApp/Home/Model/AssignedMaterial.dart';
 import 'package:hog/TailorApp/Widgets/UpdateQuote.dart';
-import 'package:hog/components/Navigator.dart';
-import 'package:hog/components/button.dart';
-import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currencyHelper.dart';
 import 'package:intl/intl.dart';
 
 void showTailorMaterialDetails(
-  BuildContext context,
+  BuildContext parentContext,
   TailorAssignedMaterial item,
+  VoidCallback? onStatusChanged,
 ) {
-  final material = item.material;
   final service = TailorHomeService();
 
   showModalBottomSheet(
-    context: context,
+    context: parentContext,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder:
@@ -26,20 +23,57 @@ void showTailorMaterialDetails(
           initialChildSize: 0.9,
           minChildSize: 0.6,
           maxChildSize: 0.95,
-          builder: (context, scrollController) {
-            return StatefulBuilder(
-              builder: (context, setState) {
-                bool isLoading = false;
+          builder: (sheetContext, scrollController) {
+            bool isLoading = false;
+            TailorAssignedMaterial currentItem = item;
 
-                Future<void> _deliverAttire() async {
+            bool isRequestingStatus() => currentItem.isRequestingStatus;
+
+            String currentActionLabel() {
+              if (currentItem.isSentForDeliveryStatus) {
+                return "Attire Sent for Delivery";
+              }
+              if (isRequestingStatus()) return "Update Quotation";
+              return "Deliver Attire";
+            }
+
+            return StatefulBuilder(
+              builder: (modalContext, setState) {
+                final material = currentItem.material;
+
+                Future<void> deliverAttire() async {
                   try {
                     setState(() => isLoading = true);
-                    await service.deliverAttire(material.id);
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    final message = await service.deliverAssignedMaterial(
+                      material.id,
+                    );
+
+                    // Re-fetch and trust backend status/model flags.
+                    final refreshed = await service.fetchAssignedMaterials();
+                    TailorAssignedMaterial? updatedItem;
+                    for (final review in refreshed.reviews) {
+                      if (review.id == currentItem.id ||
+                          review.material.id == material.id) {
+                        updatedItem = review;
+                        break;
+                      }
+                    }
+
+                    setState(() {
+                      isLoading = false;
+                      if (updatedItem != null) {
+                        currentItem = updatedItem;
+                      }
+                    });
+                    onStatusChanged?.call();
+                    print("✅ Deliver attire success for materialId=${material.id}");
+                    if (Navigator.of(modalContext).canPop()) {
+                      Navigator.of(modalContext).pop();
+                    }
+                    ScaffoldMessenger.of(parentContext).showSnackBar(
                       SnackBar(
                         content: Text(
-                          "Attire delivered successfully!",
+                          message,
                           style: GoogleFonts.poppins(),
                         ),
                         backgroundColor: const Color(0xFF10B981),
@@ -49,9 +83,15 @@ void showTailorMaterialDetails(
                         ),
                       ),
                     );
-                  } catch (e) {
-                    Nav.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    setState(() => isLoading = false);
+                  } catch (e, stackTrace) {
+                    print("❌ Deliver attire failed for materialId=${material.id}: $e");
+                    print(stackTrace);
+                    setState(() => isLoading = false);
+                    if (Navigator.of(modalContext).canPop()) {
+                      Navigator.of(modalContext).pop();
+                    }
+                    ScaffoldMessenger.of(parentContext).showSnackBar(
                       SnackBar(
                         content: Text("❌ $e", style: GoogleFonts.poppins()),
                         backgroundColor: const Color(0xFFEF4444),
@@ -61,19 +101,25 @@ void showTailorMaterialDetails(
                         ),
                       ),
                     );
-                  } finally {
-                    setState(() => isLoading = false);
                   }
                 }
 
-                final displayAmounts = _getDisplayAmounts(item);
-                final totalAmount = displayAmounts['totalCost'] ?? 0.0;
-                final paidAmount = displayAmounts['amountPaid'] ?? 0.0;
-                final paidDisplay = paidAmount > 0 ? totalAmount : 0.0;
-                final payableBalance = totalAmount * 0.90;
+                final displayAmounts = _getDisplayAmounts(currentItem);
+                final fallbackTotalAmount = displayAmounts['totalCost'] ?? 0.0;
+                final payoutBaseRaw =
+                    currentItem.isInternationalVendor
+                        ? ((currentItem.materialTotalCostUSD ?? 0.0) +
+                            (currentItem.workmanshipTotalCostUSD ?? 0.0))
+                        : (currentItem.materialTotalCost +
+                            currentItem.workmanshipTotalCost);
+                final payoutBase =
+                    payoutBaseRaw > 0 ? payoutBaseRaw : fallbackTotalAmount;
+                final agreedAmount = payoutBase;
+                final payableBalance = payoutBase * 0.90;
                 final outstandingUserPayment =
                     (displayAmounts['amountToPay'] ?? 0.0) > 0;
-                final isFullyPaid = paidAmount > 0 && !outstandingUserPayment;
+                final isFullyPaid = !outstandingUserPayment;
+                final paidDisplay = isFullyPaid ? agreedAmount : 0.0;
 
                 return Container(
                   decoration: const BoxDecoration(
@@ -127,7 +173,7 @@ void showTailorMaterialDetails(
                                         ),
                                         decoration: BoxDecoration(
                                           color: _statusBackgroundColor(
-                                            item.status,
+                                            currentItem.status,
                                           ),
                                           borderRadius: BorderRadius.circular(
                                             12,
@@ -143,7 +189,7 @@ void showTailorMaterialDetails(
                                           ],
                                         ),
                                         child: Text(
-                                          _formatStatus(item.status),
+                                          _formatStatus(currentItem.status),
                                           style: GoogleFonts.poppins(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
@@ -299,18 +345,7 @@ void showTailorMaterialDetails(
                                             ],
                                           ),
                                           const SizedBox(height: 24),
-                                          _buildFinancialRow(
-                                            "Material Cost",
-                                            displayAmounts['materialCost']!,
-                                            false,
-                                          ),
-                                          const SizedBox(height: 12),
-                                          _buildFinancialRow(
-                                            "Workmanship",
-                                            displayAmounts['workmanshipCost']!,
-                                            false,
-                                          ),
-                                          const SizedBox(height: 16),
+                                          const SizedBox(height: 4),
                                           Container(
                                             height: 1,
                                             decoration: BoxDecoration(
@@ -326,7 +361,7 @@ void showTailorMaterialDetails(
                                           const SizedBox(height: 16),
                                           _buildFinancialRow(
                                             "Total",
-                                            totalAmount,
+                                            agreedAmount,
                                             true,
                                           ),
                                           const SizedBox(height: 10),
@@ -367,9 +402,7 @@ void showTailorMaterialDetails(
                                               const SizedBox(width: 12),
                                               Expanded(
                                                 child: _buildPaymentStatus(
-                                                  outstandingUserPayment
-                                                      ? "Balance"
-                                                      : "Payable Balance",
+                                                  "Tailor Payable",
                                                   payableBalance,
                                                   isFullyPaid
                                                       ? Colors.white
@@ -491,14 +524,14 @@ void showTailorMaterialDetails(
                                         color: Colors.transparent,
                                         child: InkWell(
                                           onTap:
-                                              isLoading
+                                              (isLoading ||
+                                                      currentItem
+                                                          .isSentForDeliveryStatus)
                                                   ? null
                                                   : () {
-                                                    if (item.status
-                                                            .toLowerCase() ==
-                                                        "requesting") {
+                                                    if (isRequestingStatus()) {
                                                       showModalBottomSheet(
-                                                        context: context,
+                                                        context: modalContext,
                                                         isScrollControlled:
                                                             true,
                                                         backgroundColor:
@@ -512,7 +545,7 @@ void showTailorMaterialDetails(
                                                                 ),
                                                       );
                                                     } else {
-                                                      _deliverAttire();
+                                                      deliverAttire();
                                                     }
                                                   },
                                           borderRadius: BorderRadius.circular(
@@ -531,10 +564,7 @@ void showTailorMaterialDetails(
                                                           ),
                                                     )
                                                     : Text(
-                                                      item.status.toLowerCase() ==
-                                                              "requesting"
-                                                          ? "Update Quotation"
-                                                          : "Deliver Attire",
+                                                      currentActionLabel(),
                                                       style:
                                                           GoogleFonts.poppins(
                                                             fontSize: 16,
@@ -808,6 +838,12 @@ Color _statusBackgroundColor(String status) {
       return const Color(0xFF6B7280);
     case "requesting":
       return const Color(0xFF3B82F6);
+    case "sent for delivery":
+    case "attire sent for delivery":
+    case "for delivery":
+    case "delivery":
+    case "delivered":
+      return const Color(0xFF10B981);
     default:
       return const Color(0xFF6B7280);
   }

@@ -35,16 +35,20 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
   String deliveryMode = "address";
 
   final TextEditingController amountController = TextEditingController();
-  final TextEditingController stateController = TextEditingController();
+  final TextEditingController addressLine1Controller = TextEditingController();
+  final TextEditingController addressLine2Controller = TextEditingController();
   final TextEditingController cityController = TextEditingController();
+  final TextEditingController regionController = TextEditingController();
+  final TextEditingController postalCodeController = TextEditingController();
   CountryOption? selectedCountry = allCountries.firstWhere(
     (country) => country.isoCode == 'NG',
     orElse: () => allCountries.first,
   );
   bool isLoading = false;
   bool showCountryError = false;
-  bool showStateError = false;
+  bool showAddressLine1Error = false;
   bool showCityError = false;
+  bool showRegionError = false;
   bool showPickupCountryError = false;
   bool showPickupStateError = false;
   bool showPickupLocationError = false;
@@ -178,8 +182,11 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
   @override
   void dispose() {
     amountController.dispose();
-    stateController.dispose();
+    addressLine1Controller.dispose();
+    addressLine2Controller.dispose();
     cityController.dispose();
+    regionController.dispose();
+    postalCodeController.dispose();
     super.dispose();
   }
 
@@ -286,30 +293,54 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
         }
       } else {
         final selected = selectedCountry;
-        final state = stateController.text.trim();
+        final addressLine1 = addressLine1Controller.text.trim();
+        final addressLine2 = addressLine2Controller.text.trim();
         final city = cityController.text.trim();
-        addressToSend = selected == null ? '' : '${selected.name}, $state, $city';
+        final region = regionController.text.trim();
+        final postalCode = postalCodeController.text.trim();
 
-        if (selected == null || state.isEmpty || city.isEmpty) {
+        addressToSend =
+            selected == null
+                ? ''
+                : [
+                  addressLine1,
+                  if (addressLine2.isNotEmpty) addressLine2,
+                  city,
+                  region,
+                  if (postalCode.isNotEmpty) postalCode,
+                  selected.name,
+                ].join(', ');
+
+        if (selected == null ||
+            addressLine1.isEmpty ||
+            city.isEmpty ||
+            region.isEmpty) {
           setState(() {
             isLoading = false;
             showCountryError = selected == null;
-            showStateError = state.isEmpty;
+            showAddressLine1Error = addressLine1.isEmpty;
             showCityError = city.isEmpty;
+            showRegionError = region.isEmpty;
           });
           print('❌ ERROR: Delivery address fields are incomplete');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Please select country and enter state/city"),
+              content: Text(
+                "Please complete country, address line 1, city and state/region",
+              ),
             ),
           );
           return;
         }
-        if (showCountryError || showStateError || showCityError) {
+        if (showCountryError ||
+            showAddressLine1Error ||
+            showCityError ||
+            showRegionError) {
           setState(() {
             showCountryError = false;
-            showStateError = false;
+            showAddressLine1Error = false;
             showCityError = false;
+            showRegionError = false;
           });
         }
       }
@@ -632,9 +663,10 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
             right: 16,
             top: 36,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
               const CustomText(
                 "Choose a Payment Option",
                 fontSize: 18,
@@ -797,7 +829,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: const CustomText(
-                        "Delivery Address (Country, State, City)",
+                        "Delivery Address",
                         fontSize: 16,
                       ),
                     ),
@@ -850,12 +882,15 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                       ),
                     const SizedBox(height: 10),
                     TextFormField(
-                      controller: stateController,
+                      controller: addressLine1Controller,
                       decoration: InputDecoration(
-                        hintText: "Enter state",
+                        hintText: "Address line 1 (Street, House/Building No.)",
                         filled: true,
                         fillColor: Colors.grey.shade50,
-                        errorText: showStateError ? "State is required" : null,
+                        errorText:
+                            showAddressLine1Error
+                                ? "Address line 1 is required"
+                                : null,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(color: Colors.grey.shade300),
@@ -878,16 +913,38 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                         ),
                       ),
                       onChanged: (value) {
-                        if (showStateError && value.trim().isNotEmpty) {
-                          setState(() => showStateError = false);
+                        if (showAddressLine1Error && value.trim().isNotEmpty) {
+                          setState(() => showAddressLine1Error = false);
                         }
                       },
                     ),
                     const SizedBox(height: 10),
                     TextFormField(
+                      controller: addressLine2Controller,
+                      decoration: InputDecoration(
+                        hintText:
+                            "Address line 2 (Apartment, Suite, Landmark) - Optional",
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
                       controller: cityController,
                       decoration: InputDecoration(
-                        hintText: "Enter city",
+                        hintText: "City / Town",
                         filled: true,
                         fillColor: Colors.grey.shade50,
                         errorText: showCityError ? "City is required" : null,
@@ -917,6 +974,65 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                           setState(() => showCityError = false);
                         }
                       },
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: regionController,
+                      decoration: InputDecoration(
+                        hintText: "State / Province / Region",
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        errorText:
+                            showRegionError
+                                ? "State / Province / Region is required"
+                                : null,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.redAccent),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.redAccent),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        if (showRegionError && value.trim().isNotEmpty) {
+                          setState(() => showRegionError = false);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: postalCodeController,
+                      decoration: InputDecoration(
+                        hintText: "Postal / ZIP code (Optional)",
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
+                        ),
+                      ),
                     ),
                   ] else ...[
                     const CustomText("Pickup Location", fontSize: 16),
@@ -1107,7 +1223,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                   CustomText(
                     deliveryMode == "pickup"
                         ? "Select admin-configured pickup destination."
-                        : "Required for all payments. Country, state, and city will be sent as delivery address.",
+                        : "Use your full home address. Country, address lines, city, state/region and postal code are sent for delivery.",
                     fontSize: 11,
                     color: Colors.black54,
                   ),
@@ -1120,8 +1236,9 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                 title: "Make Payment",
                 onPressed: _makePayment,
               ),
-              const SizedBox(height: 40),
-            ],
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
 

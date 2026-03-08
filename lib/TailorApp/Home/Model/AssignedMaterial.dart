@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-import 'dart:convert';
 
 class TailorAssignedMaterialsResponse {
   final bool success;
@@ -47,6 +44,7 @@ class TailorAssignedMaterial {
   final DateTime? reminderDate;
   final String? comment;
   final String status;
+  final int? trackingNumber;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -71,6 +69,7 @@ class TailorAssignedMaterial {
     this.reminderDate,
     this.comment,
     required this.status,
+    this.trackingNumber,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -90,6 +89,32 @@ class TailorAssignedMaterial {
       if (value is double) return value;
       if (value is int) return value.toDouble();
       if (value is String) return double.tryParse(value);
+      return null;
+    }
+
+    int? parseInt(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return value;
+      if (value is double) return value.toInt();
+      if (value is String) return int.tryParse(value);
+      return null;
+    }
+
+    int? parseTrackingNumber(Map<String, dynamic> payload) {
+      final direct = parseInt(payload['trackingNumber']);
+      if (direct != null) return direct;
+
+      final trackingId = payload['trackingId'];
+      if (trackingId is Map<String, dynamic>) {
+        final nested = parseInt(trackingId['trackingNumber']);
+        if (nested != null) return nested;
+      }
+
+      final tracking = payload['tracking'];
+      if (tracking is Map<String, dynamic>) {
+        return parseInt(tracking['trackingNumber']);
+      }
+
       return null;
     }
 
@@ -120,9 +145,26 @@ class TailorAssignedMaterial {
               : null,
       comment: json['comment'],
       status: json['status'] ?? '',
+      trackingNumber: parseTrackingNumber(json),
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
     );
+  }
+
+  String get normalizedStatus => status.trim().toLowerCase();
+
+  bool get isRequestingStatus => normalizedStatus == 'requesting';
+
+  bool get isSentForDeliveryStatus {
+    const sentStatuses = {
+      'sent for delivery',
+      'attire sent for delivery',
+      'for delivery',
+      'delivery',
+      'delivered',
+      'delivered attire',
+    };
+    return material.isDelivered || sentStatuses.contains(normalizedStatus);
   }
 }
 
