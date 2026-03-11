@@ -3,8 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hog/TailorApp/Home/Model/AssignedMaterial.dart';
 import 'package:hog/constants/currencyHelper.dart';
 
-
-
 class TailorAssignedCard extends StatelessWidget {
   final TailorAssignedMaterial item;
   final VoidCallback onTap;
@@ -42,11 +40,7 @@ class TailorAssignedCard extends StatelessWidget {
           (item.amountToPayUSD ?? 0.0) > 0
               ? item.amountToPayUSD!
               : (total > 0 && paid > 0 ? (total - paid) : 0.0);
-      return {
-        'totalCost': total,
-        'amountPaid': paid,
-        'amountToPay': toPay,
-      };
+      return {'totalCost': total, 'amountPaid': paid, 'amountToPay': toPay};
     } else {
       final material = item.materialTotalCost;
       final workmanship = item.workmanshipTotalCost;
@@ -66,11 +60,7 @@ class TailorAssignedCard extends StatelessWidget {
           (item.amountToPay ?? 0.0) > 0
               ? item.amountToPay!
               : (total > 0 && paid > 0 ? (total - paid) : 0.0);
-      return {
-        'totalCost': total,
-        'amountPaid': paid,
-        'amountToPay': toPay,
-      };
+      return {'totalCost': total, 'amountPaid': paid, 'amountToPay': toPay};
     }
   }
 
@@ -78,21 +68,12 @@ class TailorAssignedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final material = item.material;
     final displayAmounts = _getDisplayAmounts();
-    final fallbackTotalAmount = displayAmounts['totalCost']!;
-    final payoutBaseRaw =
-        item.isInternationalVendor
-            ? ((item.materialTotalCostUSD ?? 0.0) +
-                (item.workmanshipTotalCostUSD ?? 0.0))
-            : (item.materialTotalCost + item.workmanshipTotalCost);
-    final payoutBase =
-        payoutBaseRaw > 0 ? payoutBaseRaw : fallbackTotalAmount;
-    final agreedAmount = payoutBase;
+    final agreedAmount = item.resolvedVendorBaseTotal;
     final outstandingUserPayment = displayAmounts['amountToPay']! > 0;
-    final payableBalanceRaw = payoutBase * 0.90;
-    final payableBalance = payableBalanceRaw.abs();
+    final payableBalance = item.resolvedDesignerPayableTotal;
     final balanceLabel = "Tailor Payable";
     final isFullyPaid = !outstandingUserPayment;
-    final paidDisplay = isFullyPaid ? agreedAmount : 0.0;
+    final paidDisplay = isFullyPaid ? payableBalance : 0.0;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -326,9 +307,7 @@ class TailorAssignedCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: const Color(0xFFF8FAFC),
                         borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: const Color(0xFFE2E8F0),
-                        ),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0xFF6B21A8).withOpacity(0.08),
@@ -345,8 +324,9 @@ class TailorAssignedCard extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF7C3AED)
-                                      .withOpacity(0.12),
+                                  color: const Color(
+                                    0xFF7C3AED,
+                                  ).withOpacity(0.12),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
@@ -386,9 +366,10 @@ class TailorAssignedCard extends StatelessWidget {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: isFullyPaid
-                                      ? const Color(0xFFDCFCE7)
-                                      : const Color(0xFFFFEDD5),
+                                  color:
+                                      isFullyPaid
+                                          ? const Color(0xFFDCFCE7)
+                                          : const Color(0xFFFFEDD5),
                                   borderRadius: BorderRadius.circular(999),
                                 ),
                                 child: Text(
@@ -396,19 +377,17 @@ class TailorAssignedCard extends StatelessWidget {
                                   style: GoogleFonts.poppins(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
-                                    color: isFullyPaid
-                                        ? const Color(0xFF16A34A)
-                                        : const Color(0xFFEA580C),
+                                    color:
+                                        isFullyPaid
+                                            ? const Color(0xFF16A34A)
+                                            : const Color(0xFFEA580C),
                                   ),
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 16),
-                          Container(
-                            height: 1,
-                            color: const Color(0xFFE2E8F0),
-                          ),
+                          Container(height: 1, color: const Color(0xFFE2E8F0)),
                           const SizedBox(height: 16),
                           Row(
                             children: [

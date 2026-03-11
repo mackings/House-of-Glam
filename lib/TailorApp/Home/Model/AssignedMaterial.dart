@@ -1,4 +1,3 @@
-
 class TailorAssignedMaterialsResponse {
   final bool success;
   final int count;
@@ -38,6 +37,14 @@ class TailorAssignedMaterial {
   final double? totalCostUSD;
   final double? amountPaidUSD;
   final double? amountToPayUSD;
+  final double? tax;
+  final double? commission;
+  final double? vendorBaseTotal;
+  final double? userPayableTotal;
+  final double? designerPayableTotal;
+  final double? vendorBaseTotalUSD;
+  final double? userPayableTotalUSD;
+  final double? designerPayableTotalUSD;
   final bool isInternationalVendor;
   final String? country;
   final DateTime? deliveryDate;
@@ -63,6 +70,14 @@ class TailorAssignedMaterial {
     this.totalCostUSD,
     this.amountPaidUSD,
     this.amountToPayUSD,
+    this.tax,
+    this.commission,
+    this.vendorBaseTotal,
+    this.userPayableTotal,
+    this.designerPayableTotal,
+    this.vendorBaseTotalUSD,
+    this.userPayableTotalUSD,
+    this.designerPayableTotalUSD,
     this.isInternationalVendor = false,
     this.country,
     this.deliveryDate,
@@ -89,6 +104,14 @@ class TailorAssignedMaterial {
       if (value is double) return value;
       if (value is int) return value.toDouble();
       if (value is String) return double.tryParse(value);
+      return null;
+    }
+
+    double? parseFirstDouble(Map<String, dynamic> payload, List<String> keys) {
+      for (final key in keys) {
+        final value = parseDouble(payload[key]);
+        if (value != null) return value;
+      }
       return null;
     }
 
@@ -133,6 +156,31 @@ class TailorAssignedMaterial {
       totalCostUSD: parseDouble(json['totalCostUSD']),
       amountPaidUSD: parseDouble(json['amountPaidUSD']),
       amountToPayUSD: parseDouble(json['amountToPayUSD']),
+      tax: parseDouble(json['tax']),
+      commission: parseDouble(json['commission']),
+      vendorBaseTotal: parseFirstDouble(json, [
+        'vendorBaseTotal',
+        'payoutBaseAmount',
+      ]),
+      userPayableTotal: parseFirstDouble(json, ['userPayableTotal']),
+      designerPayableTotal: parseFirstDouble(json, [
+        'designerPayableTotal',
+        'payoutNetAmount',
+        'payoutNetToDesigner',
+        'tailorPayable',
+        'vendorPayableTotal',
+        'netToDesigner',
+      ]),
+      vendorBaseTotalUSD: parseFirstDouble(json, ['vendorBaseTotalUSD']),
+      userPayableTotalUSD: parseFirstDouble(json, ['userPayableTotalUSD']),
+      designerPayableTotalUSD: parseFirstDouble(json, [
+        'designerPayableTotalUSD',
+        'payoutNetAmountUSD',
+        'payoutNetToDesignerUSD',
+        'tailorPayableUSD',
+        'vendorPayableTotalUSD',
+        'netToDesignerUSD',
+      ]),
       isInternationalVendor: json['isInternationalVendor'] ?? false,
       country: json['country'],
       deliveryDate:
@@ -165,6 +213,55 @@ class TailorAssignedMaterial {
       'delivered attire',
     };
     return material.isDelivered || sentStatuses.contains(normalizedStatus);
+  }
+
+  double get fallbackDisplayTotal {
+    final materialCost =
+        isInternationalVendor
+            ? (materialTotalCostUSD ?? 0.0)
+            : materialTotalCost;
+    final workmanshipCost =
+        isInternationalVendor
+            ? (workmanshipTotalCostUSD ?? 0.0)
+            : workmanshipTotalCost;
+    final explicitTotal =
+        isInternationalVendor ? (totalCostUSD ?? 0.0) : totalCost;
+    final paid =
+        isInternationalVendor ? (amountPaidUSD ?? 0.0) : (amountPaid ?? 0.0);
+    final toPay =
+        isInternationalVendor ? (amountToPayUSD ?? 0.0) : (amountToPay ?? 0.0);
+
+    if (explicitTotal > 0) return explicitTotal;
+    if ((materialCost + workmanshipCost) > 0) {
+      return materialCost + workmanshipCost;
+    }
+    return paid + toPay;
+  }
+
+  double get resolvedVendorBaseTotal {
+    final explicit =
+        isInternationalVendor
+            ? (vendorBaseTotalUSD ?? vendorBaseTotal)
+            : vendorBaseTotal;
+    if (explicit != null && explicit > 0) return explicit;
+    return fallbackDisplayTotal;
+  }
+
+  double get resolvedDesignerPayableTotal {
+    final explicit =
+        isInternationalVendor
+            ? (designerPayableTotalUSD ?? designerPayableTotal)
+            : designerPayableTotal;
+    if (explicit != null && explicit > 0) return explicit;
+
+    final baseTotal = resolvedVendorBaseTotal;
+    final fee = commission ?? 0.0;
+    if (baseTotal > 0 && fee > 0) {
+      final net = baseTotal - fee;
+      if (net > 0) return net;
+    }
+
+    return (baseTotal * 0.90).abs();
   }
 }
 

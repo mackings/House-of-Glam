@@ -66,16 +66,15 @@ void showTailorMaterialDetails(
                       }
                     });
                     onStatusChanged?.call();
-                    print("✅ Deliver attire success for materialId=${material.id}");
+                    print(
+                      "✅ Deliver attire success for materialId=${material.id}",
+                    );
                     if (Navigator.of(modalContext).canPop()) {
                       Navigator.of(modalContext).pop();
                     }
                     ScaffoldMessenger.of(parentContext).showSnackBar(
                       SnackBar(
-                        content: Text(
-                          message,
-                          style: GoogleFonts.poppins(),
-                        ),
+                        content: Text(message, style: GoogleFonts.poppins()),
                         backgroundColor: const Color(0xFF10B981),
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(
@@ -85,7 +84,9 @@ void showTailorMaterialDetails(
                     );
                     setState(() => isLoading = false);
                   } catch (e, stackTrace) {
-                    print("❌ Deliver attire failed for materialId=${material.id}: $e");
+                    print(
+                      "❌ Deliver attire failed for materialId=${material.id}: $e",
+                    );
                     print(stackTrace);
                     setState(() => isLoading = false);
                     if (Navigator.of(modalContext).canPop()) {
@@ -105,21 +106,12 @@ void showTailorMaterialDetails(
                 }
 
                 final displayAmounts = _getDisplayAmounts(currentItem);
-                final fallbackTotalAmount = displayAmounts['totalCost'] ?? 0.0;
-                final payoutBaseRaw =
-                    currentItem.isInternationalVendor
-                        ? ((currentItem.materialTotalCostUSD ?? 0.0) +
-                            (currentItem.workmanshipTotalCostUSD ?? 0.0))
-                        : (currentItem.materialTotalCost +
-                            currentItem.workmanshipTotalCost);
-                final payoutBase =
-                    payoutBaseRaw > 0 ? payoutBaseRaw : fallbackTotalAmount;
-                final agreedAmount = payoutBase;
-                final payableBalance = payoutBase * 0.90;
+                final agreedAmount = currentItem.resolvedVendorBaseTotal;
+                final payableBalance = currentItem.resolvedDesignerPayableTotal;
                 final outstandingUserPayment =
                     (displayAmounts['amountToPay'] ?? 0.0) > 0;
                 final isFullyPaid = !outstandingUserPayment;
-                final paidDisplay = isFullyPaid ? agreedAmount : 0.0;
+                final paidDisplay = isFullyPaid ? payableBalance : 0.0;
 
                 return Container(
                   decoration: const BoxDecoration(
@@ -277,13 +269,15 @@ void showTailorMaterialDetails(
                                                 bottom: 12,
                                               ),
                                               decoration: BoxDecoration(
-                                                color: const Color(0xFFF59E0B)
-                                                    .withOpacity(0.12),
+                                                color: const Color(
+                                                  0xFFF59E0B,
+                                                ).withOpacity(0.12),
                                                 borderRadius:
                                                     BorderRadius.circular(12),
                                                 border: Border.all(
-                                                  color: const Color(0xFFF59E0B)
-                                                      .withOpacity(0.4),
+                                                  color: const Color(
+                                                    0xFFF59E0B,
+                                                  ).withOpacity(0.4),
                                                 ),
                                               ),
                                               child: Row(
@@ -297,13 +291,15 @@ void showTailorMaterialDetails(
                                                   Expanded(
                                                     child: Text(
                                                       "User has an outstanding payment to complete.",
-                                                      style: GoogleFonts.poppins(
-                                                        fontSize: 12,
-                                                        color:
-                                                            const Color(0xFF92400E),
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                      ),
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                            fontSize: 12,
+                                                            color: const Color(
+                                                              0xFF92400E,
+                                                            ),
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
                                                     ),
                                                   ),
                                                 ],
@@ -601,9 +597,7 @@ Map<String, double> _getDisplayAmounts(TailorAssignedMaterial item) {
   final countryCode = item.country?.trim().toUpperCase();
   final isInternational =
       item.isInternationalVendor ||
-      (countryCode != null &&
-          countryCode != 'NG' &&
-          countryCode != 'NIGERIA');
+      (countryCode != null && countryCode != 'NG' && countryCode != 'NIGERIA');
 
   if (isInternational) {
     final material = item.materialTotalCostUSD ?? 0.0;

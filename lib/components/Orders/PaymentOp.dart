@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hog/App/Banks/Api/BamkService.dart';
@@ -45,6 +47,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     orElse: () => allCountries.first,
   );
   bool isLoading = false;
+  bool isCalculatingDelivery = false;
   bool showCountryError = false;
   bool showAddressLine1Error = false;
   bool showCityError = false;
@@ -58,6 +61,9 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
   PickupCountryOption? selectedPickupCountry;
   PickupStateOption? selectedPickupState;
   PickupLocationOption? selectedPickupLocation;
+  Timer? _deliveryQuoteDebounce;
+  String? _deliveryCostLabel;
+  String? _confirmedDeliveryQuoteKey;
 
   bool _isUserInNigeria = true;
 
@@ -130,11 +136,12 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
         userCountry?.toUpperCase() == 'NIGERIA' ||
         userCountry?.toUpperCase() == 'NG';
     if (!mounted) return;
-    final matchedCountry = allCountries.where((country) {
-      final normalized = userCountry?.trim().toUpperCase() ?? '';
-      return country.name.toUpperCase() == normalized ||
-          country.isoCode.toUpperCase() == normalized;
-    }).toList();
+    final matchedCountry =
+        allCountries.where((country) {
+          final normalized = userCountry?.trim().toUpperCase() ?? '';
+          return country.name.toUpperCase() == normalized ||
+              country.isoCode.toUpperCase() == normalized;
+        }).toList();
     setState(() {
       _isUserInNigeria = isNigeria;
       if (matchedCountry.isNotEmpty) {
@@ -179,8 +186,267 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     );
   }
 
+  void _clearDeliveryQuote() {
+    _deliveryQuoteDebounce?.cancel();
+    if (!mounted) return;
+    setState(() {
+      isCalculatingDelivery = false;
+      _deliveryCostLabel = null;
+      _confirmedDeliveryQuoteKey = null;
+    });
+  }
+
+  bool _hasValidAddressSelection() {
+    return selectedCountry != null &&
+        addressLine1Controller.text.trim().isNotEmpty &&
+        cityController.text.trim().isNotEmpty &&
+        regionController.text.trim().isNotEmpty;
+  }
+
+  bool _hasValidPickupSelection() {
+    return selectedPickupCountry != null &&
+        selectedPickupState != null &&
+        selectedPickupLocation != null;
+  }
+
+  String _buildAddressForQuote() {
+    final selected = selectedCountry;
+    if (selected == null) return '';
+
+    final addressLine1 = addressLine1Controller.text.trim();
+    final addressLine2 = addressLine2Controller.text.trim();
+    final city = cityController.text.trim();
+    final region = regionController.text.trim();
+    final postalCode = postalCodeController.text.trim();
+
+    return [
+      addressLine1,
+      if (addressLine2.isNotEmpty) addressLine2,
+      city,
+      region,
+      if (postalCode.isNotEmpty) postalCode,
+      selected.name,
+    ].join(', ');
+  }
+
+  double? _extractDeliveryCost(Map<String, dynamic> payload) {
+    final candidates = [
+      payload['deliveryCost'],
+      payload['cost'],
+      payload['amount'],
+      payload['fee'],
+      payload['deliveryFee'],
+      payload['data'] is Map<String, dynamic>
+          ? (payload['data'] as Map<String, dynamic>)['deliveryCost']
+          : null,
+      payload['data'] is Map<String, dynamic>
+          ? (payload['data'] as Map<String, dynamic>)['cost']
+          : null,
+      payload['data'] is Map<String, dynamic>
+          ? (payload['data'] as Map<String, dynamic>)['amount']
+          : null,
+      payload['data'] is Map<String, dynamic>
+          ? (payload['data'] as Map<String, dynamic>)['fee']
+          : null,
+      payload['data'] is Map<String, dynamic>
+          ? (payload['data'] as Map<String, dynamic>)['deliveryFee']
+          : null,
+    ];
+
+    for (final candidate in candidates) {
+      if (candidate is num) return candidate.toDouble();
+      if (candidate is String) {
+        final parsed = double.tryParse(candidate);
+        if (parsed != null) return parsed;
+      }
+    }
+    return null;
+  }
+
+  void _scheduleDeliveryCostRefresh() {
+    _deliveryQuoteDebounce?.cancel();
+
+    final canQuote =
+        deliveryMode == "pickup"
+            ? _hasValidPickupSelection()
+            : _hasValidAddressSelection();
+
+    if (!canQuote) {
+      _clearDeliveryQuote();
+      return;
+    }
+
+    _deliveryQuoteDebounce = Timer(const Duration(milliseconds: 500), () {
+      _refreshDeliveryCost();
+    });
+  }
+
+  String _currentDeliveryQuoteKey() {
+    if (deliveryMode == "pickup") {
+      return [
+        shipment,
+        deliveryMode,
+        selectedPickupCountry?.id ?? '',
+        selectedPickupState?.id ?? '',
+        selectedPickupLocation?.id ?? '',
+      ].join('|');
+    }
+
+    return [
+      shipment,
+      deliveryMode,
+      selectedCountry?.isoCode ?? '',
+      addressLine1Controller.text.trim(),
+      addressLine2Controller.text.trim(),
+      cityController.text.trim(),
+      regionController.text.trim(),
+      postalCodeController.text.trim(),
+    ].join('|');
+  }
+
+  Future<bool> _showDeliveryFeeSheet(String amountLabel) async {
+    if (!mounted) return false;
+
+    final result = await showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder:
+          (sheetContext) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 42,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const CustomText(
+                    "Delivery Fee",
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  const SizedBox(height: 8),
+                  CustomText(
+                    "Estimated delivery cost: $amountLabel",
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(sheetContext, false),
+                          child: const Text("Close"),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: CustomButton(
+                          title: "Continue",
+                          onPressed: () => Navigator.pop(sheetContext, true),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+    );
+
+    return result == true;
+  }
+
+  Future<void> _refreshDeliveryCost() async {
+    final canQuote =
+        deliveryMode == "pickup"
+            ? _hasValidPickupSelection()
+            : _hasValidAddressSelection();
+    if (!canQuote) {
+      _clearDeliveryQuote();
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        isCalculatingDelivery = true;
+      });
+    }
+
+    final response = await PaymentService.calculateDeliveryCost(
+      reviewId: widget.review.id,
+      shipmentMethod: shipment,
+      address: deliveryMode == "address" ? _buildAddressForQuote() : null,
+      pickupCountryId:
+          deliveryMode == "pickup" ? selectedPickupCountry?.id : null,
+      pickupStateId: deliveryMode == "pickup" ? selectedPickupState?.id : null,
+      pickupLocationId:
+          deliveryMode == "pickup" ? selectedPickupLocation?.id : null,
+    );
+
+    if (!mounted) return;
+
+    final cost = response == null ? null : _extractDeliveryCost(response);
+
+    setState(() {
+      isCalculatingDelivery = false;
+      _deliveryCostLabel =
+          cost != null ? CurrencyHelper.formatAmount(cost) : null;
+    });
+  }
+
+  Future<bool> _showDeliveryFeeBeforePaymentIfNeeded() async {
+    final canQuote =
+        deliveryMode == "pickup"
+            ? _hasValidPickupSelection()
+            : _hasValidAddressSelection();
+
+    if (!canQuote) {
+      return true;
+    }
+
+    final quoteKey = _currentDeliveryQuoteKey();
+    if (_confirmedDeliveryQuoteKey == quoteKey && _deliveryCostLabel != null) {
+      return true;
+    }
+
+    await _refreshDeliveryCost();
+    if (!mounted) return false;
+
+    if (_deliveryCostLabel == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Unable to estimate delivery fee. Please try again."),
+        ),
+      );
+      return false;
+    }
+
+    final shouldProceed = await _showDeliveryFeeSheet(_deliveryCostLabel!);
+    if (!mounted || !shouldProceed) return false;
+
+    setState(() {
+      _confirmedDeliveryQuoteKey = quoteKey;
+    });
+    return true;
+  }
+
   @override
   void dispose() {
+    _deliveryQuoteDebounce?.cancel();
     amountController.dispose();
     addressLine1Controller.dispose();
     addressLine2Controller.dispose();
@@ -191,6 +457,12 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
   }
 
   Future<void> _makePayment() async {
+    final shouldContinue = await _showDeliveryFeeBeforePaymentIfNeeded();
+    if (!shouldContinue || !mounted) return;
+    await _processPayment();
+  }
+
+  Future<void> _processPayment() async {
     setState(() => isLoading = true);
 
     try {
@@ -252,7 +524,9 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
         final pickupState = selectedPickupState;
         final pickupLocation = selectedPickupLocation;
 
-        if (pickupCountry == null || pickupState == null || pickupLocation == null) {
+        if (pickupCountry == null ||
+            pickupState == null ||
+            pickupLocation == null) {
           setState(() {
             isLoading = false;
             showPickupCountryError = pickupCountry == null;
@@ -262,7 +536,9 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
           print('❌ ERROR: Pickup fields are incomplete');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Please select pickup country, state, and location"),
+              content: Text(
+                "Please select pickup country, state, and location",
+              ),
             ),
           );
           return;
@@ -275,7 +551,9 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
 
         // If duplicate states were merged in UI, resolve the actual state ID by location.
         for (final state in pickupCountry.states) {
-          final hasLocation = state.locations.any((l) => l.id == pickupLocation.id);
+          final hasLocation = state.locations.any(
+            (l) => l.id == pickupLocation.id,
+          );
           if (hasLocation) {
             pickupStateId = state.id;
             break;
@@ -667,575 +945,605 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-              const CustomText(
-                "Choose a Payment Option",
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-              const SizedBox(height: 12),
+                const CustomText(
+                  "Choose a Payment Option",
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                const SizedBox(height: 12),
 
-              if (isInternationalVendor)
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.payment,
-                        color: Colors.blue.shade700,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: CustomText(
-                          "International vendor - Payment via Stripe",
-                          fontSize: 12,
-                          color: Colors.blue.shade900,
+                if (isInternationalVendor)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.blue.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.payment,
+                          color: Colors.blue.shade700,
+                          size: 20,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: CustomText(
+                            "International vendor - Payment via Stripe",
+                            fontSize: 12,
+                            color: Colors.blue.shade900,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
-              if (isInternationalVendor) const SizedBox(height: 12),
+                if (isInternationalVendor) const SizedBox(height: 12),
 
-              if (widget.allowPaymentTypeSwitch)
-                Row(
-                  children: [
-                    Radio(
-                      value: "full",
-                      groupValue: paymentType,
-                      onChanged:
-                          (val) => setState(() => paymentType = val as String),
-                    ),
-                    const Text("Full Payment"),
-                    Radio(
-                      value: "part",
-                      groupValue: paymentType,
-                      onChanged: (val) {
-                        setState(() {
-                          paymentType = val as String;
-                          _autoFillHalfPayment();
-                        });
-                      },
-                    ),
-                    const Text("Part Payment"),
-                  ],
-                ),
-
-              if (paymentType == "part") ...[
-                CustomTextField(
-                  title: _isUserInNigeria ? "Amount (NGN)" : "Amount (USD)",
-                  fieldKey: "amount",
-                  hintText:
-                      _isUserInNigeria
-                          ? "Enter amount e.g., 23,000"
-                          : "Enter amount e.g., 120.50",
-                  controller: amountController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                      _isUserInNigeria
-                          ? RegExp(r'^[0-9,]*$')
-                          : RegExp(r'^[0-9,]*\.?\d{0,2}$'),
-                    ),
-                  ],
-                  onChanged: _handleAmountChange,
-                ),
-                const SizedBox(height: 8),
-              ],
-
-              const SizedBox(height: 12),
-
-              Align(
-                alignment: Alignment.centerLeft,
-                child: const CustomText("Shipment Method", fontSize: 16),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: DropdownButtonFormField<String>(
-                  value: shipment,
-                  decoration: const InputDecoration(border: InputBorder.none),
-                  items: const [
-                    DropdownMenuItem(
-                      value: "Regular",
-                      child: Text("Regular (1–8 days)"),
-                    ),
-                    DropdownMenuItem(
-                      value: "Express",
-                      child: Text("Express (1–4 days)"),
-                    ),
-                    DropdownMenuItem(
-                      value: "Cargo",
-                      child: Text("Cargo (1–15 days)"),
-                    ),
-                  ],
-                  onChanged: (val) {
-                    setState(() => shipment = val!);
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 15),
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const CustomText("Delivery Option", fontSize: 16),
-                  const SizedBox(height: 8),
+                if (widget.allowPaymentTypeSwitch)
                   Row(
                     children: [
-                      Expanded(
-                        child: RadioListTile<String>(
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text("Address"),
-                          value: "address",
-                          groupValue: deliveryMode,
-                          onChanged: (val) {
-                            if (val == null) return;
-                            setState(() => deliveryMode = val);
-                          },
-                        ),
+                      Radio(
+                        value: "full",
+                        groupValue: paymentType,
+                        onChanged:
+                            (val) =>
+                                setState(() => paymentType = val as String),
                       ),
-                      Expanded(
-                        child: RadioListTile<String>(
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text("Pickup Location"),
-                          value: "pickup",
-                          groupValue: deliveryMode,
-                          onChanged: (val) {
-                            if (val == null) return;
-                            setState(() => deliveryMode = val);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  if (deliveryMode == "address") ...[
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: const CustomText(
-                        "Delivery Address",
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: showCountryError
-                              ? Colors.redAccent
-                              : Colors.grey.shade300,
-                        ),
-                      ),
-                      child: DropdownButtonFormField<CountryOption>(
-                        value: selectedCountry,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Select country",
-                        ),
-                        items:
-                            allCountries.map((country) {
-                              return DropdownMenuItem<CountryOption>(
-                                value: country,
-                                child: Text(
-                                  '${country.flagEmoji} ${country.name}',
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              );
-                            }).toList(),
-                        onChanged: (value) {
+                      const Text("Full Payment"),
+                      Radio(
+                        value: "part",
+                        groupValue: paymentType,
+                        onChanged: (val) {
                           setState(() {
-                            selectedCountry = value;
-                            if (showCountryError && value != null) {
-                              showCountryError = false;
-                            }
+                            paymentType = val as String;
+                            _autoFillHalfPayment();
                           });
                         },
                       ),
+                      const Text("Part Payment"),
+                    ],
+                  ),
+
+                if (paymentType == "part") ...[
+                  CustomTextField(
+                    title: _isUserInNigeria ? "Amount (NGN)" : "Amount (USD)",
+                    fieldKey: "amount",
+                    hintText:
+                        _isUserInNigeria
+                            ? "Enter amount e.g., 23,000"
+                            : "Enter amount e.g., 120.50",
+                    controller: amountController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
                     ),
-                    if (showCountryError)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 6, left: 4),
-                        child: CustomText(
-                          "Country is required",
-                          fontSize: 11,
-                          color: Colors.redAccent,
-                        ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        _isUserInNigeria
+                            ? RegExp(r'^[0-9,]*$')
+                            : RegExp(r'^[0-9,]*\.?\d{0,2}$'),
                       ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: addressLine1Controller,
-                      decoration: InputDecoration(
-                        hintText: "Address line 1 (Street, House/Building No.)",
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        errorText:
-                            showAddressLine1Error
-                                ? "Address line 1 is required"
-                                : null,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.redAccent),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.redAccent),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 14,
-                        ),
+                    ],
+                    onChanged: _handleAmountChange,
+                  ),
+                  const SizedBox(height: 8),
+                ],
+
+                const SizedBox(height: 12),
+
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: const CustomText("Shipment Method", fontSize: 16),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: DropdownButtonFormField<String>(
+                    value: shipment,
+                    decoration: const InputDecoration(border: InputBorder.none),
+                    items: const [
+                      DropdownMenuItem(
+                        value: "Regular",
+                        child: Text("Regular (1–8 days)"),
                       ),
-                      onChanged: (value) {
-                        if (showAddressLine1Error && value.trim().isNotEmpty) {
-                          setState(() => showAddressLine1Error = false);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: addressLine2Controller,
-                      decoration: InputDecoration(
-                        hintText:
-                            "Address line 2 (Apartment, Suite, Landmark) - Optional",
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 14,
-                        ),
+                      DropdownMenuItem(
+                        value: "Express",
+                        child: Text("Express (1–4 days)"),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: cityController,
-                      decoration: InputDecoration(
-                        hintText: "City / Town",
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        errorText: showCityError ? "City is required" : null,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.redAccent),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.redAccent),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 14,
-                        ),
+                      DropdownMenuItem(
+                        value: "Cargo",
+                        child: Text("Cargo (1–15 days)"),
                       ),
-                      onChanged: (value) {
-                        if (showCityError && value.trim().isNotEmpty) {
-                          setState(() => showCityError = false);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: regionController,
-                      decoration: InputDecoration(
-                        hintText: "State / Province / Region",
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        errorText:
-                            showRegionError
-                                ? "State / Province / Region is required"
-                                : null,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.redAccent),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.redAccent),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 14,
-                        ),
-                      ),
-                      onChanged: (value) {
-                        if (showRegionError && value.trim().isNotEmpty) {
-                          setState(() => showRegionError = false);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: postalCodeController,
-                      decoration: InputDecoration(
-                        hintText: "Postal / ZIP code (Optional)",
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 14,
-                        ),
-                      ),
-                    ),
-                  ] else ...[
-                    const CustomText("Pickup Location", fontSize: 16),
+                    ],
+                    onChanged: (val) {
+                      setState(() => shipment = val!);
+                      _scheduleDeliveryCostRefresh();
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const CustomText("Delivery Option", fontSize: 16),
                     const SizedBox(height: 8),
-                    if (isLoadingPickupHierarchy)
-                      const Center(child: CircularProgressIndicator())
-                    else if (pickupCountries.isEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.orange.shade200),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: RadioListTile<String>(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text("Address"),
+                            value: "address",
+                            groupValue: deliveryMode,
+                            onChanged: (val) {
+                              if (val == null) return;
+                              setState(() => deliveryMode = val);
+                              _scheduleDeliveryCostRefresh();
+                            },
+                          ),
                         ),
+                        Expanded(
+                          child: RadioListTile<String>(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text("Pickup Location"),
+                            value: "pickup",
+                            groupValue: deliveryMode,
+                            onChanged: (val) {
+                              if (val == null) return;
+                              setState(() => deliveryMode = val);
+                              _scheduleDeliveryCostRefresh();
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    if (deliveryMode == "address") ...[
+                      Align(
+                        alignment: Alignment.centerLeft,
                         child: const CustomText(
-                          "No pickup locations configured by admin yet.",
-                          fontSize: 12,
-                          color: Colors.black87,
+                          "Delivery Address",
+                          fontSize: 16,
                         ),
-                      )
-                    else ...[
+                      ),
+                      const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
                           color: Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: showPickupCountryError
-                                ? Colors.redAccent
-                                : Colors.grey.shade300,
+                            color:
+                                showCountryError
+                                    ? Colors.redAccent
+                                    : Colors.grey.shade300,
                           ),
                         ),
-                        child: DropdownButtonFormField<PickupCountryOption>(
-                          value: selectedPickupCountry,
+                        child: DropdownButtonFormField<CountryOption>(
+                          value: selectedCountry,
                           decoration: const InputDecoration(
                             border: InputBorder.none,
-                            hintText: "Select pickup country",
+                            hintText: "Select country",
                           ),
                           items:
-                              pickupCountries.map((country) {
-                                return DropdownMenuItem<PickupCountryOption>(
+                              allCountries.map((country) {
+                                return DropdownMenuItem<CountryOption>(
                                   value: country,
-                                  child: Text(country.name),
+                                  child: Text(
+                                    '${country.flagEmoji} ${country.name}',
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 );
                               }).toList(),
                           onChanged: (value) {
                             setState(() {
-                              selectedPickupCountry = value;
-                              selectedPickupState = null;
-                              selectedPickupLocation = null;
-                              if (showPickupCountryError && value != null) {
-                                showPickupCountryError = false;
+                              selectedCountry = value;
+                              if (showCountryError && value != null) {
+                                showCountryError = false;
                               }
                             });
+                            _scheduleDeliveryCostRefresh();
                           },
                         ),
                       ),
-                      if (showPickupCountryError)
+                      if (showCountryError)
                         const Padding(
                           padding: EdgeInsets.only(top: 6, left: 4),
                           child: CustomText(
-                            "Pickup country is required",
+                            "Country is required",
                             fontSize: 11,
                             color: Colors.redAccent,
                           ),
                         ),
                       const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: showPickupStateError
-                                ? Colors.redAccent
-                                : Colors.grey.shade300,
+                      TextFormField(
+                        controller: addressLine1Controller,
+                        decoration: InputDecoration(
+                          hintText:
+                              "Address line 1 (Street, House/Building No.)",
+                          filled: true,
+                          fillColor: Colors.grey.shade50,
+                          errorText:
+                              showAddressLine1Error
+                                  ? "Address line 1 is required"
+                                  : null,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
                           ),
                         ),
-                        child: DropdownButtonFormField<PickupStateOption>(
-                          value: selectedPickupState,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: "Select pickup state",
-                          ),
-                          items:
-                              _getMergedPickupStates(selectedPickupCountry)
-                                  .map((state) {
-                                    return DropdownMenuItem<PickupStateOption>(
-                                      value: state,
-                                      child: Text(state.name),
-                                    );
-                                  })
-                                  .toList(),
-                          onChanged:
-                              selectedPickupCountry == null
-                                  ? null
-                                  : (value) {
-                                    setState(() {
-                                      selectedPickupState = value;
-                                      selectedPickupLocation = null;
-                                      if (showPickupStateError &&
-                                          value != null) {
-                                        showPickupStateError = false;
-                                      }
-                                    });
-                                  },
-                        ),
+                        onChanged: (value) {
+                          if (showAddressLine1Error &&
+                              value.trim().isNotEmpty) {
+                            setState(() => showAddressLine1Error = false);
+                          }
+                          _scheduleDeliveryCostRefresh();
+                        },
                       ),
-                      if (showPickupStateError)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 6, left: 4),
-                          child: CustomText(
-                            "Pickup state is required",
-                            fontSize: 11,
-                            color: Colors.redAccent,
-                          ),
-                        ),
                       const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: showPickupLocationError
-                                ? Colors.redAccent
-                                : Colors.grey.shade300,
+                      TextFormField(
+                        controller: addressLine2Controller,
+                        decoration: InputDecoration(
+                          hintText:
+                              "Address line 2 (Apartment, Suite, Landmark) - Optional",
+                          filled: true,
+                          fillColor: Colors.grey.shade50,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
                           ),
                         ),
-                        child: DropdownButtonFormField<PickupLocationOption>(
-                          value: selectedPickupLocation,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: "Select pickup address",
-                          ),
-                          items:
-                              (selectedPickupState?.locations ?? const [])
-                                  .where((location) => location.isActive)
-                                  .map((location) {
-                                    final displayText =
-                                        location.address.trim().isNotEmpty
-                                            ? location.address
-                                            : location.name;
-                                    return DropdownMenuItem<PickupLocationOption>(
-                                      value: location,
-                                      child: Text(
-                                        displayText,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    );
-                                  })
-                                  .toList(),
-                          onChanged:
-                              selectedPickupState == null
-                                  ? null
-                                  : (value) {
-                                    setState(() {
-                                      selectedPickupLocation = value;
-                                      if (showPickupLocationError &&
-                                          value != null) {
-                                        showPickupLocationError = false;
-                                      }
-                                    });
-                                  },
-                        ),
+                        onChanged: (_) => _scheduleDeliveryCostRefresh(),
                       ),
-                      if (showPickupLocationError)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 6, left: 4),
-                          child: CustomText(
-                            "Pickup location is required",
-                            fontSize: 11,
-                            color: Colors.redAccent,
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: cityController,
+                        decoration: InputDecoration(
+                          hintText: "City / Town",
+                          filled: true,
+                          fillColor: Colors.grey.shade50,
+                          errorText: showCityError ? "City is required" : null,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
                           ),
                         ),
-                      if (selectedPickupLocation != null) ...[
-                        const SizedBox(height: 8),
-                        CustomText(
-                          selectedPickupLocation!.address,
-                          fontSize: 11,
-                          color: Colors.black54,
+                        onChanged: (value) {
+                          if (showCityError && value.trim().isNotEmpty) {
+                            setState(() => showCityError = false);
+                          }
+                          _scheduleDeliveryCostRefresh();
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: regionController,
+                        decoration: InputDecoration(
+                          hintText: "State / Province / Region",
+                          filled: true,
+                          fillColor: Colors.grey.shade50,
+                          errorText:
+                              showRegionError
+                                  ? "State / Province / Region is required"
+                                  : null,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
                         ),
+                        onChanged: (value) {
+                          if (showRegionError && value.trim().isNotEmpty) {
+                            setState(() => showRegionError = false);
+                          }
+                          _scheduleDeliveryCostRefresh();
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: postalCodeController,
+                        decoration: InputDecoration(
+                          hintText: "Postal / ZIP code (Optional)",
+                          filled: true,
+                          fillColor: Colors.grey.shade50,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
+                        ),
+                        onChanged: (_) => _scheduleDeliveryCostRefresh(),
+                      ),
+                    ] else ...[
+                      const CustomText("Pickup Location", fontSize: 16),
+                      const SizedBox(height: 8),
+                      if (isLoadingPickupHierarchy)
+                        const Center(child: CircularProgressIndicator())
+                      else if (pickupCountries.isEmpty)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.orange.shade200),
+                          ),
+                          child: const CustomText(
+                            "No pickup locations configured by admin yet.",
+                            fontSize: 12,
+                            color: Colors.black87,
+                          ),
+                        )
+                      else ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color:
+                                  showPickupCountryError
+                                      ? Colors.redAccent
+                                      : Colors.grey.shade300,
+                            ),
+                          ),
+                          child: DropdownButtonFormField<PickupCountryOption>(
+                            value: selectedPickupCountry,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "Select pickup country",
+                            ),
+                            items:
+                                pickupCountries.map((country) {
+                                  return DropdownMenuItem<PickupCountryOption>(
+                                    value: country,
+                                    child: Text(country.name),
+                                  );
+                                }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedPickupCountry = value;
+                                selectedPickupState = null;
+                                selectedPickupLocation = null;
+                                if (showPickupCountryError && value != null) {
+                                  showPickupCountryError = false;
+                                }
+                              });
+                              _scheduleDeliveryCostRefresh();
+                            },
+                          ),
+                        ),
+                        if (showPickupCountryError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 6, left: 4),
+                            child: CustomText(
+                              "Pickup country is required",
+                              fontSize: 11,
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color:
+                                  showPickupStateError
+                                      ? Colors.redAccent
+                                      : Colors.grey.shade300,
+                            ),
+                          ),
+                          child: DropdownButtonFormField<PickupStateOption>(
+                            value: selectedPickupState,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "Select pickup state",
+                            ),
+                            items:
+                                _getMergedPickupStates(
+                                  selectedPickupCountry,
+                                ).map((state) {
+                                  return DropdownMenuItem<PickupStateOption>(
+                                    value: state,
+                                    child: Text(state.name),
+                                  );
+                                }).toList(),
+                            onChanged:
+                                selectedPickupCountry == null
+                                    ? null
+                                    : (value) {
+                                      setState(() {
+                                        selectedPickupState = value;
+                                        selectedPickupLocation = null;
+                                        if (showPickupStateError &&
+                                            value != null) {
+                                          showPickupStateError = false;
+                                        }
+                                      });
+                                      _scheduleDeliveryCostRefresh();
+                                    },
+                          ),
+                        ),
+                        if (showPickupStateError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 6, left: 4),
+                            child: CustomText(
+                              "Pickup state is required",
+                              fontSize: 11,
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color:
+                                  showPickupLocationError
+                                      ? Colors.redAccent
+                                      : Colors.grey.shade300,
+                            ),
+                          ),
+                          child: DropdownButtonFormField<PickupLocationOption>(
+                            value: selectedPickupLocation,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "Select pickup address",
+                            ),
+                            items:
+                                (selectedPickupState?.locations ?? const [])
+                                    .where((location) => location.isActive)
+                                    .map((location) {
+                                      final displayText =
+                                          location.address.trim().isNotEmpty
+                                              ? location.address
+                                              : location.name;
+                                      return DropdownMenuItem<
+                                        PickupLocationOption
+                                      >(
+                                        value: location,
+                                        child: Text(
+                                          displayText,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      );
+                                    })
+                                    .toList(),
+                            onChanged:
+                                selectedPickupState == null
+                                    ? null
+                                    : (value) {
+                                      setState(() {
+                                        selectedPickupLocation = value;
+                                        if (showPickupLocationError &&
+                                            value != null) {
+                                          showPickupLocationError = false;
+                                        }
+                                      });
+                                      _scheduleDeliveryCostRefresh();
+                                    },
+                          ),
+                        ),
+                        if (showPickupLocationError)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 6, left: 4),
+                            child: CustomText(
+                              "Pickup location is required",
+                              fontSize: 11,
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                        if (selectedPickupLocation != null) ...[
+                          const SizedBox(height: 8),
+                          CustomText(
+                            selectedPickupLocation!.address,
+                            fontSize: 11,
+                            color: Colors.black54,
+                          ),
+                        ],
                       ],
                     ],
+                    const SizedBox(height: 6),
+                    CustomText(
+                      deliveryMode == "pickup"
+                          ? "Select admin-configured pickup destination."
+                          : "Use your full home address. Country, address lines, city, state/region and postal code are sent for delivery.",
+                      fontSize: 11,
+                      color: Colors.black54,
+                    ),
                   ],
-                  const SizedBox(height: 6),
-                  CustomText(
-                    deliveryMode == "pickup"
-                        ? "Select admin-configured pickup destination."
-                        : "Use your full home address. Country, address lines, city, state/region and postal code are sent for delivery.",
-                    fontSize: 11,
-                    color: Colors.black54,
-                  ),
-                ],
-              ),
+                ),
 
-              const SizedBox(height: 20),
-              const SizedBox(height: 12),
-              CustomButton(
-                title: "Make Payment",
-                onPressed: _makePayment,
-              ),
+                const SizedBox(height: 20),
+                const SizedBox(height: 12),
+                CustomButton(title: "Make Payment", onPressed: _makePayment),
                 const SizedBox(height: 40),
               ],
             ),
