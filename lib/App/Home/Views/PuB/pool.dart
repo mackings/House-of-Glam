@@ -3,9 +3,12 @@ import 'package:hog/App/Home/Views/PuB/widgets/poolcard.dart';
 import 'package:hog/TailorApp/Home/Api/publishservice.dart';
 import 'package:hog/TailorApp/Home/Model/PublishedModel.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class Pool extends StatefulWidget {
-  const Pool({super.key});
+  final bool showBackButton;
+
+  const Pool({super.key, this.showBackButton = true});
 
   @override
   State<Pool> createState() => _PoolState();
@@ -46,35 +49,39 @@ class _PoolState extends State<Pool> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        backgroundColor: Colors.purple,
+        automaticallyImplyLeading: widget.showBackButton,
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppColors.ink,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
         title:
             !isSearching
-                ? const CustomText(
-                  "Check room",
-                  color: Colors.white,
-                  fontSize: 18,
+                ? const Text(
+                  "Check Room",
+                  style: TextStyle(fontWeight: FontWeight.w700),
                 )
-                : TextField(
-                  autofocus: true,
-                  style: const TextStyle(color: Colors.white),
-                  cursorColor: Colors.white,
-                  decoration: const InputDecoration(
-                    hintText: "Search materials...",
-                    hintStyle: TextStyle(color: Colors.white70),
-                    border: InputBorder.none,
+                : Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: TextField(
+                    autofocus: true,
+                    style: const TextStyle(color: AppColors.ink),
+                    cursorColor: AppColors.accent,
+                    decoration: const InputDecoration(
+                      hintText: "Search published works...",
+                      border: InputBorder.none,
+                    ),
+                    onChanged: _filterWorks,
                   ),
-                  onChanged: _filterWorks,
                 ),
         actions: [
           IconButton(
             icon: Icon(isSearching ? Icons.close : Icons.search),
-            color: Colors.white,
+            color: AppColors.ink,
             onPressed: () {
               setState(() {
                 if (isSearching) {
-                  // Close search
                   isSearching = false;
                   filteredWorks = allWorks;
                 } else {
@@ -90,9 +97,7 @@ class _PoolState extends State<Pool> {
           future: _future,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(color: Colors.purple),
-              );
+              return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return Center(
                 child: CustomText(
@@ -110,9 +115,21 @@ class _PoolState extends State<Pool> {
             }
 
             return ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: filteredWorks.length,
-              itemBuilder: (_, index) => WorkCard(work: filteredWorks[index]),
+              padding: const EdgeInsets.fromLTRB(14, 8, 14, 24),
+              itemCount: filteredWorks.length + 1,
+              itemBuilder: (_, index) {
+                if (index == 0) {
+                  return const Padding(
+                    padding: EdgeInsets.fromLTRB(4, 0, 4, 12),
+                    child: CustomText(
+                      "Explore finished work, inspiration, and current check-room drops from active tailors.",
+                      color: AppColors.subtext,
+                      textAlign: TextAlign.left,
+                    ),
+                  );
+                }
+                return WorkCard(work: filteredWorks[index - 1]);
+              },
             );
           },
         ),

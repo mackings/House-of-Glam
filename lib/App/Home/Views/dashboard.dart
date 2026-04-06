@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
@@ -11,10 +13,12 @@ import 'package:hog/TailorApp/Home/Views/Tailorbusiness.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/Tailors/tailorcard.dart';
 import 'package:hog/components/bankCard.dart';
+import 'package:hog/components/button.dart';
 import 'package:hog/components/header.dart';
 import 'package:hog/components/slideritem.dart';
 import 'package:hog/components/sliders.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class Home extends ConsumerStatefulWidget {
   const Home({super.key});
@@ -24,16 +28,18 @@ class Home extends ConsumerStatefulWidget {
 }
 
 class _HomeState extends ConsumerState<Home> {
-  TextEditingController searchController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
 
   List<Tailor> _tailors = [];
   List<Category> _categories = [];
 
   bool _isLoadingTailors = true;
   bool _isLoadingCategories = true;
+  final Set<String> _openingTailorIds = <String>{};
+  final Map<String, String> _prefetchedVendorImages = {};
 
-  String userName = "User"; // default
-  String userAvatar = "https://i.pravatar.cc/150"; // default
+  String userName = "User";
+  String userAvatar = "https://i.pravatar.cc/150";
 
   @override
   void initState() {
@@ -50,8 +56,8 @@ class _HomeState extends ConsumerState<Home> {
         _tailors = tailors;
         _isLoadingTailors = false;
       });
-    } catch (e) {
-      print("❌ Error fetching tailors: $e");
+      _primeVendorProfiles(tailors);
+    } catch (_) {
       setState(() {
         _isLoadingTailors = false;
       });
@@ -71,20 +77,46 @@ class _HomeState extends ConsumerState<Home> {
   Future<void> _fetchCategories() async {
     try {
       final categories = await HomeApiService.getAllCategories();
-      print("✅ Fetched ${categories.length} categories");
-      if (categories.isNotEmpty) {
-        print("📋 Category names: ${categories.map((c) => c.name).toList()}");
-        print("🖼️ First category image: ${categories.first.image}");
-      }
       setState(() {
         _categories = categories;
         _isLoadingCategories = false;
       });
-    } catch (e) {
-      print("❌ Error fetching categories: $e");
+    } catch (_) {
       setState(() {
         _isLoadingCategories = false;
       });
+    }
+  }
+
+  Future<void> _refreshData() async {
+    setState(() {
+      _isLoadingCategories = true;
+      _isLoadingTailors = true;
+    });
+    await Future.wait([_fetchCategories(), _fetchTailors()]);
+  }
+
+  void _primeVendorProfiles(List<Tailor> tailors) {
+    for (final tailor in tailors) {
+      final cachedImage = HomeApiService.getCachedVendorImage(tailor.id);
+      if (cachedImage != null && cachedImage.isNotEmpty) {
+        _prefetchedVendorImages[tailor.id] = cachedImage;
+      }
+
+      unawaited(
+        HomeApiService.getVendorDetails(tailor.id).then((details) {
+          if (!mounted || details == null) {
+            return;
+          }
+          final image = details.userProfile.image.trim();
+          if (image.isEmpty || _prefetchedVendorImages[tailor.id] == image) {
+            return;
+          }
+          setState(() {
+            _prefetchedVendorImages[tailor.id] = image;
+          });
+        }),
+      );
     }
   }
 
@@ -94,24 +126,54 @@ class _HomeState extends ConsumerState<Home> {
     super.dispose();
   }
 
+  Future<void> _openTailor(Tailor tailor) async {
+    if (_openingTailorIds.contains(tailor.id)) {
+      return;
+    }
+
+    setState(() {
+      _openingTailorIds.add(tailor.id);
+    });
+
+    final vendorDetails = await HomeApiService.getVendorDetails(tailor.id);
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _openingTailorIds.remove(tailor.id);
+    });
+
+    if (vendorDetails == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to load tailor details")),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => Details(
+              vendor: vendorDetails.vendor,
+              userProfile: vendorDetails.userProfile,
+            ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.canvas,
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () async {
-            // Reset loading state
-            setState(() {
-              _isLoadingCategories = true;
-              _isLoadingTailors = true;
-            });
-            // Fetch both
-            await Future.wait([_fetchCategories(), _fetchTailors()]);
-          },
+          onRefresh: _refreshData,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -120,19 +182,74 @@ class _HomeState extends ConsumerState<Home> {
                   avatarUrl: userAvatar,
                   onNotificationTap: () {
                     Nav.push(context, TrackingDelivery());
-                    print("Notifications tapped!");
                   },
                 ),
-
-                const SizedBox(height: 30),
-
+                const SizedBox(height: 22),
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(28),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFFFEFBFF), Color(0xFFF0E9FB)],
+                    ),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const CustomText(
+                        "Discover skilled tailors and marketplace drops in one place.",
+                        textAlign: TextAlign.left,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      const SizedBox(height: 10),
+                      const CustomText(
+                        "Browse categories, review top-rated creators, and manage wallet activity with a cleaner experience.",
+                        textAlign: TextAlign.left,
+                        color: AppColors.subtext,
+                        fontSize: 13,
+                      ),
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: CustomButton(
+                              title: "Become a tailor",
+                              onPressed: () {
+                                Nav.push(context, TailorRegistrationPage());
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                Nav.push(context, TrackingDelivery());
+                              },
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.accent,
+                                minimumSize: const Size.fromHeight(54),
+                                side: const BorderSide(color: AppColors.border),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                              ),
+                              child: const Text("Track activity"),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 22),
                 CarouselSlider(
-                  height: 170,
+                  height: 196,
                   items: const [
-                    // 🆕 First card shows bank details
                     BankDetailsCard(),
-
-                    // Rest of your existing cards
                     CarouselItemWidget(
                       title: "",
                       assetImage: 'assets/Img/agbada.png',
@@ -151,74 +268,67 @@ class _HomeState extends ConsumerState<Home> {
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 30),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Nav.push(context, TailorRegistrationPage());
-                      },
-                      child: CustomText(
-                        "Top Categories",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 26),
+                _SectionHeader(
+                  title: "Top Categories",
+                  actionLabel: "Explore",
+                  onTap: () {
+                    Nav.push(context, TailorRegistrationPage());
+                  },
                 ),
-
-                const SizedBox(height: 30),
-
+                const SizedBox(height: 14),
                 SizedBox(
-                  height: 120,
+                  height: 126,
                   child:
                       _isLoadingCategories
                           ? const Center(child: CircularProgressIndicator())
                           : ListView.separated(
                             scrollDirection: Axis.horizontal,
                             itemCount: _categories.length,
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 2),
                             separatorBuilder:
                                 (_, __) => const SizedBox(width: 12),
                             itemBuilder: (context, index) {
                               final cat = _categories[index];
-                              return GestureDetector(
-                                onTap: () {
-                                  print("Tapped category ${cat.name}");
-                                },
+                              return Container(
+                                width: 100,
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(22),
+                                  border: Border.all(color: AppColors.border),
+                                ),
                                 child: Column(
                                   children: [
-                                    Container(
-                                      width: 80,
-                                      height: 80,
-                                      decoration: BoxDecoration(
+                                    Expanded(
+                                      child: ClipRRect(
                                         borderRadius: BorderRadius.circular(16),
-                                        image: DecorationImage(
-                                          image: NetworkImage(
-                                            cat.image.isNotEmpty == true
-                                                ? cat.image
-                                                : "https://via.placeholder.com/150",
-                                          ),
+                                        child: Image.network(
+                                          cat.image.isNotEmpty
+                                              ? cat.image
+                                              : "https://via.placeholder.com/150",
+                                          width: double.infinity,
                                           fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (_, __, ___) => Container(
+                                                color: AppColors.surfaceMuted,
+                                                alignment: Alignment.center,
+                                                child: const Icon(
+                                                  Icons.image_outlined,
+                                                  color: AppColors.subtext,
+                                                ),
+                                              ),
                                         ),
                                       ),
                                     ),
                                     const SizedBox(height: 8),
-                                    SizedBox(
-                                      width: 80,
-                                      child: CustomText(
-                                        cat.name.isNotEmpty == true
-                                            ? cat.name
-                                            : "Unnamed",
-                                        textAlign: TextAlign.center,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                                    CustomText(
+                                      cat.name.isNotEmpty ? cat.name : "Unnamed",
+                                      textAlign: TextAlign.center,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),
@@ -226,50 +336,26 @@ class _HomeState extends ConsumerState<Home> {
                             },
                           ),
                 ),
-
-                const SizedBox(height: 20),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CustomText(
-                      "Top rated Tailors",
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.purple,
-                        borderRadius: BorderRadius.circular(8),
+                const SizedBox(height: 26),
+                _SectionHeader(
+                  title: "Top Rated Tailors",
+                  actionLabel: "See all",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => Alltailors(tailors: _tailors),
                       ),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => Alltailors(tailors: _tailors),
-                            ),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 15,
-                            vertical: 5,
-                          ),
-                          child: CustomText(
-                            "See all",
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
-
-                const SizedBox(height: 20),
-
+                const SizedBox(height: 8),
+                const CustomText(
+                  "Trusted profiles with strong reviews and active portfolios.",
+                  textAlign: TextAlign.left,
+                  color: AppColors.subtext,
+                ),
+                const SizedBox(height: 18),
                 _isLoadingTailors
                     ? const Center(child: CircularProgressIndicator())
                     : GridView.builder(
@@ -279,44 +365,16 @@ class _HomeState extends ConsumerState<Home> {
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
-                            childAspectRatio: 3 / 4,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
+                            childAspectRatio: 0.69,
+                            crossAxisSpacing: 14,
+                            mainAxisSpacing: 14,
                           ),
                       itemBuilder: (context, index) {
                         final tailor = _tailors[index];
                         return TailorCard(
-                          tailor: tailor, // ✅ Use the model directly
-                          onTap: () async {
-                            print("Tapped on ${tailor.id}");
-
-                            // fetch vendor details from API
-                            final vendorDetails =
-                                await HomeApiService.getVendorDetails(
-                                  tailor.id,
-                                );
-
-                            if (vendorDetails != null) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => Details(
-                                        vendor: vendorDetails.vendor,
-                                        userProfile: vendorDetails.userProfile,
-                                      ),
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "Failed to load tailor details",
-                                  ),
-                                ),
-                              );
-                            }
-                          },
+                          tailor: tailor,
+                          imageUrl: _prefetchedVendorImages[tailor.id],
+                          onTap: () => _openTailor(tailor),
                         );
                       },
                     ),
@@ -325,6 +383,44 @@ class _HomeState extends ConsumerState<Home> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final String actionLabel;
+  final VoidCallback onTap;
+
+  const _SectionHeader({
+    required this.title,
+    required this.actionLabel,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: CustomText(
+            title,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            textAlign: TextAlign.left,
+          ),
+        ),
+        TextButton(
+          onPressed: onTap,
+          child: Text(
+            actionLabel,
+            style: const TextStyle(
+              color: AppColors.accent,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

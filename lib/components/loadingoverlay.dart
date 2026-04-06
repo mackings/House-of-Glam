@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class LoadingOverlay extends StatelessWidget {
   final bool isLoading;
@@ -11,13 +12,32 @@ class LoadingOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        child, // main content
+        child,
         if (isLoading)
           Container(
-            color: Colors.black54, // dim background
-            child: const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            color: AppColors.ink.withValues(alpha: 0.24),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: AppColors.shadow,
+                      blurRadius: 24,
+                      offset: Offset(0, 12),
+                    ),
+                  ],
+                ),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 14),
+                    Text('Please wait...'),
+                  ],
+                ),
               ),
             ),
           ),

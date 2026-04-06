@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class CustomButton extends StatelessWidget {
   final String title;
@@ -22,23 +23,29 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final isDisabled = isLoading || onPressed == null;
 
     return SizedBox(
       width: width ?? double.infinity,
-      height: height ?? 50,
+      height: height ?? 54,
       child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed, // ✅ disable while loading
+        onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          elevation: 0,
-          backgroundColor: isOutlined ? Colors.transparent : Colors.purple,
-          foregroundColor: isOutlined ? Colors.purple : Colors.white,
+          elevation: isOutlined ? 0 : 1,
+          shadowColor: AppColors.shadow,
+          backgroundColor:
+              isOutlined
+                  ? Colors.white
+                  : (isDisabled ? AppColors.accent.withValues(alpha: 0.55) : AppColors.accent),
+          foregroundColor: isOutlined ? AppColors.accent : Colors.white,
           side:
               isOutlined
-                  ? const BorderSide(color: Colors.purple, width: 2)
+                  ? const BorderSide(color: AppColors.border, width: 1.2)
                   : BorderSide.none,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(18),
           ),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         ),
         child:
             isLoading
@@ -52,9 +59,9 @@ class CustomButton extends StatelessWidget {
                 )
                 : CustomText(
                   title,
-                  fontSize: screenWidth * 0.04,
-                  fontWeight: FontWeight.w600,
-                  color: isOutlined ? Colors.purple : Colors.white,
+                  fontSize: screenWidth < 390 ? 13 : 14,
+                  fontWeight: FontWeight.w700,
+                  color: isOutlined ? AppColors.accent : Colors.white,
                 ),
       ),
     );

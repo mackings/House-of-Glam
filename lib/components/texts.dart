@@ -23,16 +23,19 @@ class CustomText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final baseStyle = Theme.of(context).textTheme.bodyMedium ??
+        GoogleFonts.plusJakartaSans(fontSize: 14);
+
     return Text(
       text,
       textAlign: textAlign ?? TextAlign.center, // ✅ center by default
       maxLines: maxLines,
       softWrap: true, // ✅ allow line breaks
       overflow: overflow ?? TextOverflow.visible,
-      style: GoogleFonts.poppins(
-        fontSize: fontSize ?? 14,
-        fontWeight: fontWeight ?? FontWeight.normal,
-        color: color ?? Colors.black,
+      style: baseStyle.copyWith(
+        fontSize: fontSize ?? baseStyle.fontSize ?? 14,
+        fontWeight: fontWeight ?? baseStyle.fontWeight ?? FontWeight.normal,
+        color: color ?? baseStyle.color ?? Colors.black,
       ),
     );
   }

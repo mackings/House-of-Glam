@@ -12,6 +12,8 @@ class SecurePrefs {
   static const String _attireIdKey = "attire_id";
   static const String _userDataKey = "user_data";
   static const String _adminSettingsKey = "admin_settings";
+  static const String _lastEmailKey = "last_email";
+  static const String _onboardingSeenKey = "onboarding_seen";
 
   // ✅ NEW: Currency Key
   static const String _userCurrencyKey = "user_currency";
@@ -109,6 +111,27 @@ class SecurePrefs {
     await _storage.delete(key: _userDataKey);
   }
 
+  static Future<void> saveLastEmail(String email) async {
+    await _storage.write(key: _lastEmailKey, value: email);
+  }
+
+  static Future<String?> getLastEmail() async {
+    return await _storage.read(key: _lastEmailKey);
+  }
+
+  static Future<void> clearLastEmail() async {
+    await _storage.delete(key: _lastEmailKey);
+  }
+
+  static Future<void> saveOnboardingSeen(bool value) async {
+    await _storage.write(key: _onboardingSeenKey, value: value ? 'true' : 'false');
+  }
+
+  static Future<bool> getOnboardingSeen() async {
+    final raw = await _storage.read(key: _onboardingSeenKey);
+    return raw == 'true';
+  }
+
   /// ✅ Convenience: return only the user's role
   static Future<String?> getUserRole() async {
     final userJson = await _storage.read(key: _userDataKey);
@@ -185,6 +208,13 @@ class SecurePrefs {
   // CLEAR ALL (LOGOUT)
   // -------------------------
   static Future<void> clearAll() async {
-    await _storage.deleteAll();
+    await Future.wait([
+      _storage.delete(key: _authTokenKey),
+      _storage.delete(key: _refreshTokenKey),
+      _storage.delete(key: _attireIdKey),
+      _storage.delete(key: _userDataKey),
+      _storage.delete(key: _adminSettingsKey),
+      _storage.delete(key: _userCurrencyKey),
+    ]);
   }
 }

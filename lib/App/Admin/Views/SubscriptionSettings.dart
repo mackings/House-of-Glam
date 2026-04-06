@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hog/TailorApp/Home/Api/subservice.dart';
 import 'package:hog/TailorApp/Home/Model/submodel.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class SubscriptionSettings extends StatefulWidget {
@@ -68,6 +69,17 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
               CustomText(
                 plan == null ? "Create Subscription Plan" : "Update Plan",
                 fontSize: 18,
@@ -85,10 +97,8 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
                 items:
                     _planNames
                         .map(
-                          (name) => DropdownMenuItem(
-                            value: name,
-                            child: Text(name),
-                          ),
+                          (name) =>
+                              DropdownMenuItem(value: name, child: Text(name)),
                         )
                         .toList(),
                 onChanged: (v) => nameCtrl.text = v ?? nameCtrl.text,
@@ -105,7 +115,9 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
                         .map(
                           (d) => DropdownMenuItem(
                             value: d,
-                            child: Text("${d[0].toUpperCase()}${d.substring(1)}"),
+                            child: Text(
+                              "${d[0].toUpperCase()}${d.substring(1)}",
+                            ),
                           ),
                         )
                         .toList(),
@@ -179,7 +191,9 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
                     );
                     if (result != null) _fetchPlans();
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purple,
+                  ),
                   child: Text(
                     plan == null ? "Create Plan" : "Update Plan",
                     style: const TextStyle(color: Colors.white),
@@ -198,7 +212,9 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
     final ok = await _service.deleteSubscriptionPlan(plan.id);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(ok ? "Plan deleted successfully" : "Delete failed")),
+      SnackBar(
+        content: Text(ok ? "Plan deleted successfully" : "Delete failed"),
+      ),
     );
     if (ok) _fetchPlans();
   }
@@ -212,18 +228,20 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
         _plans.where((p) => p.duration.toLowerCase() == "yearly").length;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7FB),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: Colors.purple,
+        backgroundColor: AppColors.canvas,
+        surfaceTintColor: Colors.transparent,
+        iconTheme: const IconThemeData(color: AppColors.ink),
         title: const CustomText(
           "Subscription Settings",
-          color: Colors.white,
+          color: AppColors.ink,
           fontSize: 18,
+          fontWeight: FontWeight.w700,
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.purple,
+        backgroundColor: AppColors.accent,
         onPressed: () => _showCreateOrEditSheet(),
         child: const Icon(Icons.add, color: Colors.white),
       ),
@@ -233,13 +251,61 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
               : RefreshIndicator(
                 onRefresh: _fetchPlans,
                 child: ListView(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
                   children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFF7F2FF), Color(0xFFFFFFFF)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: const Icon(
+                              Icons.verified_outlined,
+                              color: AppColors.accent,
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          const CustomText(
+                            "Tailor subscription control",
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.ink,
+                            textAlign: TextAlign.left,
+                          ),
+                          const SizedBox(height: 8),
+                          const CustomText(
+                            "Create and manage plan tiers, durations, and payable amounts used across the designer flow.",
+                            fontSize: 13,
+                            color: AppColors.subtext,
+                            textAlign: TextAlign.left,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.purple.shade600, Colors.purple.shade400],
+                          colors: [
+                            Colors.purple.shade600,
+                            Colors.purple.shade400,
+                          ],
                         ),
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -285,7 +351,8 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   CustomText(
                                     plan.name,
@@ -328,7 +395,9 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   TextButton.icon(
-                                    onPressed: () => _showCreateOrEditSheet(plan: plan),
+                                    onPressed:
+                                        () =>
+                                            _showCreateOrEditSheet(plan: plan),
                                     icon: const Icon(Icons.edit, size: 16),
                                     label: const Text("Edit"),
                                   ),

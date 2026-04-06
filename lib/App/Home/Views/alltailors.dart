@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Home/Api/home.dart';
 import 'package:hog/App/Home/Model/tailor.dart';
 import 'package:hog/App/Tailors/details.dart';
 import 'package:hog/components/Tailors/tailorcard.dart';
+import 'package:hog/components/customAppbar.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class Alltailors extends ConsumerStatefulWidget {
   final List<Tailor> tailors;
@@ -16,65 +20,122 @@ class Alltailors extends ConsumerStatefulWidget {
 }
 
 class _AlltailorsState extends ConsumerState<Alltailors> {
+  final Set<String> _openingTailorIds = <String>{};
+  final Map<String, String> _prefetchedVendorImages = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _primeVendorProfiles();
+  }
+
+  void _primeVendorProfiles() {
+    for (final tailor in widget.tailors) {
+      final cachedImage = HomeApiService.getCachedVendorImage(tailor.id);
+      if (cachedImage != null && cachedImage.isNotEmpty) {
+        _prefetchedVendorImages[tailor.id] = cachedImage;
+      }
+
+      unawaited(
+        HomeApiService.getVendorDetails(tailor.id).then((details) {
+          if (!mounted || details == null) {
+            return;
+          }
+          final image = details.userProfile.image.trim();
+          if (image.isEmpty || _prefetchedVendorImages[tailor.id] == image) {
+            return;
+          }
+          setState(() {
+            _prefetchedVendorImages[tailor.id] = image;
+          });
+        }),
+      );
+    }
+  }
+
+  Future<void> _openTailor(Tailor tailor) async {
+    if (_openingTailorIds.contains(tailor.id)) {
+      return;
+    }
+
+    setState(() {
+      _openingTailorIds.add(tailor.id);
+    });
+
+    final vendorDetails = await HomeApiService.getVendorDetails(tailor.id);
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _openingTailorIds.remove(tailor.id);
+    });
+
+    if (vendorDetails == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to load tailor details")),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => Details(
+              vendor: vendorDetails.vendor,
+              userProfile: vendorDetails.userProfile,
+            ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
-        title: const CustomText(
-          "All tailors",
-          fontSize: 18,
-          color: Colors.white,
-        ),
-        backgroundColor: Colors.purple,
+      backgroundColor: AppColors.canvas,
+      appBar: const CustomAppBar(
+        title: "All Tailors",
+        enableAction: false,
       ),
       body: SafeArea(
         child:
             widget.tailors.isEmpty
                 ? const Center(child: Text("No tailors available"))
-                : GridView.builder(
-                  padding: const EdgeInsets.all(20),
-                  itemCount: widget.tailors.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 3 / 4,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemBuilder: (context, index) {
-                    final tailor = widget.tailors[index];
-                    return TailorCard(
-                      tailor: tailor,
-                      onTap: () async {
-                        print("Tapped on ${tailor.user?.fullName}");
-                        print("Tapped on ${tailor.id}");
-
-                        // fetch vendor details from API
-                        final vendorDetails =
-                            await HomeApiService.getVendorDetails(tailor.id);
-
-                        if (vendorDetails != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => Details(
-                                    vendor: vendorDetails.vendor,
-                                    userProfile: vendorDetails.userProfile,
-                                  ),
+                : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(20, 6, 20, 0),
+                      child: CustomText(
+                        "Browse the full directory of available tailors.",
+                        textAlign: TextAlign.left,
+                        color: AppColors.subtext,
+                      ),
+                    ),
+                    Expanded(
+                      child: GridView.builder(
+                        padding: const EdgeInsets.all(20),
+                        itemCount: widget.tailors.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.69,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
                             ),
+                        itemBuilder: (context, index) {
+                          final tailor = widget.tailors[index];
+                          return TailorCard(
+                            tailor: tailor,
+                            imageUrl: _prefetchedVendorImages[tailor.id],
+                            onTap: () => _openTailor(tailor),
                           );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Failed to load tailor details"),
-                            ),
-                          );
-                        }
-                      },
-                    );
-                  },
+                        },
+                      ),
+                    ),
+                  ],
                 ),
       ),
     );

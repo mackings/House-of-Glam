@@ -1,21 +1,19 @@
-import 'dart:convert';
-
 import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Auth/Api/authclass.dart';
+import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
 import 'package:hog/App/Auth/Views/verify.dart';
 import 'package:hog/TailorApp/Home/Views/Tailorbusiness.dart';
 import 'package:hog/components/Navigator.dart';
-import 'package:hog/components/alerts.dart';
+import 'package:hog/components/authShell.dart';
 import 'package:hog/components/button.dart';
-import 'package:hog/components/customAppbar.dart';
 import 'package:hog/components/dialogs.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class Signup extends ConsumerStatefulWidget {
   const Signup({super.key});
@@ -25,6 +23,7 @@ class Signup extends ConsumerStatefulWidget {
 }
 
 class _SignupState extends ConsumerState<Signup> {
+  final _formKey = GlobalKey<FormState>();
   late TextEditingController fullnameController;
   late TextEditingController emailController;
   late TextEditingController phoneController;
@@ -33,12 +32,7 @@ class _SignupState extends ConsumerState<Signup> {
   late TextEditingController countryController;
 
   bool isLoading = false;
-  bool isTailor = false;
-
-  String? selectedCountry;
-
-  // ✅ Track selected country code for phone
-  String selectedCountryCode = '+234'; // default to Nigeria
+  String selectedCountryCode = '+234';
 
   @override
   void initState() {
@@ -63,114 +57,87 @@ class _SignupState extends ConsumerState<Signup> {
   }
 
   Future<void> _handleSignup() async {
-    final fullname = fullnameController.text.trim();
-    final email = emailController.text.trim();
-    final phone = phoneController.text.trim();
-    final password = passwordController.text.trim();
-    final address = addressController.text.trim();
-    final country = countryController.text.trim();
-
-    if (fullname.isEmpty ||
-        email.isEmpty ||
-        phone.isEmpty ||
-        password.isEmpty ||
-        country.isEmpty ||
-        address.isEmpty) {
-      await showErrorDialog(context, "Please fill in all fields");
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    // ✅ Combine selected country code with phone number
-    final formattedPhone = '$selectedCountryCode$phone';
+    final formattedPhone = '$selectedCountryCode${phoneController.text.trim()}';
 
     setState(() => isLoading = true);
 
     final response = await ApiService.signup(
-      fullName: fullname,
-      email: email,
-      password: password,
-      phoneNumber: formattedPhone, // ✅ send full phone with country code
-      address: address,
-      country: country,
-      role: isTailor ? "tailor" : "user",
+      fullName: fullnameController.text.trim(),
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+      phoneNumber: formattedPhone,
+      address: addressController.text.trim(),
+      country: countryController.text.trim(),
+      role: "user",
     );
 
     setState(() => isLoading = false);
 
+    if (!mounted) {
+      return;
+    }
+
     if (response["success"]) {
+      await SecurePrefs.saveLastEmail(emailController.text.trim());
       await showSuccessDialog(context, "Account created successfully!");
+      if (!mounted) {
+        return;
+      }
       Nav.push(context, Verify());
     } else {
       await showErrorDialog(context, response["error"]);
     }
   }
 
-  final _formKey = GlobalKey<FormState>();
-
-  Widget _buildCountryPickerField() {
+  Widget _buildCountryPickerField(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(bottom: 8.0),
-          child: CustomText(
-            "Country",
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
+        Text(
+          "Country",
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w700,
           ),
         ),
-
+        const SizedBox(height: 8),
         TextFormField(
           controller: countryController,
           readOnly: true,
-          decoration: InputDecoration(
-            hintText: "Select Country",
-            prefixIcon: const Icon(Icons.public),
-            suffixIcon: const Icon(Icons.search),
-            filled: true,
-            fillColor: const Color(0xFFF7F7F7),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.black),
-            ),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Please select a country';
+            }
+            return null;
+          },
+          decoration: const InputDecoration(
+            hintText: "Select country",
+            prefixIcon: Icon(Icons.public_rounded),
+            suffixIcon: Icon(Icons.keyboard_arrow_down_rounded),
           ),
           onTap: () {
             showCountryPicker(
               context: context,
               showSearch: true,
               countryListTheme: CountryListThemeData(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(22),
                 inputDecoration: const InputDecoration(
                   hintText: "Search country",
                   prefixIcon: Icon(Icons.search),
                 ),
-                textStyle: const TextStyle(fontSize: 14),
+                textStyle: Theme.of(context).textTheme.bodyMedium,
               ),
               onSelect: (Country country) {
                 setState(() {
-                  selectedCountry = country.name;
                   countryController.text = country.name;
                 });
               },
             );
           },
-          
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please select a country';
-            }
-            return null;
-          },
         ),
-
-
       ],
     );
   }
@@ -179,185 +146,179 @@ class _SignupState extends ConsumerState<Signup> {
   Widget build(BuildContext context) {
     return LoadingOverlay(
       isLoading: isLoading,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Form(
-              key: _formKey, // ✅ attach form key here
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-
-                  GestureDetector(
-                    onTap: () {
-                      Nav.push(context, TailorRegistrationPage());
-                    },
-                    child: CustomText(
-                      "Sign Up",
-                      fontWeight: FontWeight.w700,
-                      fontSize: 25,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-
-                  CustomTextField(
-                    title: "Full Name",
-                    hintText: "Enter your full name",
-                    prefixIcon: Icons.person,
-                    fieldKey: "fullname",
-                    controller: fullnameController,
-                    keyboardType: TextInputType.name,
-                  ),
-
-                  CustomTextField(
-                    title: "Email",
-                    hintText: "Enter your email",
-                    prefixIcon: Icons.email,
-                    fieldKey: "email",
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-
-                  CustomTextField(
-                    title: "Phone",
-                    hintText: "Enter your phone number",
-                    prefixIcon: Icons.phone,
-                    fieldKey: "phone",
-                    controller: phoneController,
-                    keyboardType: TextInputType.phone,
-                    enableCountryCode: true,
-                    useGlobalCountryPicker: true,
-                    selectedCountryCode: selectedCountryCode,
-                    onCountryChanged: (code) {
-                      setState(() {
-                        selectedCountryCode = code ?? '+234';
-                      });
-                    },
-                  ),
-
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final isWideScreen = constraints.maxWidth > 600;
-
-                      if (isWideScreen) {
-                        // 💻 Desktop / Tablet
-                        return IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: CustomTextField(
-                                  title: "Address",
-                                  hintText: "Enter Address",
-                                  prefixIcon: Icons.house,
-                                  fieldKey: "address",
-                                  controller: addressController,
-                                ),
-                              ),
-
-                              const SizedBox(width: 10),
-
-                              Expanded(
-                                child: _buildCountryPickerField(),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-
-                      // 📱 Mobile Layout
-                      return Column(
-                        children: [
-                          CustomTextField(
-                            title: "Address",
-                            hintText: "Enter Address",
-                            prefixIcon: Icons.house,
-                            fieldKey: "address",
-                            controller: addressController,
-                          ),
-
-                          _buildCountryPickerField(),
-                          const SizedBox(height: 16),
-                        ],
-                      );
-                    },
-                  ),
-
-                  CustomTextField(
-                    title: "Password",
-                    hintText: "Enter your password",
-                    prefixIcon: Icons.lock,
-                    isPassword: true,
-                    fieldKey: "password",
-                    controller: passwordController,
-                  ),
-
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: isTailor,
-                        onChanged: (val) {
-                          setState(() {
-                            isTailor = val ?? false;
-                          });
-                          if (val == true) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  "Leave blank if you are not a tailor",
-                                ),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                      const CustomText("I'm a Designer"),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  CustomButton(
-                    title: "Create Account",
-                    isOutlined: false,
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _handleSignup();
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Please fix the errors'),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const CustomText("Existing user? "),
-                      const SizedBox(width: 10),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (_) => const Signin()),
-                          );
-                        },
-                        child: CustomText("Login", fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ],
+      child: AuthShell(
+        eyebrow: 'Create your profile',
+        title: 'Step into a cleaner, better-tailored experience.',
+        subtitle:
+            'Set up your account once and move across shopping, tailoring, and marketplace flows with a consistent interface.',
+        footer: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CustomText(
+              "Already have an account? ",
+              color: AppColors.subtext,
+              textAlign: TextAlign.left,
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const Signin()),
+                );
+              },
+              child: const CustomText(
+                "Sign in",
+                fontWeight: FontWeight.w700,
+                color: AppColors.accent,
+                textAlign: TextAlign.left,
               ),
             ),
+          ],
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Personal Details",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                "Fill in your core details to create your customer account.",
+                style: TextStyle(color: AppColors.subtext, height: 1.5),
+              ),
+              const SizedBox(height: 22),
+              CustomTextField(
+                title: "Full name",
+                hintText: "Enter your full name",
+                prefixIcon: Icons.person_outline_rounded,
+                fieldKey: "fullname",
+                controller: fullnameController,
+                keyboardType: TextInputType.name,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Full name is required';
+                  }
+                  return null;
+                },
+              ),
+              CustomTextField(
+                title: "Email address",
+                hintText: "name@example.com",
+                prefixIcon: Icons.mail_outline_rounded,
+                fieldKey: "email",
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Email is required';
+                  }
+                  return null;
+                },
+              ),
+              CustomTextField(
+                title: "Phone number",
+                hintText: "Enter your phone number",
+                prefixIcon: Icons.call_outlined,
+                fieldKey: "phone",
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+                enableCountryCode: true,
+                useGlobalCountryPicker: true,
+                selectedCountryCode: selectedCountryCode,
+                onCountryChanged: (code) {
+                  setState(() {
+                    selectedCountryCode = code ?? '+234';
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Phone number is required';
+                  }
+                  return null;
+                },
+              ),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isWideScreen = constraints.maxWidth > 640;
+                  if (isWideScreen) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: CustomTextField(
+                            title: "Address",
+                            hintText: "Enter address",
+                            prefixIcon: Icons.home_outlined,
+                            fieldKey: "address",
+                            controller: addressController,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Address is required';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(child: _buildCountryPickerField(context)),
+                      ],
+                    );
+                  }
+
+                  return Column(
+                    children: [
+                      CustomTextField(
+                        title: "Address",
+                        hintText: "Enter address",
+                        prefixIcon: Icons.home_outlined,
+                        fieldKey: "address",
+                        controller: addressController,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Address is required';
+                          }
+                          return null;
+                        },
+                      ),
+                      _buildCountryPickerField(context),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+              CustomTextField(
+                title: "Password",
+                hintText: "Create a secure password",
+                prefixIcon: Icons.lock_outline_rounded,
+                isPassword: true,
+                fieldKey: "password",
+                controller: passwordController,
+              ),
+              const SizedBox(height: 18),
+              CustomButton(
+                title: "Create account",
+                onPressed: _handleSignup,
+              ),
+              const SizedBox(height: 14),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Nav.push(context, TailorRegistrationPage());
+                },
+                icon: const Icon(Icons.design_services_outlined),
+                label: const Text("Register as a tailor instead"),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.accent,
+                  minimumSize: const Size.fromHeight(54),
+                  side: const BorderSide(color: AppColors.border),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

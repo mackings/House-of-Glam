@@ -4,11 +4,12 @@ import 'package:hog/App/Home/Model/category.dart';
 import 'package:hog/App/Home/Model/tailor.dart';
 import 'package:hog/App/Home/Model/vendor.dart';
 import 'package:hog/constants/api_config.dart';
-import 'package:hog/utils/error_handler.dart';
 import 'package:http/http.dart' as http;
 
 class HomeApiService {
   static const String baseUrl = ApiConfig.apiBaseUrl;
+  static final Map<String, VendorDetailsResponse> _vendorCache = {};
+  static final Map<String, Future<VendorDetailsResponse?>> _vendorInFlight = {};
 
   static Future<List<Tailor>> getAllTailors() async {
     try {
@@ -71,8 +72,50 @@ class HomeApiService {
   }
 
   static Future<VendorDetailsResponse?> getVendorDetails(
-    String vendorId,
-  ) async {
+    String vendorId, {
+    bool forceRefresh = false,
+  }) async {
+    if (!forceRefresh && _vendorCache.containsKey(vendorId)) {
+      return _vendorCache[vendorId];
+    }
+
+    if (!forceRefresh && _vendorInFlight.containsKey(vendorId)) {
+      return _vendorInFlight[vendorId];
+    }
+
+    final future = _fetchVendorDetails(vendorId, forceRefresh: forceRefresh);
+    _vendorInFlight[vendorId] = future;
+    final result = await future;
+    _vendorInFlight.remove(vendorId);
+    if (result != null) {
+      _vendorCache[vendorId] = result;
+    }
+    return result;
+  }
+
+  static VendorDetailsResponse? getCachedVendorDetails(String vendorId) {
+    return _vendorCache[vendorId];
+  }
+
+  static String? getCachedVendorImage(String vendorId) {
+    final image = _vendorCache[vendorId]?.userProfile.image;
+    if (image == null || image.trim().isEmpty) {
+      return null;
+    }
+    return image;
+  }
+
+  static Future<void> prefetchVendorDetails(List<String> vendorIds) async {
+    await Future.wait(
+      vendorIds.map((vendorId) => getVendorDetails(vendorId)),
+      eagerError: false,
+    );
+  }
+
+  static Future<VendorDetailsResponse?> _fetchVendorDetails(
+    String vendorId, {
+    bool forceRefresh = false,
+  }) async {
     try {
       final token = await SecurePrefs.getToken();
       final url = Uri.parse(
@@ -95,6 +138,10 @@ class HomeApiService {
       }
     } catch (e) {
       print("❌ Error fetching vendor details: $e");
+    }
+
+    if (!forceRefresh) {
+      return _vendorCache[vendorId];
     }
 
     return null;

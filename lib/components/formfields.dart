@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:country_picker/country_picker.dart';
+import 'package:hog/theme/app_theme.dart';
 
 final obscureTextProvider = StateProvider.family<bool, String>(
   (ref, fieldKey) => true,
@@ -27,6 +28,8 @@ class CustomTextField extends ConsumerWidget {
   final List<String> countryCodes;
   final String? selectedCountryCode;
   final ValueChanged<String?>? onCountryChanged;
+  final bool readOnly;
+  final bool autofocus;
 
   final bool isCompact;
 
@@ -49,14 +52,16 @@ class CustomTextField extends ConsumerWidget {
     this.countryCodes = const ['+1', '+44', '+234', '+91'],
     this.selectedCountryCode,
     this.onCountryChanged,
+    this.readOnly = false,
+    this.autofocus = false,
     this.useGlobalCountryPicker =
         false, // ✅ default = false (backward compatible)
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final screenWidth = MediaQuery.of(context).size.width;
     final obscureText = ref.watch(obscureTextProvider(fieldKey));
+    final theme = Theme.of(context);
 
     return Padding(
       padding:
@@ -68,7 +73,10 @@ class CustomTextField extends ConsumerWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: AppColors.ink,
+            ),
           ),
           const SizedBox(height: 8),
 
@@ -78,14 +86,10 @@ class CustomTextField extends ConsumerWidget {
                 value: selectedValue,
                 decoration: InputDecoration(
                   hintText: hintText,
-                  prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 15,
-                    horizontal: screenWidth * 0.04,
-                  ),
+                  prefixIcon:
+                      prefixIcon != null
+                          ? Icon(prefixIcon, size: 20, color: AppColors.subtext)
+                          : null,
                 ),
                 items:
                     dropdownItems!
@@ -118,23 +122,25 @@ class CustomTextField extends ConsumerWidget {
                             );
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
                             alignment: Alignment.center,
                             height: 58,
                             decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade400),
-                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.white,
+                              border: Border.all(color: AppColors.border),
+                              borderRadius: BorderRadius.circular(18),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   selectedCountryCode ?? '+1',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
-                                const Icon(Icons.arrow_drop_down),
+                                const SizedBox(width: 6),
+                                const Icon(Icons.keyboard_arrow_down_rounded),
                               ],
                             ),
                           ),
@@ -145,9 +151,6 @@ class CustomTextField extends ConsumerWidget {
                           child: DropdownButtonFormField<String>(
                             value: selectedCountryCode ?? countryCodes.first,
                             decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
                               contentPadding: const EdgeInsets.symmetric(
                                 vertical: 15,
                                 horizontal: 10,
@@ -171,10 +174,12 @@ class CustomTextField extends ConsumerWidget {
                   Expanded(
                     child: TextFormField(
                       controller: controller,
+                      autofocus: autofocus,
+                      readOnly: readOnly,
                       keyboardType: keyboardType,
-                      inputFormatters: inputFormatters,
-                      obscureText: isPassword ? obscureText : false,
-                      onChanged: onChanged,
+                        inputFormatters: inputFormatters,
+                        obscureText: isPassword ? obscureText : false,
+                        onChanged: onChanged,
                       validator: (value) {
                         if (isPassword) {
                           if (value == null || value.isEmpty) {
@@ -201,7 +206,13 @@ class CustomTextField extends ConsumerWidget {
                       decoration: InputDecoration(
                         hintText: hintText,
                         prefixIcon:
-                            prefixIcon != null ? Icon(prefixIcon) : null,
+                            prefixIcon != null
+                                ? Icon(
+                                  prefixIcon,
+                                  size: 20,
+                                  color: AppColors.subtext,
+                                )
+                                : null,
                         suffixIcon:
                             isPassword
                                 ? IconButton(
@@ -209,6 +220,7 @@ class CustomTextField extends ConsumerWidget {
                                     obscureText
                                         ? Icons.visibility_off
                                         : Icons.visibility,
+                                    size: 20,
                                   ),
                                   onPressed: () {
                                     ref
@@ -221,13 +233,6 @@ class CustomTextField extends ConsumerWidget {
                                   },
                                 )
                                 : null,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: 15,
-                          horizontal: screenWidth * 0.04,
-                        ),
                       ),
                     ),
                   ),

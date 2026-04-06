@@ -3,12 +3,14 @@ import 'package:hog/App/Home/Api/Transaction.dart';
 import 'package:hog/App/Home/Model/TransModel.dart';
 import 'package:hog/components/Transactions/card.dart';
 import 'package:hog/components/Transactions/modal.dart';
-import 'package:hog/components/texts.dart';
+import 'package:hog/components/customAppbar.dart';
 import 'package:hog/constants/currencyHelper.dart';
-import 'package:intl/intl.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class Transactions extends StatefulWidget {
-  const Transactions({super.key});
+  final bool showBackButton;
+
+  const Transactions({super.key, this.showBackButton = true});
 
   @override
   State<Transactions> createState() => _TransactionsState();
@@ -17,7 +19,6 @@ class Transactions extends StatefulWidget {
 class _TransactionsState extends State<Transactions> {
   bool isLoading = false;
   List<TransactionResponse> transactions = [];
-  // ✅ Store converted amounts
   Map<String, double> convertedAmounts = {};
 
   @override
@@ -31,20 +32,16 @@ class _TransactionsState extends State<Transactions> {
 
     final response = await TransactionService.getTransactions();
 
-    if (response != null && response.transactions!.isNotEmpty) {
-      setState(() => transactions = response.transactions!);
-
-      // ✅ Convert all amounts to user's currency
+    if (response != null && response.transactions.isNotEmpty) {
+      setState(() => transactions = response.transactions);
       await _convertAllAmounts();
     }
 
     setState(() => isLoading = false);
   }
 
-  // ✅ Convert all transaction amounts from NGN to user's currency
   Future<void> _convertAllAmounts() async {
     for (var txn in transactions) {
-      // ✅ Use totalAmount for transfers, amountPaid for orders
       final amount =
           txn.isBankTransfer
               ? (txn.totalAmount ?? 0.0)
@@ -52,13 +49,10 @@ class _TransactionsState extends State<Transactions> {
 
       if (amount > 0) {
         try {
-          // ✅ Convert from NGN (amounts are already in NGN, not kobo)
           final ngnAmount = amount.round();
           final converted = await CurrencyHelper.convertFromNGN(ngnAmount);
           convertedAmounts[txn.id ?? ''] = converted;
-        } catch (e) {
-          print("❌ Error converting amount for ${txn.id}: $e");
-          // Fallback: use amount as-is
+        } catch (_) {
           convertedAmounts[txn.id ?? ''] = amount;
         }
       }
@@ -75,8 +69,9 @@ class _TransactionsState extends State<Transactions> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder:
           (_) => TransactionDetailsModal(
@@ -89,14 +84,11 @@ class _TransactionsState extends State<Transactions> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const CustomText(
-          "Transactions",
-          color: Colors.white,
-          fontSize: 20,
-        ),
-        backgroundColor: Colors.purple,
+      backgroundColor: AppColors.canvas,
+      appBar: CustomAppBar(
+        title: "Transactions",
+        enableAction: false,
+        enableBack: widget.showBackButton,
       ),
       body: RefreshIndicator(
         onRefresh: fetchTransactions,
@@ -104,12 +96,30 @@ class _TransactionsState extends State<Transactions> {
             isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : transactions.isEmpty
-                ? const Center(child: Text("No transactions found"))
+                ? ListView(
+                  children: const [
+                    SizedBox(height: 220),
+                    Center(child: Text("No transactions found")),
+                  ],
+                )
                 : ListView.builder(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: transactions.length,
+                  padding: const EdgeInsets.fromLTRB(14, 8, 14, 20),
+                  itemCount: transactions.length + 1,
                   itemBuilder: (context, index) {
-                    final txn = transactions[index];
+                    if (index == 0) {
+                      return const Padding(
+                        padding: EdgeInsets.fromLTRB(6, 4, 6, 10),
+                        child: Text(
+                          "Review payments, transfers, and order activity with cleaner transaction details.",
+                          style: TextStyle(
+                            color: AppColors.subtext,
+                            height: 1.5,
+                          ),
+                        ),
+                      );
+                    }
+
+                    final txn = transactions[index - 1];
                     final convertedAmount = convertedAmounts[txn.id ?? ''] ?? 0;
 
                     return TransactionCard(

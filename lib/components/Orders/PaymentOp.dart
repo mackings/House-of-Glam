@@ -11,6 +11,7 @@ import 'package:hog/components/texts.dart';
 import 'package:hog/constants/country_list.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:hog/constants/currencyHelper.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class PaymentOptionsModal extends StatefulWidget {
@@ -934,118 +935,139 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
 
     return Stack(
       children: [
-        Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 16,
-            right: 16,
-            top: 36,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const CustomText(
-                  "Choose a Payment Option",
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-                const SizedBox(height: 12),
-
-                if (isInternationalVendor)
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.blue.shade200),
+        SafeArea(
+          top: true,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 40, 20, 28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 52,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: AppColors.border,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.payment,
-                          color: Colors.blue.shade700,
-                          size: 20,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      _buildHeaderButton(
+                        icon: Icons.arrow_back_ios_new_rounded,
+                        onTap: () => Navigator.of(context).pop(),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const CustomText(
+                              "Payment Options",
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              textAlign: TextAlign.left,
+                            ),
+                            const SizedBox(height: 2),
+                            CustomText(
+                              "Choose how you want to complete this payment.",
+                              fontSize: 12,
+                              color: AppColors.subtext,
+                              textAlign: TextAlign.left,
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
+                      ),
+                      _buildHeaderButton(
+                        icon: Icons.close_rounded,
+                        onTap: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  _buildSummaryCard(isInternationalVendor),
+                  if (widget.allowPaymentTypeSwitch) ...[
+                    const SizedBox(height: 18),
+                    const CustomText(
+                      "Payment Type",
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      textAlign: TextAlign.left,
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
                         Expanded(
-                          child: CustomText(
-                            "International vendor - Payment via Stripe",
-                            fontSize: 12,
-                            color: Colors.blue.shade900,
+                          child: _buildSelectionTile(
+                            title: "Full Payment",
+                            subtitle: "Pay the complete amount now",
+                            icon: Icons.account_balance_wallet_outlined,
+                            selected: paymentType == "full",
+                            onTap: () {
+                              setState(() => paymentType = "full");
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildSelectionTile(
+                            title: "Part Payment",
+                            subtitle: "Pay half and complete later",
+                            icon: Icons.payments_outlined,
+                            selected: paymentType == "part",
+                            onTap: () {
+                              setState(() {
+                                paymentType = "part";
+                                _autoFillHalfPayment();
+                              });
+                            },
                           ),
                         ),
                       ],
                     ),
-                  ),
-
-                if (isInternationalVendor) const SizedBox(height: 12),
-
-                if (widget.allowPaymentTypeSwitch)
-                  Row(
-                    children: [
-                      Radio(
-                        value: "full",
-                        groupValue: paymentType,
-                        onChanged:
-                            (val) =>
-                                setState(() => paymentType = val as String),
+                  ],
+                  if (paymentType == "part") ...[
+                    const SizedBox(height: 14),
+                    CustomTextField(
+                      title: _isUserInNigeria ? "Amount (NGN)" : "Amount (USD)",
+                      fieldKey: "amount",
+                      hintText:
+                          _isUserInNigeria
+                              ? "Enter amount e.g., 23,000"
+                              : "Enter amount e.g., 120.50",
+                      controller: amountController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
                       ),
-                      const Text("Full Payment"),
-                      Radio(
-                        value: "part",
-                        groupValue: paymentType,
-                        onChanged: (val) {
-                          setState(() {
-                            paymentType = val as String;
-                            _autoFillHalfPayment();
-                          });
-                        },
-                      ),
-                      const Text("Part Payment"),
-                    ],
-                  ),
-
-                if (paymentType == "part") ...[
-                  CustomTextField(
-                    title: _isUserInNigeria ? "Amount (NGN)" : "Amount (USD)",
-                    fieldKey: "amount",
-                    hintText:
-                        _isUserInNigeria
-                            ? "Enter amount e.g., 23,000"
-                            : "Enter amount e.g., 120.50",
-                    controller: amountController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          _isUserInNigeria
+                              ? RegExp(r'^[0-9,]*$')
+                              : RegExp(r'^[0-9,]*\.?\d{0,2}$'),
+                        ),
+                      ],
+                      onChanged: _handleAmountChange,
                     ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        _isUserInNigeria
-                            ? RegExp(r'^[0-9,]*$')
-                            : RegExp(r'^[0-9,]*\.?\d{0,2}$'),
-                      ),
-                    ],
-                    onChanged: _handleAmountChange,
+                  ],
+                  const SizedBox(height: 18),
+                  const CustomText(
+                    "Shipment Method",
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    textAlign: TextAlign.left,
                   ),
-                  const SizedBox(height: 8),
-                ],
-
-                const SizedBox(height: 12),
-
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: const CustomText("Shipment Method", fontSize: 16),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade400),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: DropdownButtonFormField<String>(
+                  const SizedBox(height: 10),
+                  _buildDropdownField<String>(
                     value: shipment,
-                    decoration: const InputDecoration(border: InputBorder.none),
+                    hintText: "Select shipment method",
+                    icon: Icons.local_shipping_outlined,
                     items: const [
                       DropdownMenuItem(
                         value: "Regular",
@@ -1061,491 +1083,427 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                       ),
                     ],
                     onChanged: (val) {
-                      setState(() => shipment = val!);
+                      if (val == null) return;
+                      setState(() => shipment = val);
                       _scheduleDeliveryCostRefresh();
                     },
                   ),
-                ),
-
-                const SizedBox(height: 15),
-
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const CustomText("Delivery Option", fontSize: 16),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: RadioListTile<String>(
-                            dense: true,
-                            contentPadding: EdgeInsets.zero,
-                            title: const Text("Address"),
-                            value: "address",
-                            groupValue: deliveryMode,
-                            onChanged: (val) {
-                              if (val == null) return;
-                              setState(() => deliveryMode = val);
-                              _scheduleDeliveryCostRefresh();
-                            },
-                          ),
-                        ),
-                        Expanded(
-                          child: RadioListTile<String>(
-                            dense: true,
-                            contentPadding: EdgeInsets.zero,
-                            title: const Text("Pickup Location"),
-                            value: "pickup",
-                            groupValue: deliveryMode,
-                            onChanged: (val) {
-                              if (val == null) return;
-                              setState(() => deliveryMode = val);
-                              _scheduleDeliveryCostRefresh();
-                            },
-                          ),
+                  const SizedBox(height: 18),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: AppColors.border),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: AppColors.shadow,
+                          blurRadius: 18,
+                          offset: Offset(0, 10),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    if (deliveryMode == "address") ...[
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: const CustomText(
-                          "Delivery Address",
-                          fontSize: 16,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const CustomText(
+                          "Delivery Option",
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          textAlign: TextAlign.left,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color:
-                                showCountryError
-                                    ? Colors.redAccent
-                                    : Colors.grey.shade300,
-                          ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildSelectionTile(
+                                title: "Address",
+                                subtitle: "Deliver to your address",
+                                icon: Icons.location_on_outlined,
+                                selected: deliveryMode == "address",
+                                onTap: () {
+                                  setState(() => deliveryMode = "address");
+                                  _scheduleDeliveryCostRefresh();
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildSelectionTile(
+                                title: "Pickup",
+                                subtitle: "Collect from a location",
+                                icon: Icons.store_mall_directory_outlined,
+                                selected: deliveryMode == "pickup",
+                                onTap: () {
+                                  setState(() => deliveryMode = "pickup");
+                                  _scheduleDeliveryCostRefresh();
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                        child: DropdownButtonFormField<CountryOption>(
-                          value: selectedCountry,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
+                        const SizedBox(height: 16),
+                        if (deliveryMode == "address") ...[
+                          _buildDropdownField<CountryOption>(
+                            value: selectedCountry,
                             hintText: "Select country",
-                          ),
-                          items:
-                              allCountries.map((country) {
-                                return DropdownMenuItem<CountryOption>(
-                                  value: country,
-                                  child: Text(
-                                    '${country.flagEmoji} ${country.name}',
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                );
-                              }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedCountry = value;
-                              if (showCountryError && value != null) {
-                                showCountryError = false;
-                              }
-                            });
-                            _scheduleDeliveryCostRefresh();
-                          },
-                        ),
-                      ),
-                      if (showCountryError)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 6, left: 4),
-                          child: CustomText(
-                            "Country is required",
-                            fontSize: 11,
-                            color: Colors.redAccent,
-                          ),
-                        ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: addressLine1Controller,
-                        decoration: InputDecoration(
-                          hintText:
-                              "Address line 1 (Street, House/Building No.)",
-                          filled: true,
-                          fillColor: Colors.grey.shade50,
-                          errorText:
-                              showAddressLine1Error
-                                  ? "Address line 1 is required"
-                                  : null,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.redAccent,
-                            ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.redAccent,
-                            ),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 14,
-                          ),
-                        ),
-                        onChanged: (value) {
-                          if (showAddressLine1Error &&
-                              value.trim().isNotEmpty) {
-                            setState(() => showAddressLine1Error = false);
-                          }
-                          _scheduleDeliveryCostRefresh();
-                        },
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: addressLine2Controller,
-                        decoration: InputDecoration(
-                          hintText:
-                              "Address line 2 (Apartment, Suite, Landmark) - Optional",
-                          filled: true,
-                          fillColor: Colors.grey.shade50,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 14,
-                          ),
-                        ),
-                        onChanged: (_) => _scheduleDeliveryCostRefresh(),
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: cityController,
-                        decoration: InputDecoration(
-                          hintText: "City / Town",
-                          filled: true,
-                          fillColor: Colors.grey.shade50,
-                          errorText: showCityError ? "City is required" : null,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.redAccent,
-                            ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.redAccent,
-                            ),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 14,
-                          ),
-                        ),
-                        onChanged: (value) {
-                          if (showCityError && value.trim().isNotEmpty) {
-                            setState(() => showCityError = false);
-                          }
-                          _scheduleDeliveryCostRefresh();
-                        },
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: regionController,
-                        decoration: InputDecoration(
-                          hintText: "State / Province / Region",
-                          filled: true,
-                          fillColor: Colors.grey.shade50,
-                          errorText:
-                              showRegionError
-                                  ? "State / Province / Region is required"
-                                  : null,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.redAccent,
-                            ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Colors.redAccent,
-                            ),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 14,
-                          ),
-                        ),
-                        onChanged: (value) {
-                          if (showRegionError && value.trim().isNotEmpty) {
-                            setState(() => showRegionError = false);
-                          }
-                          _scheduleDeliveryCostRefresh();
-                        },
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: postalCodeController,
-                        decoration: InputDecoration(
-                          hintText: "Postal / ZIP code (Optional)",
-                          filled: true,
-                          fillColor: Colors.grey.shade50,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 14,
-                          ),
-                        ),
-                        onChanged: (_) => _scheduleDeliveryCostRefresh(),
-                      ),
-                    ] else ...[
-                      const CustomText("Pickup Location", fontSize: 16),
-                      const SizedBox(height: 8),
-                      if (isLoadingPickupHierarchy)
-                        const Center(child: CircularProgressIndicator())
-                      else if (pickupCountries.isEmpty)
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.orange.shade200),
-                          ),
-                          child: const CustomText(
-                            "No pickup locations configured by admin yet.",
-                            fontSize: 12,
-                            color: Colors.black87,
-                          ),
-                        )
-                      else ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color:
-                                  showPickupCountryError
-                                      ? Colors.redAccent
-                                      : Colors.grey.shade300,
-                            ),
-                          ),
-                          child: DropdownButtonFormField<PickupCountryOption>(
-                            value: selectedPickupCountry,
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              hintText: "Select pickup country",
-                            ),
+                            icon: Icons.public_rounded,
+                            errorText:
+                                showCountryError ? "Country is required" : null,
                             items:
-                                pickupCountries.map((country) {
-                                  return DropdownMenuItem<PickupCountryOption>(
+                                allCountries.map((country) {
+                                  return DropdownMenuItem<CountryOption>(
                                     value: country,
-                                    child: Text(country.name),
+                                    child: Text(
+                                      '${country.flagEmoji} ${country.name}',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   );
                                 }).toList(),
                             onChanged: (value) {
                               setState(() {
-                                selectedPickupCountry = value;
-                                selectedPickupState = null;
-                                selectedPickupLocation = null;
-                                if (showPickupCountryError && value != null) {
-                                  showPickupCountryError = false;
+                                selectedCountry = value;
+                                if (showCountryError && value != null) {
+                                  showCountryError = false;
                                 }
                               });
                               _scheduleDeliveryCostRefresh();
                             },
                           ),
-                        ),
-                        if (showPickupCountryError)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 6, left: 4),
-                            child: CustomText(
-                              "Pickup country is required",
-                              fontSize: 11,
-                              color: Colors.redAccent,
-                            ),
+                          const SizedBox(height: 12),
+                          _buildTextField(
+                            controller: addressLine1Controller,
+                            hintText:
+                                "Address line 1 (Street, House/Building No.)",
+                            icon: Icons.home_work_outlined,
+                            errorText:
+                                showAddressLine1Error
+                                    ? "Address line 1 is required"
+                                    : null,
+                            onChanged: (value) {
+                              if (showAddressLine1Error &&
+                                  value.trim().isNotEmpty) {
+                                setState(() => showAddressLine1Error = false);
+                              }
+                              _scheduleDeliveryCostRefresh();
+                            },
                           ),
-                        const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color:
-                                  showPickupStateError
-                                      ? Colors.redAccent
-                                      : Colors.grey.shade300,
-                            ),
+                          const SizedBox(height: 12),
+                          _buildTextField(
+                            controller: addressLine2Controller,
+                            hintText:
+                                "Address line 2 (Apartment, Suite, Landmark) - Optional",
+                            icon: Icons.pin_drop_outlined,
+                            onChanged: (_) => _scheduleDeliveryCostRefresh(),
                           ),
-                          child: DropdownButtonFormField<PickupStateOption>(
-                            value: selectedPickupState,
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildTextField(
+                                  controller: cityController,
+                                  hintText: "City / Town",
+                                  icon: Icons.location_city_outlined,
+                                  errorText:
+                                      showCityError ? "City is required" : null,
+                                  onChanged: (value) {
+                                    if (showCityError &&
+                                        value.trim().isNotEmpty) {
+                                      setState(() => showCityError = false);
+                                    }
+                                    _scheduleDeliveryCostRefresh();
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildTextField(
+                                  controller: regionController,
+                                  hintText: "State / Region",
+                                  icon: Icons.map_outlined,
+                                  errorText:
+                                      showRegionError
+                                          ? "State / Region is required"
+                                          : null,
+                                  onChanged: (value) {
+                                    if (showRegionError &&
+                                        value.trim().isNotEmpty) {
+                                      setState(() => showRegionError = false);
+                                    }
+                                    _scheduleDeliveryCostRefresh();
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          _buildTextField(
+                            controller: postalCodeController,
+                            hintText: "Postal / ZIP code (Optional)",
+                            icon: Icons.markunread_mailbox_outlined,
+                            onChanged: (_) => _scheduleDeliveryCostRefresh(),
+                          ),
+                        ] else ...[
+                          if (isLoadingPickupHierarchy)
+                            const Center(child: CircularProgressIndicator())
+                          else if (pickupCountries.isEmpty)
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFF4DE),
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: const Color(0xFFF5D08A),
+                                ),
+                              ),
+                              child: const CustomText(
+                                "No pickup locations configured by admin yet.",
+                                fontSize: 12,
+                                color: AppColors.warning,
+                                textAlign: TextAlign.left,
+                              ),
+                            )
+                          else ...[
+                            _buildDropdownField<PickupCountryOption>(
+                              value: selectedPickupCountry,
+                              hintText: "Select pickup country",
+                              icon: Icons.public_rounded,
+                              errorText:
+                                  showPickupCountryError
+                                      ? "Pickup country is required"
+                                      : null,
+                              items:
+                                  pickupCountries.map((country) {
+                                    return DropdownMenuItem<
+                                      PickupCountryOption
+                                    >(
+                                      value: country,
+                                      child: Text(country.name),
+                                    );
+                                  }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedPickupCountry = value;
+                                  selectedPickupState = null;
+                                  selectedPickupLocation = null;
+                                  if (showPickupCountryError && value != null) {
+                                    showPickupCountryError = false;
+                                  }
+                                });
+                                _scheduleDeliveryCostRefresh();
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            _buildDropdownField<PickupStateOption>(
+                              value: selectedPickupState,
                               hintText: "Select pickup state",
+                              icon: Icons.map_outlined,
+                              errorText:
+                                  showPickupStateError
+                                      ? "Pickup state is required"
+                                      : null,
+                              items:
+                                  _getMergedPickupStates(
+                                    selectedPickupCountry,
+                                  ).map((state) {
+                                    return DropdownMenuItem<PickupStateOption>(
+                                      value: state,
+                                      child: Text(state.name),
+                                    );
+                                  }).toList(),
+                              onChanged:
+                                  selectedPickupCountry == null
+                                      ? null
+                                      : (value) {
+                                        setState(() {
+                                          selectedPickupState = value;
+                                          selectedPickupLocation = null;
+                                          if (showPickupStateError &&
+                                              value != null) {
+                                            showPickupStateError = false;
+                                          }
+                                        });
+                                        _scheduleDeliveryCostRefresh();
+                                      },
                             ),
-                            items:
-                                _getMergedPickupStates(
-                                  selectedPickupCountry,
-                                ).map((state) {
-                                  return DropdownMenuItem<PickupStateOption>(
-                                    value: state,
-                                    child: Text(state.name),
-                                  );
-                                }).toList(),
-                            onChanged:
-                                selectedPickupCountry == null
-                                    ? null
-                                    : (value) {
-                                      setState(() {
-                                        selectedPickupState = value;
-                                        selectedPickupLocation = null;
-                                        if (showPickupStateError &&
-                                            value != null) {
-                                          showPickupStateError = false;
-                                        }
-                                      });
-                                      _scheduleDeliveryCostRefresh();
-                                    },
-                          ),
-                        ),
-                        if (showPickupStateError)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 6, left: 4),
-                            child: CustomText(
-                              "Pickup state is required",
-                              fontSize: 11,
-                              color: Colors.redAccent,
+                            const SizedBox(height: 12),
+                            _buildDropdownField<PickupLocationOption>(
+                              value: selectedPickupLocation,
+                              hintText: "Select pickup address",
+                              icon: Icons.storefront_outlined,
+                              errorText:
+                                  showPickupLocationError
+                                      ? "Pickup location is required"
+                                      : null,
+                              items:
+                                  (selectedPickupState?.locations ?? const [])
+                                      .where((location) => location.isActive)
+                                      .map((location) {
+                                        final displayText =
+                                            location.address.trim().isNotEmpty
+                                                ? location.address
+                                                : location.name;
+                                        return DropdownMenuItem<
+                                          PickupLocationOption
+                                        >(
+                                          value: location,
+                                          child: Text(
+                                            displayText,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        );
+                                      })
+                                      .toList(),
+                              onChanged:
+                                  selectedPickupState == null
+                                      ? null
+                                      : (value) {
+                                        setState(() {
+                                          selectedPickupLocation = value;
+                                          if (showPickupLocationError &&
+                                              value != null) {
+                                            showPickupLocationError = false;
+                                          }
+                                        });
+                                        _scheduleDeliveryCostRefresh();
+                                      },
+                            ),
+                            if (selectedPickupLocation != null) ...[
+                              const SizedBox(height: 10),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceMuted,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Icon(
+                                      Icons.place_outlined,
+                                      size: 18,
+                                      color: AppColors.accent,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: CustomText(
+                                        selectedPickupLocation!.address,
+                                        fontSize: 12,
+                                        color: AppColors.ink,
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ],
+                        const SizedBox(height: 12),
+                        if (isCalculatingDelivery)
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceMuted,
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Row(
+                              children: [
+                                const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: CustomText(
+                                    "Estimating delivery fee...",
+                                    fontSize: 12,
+                                    color: AppColors.subtext,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else if (_deliveryCostLabel != null)
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: AppColors.accentSoft,
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.local_shipping_outlined,
+                                  color: AppColors.accent,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: CustomText(
+                                    "Estimated delivery fee: $_deliveryCostLabel",
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.accent,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color:
-                                  showPickupLocationError
-                                      ? Colors.redAccent
-                                      : Colors.grey.shade300,
+                        CustomText(
+                          deliveryMode == "pickup"
+                              ? "Choose an admin-configured pickup destination to continue."
+                              : "Use your full address so delivery costs and destination details stay accurate.",
+                          fontSize: 11,
+                          color: AppColors.subtext,
+                          textAlign: TextAlign.left,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed:
+                              isLoading
+                                  ? null
+                                  : () => Navigator.of(context).pop(),
+                          icon: const Icon(Icons.close_rounded, size: 18),
+                          label: const Text("Cancel"),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(54),
+                            side: const BorderSide(color: AppColors.border),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
                             ),
-                          ),
-                          child: DropdownButtonFormField<PickupLocationOption>(
-                            value: selectedPickupLocation,
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              hintText: "Select pickup address",
-                            ),
-                            items:
-                                (selectedPickupState?.locations ?? const [])
-                                    .where((location) => location.isActive)
-                                    .map((location) {
-                                      final displayText =
-                                          location.address.trim().isNotEmpty
-                                              ? location.address
-                                              : location.name;
-                                      return DropdownMenuItem<
-                                        PickupLocationOption
-                                      >(
-                                        value: location,
-                                        child: Text(
-                                          displayText,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      );
-                                    })
-                                    .toList(),
-                            onChanged:
-                                selectedPickupState == null
-                                    ? null
-                                    : (value) {
-                                      setState(() {
-                                        selectedPickupLocation = value;
-                                        if (showPickupLocationError &&
-                                            value != null) {
-                                          showPickupLocationError = false;
-                                        }
-                                      });
-                                      _scheduleDeliveryCostRefresh();
-                                    },
                           ),
                         ),
-                        if (showPickupLocationError)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 6, left: 4),
-                            child: CustomText(
-                              "Pickup location is required",
-                              fontSize: 11,
-                              color: Colors.redAccent,
-                            ),
-                          ),
-                        if (selectedPickupLocation != null) ...[
-                          const SizedBox(height: 8),
-                          CustomText(
-                            selectedPickupLocation!.address,
-                            fontSize: 11,
-                            color: Colors.black54,
-                          ),
-                        ],
-                      ],
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: CustomButton(
+                          title: "Continue to Pay",
+                          onPressed: isLoading ? null : _makePayment,
+                          isLoading: isLoading,
+                        ),
+                      ),
                     ],
-                    const SizedBox(height: 6),
-                    CustomText(
-                      deliveryMode == "pickup"
-                          ? "Select admin-configured pickup destination."
-                          : "Use your full home address. Country, address lines, city, state/region and postal code are sent for delivery.",
-                      fontSize: 11,
-                      color: Colors.black54,
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-                const SizedBox(height: 12),
-                CustomButton(title: "Make Payment", onPressed: _makePayment),
-                const SizedBox(height: 40),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1556,6 +1514,176 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
             child: const Center(child: CircularProgressIndicator()),
           ),
       ],
+    );
+  }
+
+  Widget _buildHeaderButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          color: AppColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Icon(icon, size: 18, color: AppColors.ink),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(bool isInternationalVendor) {
+    final total = widget.review.userPayableTotal ?? widget.review.totalCost;
+    final subtitle =
+        isInternationalVendor
+            ? "Checkout will continue with Stripe"
+            : "Checkout will continue with Paystack";
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFF7F2FF), Color(0xFFFFFFFF)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: AppColors.accentSoft,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              isInternationalVendor
+                  ? Icons.language_rounded
+                  : Icons.account_balance_wallet_outlined,
+              color: AppColors.accent,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(
+                  CurrencyHelper.formatAmount(total),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  textAlign: TextAlign.left,
+                ),
+                const SizedBox(height: 2),
+                CustomText(
+                  subtitle,
+                  fontSize: 12,
+                  color: AppColors.subtext,
+                  textAlign: TextAlign.left,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectionTile({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.accentSoft : Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: selected ? AppColors.accent : AppColors.border,
+            width: selected ? 1.4 : 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: selected ? AppColors.accent : AppColors.subtext,
+            ),
+            const SizedBox(height: 10),
+            CustomText(
+              title,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              textAlign: TextAlign.left,
+            ),
+            const SizedBox(height: 4),
+            CustomText(
+              subtitle,
+              fontSize: 11,
+              color: AppColors.subtext,
+              textAlign: TextAlign.left,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdownField<T>({
+    required T? value,
+    required String hintText,
+    required List<DropdownMenuItem<T>> items,
+    required ValueChanged<T?>? onChanged,
+    required IconData icon,
+    String? errorText,
+  }) {
+    return DropdownButtonFormField<T>(
+      initialValue: value,
+      isExpanded: true,
+      menuMaxHeight: 360,
+      decoration: InputDecoration(
+        hintText: hintText,
+        prefixIcon: Icon(icon, size: 20, color: AppColors.subtext),
+        errorText: errorText,
+      ),
+      items: items,
+      onChanged: onChanged,
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required ValueChanged<String> onChanged,
+    required IconData icon,
+    String? errorText,
+  }) {
+    return TextFormField(
+      controller: controller,
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        hintText: hintText,
+        prefixIcon: Icon(icon, size: 20, color: AppColors.subtext),
+        errorText: errorText,
+      ),
     );
   }
 }

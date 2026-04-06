@@ -6,6 +6,7 @@ import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class PatronizeForm extends StatefulWidget {
   final String publishedId;
@@ -117,7 +118,9 @@ class _PatronizeFormState extends State<PatronizeForm> {
   @override
   void dispose() {
     specialInstructionsController.dispose();
-    measurementControllers.values.forEach((c) => c.dispose());
+    for (final controller in measurementControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -125,53 +128,148 @@ class _PatronizeFormState extends State<PatronizeForm> {
   Widget build(BuildContext context) {
     return LoadingOverlay(
       isLoading: isLoading,
-      child: Scaffold(
-        appBar: AppBar(
-          iconTheme: IconThemeData(color: Colors.white),
-          backgroundColor: Colors.purple,
-          title: CustomText(
-            "Patronize Work",
+      child: SafeArea(
+        top: true,
+        child: Container(
+          decoration: const BoxDecoration(
             color: Colors.white,
-            fontSize: 18,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
           ),
-        ),
-        body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            padding: EdgeInsets.fromLTRB(
+              20,
+              26,
+              20,
+              MediaQuery.of(context).viewInsets.bottom + 28,
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 52,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: AppColors.border,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Row(
                     children: [
-                      // CustomText("Special Instructions *",
-                      //   color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
-                      // const Divider(),
-                      CustomTextField(
-                        title: "Special Instructions",
-                        hintText: "e.g. Make it slim fit",
-                        fieldKey: "specialInstructions",
-                        controller: specialInstructionsController,
+                      InkWell(
+                        onTap: () => Navigator.pop(context),
+                        borderRadius: BorderRadius.circular(14),
+                        child: Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceMuted,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: const Icon(
+                            Icons.close_rounded,
+                            size: 18,
+                            color: AppColors.ink,
+                          ),
+                        ),
                       ),
-
-                      const SizedBox(height: 20),
-                      CustomText(
-                        "Measurements *",
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CustomText(
+                              "Patronize Work",
+                              fontSize: 21,
+                              fontWeight: FontWeight.w800,
+                              textAlign: TextAlign.left,
+                            ),
+                            SizedBox(height: 2),
+                            CustomText(
+                              "Add your measurements and any special instruction before placing the order.",
+                              fontSize: 12,
+                              color: AppColors.subtext,
+                              textAlign: TextAlign.left,
+                            ),
+                          ],
+                        ),
                       ),
-                      const Divider(),
-                      buildMeasurementFields(),
-
-                      const SizedBox(height: 40),
-                      CustomButton(title: "Submit Order", onPressed: _submit),
-                      const SizedBox(height: 30),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 18),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFF9F5FF), Colors.white],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: AppColors.accentSoft,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(
+                            Icons.checkroom_rounded,
+                            color: AppColors.accent,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: CustomText(
+                            "Use accurate body measurements so the tailor can process the request correctly.",
+                            fontSize: 13,
+                            color: AppColors.subtext,
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  CustomTextField(
+                    title: "Special Instructions",
+                    hintText: "e.g. Make it slim fit",
+                    fieldKey: "specialInstructions",
+                    controller: specialInstructionsController,
+                  ),
+                  const SizedBox(height: 18),
+                  const CustomText(
+                    "Measurements *",
+                    color: AppColors.ink,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    textAlign: TextAlign.left,
+                  ),
+                  const SizedBox(height: 6),
+                  const CustomText(
+                    "Fill in the available body measurements below.",
+                    fontSize: 12,
+                    color: AppColors.subtext,
+                    textAlign: TextAlign.left,
+                  ),
+                  const SizedBox(height: 14),
+                  buildMeasurementFields(),
+                  const SizedBox(height: 28),
+                  CustomButton(title: "Submit Order", onPressed: _submit),
+                  const SizedBox(height: 10),
+                ],
+              ),
             ),
           ),
         ),

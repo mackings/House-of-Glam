@@ -74,9 +74,13 @@ class _TailorMainPageState extends State<TailorMainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _pages.isNotEmpty ? _pages[_currentIndex] : const SizedBox(),
-      bottomNavigationBar: TailorCustomBottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _onNavTap,
+      bottomNavigationBar: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: TailorCustomBottomNavBar(
+          currentIndex: _currentIndex,
+          onTap: _onNavTap,
+        ),
       ),
     );
   }

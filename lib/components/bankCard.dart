@@ -49,16 +49,16 @@ class _BankDetailsCardState extends State<BankDetailsCard> {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 9),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(widget.borderRadius),
+          borderRadius: BorderRadius.circular(widget.borderRadius + 8),
           child: Container(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.purple.shade700, Colors.purple.shade400],
+              gradient: const LinearGradient(
+                colors: [Color(0xFF16131E), Color(0xFF7C3AED)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
             ),
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(18),
             child:
                 isLoading
                     ? const Center(
@@ -72,10 +72,17 @@ class _BankDetailsCardState extends State<BankDetailsCard> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Icon(
-                              Icons.account_balance,
-                              color: Colors.white,
-                              size: 20,
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(
+                                Icons.account_balance_outlined,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -83,8 +90,8 @@ class _BankDetailsCardState extends State<BankDetailsCard> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(20),
+                                color: Colors.white.withValues(alpha: 0.14),
+                                borderRadius: BorderRadius.circular(999),
                               ),
                               child: const Text(
                                 "HOG Bank",
@@ -107,9 +114,9 @@ class _BankDetailsCardState extends State<BankDetailsCard> {
                               "₦${walletBalance.toStringAsFixed(2)}",
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 28,
+                                fontSize: 26,
                                 fontWeight: FontWeight.bold,
-                                letterSpacing: 1,
+                                letterSpacing: 0.3,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -118,9 +125,9 @@ class _BankDetailsCardState extends State<BankDetailsCard> {
                             Text(
                               "Wallet Balance",
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.8),
+                                color: Colors.white.withValues(alpha: 0.8),
                                 fontSize: 12,
-                                fontWeight: FontWeight.w400,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -129,10 +136,10 @@ class _BankDetailsCardState extends State<BankDetailsCard> {
                             Text(
                               accountNumber,
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.92),
                                 fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: 1.5,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1.2,
                               ),
                             ),
                           ],

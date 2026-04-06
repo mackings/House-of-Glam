@@ -6,6 +6,7 @@ import 'package:hog/TailorApp/Widgets/tailorAssignedCard.dart';
 import 'package:hog/TailorApp/Widgets/tailorModalsheetdetails.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class AssignedMaterials extends StatefulWidget {
   const AssignedMaterials({super.key});
@@ -33,21 +34,24 @@ class _AssignedMaterialsState extends State<AssignedMaterials> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
+        surfaceTintColor: Colors.transparent,
+        backgroundColor: AppColors.canvas,
+        iconTheme: const IconThemeData(color: AppColors.ink),
         title: const CustomText(
           "Assigned Materials",
           fontSize: 18,
-          color: Colors.white,
+          color: AppColors.ink,
+          fontWeight: FontWeight.w700,
         ),
-        backgroundColor: Colors.purple,
         elevation: 0,
         actions: [
-          GestureDetector(
-            onTap: () {
+          IconButton(
+            onPressed: () {
               Nav.push(context, OfferHome());
             },
-            child: Icon(Icons.local_offer, color: Colors.white),
+            icon: const Icon(Icons.local_offer_outlined, color: AppColors.ink),
           ),
         ],
       ),
@@ -57,13 +61,13 @@ class _AssignedMaterialsState extends State<AssignedMaterials> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
-                child: CircularProgressIndicator(color: Colors.purple),
+                child: CircularProgressIndicator(color: AppColors.accent),
               );
             } else if (snapshot.hasError) {
               return Center(
                 child: CustomText(
                   "❌ Error: ${snapshot.error}",
-                  color: Colors.red,
+                  color: AppColors.danger,
                 ),
               );
             } else if (!snapshot.hasData || snapshot.data!.reviews.isEmpty) {
@@ -77,7 +81,7 @@ class _AssignedMaterialsState extends State<AssignedMaterials> {
                       child: CustomText(
                         "No assigned materials found",
                         fontSize: 16,
-                        color: Colors.grey,
+                        color: AppColors.subtext,
                       ),
                     ),
                   ],
@@ -86,28 +90,149 @@ class _AssignedMaterialsState extends State<AssignedMaterials> {
             }
 
             final materials = snapshot.data!.reviews;
+            final quoted =
+                materials
+                    .where((item) => item.resolvedVendorBaseTotal > 0)
+                    .length;
 
             return RefreshIndicator(
               onRefresh: _loadMaterials,
-              child: ListView.builder(
-                padding: const EdgeInsets.all(12),
-                itemCount: materials.length,
-                itemBuilder: (context, index) {
-                  final item = materials[index];
-                  return TailorAssignedCard(
-                    item: item,
-                    onTap:
-                        () => showTailorMaterialDetails(
-                          context,
-                          item,
-                          () => _loadMaterials(),
-                        ),
-                  );
-                },
+              color: AppColors.accent,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+                children: [
+                  _TailorIntroCard(
+                    title: "Customer-approved jobs",
+                    subtitle:
+                        "Open any assignment to review the quotation, delivery, and final tailoring instructions.",
+                    primaryLabel: "Assigned",
+                    primaryValue: "${materials.length}",
+                    secondaryLabel: "Quoted",
+                    secondaryValue: "$quoted",
+                  ),
+                  const SizedBox(height: 16),
+                  ...materials.map((item) {
+                    return TailorAssignedCard(
+                      item: item,
+                      onTap:
+                          () => showTailorMaterialDetails(
+                            context,
+                            item,
+                            () => _loadMaterials(),
+                          ),
+                    );
+                  }),
+                ],
               ),
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _TailorIntroCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String primaryLabel;
+  final String primaryValue;
+  final String secondaryLabel;
+  final String secondaryValue;
+
+  const _TailorIntroCard({
+    required this.title,
+    required this.subtitle,
+    required this.primaryLabel,
+    required this.primaryValue,
+    required this.secondaryLabel,
+    required this.secondaryValue,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: AppColors.border),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 18,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.accentSoft,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.assignment_turned_in_outlined,
+                  color: AppColors.accent,
+                ),
+              ),
+              const Spacer(),
+              _CompactStat(label: primaryLabel, value: primaryValue),
+              const SizedBox(width: 8),
+              _CompactStat(label: secondaryLabel, value: secondaryValue),
+            ],
+          ),
+          const SizedBox(height: 18),
+          CustomText(
+            title,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: AppColors.ink,
+            textAlign: TextAlign.left,
+          ),
+          const SizedBox(height: 8),
+          CustomText(
+            subtitle,
+            fontSize: 13,
+            color: AppColors.subtext,
+            textAlign: TextAlign.left,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CompactStat extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _CompactStat({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        children: [
+          CustomText(
+            value,
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: AppColors.ink,
+          ),
+          CustomText(label, fontSize: 11, color: AppColors.subtext),
+        ],
       ),
     );
   }

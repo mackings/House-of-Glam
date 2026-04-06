@@ -5,6 +5,7 @@ import 'package:hog/App/Profile/widgets/FullImageView.dart';
 import 'package:hog/App/Profile/widgets/Payment.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 void showProductDetails(BuildContext context, SellerListing listing) {
@@ -12,22 +13,97 @@ void showProductDetails(BuildContext context, SellerListing listing) {
     context: context,
     backgroundColor: Colors.white,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
     isScrollControlled: true,
     builder: (context) {
       final priceFormatter = NumberFormat('#,###');
       final pageController = PageController();
 
-      return Padding(
-        padding: const EdgeInsets.all(16),
+      Future<void> handlePurchase() async {
+        final navigator = Navigator.of(context);
+        final messenger = ScaffoldMessenger.of(context);
+        Navigator.pop(context);
+
+        final response = await BidPaymentService.purchaseListings(
+          listingIds: [listing.id],
+          shipmentMethod: "Express",
+        );
+
+        if (response != null && response['success'] == true) {
+          final authUrl = response['authorizationUrl'];
+
+          navigator.push(
+            MaterialPageRoute(
+              builder: (_) => PaymentWebView(paymentUrl: authUrl),
+            ),
+          );
+        } else {
+          messenger.showSnackBar(
+            const SnackBar(content: Text("Failed to place order")),
+          );
+        }
+      }
+
+      return SafeArea(
+        top: true,
         child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            18,
+            14,
+            18,
+            MediaQuery.of(context).viewInsets.bottom + 26,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🖼 Slidable Product Images
+              Center(
+                child: Container(
+                  width: 52,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _HeaderButton(
+                    icon: Icons.arrow_back_ios_new_rounded,
+                    onTap: () => Navigator.pop(context),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomText(
+                          "Listing Details",
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          textAlign: TextAlign.left,
+                        ),
+                        SizedBox(height: 2),
+                        CustomText(
+                          "Browse the approved item details before purchase.",
+                          fontSize: 12,
+                          color: AppColors.subtext,
+                          textAlign: TextAlign.left,
+                        ),
+                      ],
+                    ),
+                  ),
+                  _HeaderButton(
+                    icon: Icons.close_rounded,
+                    onTap: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
               SizedBox(
-                height: 220,
+                height: 250,
                 child: Stack(
                   children: [
                     PageView.builder(
@@ -53,23 +129,52 @@ void showProductDetails(BuildContext context, SellerListing listing) {
                             }
                           },
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              imageUrl.isNotEmpty
-                                  ? imageUrl
-                                  : 'https://via.placeholder.com/200',
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                            ),
+                            borderRadius: BorderRadius.circular(24),
+                            child:
+                                imageUrl.isNotEmpty
+                                    ? Image.network(
+                                      imageUrl,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                    )
+                                    : Container(
+                                      color: AppColors.surfaceMuted,
+                                      child: const Center(
+                                        child: Icon(
+                                          Icons.image_not_supported_outlined,
+                                          size: 42,
+                                          color: AppColors.subtext,
+                                        ),
+                                      ),
+                                    ),
                           ),
                         );
                       },
                     ),
-
-                    // 🔘 Page Indicator
-                    // 🔘 Page Indicator
                     Positioned(
-                      bottom: 8,
+                      top: 14,
+                      right: 14,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.92),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: CustomText(
+                          listing.price == 0
+                              ? "Free"
+                              : "$currencySymbol${priceFormatter.format(listing.price)}",
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.accent,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 12,
                       left: 0,
                       right: 0,
                       child: Center(
@@ -93,14 +198,16 @@ void showProductDetails(BuildContext context, SellerListing listing) {
                                   margin: const EdgeInsets.symmetric(
                                     horizontal: 3,
                                   ),
-                                  width: selected.round() == index ? 10 : 6,
-                                  height: 6,
+                                  width: selected.round() == index ? 20 : 7,
+                                  height: 7,
                                   decoration: BoxDecoration(
                                     color:
                                         selected.round() == index
-                                            ? Colors.purple
-                                            : Colors.grey.shade400,
-                                    borderRadius: BorderRadius.circular(4),
+                                            ? Colors.white
+                                            : Colors.white.withValues(
+                                              alpha: 0.45,
+                                            ),
+                                    borderRadius: BorderRadius.circular(999),
                                   ),
                                 );
                               },
@@ -112,145 +219,146 @@ void showProductDetails(BuildContext context, SellerListing listing) {
                   ],
                 ),
               ),
-
-              const SizedBox(height: 16),
-
-              // Title
+              const SizedBox(height: 18),
               CustomText(
                 listing.title,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-              const SizedBox(height: 6),
-
-              // Price
-              CustomText(
-                listing.price == 0
-                    ? "Free"
-                    : "${currencySymbol}${priceFormatter.format(listing.price)}",
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.purple,
-              ),
-              const SizedBox(height: 16),
-
-              // Condition
-              CustomText(
-                "Condition: ${listing.condition}",
-                fontSize: 14,
-                color: Colors.black87,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: AppColors.ink,
+                textAlign: TextAlign.left,
               ),
               const SizedBox(height: 8),
-
-              // Size
-              CustomText(
-                "Size: ${listing.size}",
-                fontSize: 14,
-                color: Colors.black87,
-              ),
-              const SizedBox(height: 8),
-
-              // Description
-              CustomText(
-                listing.description,
-                fontSize: 14,
-                color: Colors.black54,
-              ),
-              const SizedBox(height: 16),
-
-              // Seller info
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
-                  CircleAvatar(
-                    radius: 22,
-                    backgroundImage:
-                        listing.user.image != null
-                            ? NetworkImage(listing.user.image!)
-                            : null,
-                    backgroundColor: Colors.purple.withOpacity(0.2),
-                    child:
-                        listing.user.image == null
-                            ? const Icon(
-                              Icons.person,
-                              color: Colors.purple,
-                              size: 24,
-                            )
-                            : null,
+                  _MetaChip(
+                    icon: Icons.category_outlined,
+                    label: listing.category.name,
                   ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CustomText(
-                        listing.user.fullName,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                      CustomText(
-                        listing.user.address,
-                        fontSize: 14,
-                        color: Colors.black54,
-                      ),
-                    ],
+                  _MetaChip(
+                    icon: Icons.info_outline_rounded,
+                    label: listing.condition,
                   ),
+                  if (listing.size.isNotEmpty)
+                    _MetaChip(
+                      icon: Icons.straighten_rounded,
+                      label: listing.size,
+                    ),
                 ],
               ),
-              const SizedBox(height: 16),
-
-              // Date
-              CustomText(
-                "Uploaded on ${DateFormat.yMMMd().format(listing.createdAt)}",
-                fontSize: 13,
-                color: Colors.black45,
+              const SizedBox(height: 18),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const CustomText(
+                      "Description",
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      textAlign: TextAlign.left,
+                    ),
+                    const SizedBox(height: 8),
+                    CustomText(
+                      listing.description,
+                      fontSize: 13,
+                      color: AppColors.subtext,
+                      textAlign: TextAlign.left,
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 20),
-
-              // Contact Button
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: AppColors.shadow,
+                      blurRadius: 18,
+                      offset: Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 24,
+                      backgroundImage:
+                          listing.user.image != null &&
+                                  listing.user.image!.isNotEmpty
+                              ? NetworkImage(listing.user.image!)
+                              : null,
+                      backgroundColor: AppColors.accentSoft,
+                      child:
+                          listing.user.image == null ||
+                                  listing.user.image!.isEmpty
+                              ? const Icon(
+                                Icons.person_outline_rounded,
+                                color: AppColors.accent,
+                                size: 22,
+                              )
+                              : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomText(
+                            listing.user.fullName,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.ink,
+                            textAlign: TextAlign.left,
+                          ),
+                          if (listing.user.address.isNotEmpty)
+                            CustomText(
+                              listing.user.address,
+                              fontSize: 12,
+                              color: AppColors.subtext,
+                              textAlign: TextAlign.left,
+                            ),
+                          const SizedBox(height: 4),
+                          CustomText(
+                            "Uploaded ${DateFormat.yMMMd().format(listing.createdAt)}",
+                            fontSize: 11,
+                            color: AppColors.subtext,
+                            textAlign: TextAlign.left,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 22),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
+                child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    backgroundColor: AppColors.accent,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(54),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(18),
                     ),
                   ),
-                  onPressed: () async {
-                    // ✅ Save a reference to the parent context
-                    final parentContext = Navigator.of(context).context;
-
-                    // ✅ Close the bottom sheet first
-                    Navigator.pop(context);
-
-                    // ✅ Call API
-                    final response = await BidPaymentService.purchaseListings(
-                      listingIds: [listing.id],
-                      shipmentMethod: "Express",
-                    );
-
-                    if (response != null && response['success'] == true) {
-                      final authUrl = response['authorizationUrl'];
-
-                      Navigator.push(
-                        parentContext,
-                        MaterialPageRoute(
-                          builder: (_) => PaymentWebView(paymentUrl: authUrl),
-                        ),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(parentContext).showSnackBar(
-                        const SnackBar(content: Text("Failed to place order")),
-                      );
-                    }
-                  },
-
-                  child: const CustomText(
-                    "Purchase",
-                    fontSize: 16,
-                    color: Colors.white,
+                  onPressed: handlePurchase,
+                  icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+                  label: const Text(
+                    "Purchase Listing",
+                    style: TextStyle(fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -260,4 +368,61 @@ void showProductDetails(BuildContext context, SellerListing listing) {
       );
     },
   );
+}
+
+class _HeaderButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _HeaderButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          color: AppColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Icon(icon, size: 18, color: AppColors.ink),
+      ),
+    );
+  }
+}
+
+class _MetaChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _MetaChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: AppColors.subtext),
+          const SizedBox(width: 6),
+          CustomText(
+            label,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: AppColors.ink,
+            textAlign: TextAlign.left,
+          ),
+        ],
+      ),
+    );
+  }
 }

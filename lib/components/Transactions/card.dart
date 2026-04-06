@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Home/Model/TransModel.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class TransactionCard extends StatelessWidget {
@@ -25,7 +26,6 @@ class TransactionCard extends StatelessWidget {
     return DateFormat('MMM d, h:mm a').format(DateTime.parse(date));
   }
 
-  // ✅ Get transaction title based on type
   String getTransactionTitle() {
     if (txn.isBankTransfer) {
       return txn.title ?? "Bank Transfer";
@@ -36,7 +36,6 @@ class TransactionCard extends StatelessWidget {
     }
   }
 
-  // ✅ Get subtitle based on transaction type
   String getSubtitle() {
     if (txn.isBankTransfer) {
       return "${txn.bankName ?? 'Bank'} • ${txn.accountNumber ?? ''}";
@@ -49,105 +48,112 @@ class TransactionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Handle both paymentStatus and status fields
     final statusField = txn.paymentStatus ?? txn.status ?? "pending";
     final isSuccess =
         statusField.toLowerCase() == "success" ||
         statusField.toLowerCase() == "successfull";
+    final accent = isSuccess ? AppColors.success : AppColors.danger;
+    final badge = isSuccess
+        ? const Color(0xFFEAF8F1)
+        : const Color(0xFFFFEEEE);
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(22),
       child: Container(
         padding: const EdgeInsets.all(16),
-        margin: const EdgeInsets.symmetric(vertical: 6),
+        margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade400, width: 1.5),
-          boxShadow: [
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.border),
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+              color: AppColors.shadow,
+              blurRadius: 18,
+              offset: Offset(0, 10),
             ),
           ],
         ),
         child: Row(
           children: [
-            // Status Icon - different for bank transfers
-            CircleAvatar(
-              backgroundColor: isSuccess ? Colors.purple[50] : Colors.red[50],
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: badge,
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: Icon(
                 txn.isBankTransfer
-                    ? (isSuccess ? Icons.account_balance : Icons.error)
-                    : (isSuccess ? Icons.check_circle : Icons.error),
-                color: isSuccess ? Colors.purple : Colors.red,
+                    ? (isSuccess
+                        ? Icons.account_balance_outlined
+                        : Icons.error_outline_rounded)
+                    : (isSuccess
+                        ? Icons.check_circle_outline_rounded
+                        : Icons.error_outline_rounded),
+                color: accent,
               ),
             ),
             const SizedBox(width: 14),
-
-            // Transaction details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ✅ Amount in user's currency
                   CustomText(
                     "$currencySymbol${formatAmount(convertedAmount)}",
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    textAlign: TextAlign.left,
                   ),
                   const SizedBox(height: 6),
-
-                  // ✅ Transaction title
                   CustomText(
                     getTransactionTitle(),
-                    color: Colors.black87,
+                    color: AppColors.ink,
                     fontSize: 13,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
+                    textAlign: TextAlign.left,
                   ),
                   const SizedBox(height: 2),
-
-                  // ✅ Subtitle
                   CustomText(
                     getSubtitle(),
-                    color: Colors.grey[600],
+                    color: AppColors.subtext,
                     fontSize: 12,
+                    textAlign: TextAlign.left,
                   ),
                   const SizedBox(height: 4),
-
-                  // Date with icon
                   Row(
                     children: [
                       const Icon(
-                        Icons.date_range,
+                        Icons.schedule_outlined,
                         size: 14,
-                        color: Colors.purple,
+                        color: AppColors.subtext,
                       ),
                       const SizedBox(width: 4),
-                      CustomText(
-                        formatDate(txn.createdAt.toString()),
-                        color: Colors.grey[600],
-                        fontSize: 12,
+                      Expanded(
+                        child: CustomText(
+                          formatDate(txn.createdAt.toString()),
+                          color: AppColors.subtext,
+                          fontSize: 12,
+                          textAlign: TextAlign.left,
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-
-            // Status Badge
+            const SizedBox(width: 12),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
               decoration: BoxDecoration(
-                color: isSuccess ? Colors.purple[50] : Colors.red[50],
-                borderRadius: BorderRadius.circular(20),
+                color: badge,
+                borderRadius: BorderRadius.circular(999),
               ),
               child: CustomText(
                 statusField,
-                color: isSuccess ? Colors.purple : Colors.red,
-                fontWeight: FontWeight.bold,
+                color: accent,
+                fontWeight: FontWeight.w700,
                 fontSize: 12,
               ),
             ),

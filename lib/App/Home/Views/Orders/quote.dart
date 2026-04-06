@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hog/App/Banks/Api/BamkService.dart';
-import 'package:hog/App/Home/Api/paymentService.dart';
 import 'package:hog/App/Home/Api/useractivity.dart';
 import 'package:hog/App/Home/Model/reviewModel.dart';
 import 'package:hog/App/Home/Views/Offers/Views/OfferHome.dart';
@@ -9,7 +7,9 @@ import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/Orders/Hireconf.dart';
 import 'package:hog/components/Orders/PaymentOp.dart';
 import 'package:hog/components/Orders/quotationcard.dart';
+import 'package:hog/components/customAppbar.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class Quotation extends StatefulWidget {
@@ -43,7 +43,6 @@ class _QuotationState extends State<Quotation> {
     setState(() => isLoading = false);
   }
 
-  // Show Hire Designer Modal
   void _showHireDesignerConfirmation(Review review) {
     showModalBottomSheet(
       context: context,
@@ -53,8 +52,6 @@ class _QuotationState extends State<Quotation> {
           ),
     );
   }
-
-  // Show Payment Options Modal
 
   void _showPaymentOptions(
     Review review, {
@@ -70,131 +67,12 @@ class _QuotationState extends State<Quotation> {
             initialPaymentType: initialPaymentType,
             allowPaymentTypeSwitch: allowPaymentTypeSwitch,
             onCheckout: (String url) async {
-              // wait until modal is closed before navigating
               await Future.delayed(const Duration(milliseconds: 250));
               if (mounted) _openCheckout(url);
             },
           ),
     );
   }
-
-  // Immediately call payment API, then go to WebView
-  Future<void> _initiatePayment(
-    Review review,
-    String paymentType, {
-    String? partAmount,
-    String shipment = "Regular",
-  }) async {
-    setState(() => isLoading = true);
-
-    try {
-      // ✅ Use backend's isInternationalVendor flag
-      final isInternationalVendor = review.isInternationalVendor;
-
-      // ✅ For international vendors, use Stripe checkout with USD amounts
-      if (isInternationalVendor) {
-        String? amountToSend;
-        String? addressToSend;
-
-        if (paymentType == "part") {
-          // Part payment - send the USD amount
-          amountToSend = (partAmount?.replaceAll(",", "") ?? "0");
-        } else {
-          // Full payment - send remaining balance in USD + address
-          if (review.amountPaidUSD > 0) {
-            // Already made a part payment → pay remaining USD balance
-            amountToSend = review.amountToPayUSD.toString();
-          } else {
-            // First time full payment - use USD total
-            amountToSend = review.totalCostUSD.toString();
-          }
-          addressToSend =
-              review.user.address ??
-              ""; // Using user's saved address as fallback
-        }
-
-        final resp = await BankApiService.stripeCheckoutPayment(
-          reviewId: review.id,
-          shipmentMethod: shipment,
-          paymentStatus:
-              paymentType == "part" ? "part payment" : "full payment",
-          amount: amountToSend,
-          address: addressToSend,
-        );
-
-        if (resp["success"] == true) {
-          final checkoutUrl = resp["checkoutUrl"];
-          if (checkoutUrl != null && mounted) {
-            Navigator.of(
-              context,
-              rootNavigator: true,
-            ).popUntil((route) => route.isFirst);
-            _openCheckout(checkoutUrl);
-          } else {
-            print("❌ No Stripe checkout URL returned");
-          }
-        } else {
-          print("❌ Stripe payment failed: ${resp["error"]}");
-        }
-        if (mounted) {
-          setState(() => isLoading = false);
-        }
-        return;
-      }
-
-      // ✅ For local vendors (Nigeria), use Paystack
-      late String amountToSend;
-
-      if (paymentType == "part") {
-        // ✅ User chooses part payment
-        amountToSend = (partAmount?.replaceAll(",", "") ?? "0");
-      } else {
-        if (review.amountPaid > 0) {
-          // ✅ Already made a part payment → pay remaining balance
-          amountToSend = review.amountToPay.toString();
-          print(amountToSend);
-        } else {
-          // ✅ First time full payment
-          amountToSend = review.totalCost.toString();
-        }
-      }
-
-      final resp =
-          paymentType == "part"
-              ? await PaymentService.createPartPayment(
-                reviewId: review.id,
-                amount: amountToSend,
-                shipmentMethod: shipment,
-              )
-              : await PaymentService.createFullPayment(
-                reviewId: review.id,
-                amount: amountToSend,
-                shipmentMethod: shipment,
-                // address:
-              );
-
-      if (resp != null && resp["success"] == true) {
-        final authUrl = resp["authorizationUrl"];
-        if (authUrl != null) {
-          Navigator.of(
-            context,
-            rootNavigator: true,
-          ).popUntil((route) => route.isFirst);
-          _openCheckout(authUrl);
-        } else {
-          print("❌ No authorization URL returned");
-        }
-      } else {
-        print("❌ Payment failed: ${resp?["message"]}");
-      }
-    } catch (e) {
-      print("❌ Error during payment: $e");
-    } finally {
-      setState(() => isLoading = false);
-    }
-  }
-
-  // Open Paystack checkout in WebView
 
   void _openCheckout(String url) {
     final controller =
@@ -207,22 +85,13 @@ class _QuotationState extends State<Quotation> {
       MaterialPageRoute(
         builder:
             (_) => Scaffold(
-              appBar: AppBar(
-                backgroundColor: Colors.purple,
-                title: const CustomText(
-                  "Payments",
-                  color: Colors.white,
-                  fontSize: 18,
-                ),
-                iconTheme: const IconThemeData(color: Colors.white),
-              ),
+              backgroundColor: AppColors.canvas,
+              appBar: const CustomAppBar(title: "Payments", enableAction: false),
               body: WebViewWidget(controller: controller),
             ),
       ),
     ).then((_) {
-      // ✅ Dispose controller when leaving WebView
       controller.clearCache();
-      // ✅ Refresh reviews after payment to get updated status
       fetchReviews();
     });
   }
@@ -230,21 +99,21 @@ class _QuotationState extends State<Quotation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const CustomText(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        title: const Text(
           "Quotations",
-          color: Colors.white,
-          fontSize: 18,
+          style: TextStyle(fontWeight: FontWeight.w700),
         ),
-        backgroundColor: Colors.purple,
-
         actions: [
-          GestureDetector(
-            onTap: () {
+          IconButton(
+            onPressed: () {
               Nav.push(context, OfferHome());
             },
-            child: Icon(Icons.local_offer),
+            icon: const Icon(Icons.local_offer_outlined),
+            tooltip: "Offers",
           ),
         ],
       ),
@@ -254,27 +123,56 @@ class _QuotationState extends State<Quotation> {
             isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : reviews.isEmpty
-                ? const Center(child: CustomText("No quotations found"))
+                ? ListView(
+                    children: const [
+                      SizedBox(height: 220),
+                      Center(child: CustomText("No quotations found")),
+                    ],
+                  )
                 : ListView.builder(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 12,
-                  ),
-                  itemCount: reviews.length,
+                  padding: const EdgeInsets.fromLTRB(14, 8, 14, 24),
+                  itemCount: reviews.length + 1,
                   itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 14),
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CustomText(
+                              "Review tailor quotations, accept the right fit, or negotiate with offers before payment.",
+                              textAlign: TextAlign.left,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            SizedBox(height: 6),
+                            CustomText(
+                              "Use the offer flow when you want to negotiate, or hire directly when the quote already works for you.",
+                              textAlign: TextAlign.left,
+                              color: AppColors.subtext,
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    final review = reviews[index - 1];
                     return QuotationCard(
-                      review: reviews[index],
-                      onRefresh: fetchReviews, // ✅ Pass refresh callback
+                      review: review,
+                      onRefresh: fetchReviews,
                       hasSubmittedOffer: _submittedOfferReviewIds.contains(
-                        reviews[index].id,
+                        review.id,
                       ),
                       onHireDesigner: () {
-                        print(reviews[index].id);
-                        _showHireDesignerConfirmation(reviews[index]);
+                        _showHireDesignerConfirmation(review);
                       },
                       onMakeOffer: () {
-                        // Show create offer sheet
-                        final review = reviews[index];
                         showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
@@ -289,38 +187,17 @@ class _QuotationState extends State<Quotation> {
                                 },
                               ),
                         ).then((_) {
-                          // Refresh quotations list after returning
                           fetchReviews();
                         });
                       },
-                      onCompletePayment: (int amount) {
-                        final review = reviews[index];
-
+                      onCompletePayment: (_) {
                         if (review.status == "part payment") {
-                          // ✅ User already made a part payment → finish balance
                           _showPaymentOptions(
                             review,
                             initialPaymentType: "full",
                             allowPaymentTypeSwitch: false,
-                          );
-                        } else if (review.status == "quote") {
-                          // ✅ First payment (pay full cost)
-                          _showPaymentOptions(
-                            review,
-                            initialPaymentType: "full",
-                            allowPaymentTypeSwitch: false,
-                          );
-                        } else if (review.status == "full payment") {
-                          // ✅ Already fully paid, just ignore
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                "This quotation is already fully paid.",
-                              ),
-                            ),
                           );
                         } else {
-                          // ✅ Default: treat as full payment
                           _showPaymentOptions(
                             review,
                             initialPaymentType: "full",

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
-import 'package:hog/App/Home/Model/offerModel.dart';
 import 'package:hog/App/Home/Views/Offers/Api/OfferService.dart';
 import 'package:hog/App/Home/Views/Offers/Model/offerThread.dart';
 import 'package:hog/App/Home/Views/Offers/Widgets/offerdetail_v2.dart';
 import 'package:hog/components/texts.dart';
-import 'package:intl/intl.dart';
+import 'package:hog/constants/currencyHelper.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class OfferHome extends StatefulWidget {
@@ -20,8 +20,8 @@ class _OfferHomeState extends State<OfferHome>
   List<MakeOffer> offers = [];
   String? userId;
   String? userRole;
-  String _userCountry = 'Nigeria'; // 🆕 Add user country tracking
-  bool _useUSD = false; // 🆕 Add currency preference
+  String _userCountry = 'Nigeria';
+  bool _useUSD = false;
   bool isLoading = true;
   late AnimationController _animationController;
 
@@ -42,24 +42,23 @@ class _OfferHomeState extends State<OfferHome>
     super.dispose();
   }
 
-  // 🆕 Updated to load user country
   Future<void> _loadUserData() async {
     userId = await SecurePrefs.getUserId();
     final userData = await SecurePrefs.getUserData();
     userRole = userData?["role"];
-    _userCountry = userData?["country"] ?? 'Nigeria'; // 🆕 Get user country
+    _userCountry = userData?["country"] ?? 'Nigeria';
 
-    // 🆕 Determine if user should see USD
+    if (!mounted) return;
     setState(() {
       _useUSD = _userCountry != 'Nigeria';
     });
   }
 
   Future<void> loadOffers() async {
+    if (!mounted) return;
     setState(() => isLoading = true);
     final data = await OfferService.getAllOffers();
 
-    // Parse offers using the new model
     final parsedOffers = <MakeOffer>[];
     for (var item in data) {
       try {
@@ -69,72 +68,70 @@ class _OfferHomeState extends State<OfferHome>
       }
     }
 
+    if (!mounted) return;
     setState(() {
       offers = parsedOffers;
       isLoading = false;
     });
 
-    _animationController.forward();
+    if (mounted) {
+      _animationController.forward(from: 0);
+    }
   }
 
   bool isBuyerOffer(MakeOffer offer) {
     return offer.user.id == (userId ?? "");
   }
 
-  String formatDate(DateTime dateTime) {
-    return DateFormat('dd MMM yyyy • hh:mm a').format(dateTime.toLocal());
-  }
-
   Widget _buildStatusBadge(MakeOffer offer) {
     Color bgColor;
-    Color borderColor;
+    Color iconColor;
     IconData icon;
     String label;
 
     if (offer.mutualConsentAchieved) {
-      bgColor = const Color(0xFFEDE9FE);
-      borderColor = const Color(0xFF7C3AED);
-      icon = Icons.check_circle_rounded;
-      label = "Ready";
+      bgColor = AppColors.accentSoft;
+      iconColor = AppColors.accent;
+      icon = Icons.verified_rounded;
+      label = "Agreed";
     } else if (offer.status == "accepted" && !offer.mutualConsentAchieved) {
-      bgColor = const Color(0xFFFEF3C7);
-      borderColor = const Color(0xFFF59E0B);
+      bgColor = const Color(0xFFFFF4DE);
+      iconColor = AppColors.warning;
       icon = Icons.schedule_rounded;
-      label = "Pending";
+      label = "Awaiting";
     } else if (offer.status == "rejected") {
-      bgColor = const Color(0xFFFEE2E2);
-      borderColor = const Color(0xFFEF4444);
+      bgColor = const Color(0xFFFDECEC);
+      iconColor = AppColors.danger;
       icon = Icons.cancel_rounded;
       label = "Declined";
     } else if (offer.status == "incoming") {
-      bgColor = const Color(0xFFDCEDFD);
-      borderColor = const Color(0xFF3B82F6);
+      bgColor = const Color(0xFFE8F3FF);
+      iconColor = const Color(0xFF2563EB);
       icon = Icons.fiber_new_rounded;
       label = "New";
     } else {
-      bgColor = const Color(0xFFFED7AA);
-      borderColor = const Color(0xFFF97316);
-      icon = Icons.chat_bubble_rounded;
+      bgColor = const Color(0xFFFFF2E8);
+      iconColor = const Color(0xFFEA580C);
+      icon = Icons.forum_rounded;
       label = "Active";
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor, width: 1.5),
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: borderColor),
-          const SizedBox(width: 4),
+          Icon(icon, size: 14, color: iconColor),
+          const SizedBox(width: 6),
           CustomText(
             label,
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: borderColor,
+            color: iconColor,
           ),
         ],
       ),
@@ -144,120 +141,115 @@ class _OfferHomeState extends State<OfferHome>
   Widget _buildConsentIndicators(MakeOffer offer) {
     if (offer.mutualConsentAchieved) {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF7C3AED), Color(0xFF6D28D9)],
-          ),
-          borderRadius: BorderRadius.circular(12),
+          color: const Color(0xFFEEF8F2),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: const Color(0xFFCDEDD9)),
         ),
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.verified, size: 14, color: Colors.white),
-            SizedBox(width: 4),
+            Icon(
+              Icons.check_circle_rounded,
+              size: 14,
+              color: AppColors.success,
+            ),
+            SizedBox(width: 6),
             CustomText(
               "Both Agreed",
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: AppColors.success,
             ),
           ],
         ),
       );
     }
 
-    return Row(
+    Widget buildPill({
+      required String label,
+      required bool active,
+      required IconData icon,
+    }) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: active ? AppColors.accentSoft : AppColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: active ? AppColors.accent : AppColors.border,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              active ? Icons.check_circle_rounded : icon,
+              size: 13,
+              color: active ? AppColors.accent : AppColors.subtext,
+            ),
+            const SizedBox(width: 5),
+            CustomText(
+              label,
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: active ? AppColors.accent : AppColors.subtext,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
       children: [
-        if (offer.buyerConsent) ...[
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEDE9FE),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF7C3AED), width: 1),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.check_circle, size: 12, color: Color(0xFF7C3AED)),
-                SizedBox(width: 3),
-                CustomText(
-                  "Buyer",
-                  fontSize: 9,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF7C3AED),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 6),
-        ],
-        if (offer.vendorConsent) ...[
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEDE9FE),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF7C3AED), width: 1),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.check_circle, size: 12, color: Color(0xFF7C3AED)),
-                SizedBox(width: 3),
-                CustomText(
-                  "Vendor",
-                  fontSize: 9,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF7C3AED),
-                ),
-              ],
-            ),
-          ),
-        ],
+        buildPill(
+          label: "Buyer",
+          active: offer.buyerConsent,
+          icon: Icons.person_outline_rounded,
+        ),
+        buildPill(
+          label: "Vendor",
+          active: offer.vendorConsent,
+          icon: Icons.storefront_outlined,
+        ),
         if (!offer.buyerConsent && !offer.vendorConsent)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.pending_outlined, size: 12, color: Colors.black38),
-                SizedBox(width: 3),
-                CustomText("Awaiting", fontSize: 9, color: Colors.black38),
-              ],
-            ),
+          buildPill(
+            label: "Awaiting response",
+            active: false,
+            icon: Icons.hourglass_empty_rounded,
           ),
       ],
     );
   }
 
+  String _displayAmount(MakeOffer offer) {
+    final latest = offer.latestChat;
+    final agreedAmount =
+        offer.finalTotalCost > 0 || offer.finalTotalCostUSD > 0
+            ? (_useUSD ? offer.finalTotalCostUSD : offer.finalTotalCost)
+            : (_useUSD
+                ? (latest?.counterTotalCostUSD ?? 0)
+                : (latest?.counterTotalCost ?? 0));
+
+    if (agreedAmount <= 0) return "No price yet";
+    return _useUSD
+        ? CurrencyHelper.formatAmount(agreedAmount, currencyCode: 'USD')
+        : CurrencyHelper.formatAmount(agreedAmount, currencyCode: 'NGN');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const CustomText(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        title: const Text(
           "Price Negotiations",
-          fontSize: 19,
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-        ),
-        backgroundColor: Colors.purple,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.purple, Colors.purple.shade700],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
+          style: TextStyle(fontWeight: FontWeight.w700),
         ),
         actions: [
           IconButton(
@@ -265,117 +257,155 @@ class _OfferHomeState extends State<OfferHome>
             onPressed: loadOffers,
             tooltip: "Refresh",
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
         ],
       ),
       body:
           isLoading
-              ? const Center(
-                child: CircularProgressIndicator(color: Colors.purple),
-              )
+              ? const Center(child: CircularProgressIndicator())
               : RefreshIndicator(
                 onRefresh: loadOffers,
-                color: Colors.purple,
                 child:
                     offers.isEmpty
                         ? _buildEmptyState()
                         : ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: offers.length,
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                          itemCount: offers.length + 1,
                           itemBuilder: (context, index) {
-                            return _buildOfferCard(offers[index], index);
+                            if (index == 0) {
+                              return _buildIntroCard();
+                            }
+                            return _buildOfferCard(
+                              offers[index - 1],
+                              index - 1,
+                            );
                           },
                         ),
               ),
     );
   }
 
+  Widget _buildIntroCard() {
+    final readyCount =
+        offers.where((offer) => offer.mutualConsentAchieved).length;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFF9F5FF), Colors.white],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: AppColors.accentSoft,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.handshake_outlined,
+                  color: AppColors.accent,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const CustomText(
+                      "Track every offer clearly",
+                      textAlign: TextAlign.left,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    const SizedBox(height: 4),
+                    CustomText(
+                      "Review active conversations, accepted prices, and pending decisions in one place.",
+                      textAlign: TextAlign.left,
+                      fontSize: 13,
+                      color: AppColors.subtext,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _SummaryStat(
+                  label: "Total Offers",
+                  value: offers.length.toString(),
+                  icon: Icons.local_offer_outlined,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _SummaryStat(
+                  label: "Agreements",
+                  value: readyCount.toString(),
+                  icon: Icons.verified_outlined,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildEmptyState() {
     return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 40, 20, 24),
       children: [
-        const SizedBox(height: 100),
-        Center(
+        Container(
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: AppColors.border),
+          ),
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.all(40),
+                width: 108,
+                height: 108,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.purple.shade50,
-                      Colors.purple.shade100.withOpacity(0.5),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFF4EAFF), Color(0xFFECE3FF)],
                   ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.purple.withOpacity(0.1),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(32),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.handshake_outlined,
-                  size: 90,
-                  color: Colors.purple.shade400,
+                  size: 46,
+                  color: AppColors.accent,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               const CustomText(
                 "No Negotiations Yet",
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
               ),
-              const SizedBox(height: 12),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 60),
-                child: CustomText(
-                  "Start making offers on quotations to negotiate prices with vendors",
-                  fontSize: 15,
-                  color: Colors.black54,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 32),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.purple, Colors.purple.shade700],
-                  ),
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.purple.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.local_offer_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    SizedBox(width: 8),
-                    CustomText(
-                      "Browse Quotations",
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ],
-                ),
+              const SizedBox(height: 10),
+              CustomText(
+                "When you make an offer from a quotation, the full negotiation thread will appear here.",
+                fontSize: 14,
+                color: AppColors.subtext,
+                textAlign: TextAlign.center,
               ),
             ],
           ),
@@ -390,7 +420,6 @@ class _OfferHomeState extends State<OfferHome>
     final latestComment = latestChat?.comment ?? "No messages yet";
     final displayName =
         isBuyer ? offer.vendor.businessName : offer.user.fullName;
-
     final initials =
         displayName.isNotEmpty
             ? displayName
@@ -405,11 +434,11 @@ class _OfferHomeState extends State<OfferHome>
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 400 + delay),
+      duration: Duration(milliseconds: 380 + delay),
       curve: Curves.easeOutCubic,
       builder: (context, value, child) {
         return Transform.translate(
-          offset: Offset(0, 20 * (1 - value)),
+          offset: Offset(0, 18 * (1 - value)),
           child: Opacity(opacity: value, child: child),
         );
       },
@@ -419,82 +448,55 @@ class _OfferHomeState extends State<OfferHome>
             context,
             MaterialPageRoute(builder: (_) => OfferDetailV2(offerId: offer.id)),
           );
+          if (!mounted) return;
           await loadOffers();
         },
         child: Container(
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border:
-                offer.mutualConsentAchieved
-                    ? Border.all(color: const Color(0xFF7C3AED), width: 2.5)
-                    : null,
-            boxShadow: [
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(
+              color:
+                  offer.mutualConsentAchieved
+                      ? AppColors.accent
+                      : AppColors.border,
+              width: offer.mutualConsentAchieved ? 1.4 : 1,
+            ),
+            boxShadow: const [
               BoxShadow(
-                color:
-                    offer.mutualConsentAchieved
-                        ? const Color(0xFF7C3AED).withOpacity(0.15)
-                        : Colors.black.withOpacity(0.08),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+                color: AppColors.shadow,
+                blurRadius: 18,
+                offset: Offset(0, 10),
               ),
             ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Section
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors:
-                        offer.mutualConsentAchieved
-                            ? [const Color(0xFFF0FDF4), Colors.white]
-                            : [
-                              Colors.purple.shade50.withOpacity(0.3),
-                              Colors.white,
-                            ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                ),
-                child: Row(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
                     Container(
+                      width: 56,
+                      height: 56,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.purple.shade400,
-                            Colors.purple.shade600,
-                          ],
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF8B5CF6), Color(0xFF6D28D9)],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.purple.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(18),
                       ),
-                      child: CircleAvatar(
-                        radius: 28,
-                        backgroundColor: Colors.transparent,
+                      child: Center(
                         child: CustomText(
                           initials,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 17,
                           color: Colors.white,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -502,178 +504,188 @@ class _OfferHomeState extends State<OfferHome>
                           CustomText(
                             displayName,
                             fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.black87,
+                            fontWeight: FontWeight.w800,
+                            textAlign: TextAlign.left,
                           ),
-                          const SizedBox(height: 3),
-                          if (isBuyer)
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.shopping_bag_outlined,
-                                  size: 13,
-                                  color: Colors.black45,
-                                ),
-                                const SizedBox(width: 4),
-                                const CustomText(
-                                  "You're buying",
-                                  fontSize: 12,
-                                  color: Colors.black54,
-                                ),
-                              ],
-                            ),
+                          const SizedBox(height: 4),
+                          CustomText(
+                            isBuyer
+                                ? "Vendor conversation"
+                                : "Buyer conversation",
+                            fontSize: 12,
+                            color: AppColors.subtext,
+                            textAlign: TextAlign.left,
+                          ),
                         ],
                       ),
                     ),
                     _buildStatusBadge(offer),
                   ],
                 ),
-              ),
-
-              const Divider(height: 1, thickness: 1),
-
-              // Content Section
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Latest Message
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8F9FA),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.purple.shade50,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Icon(
-                              Icons.chat_bubble_rounded,
-                              size: 18,
-                              color: Colors.purple.shade400,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const CustomText(
-                                  "Latest Message",
-                                  fontSize: 10,
-                                  color: Colors.black45,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                const SizedBox(height: 2),
-                                CustomText(
-                                  latestComment,
-                                  fontSize: 13,
-                                  color: Colors.black87,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Consent
-                    _buildConsentIndicators(offer),
-
-                    const SizedBox(height: 14),
-
-                    // Footer Info
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.forum_rounded,
-                              size: 14,
-                              color: Colors.black38,
-                            ),
-                            const SizedBox(width: 5),
-                            CustomText(
-                              "${offer.chats.length} messages",
-                              fontSize: 12,
-                              color: Colors.black54,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.access_time_rounded,
-                              size: 13,
-                              color: Colors.black38,
-                            ),
-                            const SizedBox(width: 4),
-                            CustomText(
-                              timeago.format(
-                                offer.updatedAt,
-                                locale: 'en_short',
-                              ),
-                              fontSize: 11,
-                              color: Colors.black45,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              // Mutual Consent Footer
-              if (offer.mutualConsentAchieved)
+                const SizedBox(height: 14),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF7C3AED), Color(0xFF6D28D9)],
-                    ),
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
-                    ),
+                    color: AppColors.surfaceMuted,
+                    borderRadius: BorderRadius.circular(18),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.verified_rounded,
-                        color: Colors.white,
-                        size: 18,
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(
+                          Icons.attach_money_rounded,
+                          color: AppColors.accent,
+                          size: 18,
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                      const CustomText(
-                        "Agreement Reached • Ready for Payment",
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const CustomText(
+                              "Current amount",
+                              fontSize: 11,
+                              color: AppColors.subtext,
+                              textAlign: TextAlign.left,
+                            ),
+                            const SizedBox(height: 3),
+                            CustomText(
+                              _displayAmount(offer),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              textAlign: TextAlign.left,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
+                        color: AppColors.subtext,
                       ),
                     ],
                   ),
                 ),
-            ],
+                const SizedBox(height: 14),
+                CustomText(
+                  "Latest Message",
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.subtext,
+                  textAlign: TextAlign.left,
+                ),
+                const SizedBox(height: 6),
+                CustomText(
+                  latestComment,
+                  fontSize: 14,
+                  color: AppColors.ink,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.left,
+                ),
+                const SizedBox(height: 14),
+                _buildConsentIndicators(offer),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.forum_outlined,
+                      size: 15,
+                      color: AppColors.subtext,
+                    ),
+                    const SizedBox(width: 6),
+                    CustomText(
+                      "${offer.chats.length} messages",
+                      fontSize: 12,
+                      color: AppColors.subtext,
+                      textAlign: TextAlign.left,
+                    ),
+                    const Spacer(),
+                    const Icon(
+                      Icons.access_time_rounded,
+                      size: 14,
+                      color: AppColors.subtext,
+                    ),
+                    const SizedBox(width: 6),
+                    CustomText(
+                      latestChat == null
+                          ? "Now"
+                          : timeago.format(latestChat.timestamp),
+                      fontSize: 12,
+                      color: AppColors.subtext,
+                      textAlign: TextAlign.left,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SummaryStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+
+  const _SummaryStat({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.accentSoft,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, size: 18, color: AppColors.accent),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(
+                  label,
+                  fontSize: 11,
+                  color: AppColors.subtext,
+                  textAlign: TextAlign.left,
+                ),
+                const SizedBox(height: 2),
+                CustomText(
+                  value,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  textAlign: TextAlign.left,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

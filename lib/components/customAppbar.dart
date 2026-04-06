@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -23,41 +24,60 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.enableBack = true,
     this.enableAction = true,
     this.backgroundColor = Colors.transparent,
-    this.iconColor = Colors.black,
+    this.iconColor = AppColors.ink,
     this.titleStyle,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: true, // make sure it doesn’t overlap status bar
-      child: AppBar(
-        backgroundColor: backgroundColor,
-        elevation: 0,
-        centerTitle: true,
-        leading:
-            enableBack
-                ? IconButton(
-                  icon: Icon(backIcon, color: iconColor),
+    return AppBar(
+      backgroundColor: backgroundColor,
+      elevation: 0,
+      centerTitle: true,
+      leading:
+          enableBack
+              ? Padding(
+                padding: const EdgeInsets.only(left: 10),
+                child: IconButton(
+                  icon: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Icon(backIcon, color: iconColor, size: 18),
+                  ),
                   onPressed: onBack ?? () => Navigator.pop(context),
-                )
-                : null,
-        title: CustomText(
-          title,
-          fontSize: titleStyle?.fontSize ?? 20,
-          fontWeight: FontWeight.bold,
-          color: titleStyle?.color ?? iconColor,
-        ),
-        actions:
-            enableAction
-                ? [
-                  IconButton(
-                    icon: Icon(actionIcon, color: iconColor),
+                ),
+              )
+              : null,
+      title: CustomText(
+        title,
+        fontSize: titleStyle?.fontSize ?? 20,
+        fontWeight: FontWeight.w700,
+        color: titleStyle?.color ?? iconColor,
+      ),
+      actions:
+          enableAction
+              ? [
+                Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: IconButton(
+                    icon: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Icon(actionIcon, color: iconColor, size: 18),
+                    ),
                     onPressed: onAction,
                   ),
-                ]
-                : null,
-      ),
+                ),
+              ]
+              : null,
     );
   }
 

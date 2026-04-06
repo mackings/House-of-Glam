@@ -7,13 +7,17 @@ import 'package:hog/App/Home/Model/category.dart';
 import 'package:hog/components/Tailors/dropdown.dart';
 import 'package:hog/components/Tailors/imagepickers.dart';
 import 'package:hog/components/button.dart';
+import 'package:hog/components/customAppbar.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class PlaceOrder extends StatefulWidget {
-  const PlaceOrder({super.key});
+  final bool showBackButton;
+
+  const PlaceOrder({super.key, this.showBackButton = true});
 
   @override
   State<PlaceOrder> createState() => _PlaceOrderState();
@@ -299,7 +303,9 @@ class _PlaceOrderState extends State<PlaceOrder> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  message.isNotEmpty ? message : "Your order was submitted successfully.",
+                  message.isNotEmpty
+                      ? message
+                      : "Your order was submitted successfully.",
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -331,30 +337,55 @@ class _PlaceOrderState extends State<PlaceOrder> {
     return LoadingOverlay(
       isLoading: isLoading,
       child: Scaffold(
-        appBar: AppBar(
-          title: const CustomText(
-            "Place Order",
-            color: Colors.white,
-            fontSize: 18,
-          ),
-          backgroundColor: Colors.purple,
+        backgroundColor: AppColors.canvas,
+        appBar: CustomAppBar(
+          title: "Place Order",
+          enableAction: false,
+          enableBack: widget.showBackButton,
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 20),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomText(
+                      "Submit a clearer design brief for faster quotations.",
+                      textAlign: TextAlign.left,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    SizedBox(height: 6),
+                    CustomText(
+                      "Provide attire details, measurements, and sample images so tailors can respond accurately.",
+                      textAlign: TextAlign.left,
+                      color: AppColors.subtext,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
 
               // Attire Section
               CustomText(
                 "Attire Details *",
-                color: Colors.black,
+                color: AppColors.ink,
                 fontSize: 18,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w700,
+                textAlign: TextAlign.left,
               ),
               const Divider(),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               CustomDropdown(
                 label: "Choose Material",
@@ -427,9 +458,10 @@ class _PlaceOrderState extends State<PlaceOrder> {
               const SizedBox(height: 20),
               CustomText(
                 "Brand *",
-                color: Colors.black,
+                color: AppColors.ink,
                 fontSize: 18,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w700,
+                textAlign: TextAlign.left,
               ),
               const Divider(),
               CustomTextField(
@@ -442,9 +474,10 @@ class _PlaceOrderState extends State<PlaceOrder> {
 
               CustomText(
                 "Special Instructions *",
-                color: Colors.black,
+                color: AppColors.ink,
                 fontSize: 18,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w700,
+                textAlign: TextAlign.left,
               ),
               const Divider(),
               CustomTextField(
@@ -457,9 +490,10 @@ class _PlaceOrderState extends State<PlaceOrder> {
               const SizedBox(height: 20),
               CustomText(
                 "Measurements (CM)*",
-                color: Colors.black,
+                color: AppColors.ink,
                 fontSize: 18,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w700,
+                textAlign: TextAlign.left,
               ),
               const Divider(),
               buildMeasurementFields(),
@@ -467,9 +501,10 @@ class _PlaceOrderState extends State<PlaceOrder> {
               const SizedBox(height: 20),
               CustomText(
                 "Design samples *",
-                color: Colors.black,
+                color: AppColors.ink,
                 fontSize: 18,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w700,
+                textAlign: TextAlign.left,
               ),
               const Divider(),
               SizedBox(height: 20),

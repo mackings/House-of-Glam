@@ -6,12 +6,9 @@ import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Home/Api/home.dart';
 import 'package:hog/App/Home/Model/category.dart';
 import 'package:hog/TailorApp/Home/Api/publishservice.dart';
-import 'package:hog/components/Tailors/dropdown.dart';
-import 'package:hog/components/Tailors/imagepickers.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
-import 'package:hog/components/loadingoverlay.dart';
-import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
 
 class PublishMaterial extends StatefulWidget {
@@ -80,9 +77,10 @@ class _PublishMaterialState extends State<PublishMaterial> {
         setState(() => categories = fetchedCategories);
       }
 
-      print("✅ Loaded ${categories.length} categories");
+      debugPrint("Loaded ${categories.length} categories");
     } catch (e) {
-      print("❌ Error loading categories: $e");
+      if (!mounted) return;
+      debugPrint("Error loading categories: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -98,7 +96,9 @@ class _PublishMaterialState extends State<PublishMaterial> {
       );
     }
 
-    setState(() => isLoading = false);
+    if (mounted) {
+      setState(() => isLoading = false);
+    }
   }
 
   Future<void> pickSampleImage() async {
@@ -194,38 +194,39 @@ class _PublishMaterialState extends State<PublishMaterial> {
         images: sampleImages,
       );
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "✅ Material published successfully",
-              style: GoogleFonts.poppins(),
-            ),
-            backgroundColor: const Color(0xFF10B981),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "✅ Material published successfully",
+            style: GoogleFonts.poppins(),
           ),
-        );
-        Navigator.pop(context);
-      }
+          backgroundColor: const Color(0xFF10B981),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+      Navigator.pop(context);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("❌ Failed: $e", style: GoogleFonts.poppins()),
-            backgroundColor: const Color(0xFFEF4444),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("❌ Failed: $e", style: GoogleFonts.poppins()),
+          backgroundColor: const Color(0xFFEF4444),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-        );
-      }
+        ),
+      );
     }
 
-    setState(() => isLoading = false);
+    if (mounted) {
+      setState(() => isLoading = false);
+    }
   }
 
   void removeSampleImage(int index) {
@@ -245,124 +246,49 @@ class _PublishMaterialState extends State<PublishMaterial> {
 
   @override
   Widget build(BuildContext context) {
-    return LoadingOverlay(
-      isLoading: isLoading,
-      child: Scaffold(
-        backgroundColor: Colors.grey.shade50,
-        appBar: AppBar(
-          elevation: 0,
-          iconTheme: const IconThemeData(color: Colors.white),
-          flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF6B21A8), Color(0xFF7C3AED)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-          ),
-          title: Text(
-            "Publish Material",
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
+    final hasCustomCategory =
+        selectedCategoryName == "Others" && showCustomCategoryField;
+    final hasCustomColor = selectedColor == "Others" && showCustomColorField;
+
+    return Scaffold(
+      backgroundColor: AppColors.canvas,
+      appBar: AppBar(
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        backgroundColor: AppColors.canvas,
+        title: Text(
+          "Publish Material",
+          style: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AppColors.ink,
           ),
         ),
-        body:
-            isLoading && categories.isEmpty
-                ? const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF6B21A8)),
-                )
-                : SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
+      ),
+      body:
+          isLoading && categories.isEmpty
+              ? const Center(
+                child: CircularProgressIndicator(color: AppColors.accent),
+              )
+              : SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header Section
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF6B21A8), Color(0xFF7C3AED)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF6B21A8).withOpacity(0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.checkroom_rounded,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Attire Details",
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "Fill in the material information",
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.white.withOpacity(0.8),
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Form Container
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
+                      _buildHeaderCard(),
+                      const SizedBox(height: 18),
+                      _buildSectionCard(
+                        icon: Icons.checkroom_outlined,
+                        title: "Material basics",
+                        subtitle:
+                            "Start with the category and attire type customers will see first.",
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Category Dropdown
                             _buildFieldLabel("Category", true),
-                            CustomDropdown(
-                              label: "Select Category",
+                            _buildStyledDropdown(
+                              hint: "Select category",
+                              value: selectedCategoryName,
                               options: [
                                 ...categories.map((c) => c.name),
                                 if (!categories.any(
@@ -370,7 +296,6 @@ class _PublishMaterialState extends State<PublishMaterial> {
                                 ))
                                   "Others",
                               ],
-                              selectedValue: selectedCategoryName,
                               onChanged: (val) {
                                 setState(() {
                                   selectedCategoryName = val;
@@ -400,54 +325,21 @@ class _PublishMaterialState extends State<PublishMaterial> {
                                 });
                               },
                             ),
-                            if (showCustomCategoryField) ...[
-                              const SizedBox(height: 16),
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFAF5FF),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: const Color(
-                                      0xFF6B21A8,
-                                    ).withOpacity(0.2),
-                                  ),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.edit_rounded,
-                                          size: 16,
-                                          color: const Color(0xFF6B21A8),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          "Enter Custom Category",
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w600,
-                                            color: const Color(0xFF6B21A8),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 12),
-                                    CustomTextField(
-                                      title: "",
-                                      hintText: "e.g Bespoke Gown, Bridal Wear",
-                                      fieldKey: "customCategory",
-                                      controller: customCategoryController,
-                                    ),
-                                  ],
+                            if (hasCustomCategory) ...[
+                              const SizedBox(height: 8),
+                              _buildAssistCard(
+                                title: "Custom category",
+                                subtitle:
+                                    "Name the material group exactly as you want it to appear.",
+                                child: CustomTextField(
+                                  title: "",
+                                  hintText: "e.g Bespoke Gown, Bridal Wear",
+                                  fieldKey: "customCategory",
+                                  controller: customCategoryController,
                                 ),
                               ),
                             ],
-                            const SizedBox(height: 20),
-
-                            // Attire Type
+                            const SizedBox(height: 8),
                             _buildFieldLabel("Attire Type", true),
                             CustomTextField(
                               title: "",
@@ -455,14 +347,22 @@ class _PublishMaterialState extends State<PublishMaterial> {
                               fieldKey: "attireType",
                               controller: attireTypeController,
                             ),
-                            const SizedBox(height: 20),
-
-                            // Color
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      _buildSectionCard(
+                        icon: Icons.palette_outlined,
+                        title: "Appearance and brand",
+                        subtitle:
+                            "Keep the listing easy to scan with a clear color and recognizable brand.",
+                        child: Column(
+                          children: [
                             _buildFieldLabel("Color", true),
-                            CustomDropdown(
-                              label: "Select Color",
+                            _buildStyledDropdown(
+                              hint: "Select color",
+                              value: selectedColor,
                               options: colors,
-                              selectedValue: selectedColor,
                               onChanged: (val) {
                                 setState(() {
                                   selectedColor = val;
@@ -473,58 +373,22 @@ class _PublishMaterialState extends State<PublishMaterial> {
                                 });
                               },
                             ),
-
-                            // Custom Color Field (appears when "Others" is selected)
-                            if (showCustomColorField) ...[
-                              const SizedBox(height: 16),
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFAF5FF),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: const Color(
-                                      0xFF6B21A8,
-                                    ).withOpacity(0.2),
-                                  ),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.edit_rounded,
-                                          size: 16,
-                                          color: const Color(0xFF6B21A8),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          "Enter Custom Color",
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w600,
-                                            color: const Color(0xFF6B21A8),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 12),
-                                    CustomTextField(
-                                      title: "",
-                                      hintText:
-                                          "e.g Navy Blue, Burgundy, Turquoise",
-                                      fieldKey: "customColor",
-                                      controller: customColorController,
-                                    ),
-                                  ],
+                            if (hasCustomColor) ...[
+                              const SizedBox(height: 8),
+                              _buildAssistCard(
+                                title: "Custom color",
+                                subtitle:
+                                    "Use the exact shade name if it helps buyers identify the fabric faster.",
+                                child: CustomTextField(
+                                  title: "",
+                                  hintText:
+                                      "e.g Navy Blue, Burgundy, Turquoise",
+                                  fieldKey: "customColor",
+                                  controller: customColorController,
                                 ),
                               ),
                             ],
-
-                            const SizedBox(height: 20),
-
-                            // Brand
+                            const SizedBox(height: 8),
                             _buildFieldLabel("Brand", true),
                             CustomTextField(
                               title: "",
@@ -535,161 +399,493 @@ class _PublishMaterialState extends State<PublishMaterial> {
                           ],
                         ),
                       ),
-
-                      const SizedBox(height: 24),
-
-                      // Images Section
+                      const SizedBox(height: 18),
+                      _buildSectionCard(
+                        icon: Icons.photo_library_outlined,
+                        title: "Preview gallery",
+                        subtitle:
+                            "Upload sharp images that show texture, fit, and color properly.",
+                        trailing: _buildCountBadge("${sampleImages.length}/5"),
+                        child: _buildImagePickerGrid(),
+                      ),
+                      const SizedBox(height: 18),
                       Container(
-                        padding: const EdgeInsets.all(20),
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: AppColors.border),
+                          boxShadow: const [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                              color: AppColors.shadow,
+                              blurRadius: 18,
+                              offset: Offset(0, 10),
                             ),
                           ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: const Color(
-                                      0xFF6B21A8,
-                                    ).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Icon(
-                                    Icons.image_rounded,
-                                    size: 20,
-                                    color: Color(0xFF6B21A8),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Upload Images",
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: const Color(0xFF1F2937),
-                                      ),
-                                    ),
-                                    Text(
-                                      "Add up to 5 images",
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        color: const Color(0xFF6B7280),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const Spacer(),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(
-                                      0xFF6B21A8,
-                                    ).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    "${sampleImages.length}/5",
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF6B21A8),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              "Ready to publish?",
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.ink,
+                              ),
                             ),
-                            const SizedBox(height: 16),
-                            MultiImagePicker(
-                              images: sampleImages,
-                              onAddImage: pickSampleImage,
-                              onRemoveImage: removeSampleImage,
+                            const SizedBox(height: 6),
+                            Text(
+                              "Review the details once and publish when the material is ready for customers to browse.",
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: AppColors.subtext,
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            CustomButton(
+                              title: "Publish Material",
+                              onPressed: isLoading ? null : _submitPublish,
+                              isLoading: isLoading,
                             ),
                           ],
                         ),
                       ),
-
-                      const SizedBox(height: 32),
-
-                      // Publish Button
-                      Container(
-                        width: double.infinity,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF6B21A8), Color(0xFF7C3AED)],
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF6B21A8).withOpacity(0.4),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: isLoading ? null : _submitPublish,
-                            borderRadius: BorderRadius.circular(16),
-                            child: Center(
-                              child:
-                                  isLoading
-                                      ? const SizedBox(
-                                        width: 24,
-                                        height: 24,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2.5,
-                                        ),
-                                      )
-                                      : Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          const Icon(
-                                            Icons.publish_rounded,
-                                            color: Colors.white,
-                                            size: 20,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            "Publish Material",
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.white,
-                                              letterSpacing: 0.5,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 30),
                     ],
                   ),
                 ),
+              ),
+    );
+  }
+
+  Widget _buildHeaderCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFF7F1FF), Color(0xFFFFFFFF)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: AppColors.border),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 20,
+            offset: Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.accentSoft,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: const Icon(
+                  Icons.publish_rounded,
+                  color: AppColors.accent,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "List a new material",
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "Use clear details and strong photos so the listing feels premium from the first glance.",
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        height: 1.45,
+                        color: AppColors.subtext,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _buildMiniInfoChip(
+                icon: Icons.style_outlined,
+                text: "Category, type, color",
+              ),
+              _buildMiniInfoChip(
+                icon: Icons.image_outlined,
+                text: "Up to 5 gallery images",
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Widget child,
+    Widget? trailing,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(color: AppColors.border),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 18,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(11),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(icon, color: AppColors.accent, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        height: 1.45,
+                        color: AppColors.subtext,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (trailing != null) ...[const SizedBox(width: 12), trailing],
+            ],
+          ),
+          const SizedBox(height: 20),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAssistCard({
+    required String title,
+    required String subtitle,
+    required Widget child,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.edit_note_rounded, color: AppColors.accent),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.ink,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            subtitle,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              height: 1.4,
+              color: AppColors.subtext,
+            ),
+          ),
+          const SizedBox(height: 10),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStyledDropdown({
+    required String hint,
+    required String? value,
+    required List<String> options,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      initialValue: value,
+      icon: const Icon(Icons.keyboard_arrow_down_rounded),
+      isExpanded: true,
+      decoration: InputDecoration(
+        hintText: hint,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 18,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: AppColors.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: AppColors.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: AppColors.accent, width: 1.4),
+        ),
+      ),
+      style: GoogleFonts.poppins(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: AppColors.ink,
+      ),
+      items:
+          options
+              .map(
+                (option) => DropdownMenuItem<String>(
+                  value: option,
+                  child: Text(
+                    option,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+      onChanged: onChanged,
+    );
+  }
+
+  Widget _buildImagePickerGrid() {
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceMuted,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.accentSoft,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.tips_and_updates_outlined,
+                  color: AppColors.accent,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "Use bright front shots and close texture angles for better discovery.",
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    height: 1.4,
+                    color: AppColors.subtext,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: sampleImages.length < 5 ? sampleImages.length + 1 : 5,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.92,
+          ),
+          itemBuilder: (context, index) {
+            if (index == sampleImages.length && sampleImages.length < 5) {
+              return InkWell(
+                onTap: pickSampleImage,
+                borderRadius: BorderRadius.circular(20),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceMuted,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.accentSoft,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(
+                          Icons.add_photo_alternate_outlined,
+                          color: AppColors.accent,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        "Add image",
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            final image = sampleImages[index];
+            return Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.border),
+                    image: DecorationImage(
+                      image: FileImage(image),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: InkWell(
+                    onTap: () => removeSampleImage(index),
+                    borderRadius: BorderRadius.circular(999),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        size: 16,
+                        color: AppColors.danger,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMiniInfoChip({required IconData icon, required String text}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: AppColors.accent),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.ink,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCountBadge(String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.accentSoft,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        value,
+        style: GoogleFonts.poppins(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: AppColors.accent,
+        ),
       ),
     );
   }
@@ -703,8 +899,8 @@ class _PublishMaterialState extends State<PublishMaterial> {
             label,
             style: GoogleFonts.poppins(
               fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF1F2937),
+              fontWeight: FontWeight.w700,
+              color: AppColors.ink,
             ),
           ),
           if (required) ...[

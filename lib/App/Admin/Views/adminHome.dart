@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hog/App/Admin/Api/adminService.dart';
-import 'package:hog/App/Admin/Model/PendingListing.dart';
-import 'package:hog/App/Admin/Widgets/PendingCard.dart';
-import 'package:hog/App/Admin/Widgets/rejectionSheet.dart';
+import 'package:hog/App/Admin/Widgets/moderationHistoryTab.dart';
+import 'package:hog/App/Admin/Widgets/moderationListingsTab.dart';
+import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
@@ -12,103 +13,145 @@ class AdminHome extends StatefulWidget {
 }
 
 class _AdminHomeState extends State<AdminHome> {
-  late Future<List<PendingSellerListing>> _pendingListings;
+  String? _userRole;
+  String? _userId;
+  bool _loadingIdentity = true;
+
+  bool get _isSuperAdmin => (_userRole ?? '').toLowerCase() == 'superadmin';
 
   @override
   void initState() {
     super.initState();
-    _pendingListings = AdminService.getAllPendingListings();
+    _loadIdentity();
   }
 
-  void _refresh() {
+  Future<void> _loadIdentity() async {
+    final role = await SecurePrefs.getUserRole();
+    final userId = await SecurePrefs.getUserId();
+
+    if (!mounted) {
+      return;
+    }
+
     setState(() {
-      _pendingListings = AdminService.getAllPendingListings();
+      _userRole = role;
+      _userId = userId;
+      _loadingIdentity = false;
     });
-  }
-
-  void _showRejectSheet(String listingId) {
-    final controller = TextEditingController();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // ✅ makes it expand with keyboard
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) {
-        return RejectReasonSheet(
-          controller: controller,
-          onSubmit: () async {
-            final reason = controller.text.trim();
-            if (reason.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Please enter a rejection reason"),
-                ),
-              );
-              return;
-            }
-
-            Navigator.pop(context); // close the sheet
-            final success = await AdminService.rejectListing(listingId, reason);
-            if (success) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text("Listing rejected")));
-              _refresh();
-            }
-          },
-        );
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.purple,
-        title: const Text("Admin", style: TextStyle(color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: FutureBuilder<List<PendingSellerListing>>(
-        future: _pendingListings,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.purple),
-            );
-          }
-
-          if (snapshot.hasError) {
-            return const Center(child: Text("Error loading listings"));
-          }
-
-          final listings = snapshot.data ?? [];
-          if (listings.isEmpty) {
-            return const Center(child: Text("No pending listings"));
-          }
-
-          return ListView.builder(
-            itemCount: listings.length,
-            itemBuilder: (context, index) {
-              final listing = listings[index];
-              return PendingListingCard(
-                listing: listing,
-                onApprove: () async {
-                  final success = await AdminService.approveListing(listing.id);
-                  if (success) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Listing approved")),
-                    );
-                    _refresh();
-                  }
-                },
-                onReject: () => _showRejectSheet(listing.id),
-              );
-            },
-          );
-        },
+    return DefaultTabController(
+      length: 4,
+      child: Scaffold(
+        backgroundColor: AppColors.canvas,
+        appBar: AppBar(
+          backgroundColor: AppColors.canvas,
+          surfaceTintColor: Colors.transparent,
+          iconTheme: const IconThemeData(color: AppColors.ink),
+          toolbarHeight: 92,
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const CustomText(
+                'Listing Moderation',
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+                textAlign: TextAlign.left,
+              ),
+              const SizedBox(height: 4),
+              CustomText(
+                _isSuperAdmin
+                    ? 'System-wide approval, rejection, and moderator activity'
+                    : 'Your approval queue, review history, and decisions',
+                fontSize: 12,
+                color: AppColors.subtext,
+                textAlign: TextAlign.left,
+              ),
+            ],
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: CustomText(
+                    _isSuperAdmin ? 'Super Admin' : 'Admin',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.accent,
+                  ),
+                ),
+              ),
+            ),
+          ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(64),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: const TabBar(
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  dividerColor: Colors.transparent,
+                  labelColor: AppColors.accent,
+                  unselectedLabelColor: AppColors.subtext,
+                  indicator: BoxDecoration(
+                    color: AppColors.accentSoft,
+                    borderRadius: BorderRadius.all(Radius.circular(14)),
+                  ),
+                  tabs: [
+                    Tab(text: 'Pending'),
+                    Tab(text: 'Approved'),
+                    Tab(text: 'Rejected'),
+                    Tab(text: 'Activity'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        body:
+            _loadingIdentity
+                ? const Center(
+                  child: CircularProgressIndicator(color: AppColors.accent),
+                )
+                : TabBarView(
+                  children: [
+                    ModerationListingsTab(
+                      status: 'pending',
+                      isSuperAdmin: _isSuperAdmin,
+                    ),
+                    ModerationListingsTab(
+                      status: 'approved',
+                      isSuperAdmin: _isSuperAdmin,
+                    ),
+                    ModerationListingsTab(
+                      status: 'rejected',
+                      isSuperAdmin: _isSuperAdmin,
+                    ),
+                    ModerationHistoryTab(
+                      isSuperAdmin: _isSuperAdmin,
+                      userId: _userId,
+                    ),
+                  ],
+                ),
       ),
     );
   }

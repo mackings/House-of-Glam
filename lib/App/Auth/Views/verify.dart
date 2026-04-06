@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Auth/Api/authclass.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
+import 'package:hog/components/authShell.dart';
 import 'package:hog/components/button.dart';
-import 'package:hog/components/customAppbar.dart';
 import 'package:hog/components/dialogs.dart';
 import 'package:hog/components/loadingoverlay.dart';
-import 'package:hog/components/texts.dart';
 import 'package:hog/components/tokenfields.dart';
 
 class Verify extends ConsumerStatefulWidget {
+  const Verify({super.key});
+
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _VerifyState();
 }
@@ -25,14 +26,18 @@ class _VerifyState extends ConsumerState<Verify> {
     }
 
     setState(() => isLoading = true);
-
     final response = await ApiService.verifyEmail(token: enteredCode!);
-
     setState(() => isLoading = false);
+
+    if (!mounted) {
+      return;
+    }
 
     if (response["success"]) {
       await showSuccessDialog(context, "Account verified successfully!");
-      // Navigate to Signin page
+      if (!mounted) {
+        return;
+      }
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const Signin()),
@@ -46,40 +51,36 @@ class _VerifyState extends ConsumerState<Verify> {
   Widget build(BuildContext context) {
     return LoadingOverlay(
       isLoading: isLoading,
-      child: Scaffold(
-        appBar: CustomAppBar(title: "Verification", enableAction: false),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    const CustomText(
-                      "We've sent a 4-digit code to your email",
-                      fontSize: 20,
-                    ),
-                    const SizedBox(height: 40),
-
-                    FourDigitInput(
-                      onCompleted: (code) {
-                        setState(() => enteredCode = code);
-                        print("Entered 4-digit code: $code");
-                      },
-                    ),
-
-                    const SizedBox(height: 420),
-
-                    CustomButton(
-                      title: "Verify",
-                      onPressed: _handleVerification,
-                    ),
-                  ],
-                ),
-              ),
+      child: AuthShell(
+        eyebrow: 'Email verification',
+        title: 'Confirm your account before you enter the app.',
+        subtitle:
+            'Use the 4-digit code sent to your email to activate your profile and continue.',
+        showBackButton: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Verification code",
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-          ),
+            const SizedBox(height: 6),
+            const Text(
+              "We've sent a code to your email address.",
+              style: TextStyle(height: 1.5, color: Color(0xFF686271)),
+            ),
+            const SizedBox(height: 24),
+            FourDigitInput(
+              onCompleted: (code) {
+                setState(() => enteredCode = code);
+              },
+            ),
+            const SizedBox(height: 26),
+            CustomButton(
+              title: "Verify account",
+              onPressed: _handleVerification,
+            ),
+          ],
         ),
       ),
     );

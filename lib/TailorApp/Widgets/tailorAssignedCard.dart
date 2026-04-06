@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hog/TailorApp/Home/Model/AssignedMaterial.dart';
+import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currencyHelper.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class TailorAssignedCard extends StatelessWidget {
   final TailorAssignedMaterial item;
@@ -13,410 +14,191 @@ class TailorAssignedCard extends StatelessWidget {
     required this.onTap,
   });
 
-  Map<String, double> _getDisplayAmounts() {
-    final countryCode = item.country?.trim().toUpperCase();
-    final isInternational =
-        item.isInternationalVendor ||
-        (countryCode != null &&
-            countryCode != 'NG' &&
-            countryCode != 'NIGERIA');
-
-    if (isInternational) {
-      final material = item.materialTotalCostUSD ?? 0.0;
-      final workmanship = item.workmanshipTotalCostUSD ?? 0.0;
-      final total =
-          (item.totalCostUSD ?? 0.0) > 0
-              ? item.totalCostUSD!
-              : (material + workmanship > 0
-                  ? material + workmanship
-                  : (item.amountPaidUSD ?? 0.0) + (item.amountToPayUSD ?? 0.0));
-      final paid =
-          (item.amountPaidUSD ?? 0.0) > 0
-              ? item.amountPaidUSD!
-              : (total > 0 && (item.amountToPayUSD ?? 0.0) > 0
-                  ? (total - (item.amountToPayUSD ?? 0.0))
-                  : 0.0);
-      final toPay =
-          (item.amountToPayUSD ?? 0.0) > 0
-              ? item.amountToPayUSD!
-              : (total > 0 && paid > 0 ? (total - paid) : 0.0);
-      return {'totalCost': total, 'amountPaid': paid, 'amountToPay': toPay};
-    } else {
-      final material = item.materialTotalCost;
-      final workmanship = item.workmanshipTotalCost;
-      final total =
-          item.totalCost > 0
-              ? item.totalCost
-              : (material + workmanship > 0
-                  ? material + workmanship
-                  : (item.amountPaid ?? 0.0) + (item.amountToPay ?? 0.0));
-      final paid =
-          (item.amountPaid ?? 0.0) > 0
-              ? item.amountPaid!
-              : (total > 0 && (item.amountToPay ?? 0.0) > 0
-                  ? (total - (item.amountToPay ?? 0.0))
-                  : 0.0);
-      final toPay =
-          (item.amountToPay ?? 0.0) > 0
-              ? item.amountToPay!
-              : (total > 0 && paid > 0 ? (total - paid) : 0.0);
-      return {'totalCost': total, 'amountPaid': paid, 'amountToPay': toPay};
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final material = item.material;
-    final displayAmounts = _getDisplayAmounts();
-    final agreedAmount = item.resolvedVendorBaseTotal;
-    final outstandingUserPayment = displayAmounts['amountToPay']! > 0;
+    final imageUrl =
+        material.sampleImages.isNotEmpty ? material.sampleImages.first : "";
     final payableBalance = item.resolvedDesignerPayableTotal;
-    final balanceLabel = "Tailor Payable";
+    final displayAmounts = _getDisplayAmounts(item);
+    final outstandingUserPayment = (displayAmounts['amountToPay'] ?? 0.0) > 0;
     final isFullyPaid = !outstandingUserPayment;
-    final paidDisplay = isFullyPaid ? payableBalance : 0.0;
+    final mainPayment = displayAmounts['amountPaid'] ?? 0.0;
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: GestureDetector(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(26),
         child: Container(
-          margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(color: AppColors.border),
+            boxShadow: const [
               BoxShadow(
-                color: const Color(0xFF6B21A8).withOpacity(0.08),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+                color: AppColors.shadow,
+                blurRadius: 20,
+                offset: Offset(0, 10),
               ),
             ],
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Purple Header Section
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [const Color(0xFF6B21A8), const Color(0xFF7C3AED)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(26),
                 ),
-                child: Column(
+                child: Stack(
                   children: [
-                    Row(
-                      children: [
-                        // Material Image
-                        Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.2),
-                              width: 2,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
+                    AspectRatio(
+                      aspectRatio: 16 / 8,
+                      child:
+                          imageUrl.isNotEmpty
+                              ? Image.network(
+                                imageUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder:
+                                    (_, __, ___) => _AssignedFallbackImage(
+                                      material: material,
+                                    ),
+                              )
+                              : _AssignedFallbackImage(material: material),
+                    ),
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withValues(alpha: 0.08),
+                              Colors.black.withValues(alpha: 0.46),
                             ],
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(14),
-                            child:
-                                material.sampleImages.isNotEmpty
-                                    ? Image.network(
-                                      material.sampleImages.first,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (
-                                        context,
-                                        error,
-                                        stackTrace,
-                                      ) {
-                                        return Container(
-                                          color: Colors.white.withOpacity(0.1),
-                                          child: Icon(
-                                            Icons.checkroom_rounded,
-                                            color: Colors.white.withOpacity(
-                                              0.6,
-                                            ),
-                                            size: 32,
-                                          ),
-                                        );
-                                      },
-                                    )
-                                    : Container(
-                                      color: Colors.white.withOpacity(0.1),
-                                      child: Icon(
-                                        Icons.checkroom_rounded,
-                                        color: Colors.white.withOpacity(0.6),
-                                        size: 32,
-                                      ),
-                                    ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 14,
+                      left: 14,
+                      child: _StatusPill(status: item.status),
+                    ),
+                    Positioned(
+                      top: 14,
+                      right: 14,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.18),
                           ),
                         ),
-                        const SizedBox(width: 16),
-
-                        // Title and Details
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        child: const Icon(
+                          Icons.arrow_outward_rounded,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 16,
+                      right: 16,
+                      bottom: 16,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomText(
+                            material.attireType,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            textAlign: TextAlign.left,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
                             children: [
-                              Text(
-                                material.attireType,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                  letterSpacing: -0.5,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                              _HeroChip(
+                                icon: Icons.texture_rounded,
+                                label: material.clothMaterial,
                               ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: Colors.white.withOpacity(0.2),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      material.clothMaterial,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white,
-                                        letterSpacing: 0.3,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: _getColorFromString(
-                                        material.color,
-                                      ),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.white,
-                                        width: 2,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              _HeroChip(
+                                icon: Icons.palette_outlined,
+                                label: material.color,
                               ),
                             ],
                           ),
-                        ),
-
-                        // Status Badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _statusBackgroundColor(item.status),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            _formatStatus(item.status),
-                            style: GoogleFonts.poppins(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: _statusTextColor(item.status),
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
-
-              // White Content Section
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 5),
-
-                    if (outstandingUserPayment) ...[
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF59E0B).withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: const Color(0xFFF59E0B).withOpacity(0.4),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.info_outline,
-                              size: 18,
-                              color: Color(0xFFF59E0B),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                "User has an outstanding payment to complete.",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: const Color(0xFF92400E),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-
-                    // Payment Summary - Light Modern Style
                     Container(
-                      padding: const EdgeInsets.all(18),
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFBFAFF), Color(0xFFF6F2FF)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                         borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF6B21A8).withOpacity(0.08),
-                            blurRadius: 14,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
+                        border: Border.all(color: AppColors.border),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF7C3AED,
-                                  ).withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Icon(
-                                  Icons.account_balance_wallet_rounded,
-                                  color: Color(0xFF6B21A8),
-                                  size: 20,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Total Amount",
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF64748B),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    CurrencyHelper.formatAmount(agreedAmount),
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF111827),
-                                      letterSpacing: -0.3,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const Spacer(),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color:
-                                      isFullyPaid
-                                          ? const Color(0xFFDCFCE7)
-                                          : const Color(0xFFFFEDD5),
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                                child: Text(
-                                  isFullyPaid ? "Paid" : "Outstanding",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color:
-                                        isFullyPaid
-                                            ? const Color(0xFF16A34A)
-                                            : const Color(0xFFEA580C),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Container(height: 1, color: const Color(0xFFE2E8F0)),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
                               Expanded(
-                                child: _paymentStat(
-                                  label: "Paid",
+                                child: _PaymentMiniTile(
+                                  label: "Main Payment Snapshot",
                                   value: CurrencyHelper.formatAmount(
-                                    paidDisplay,
+                                    mainPayment,
                                   ),
-                                  color: const Color(0xFF16A34A),
+                                  tone: AppColors.success,
                                   icon: Icons.check_circle_rounded,
+                                  subtitle:
+                                      isFullyPaid
+                                          ? "User payment completed"
+                                          : "Amount user paid",
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: 10),
                               Expanded(
-                                child: _paymentStat(
-                                  label: balanceLabel,
+                                child: _PaymentMiniTile(
+                                  label: "Tailor Payable",
                                   value: CurrencyHelper.formatAmount(
                                     payableBalance,
                                   ),
-                                  color:
-                                      isFullyPaid
-                                          ? const Color(0xFF64748B)
-                                          : const Color(0xFFF59E0B),
+                                  tone:
+                                      outstandingUserPayment
+                                          ? AppColors.warning
+                                          : AppColors.accent,
                                   icon:
                                       isFullyPaid
                                           ? Icons.check_circle_rounded
                                           : Icons.schedule_rounded,
-                                  alignEnd: true,
+                                  subtitle:
+                                      outstandingUserPayment
+                                          ? "Awaiting settlement"
+                                          : "Ready for payout",
                                 ),
                               ),
                             ],
@@ -424,6 +206,36 @@ class TailorAssignedCard extends StatelessWidget {
                         ],
                       ),
                     ),
+                    if (outstandingUserPayment) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF4E6),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: const Color(0xFFF8D3A1)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.info_outline_rounded,
+                              color: AppColors.warning,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 10),
+                            const Expanded(
+                              child: CustomText(
+                                "User still has an outstanding balance before full settlement.",
+                                fontSize: 12,
+                                color: Color(0xFF8A5A12),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -433,105 +245,258 @@ class TailorAssignedCard extends StatelessWidget {
       ),
     );
   }
+}
 
-  Color _statusBackgroundColor(String status) {
-    switch (status.toLowerCase()) {
-      case "full payment":
-        return Colors.white.withOpacity(0.2);
-      case "part payment":
-        return const Color(0xFFF59E0B).withOpacity(0.2);
-      case "pending":
-        return Colors.white.withOpacity(0.1);
-      case "requesting":
-        return const Color(0xFF3B82F6).withOpacity(0.2);
-      default:
-        return Colors.white.withOpacity(0.1);
-    }
-  }
+class _AssignedFallbackImage extends StatelessWidget {
+  final MaterialItem material;
 
-  Color _statusTextColor(String status) {
-    switch (status.toLowerCase()) {
-      case "full payment":
-        return Colors.white;
-      case "part payment":
-        return Colors.white;
-      case "pending":
-        return Colors.white.withOpacity(0.9);
-      case "requesting":
-        return Colors.white;
-      default:
-        return Colors.white.withOpacity(0.9);
-    }
-  }
+  const _AssignedFallbackImage({required this.material});
 
-  String _formatStatus(String status) {
-    return status
-        .split(' ')
-        .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
-        .join(' ');
-  }
-
-  Widget _paymentStat({
-    required String label,
-    required String value,
-    required Color color,
-    required IconData icon,
-    bool alignEnd = false,
-  }) {
-    return Column(
-      crossAxisAlignment:
-          alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment:
-              alignEnd ? MainAxisAlignment.end : MainAxisAlignment.start,
-          children: [
-            Icon(icon, size: 14, color: color),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                fontSize: 11,
-                color: const Color(0xFF64748B),
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.2,
-              ),
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.surfaceMuted,
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 58,
+            height: 58,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
             ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: GoogleFonts.poppins(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: color,
-            letterSpacing: -0.2,
+            child: const Icon(
+              Icons.checkroom_rounded,
+              color: AppColors.accent,
+              size: 28,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: CustomText(
+              material.brand.isEmpty ? material.attireType : material.brand,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppColors.ink,
+            ),
+          ),
+        ],
+      ),
     );
   }
+}
 
-  Color _getColorFromString(String colorName) {
-    final colorMap = {
-      'red': Colors.red,
-      'blue': Colors.blue,
-      'green': Colors.green,
-      'yellow': Colors.yellow,
-      'purple': Colors.purple,
-      'orange': Colors.orange,
-      'pink': Colors.pink,
-      'brown': Colors.brown,
-      'grey': Colors.grey,
-      'gray': Colors.grey,
-      'black': Colors.black,
-      'white': Colors.white,
-      'navy': Colors.indigo,
-      'teal': Colors.teal,
-      'cyan': Colors.cyan,
-    };
+class _HeroChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
 
-    return colorMap[colorName.toLowerCase()] ?? Colors.grey;
+  const _HeroChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Colors.white),
+          const SizedBox(width: 6),
+          CustomText(
+            label.isEmpty ? "N/A" : label,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            textAlign: TextAlign.left,
+          ),
+        ],
+      ),
+    );
   }
+}
+
+class _PaymentMiniTile extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color tone;
+  final IconData icon;
+  final String subtitle;
+
+  const _PaymentMiniTile({
+    required this.label,
+    required this.value,
+    required this.tone,
+    required this.icon,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: tone.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 14, color: tone),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(
+                  label,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.subtext,
+                  textAlign: TextAlign.left,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                CustomText(
+                  value,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: tone,
+                  textAlign: TextAlign.left,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                CustomText(
+                  subtitle,
+                  fontSize: 9,
+                  color: AppColors.subtext,
+                  textAlign: TextAlign.left,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  final String status;
+
+  const _StatusPill({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final tone = _statusTone(status);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: tone.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+      child: CustomText(
+        _formatStatus(status),
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        color: Colors.white,
+        textAlign: TextAlign.left,
+      ),
+    );
+  }
+}
+
+
+Map<String, double> _getDisplayAmounts(TailorAssignedMaterial item) {
+  final countryCode = item.country?.trim().toUpperCase();
+  final isInternational =
+      item.isInternationalVendor ||
+      (countryCode != null && countryCode != 'NG' && countryCode != 'NIGERIA');
+
+  if (isInternational) {
+    final material = item.materialTotalCostUSD ?? 0.0;
+    final workmanship = item.workmanshipTotalCostUSD ?? 0.0;
+    final total =
+        (item.totalCostUSD ?? 0.0) > 0
+            ? item.totalCostUSD!
+            : (material + workmanship > 0
+                ? material + workmanship
+                : (item.amountPaidUSD ?? 0.0) + (item.amountToPayUSD ?? 0.0));
+    final paid =
+        (item.amountPaidUSD ?? 0.0) > 0
+            ? item.amountPaidUSD!
+            : (total > 0 && (item.amountToPayUSD ?? 0.0) > 0
+                ? (total - (item.amountToPayUSD ?? 0.0))
+                : 0.0);
+    final toPay =
+        (item.amountToPayUSD ?? 0.0) > 0
+            ? item.amountToPayUSD!
+            : (total > 0 && paid > 0 ? (total - paid) : 0.0);
+    return {'totalCost': total, 'amountPaid': paid, 'amountToPay': toPay};
+  }
+
+  final material = item.materialTotalCost;
+  final workmanship = item.workmanshipTotalCost;
+  final total =
+      item.totalCost > 0
+          ? item.totalCost
+          : (material + workmanship > 0
+              ? material + workmanship
+              : (item.amountPaid ?? 0.0) + (item.amountToPay ?? 0.0));
+  final paid =
+      (item.amountPaid ?? 0.0) > 0
+          ? item.amountPaid!
+          : (total > 0 && (item.amountToPay ?? 0.0) > 0
+              ? (total - (item.amountToPay ?? 0.0))
+              : 0.0);
+  final toPay =
+      (item.amountToPay ?? 0.0) > 0
+          ? item.amountToPay!
+          : (total > 0 && paid > 0 ? (total - paid) : 0.0);
+  return {'totalCost': total, 'amountPaid': paid, 'amountToPay': toPay};
+}
+
+Color _statusTone(String status) {
+  switch (status.toLowerCase()) {
+    case "full payment":
+    case "sent for delivery":
+    case "attire sent for delivery":
+    case "for delivery":
+    case "delivery":
+    case "delivered":
+      return AppColors.success;
+    case "part payment":
+      return AppColors.warning;
+    case "requesting":
+      return const Color(0xFF2563EB);
+    default:
+      return AppColors.subtext;
+  }
+}
+
+String _formatStatus(String status) {
+  return status
+      .split(' ')
+      .where((word) => word.isNotEmpty)
+      .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
+      .join(' ');
 }

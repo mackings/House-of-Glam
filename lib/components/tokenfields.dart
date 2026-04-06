@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class FourDigitInput extends StatefulWidget {
   final void Function(String) onCompleted;
@@ -11,9 +12,9 @@ class FourDigitInput extends StatefulWidget {
     Key? key,
     required this.onCompleted,
     this.boxSize = 60,
-    this.textStyle = const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-    this.borderColor = Colors.grey,
-    this.focusedBorderColor = Colors.blue,
+    this.textStyle = const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+    this.borderColor = AppColors.border,
+    this.focusedBorderColor = AppColors.accent,
   }) : super(key: key);
 
   @override
@@ -62,7 +63,7 @@ class _FourDigitInputState extends State<FourDigitInput> {
       children: List.generate(4, (index) {
         return SizedBox(
           width: widget.boxSize,
-          height: widget.boxSize,
+          height: widget.boxSize + 8,
           child: TextField(
             controller: _controllers[index],
             focusNode: _focusNodes[index],
@@ -72,12 +73,18 @@ class _FourDigitInputState extends State<FourDigitInput> {
             style: widget.textStyle,
             decoration: InputDecoration(
               counterText: '',
+              fillColor: Colors.white,
+              filled: true,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide(color: widget.borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(18),
                 borderSide: BorderSide(color: widget.borderColor),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(18),
                 borderSide: BorderSide(color: widget.focusedBorderColor),
               ),
             ),

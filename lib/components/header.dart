@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Profile/profileHome.dart';
 import 'package:hog/App/UserProfile/Views/UserProfile.dart';
 import 'package:hog/components/Navigator.dart';
-import 'package:intl/intl.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class Header extends StatelessWidget {
   final String userName;
@@ -30,68 +30,107 @@ class Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final greeting = _getGreeting();
+    final theme = Theme.of(context);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Left side: Avatar + Greeting + Name
-        Row(
-          children: [
-            GestureDetector(
-              onTap: () {
-                Nav.push(context, UserProfileView());
-              },
-              child: CircleAvatar(
-                radius: 24,
-                backgroundImage: NetworkImage(avatarUrl),
-                backgroundColor: Colors.grey[300],
-              ),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.border),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 20,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Row(
               children: [
-                Text(
-                  greeting,
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                GestureDetector(
+                  onTap: () {
+                    Nav.push(context, UserProfileView());
+                  },
+                  child: CircleAvatar(
+                    radius: 28,
+                    backgroundImage: NetworkImage(avatarUrl),
+                    backgroundColor: Colors.grey[300],
+                  ),
                 ),
-                Text(
-                  userName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        greeting,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: AppColors.subtext,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        userName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ],
-        ),
-
-        // Right side: Notifications Bell
-        Row(
-          children: [
-            IconButton(
-              onPressed: onNotificationTap ?? () {},
-              icon: const Icon(
-                Icons.delivery_dining_outlined,
-                size: 28,
-                color: Colors.black87,
+          ),
+          const SizedBox(width: 12),
+          Row(
+            children: [
+              _HeaderIconButton(
+                icon: Icons.local_shipping_outlined,
+                onTap: onNotificationTap ?? () {},
               ),
-            ),
-
-            IconButton(
-              onPressed: () {
-                Nav.push(context, UserProfile());
-              },
-              icon: const Icon(
-                Icons.shopping_bag,
-                size: 28,
-                color: Colors.black87,
+              const SizedBox(width: 8),
+              _HeaderIconButton(
+                icon: Icons.storefront_outlined,
+                onTap: () {
+                  Nav.push(context, UserProfile());
+                },
               ),
-            ),
-          ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeaderIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _HeaderIconButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Ink(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: AppColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(16),
         ),
-      ],
+        child: Icon(icon, size: 22, color: AppColors.ink),
+      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:hog/App/Home/Views/PuB/widgets/poolUser.dart';
 import 'package:hog/App/Home/Views/PuB/widgets/pooldetail.dart';
 import 'package:hog/TailorApp/Home/Model/PublishedModel.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class WorkCard extends StatelessWidget {
@@ -39,7 +40,6 @@ class WorkCard extends StatelessWidget {
     );
   }
 
-  /// Map subscription plan name to a color
   Color getPlanColor(String? planName) {
     switch (planName?.toLowerCase()) {
       case "premium":
@@ -51,7 +51,7 @@ class WorkCard extends StatelessWidget {
       case "free":
         return Colors.grey;
       default:
-        return Colors.grey; // Unknown / no plan
+        return Colors.grey;
     }
   }
 
@@ -64,7 +64,7 @@ class WorkCard extends StatelessWidget {
 
     final planName = work.user?.subscriptionPlan?.toLowerCase() ?? "free";
     final planColor = getPlanColor(planName);
-    final isVerified = planName != "free"; // Free plan is not verified
+    final isVerified = planName != "free";
 
     return GestureDetector(
       onTap: () => _openPatronizeSheet(context),
@@ -72,13 +72,13 @@ class WorkCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black12),
-          boxShadow: [
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.border),
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black12,
-              blurRadius: 6,
-              offset: const Offset(0, 3),
+              color: AppColors.shadow,
+              blurRadius: 18,
+              offset: Offset(0, 10),
             ),
           ],
         ),
@@ -90,76 +90,82 @@ class WorkCard extends StatelessWidget {
                 onTap: () => _showFullImage(context, work.sampleImage.first),
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
+                    top: Radius.circular(22),
                   ),
                   child: Image.network(
                     work.sampleImage.first,
-                    height: 160,
+                    height: 168,
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
             Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(14.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header: title + verified check
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CustomText(
-                        work.clothPublished,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.purple,
+                      Expanded(
+                        child: CustomText(
+                          work.clothPublished,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.ink,
+                          textAlign: TextAlign.left,
+                        ),
                       ),
-                      if (planName.isNotEmpty)
-                        Row(
+                      const SizedBox(width: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isVerified
+                              ? planColor.withValues(alpha: 0.14)
+                              : AppColors.surfaceMuted,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              Icons.check_circle,
+                              Icons.verified_rounded,
                               color: isVerified ? planColor : Colors.grey,
-                              size: 20,
+                              size: 16,
                             ),
                             const SizedBox(width: 4),
                             CustomText(
                               isVerified
-                                  ? "Verified • ${planName[0].toUpperCase()}${planName.substring(1)}"
-                                  : "Unverified",
-                              fontSize: 12,
-                              color: planColor,
+                                  ? "${planName[0].toUpperCase()}${planName.substring(1)}"
+                                  : "Free",
+                              fontSize: 11,
+                              color: isVerified ? planColor : Colors.grey,
                             ),
                           ],
                         ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 10),
                   WorkDetailRow(
-                    icon: Icons.category,
+                    icon: Icons.category_outlined,
                     label: work.attireType,
-                    trailingIcon: Icons.shopping_bag,
+                    trailingIcon: Icons.shopping_bag_outlined,
                     trailingText: work.brand,
                   ),
                   const SizedBox(height: 6),
-                  WorkDetailRow(icon: Icons.color_lens, label: work.color),
+                  WorkDetailRow(icon: Icons.palette_outlined, label: work.color),
                   const SizedBox(height: 6),
                   WorkDetailRow(
-                    icon: Icons.calendar_today,
+                    icon: Icons.schedule_outlined,
                     label: formattedDate,
                     smallText: true,
                   ),
-                  const SizedBox(height: 6),
-
-                  // Show subscription plan name as a row
-                  // WorkDetailRow(
-                  //   icon: Icons.star,
-                  //   label:
-                  //       "Subscription Plan: ${work.user?.subscriptionPlan ?? 'Free'}",
-                  //   smallText: true,
-                  // ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   if (work.user != null)
                     GestureDetector(
                       onTap: () {

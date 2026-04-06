@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
 import 'package:hog/App/Banks/View/userBanks.dart';
 import 'package:hog/App/Home/Views/Orders/Transactions/TransactionHistory.dart';
@@ -10,6 +11,7 @@ import 'package:hog/App/UserProfile/widgets/ProfileCards.dart';
 import 'package:hog/TailorApp/Home/Views/Subscription.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -28,7 +30,7 @@ class _UserProfileViewState extends State<UserProfileView> {
     final url = Uri.parse("https://wa.me/$phone");
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
+    } else if (mounted) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Could not open WhatsApp")));
@@ -39,7 +41,7 @@ class _UserProfileViewState extends State<UserProfileView> {
     final url = Uri.parse("mailto:$email");
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
+    } else if (mounted) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Could not open Email app")));
@@ -50,27 +52,26 @@ class _UserProfileViewState extends State<UserProfileView> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    if (pickedFile != null) {
-      final imageFile = File(pickedFile.path);
+    if (pickedFile == null || !mounted) return;
 
+    final imageFile = File(pickedFile.path);
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Uploading image...")));
+
+    final success = await UserProfileViewService.uploadProfileImage(imageFile);
+    if (!mounted) return;
+
+    if (success) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Uploading image...")));
-
-      final success = await UserProfileViewService.uploadProfileImage(
-        imageFile,
-      );
-
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("✅ Profile image updated")),
-        );
-        _fetchProfile(); // Refresh after upload
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("❌ Failed to upload image")),
-        );
-      }
+      ).showSnackBar(const SnackBar(content: Text("Profile image updated")));
+      _fetchProfile();
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Failed to upload image")));
     }
   }
 
@@ -82,253 +83,405 @@ class _UserProfileViewState extends State<UserProfileView> {
 
   Future<void> _fetchProfile() async {
     final profile = await UserProfileViewService.getProfile();
+    if (!mounted) return;
     setState(() {
       _userProfile = profile;
       _loading = false;
     });
   }
 
+  String _formatLabel(String? value, {String fallback = "N/A"}) {
+    if (value == null || value.trim().isEmpty) return fallback;
+    return value.trim();
+  }
+
+  String _formatCapitalized(String? value, {String fallback = "Free"}) {
+    final normalized = value?.trim() ?? '';
+    if (normalized.isEmpty) return fallback;
+    return "${normalized[0].toUpperCase()}${normalized.substring(1)}";
+  }
+
   @override
   Widget build(BuildContext context) {
+    final profile = _userProfile;
+
     return Scaffold(
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: Colors.purple,
-        title: const CustomText("Profile", color: Colors.white, fontSize: 18),
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        title: const Text(
+          "Profile",
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
       ),
-      backgroundColor: Colors.white,
       body: SafeArea(
         child:
             _loading
-                ? const Center(
-                  child: CircularProgressIndicator(color: Colors.purple),
+                ? const Center(child: CircularProgressIndicator())
+                : profile == null
+                ? ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 40, 20, 24),
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(28),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: const Column(
+                        children: [
+                          Icon(
+                            Icons.person_off_outlined,
+                            size: 42,
+                            color: AppColors.subtext,
+                          ),
+                          SizedBox(height: 16),
+                          CustomText(
+                            "Failed to load profile",
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 )
-                : _userProfile == null
-                ? const Center(child: Text("Failed to load profile"))
-                : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                : RefreshIndicator(
+                  onRefresh: _fetchProfile,
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(14, 8, 14, 24),
                     children: [
-                      // 👤 Profile Picture + Upload
-                      Center(
-                        child: Stack(
-                          alignment: Alignment.bottomRight,
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFF8F3FF), Colors.white],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(28),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: Column(
                           children: [
-                            GestureDetector(
-                              onTap: () {
-                                _pickAndUploadImage(); // ✅ Now it actually runs the function
-                              },
-                              child: CircleAvatar(
-                                radius: 50,
-                                backgroundColor: Colors.purple.shade100,
-                                backgroundImage:
-                                    _userProfile!.billImage != null
-                                        ? NetworkImage(_userProfile!.billImage!)
-                                        : null,
-                                child:
-                                    _userProfile!.billImage == null
-                                        ? const Icon(
-                                          Icons.person,
-                                          size: 60,
-                                          color: Colors.purple,
-                                        )
-                                        : null,
-                              ),
-                            ),
-                            if (_userProfile!.isVerified == true)
-                              Container(
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                padding: const EdgeInsets.all(3),
-                                child: const CircleAvatar(
-                                  radius: 12,
-                                  backgroundColor: Colors.green,
-                                  child: Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 14,
+                            Stack(
+                              alignment: Alignment.bottomRight,
+                              children: [
+                                GestureDetector(
+                                  onTap: _pickAndUploadImage,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: AppColors.accentSoft,
+                                        width: 4,
+                                      ),
+                                    ),
+                                    child: CircleAvatar(
+                                      radius: 50,
+                                      backgroundColor: AppColors.accentSoft,
+                                      backgroundImage:
+                                          profile.billImage != null
+                                              ? NetworkImage(profile.billImage!)
+                                              : null,
+                                      child:
+                                          profile.billImage == null
+                                              ? const Icon(
+                                                Icons.person_outline_rounded,
+                                                size: 56,
+                                                color: AppColors.accent,
+                                              )
+                                              : null,
+                                    ),
                                   ),
                                 ),
-                              ),
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: AppColors.border),
+                                  ),
+                                  child: const Icon(
+                                    Icons.camera_alt_outlined,
+                                    size: 18,
+                                    color: AppColors.accent,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            CustomText(
+                              _formatLabel(profile.fullName),
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.ink,
+                            ),
+                            const SizedBox(height: 4),
+                            CustomText(
+                              _formatLabel(profile.email, fallback: ""),
+                              fontSize: 13,
+                              color: AppColors.subtext,
+                            ),
+                            const SizedBox(height: 14),
+                            Wrap(
+                              spacing: 10,
+                              runSpacing: 10,
+                              alignment: WrapAlignment.center,
+                              children: [
+                                _StatusChip(
+                                  icon:
+                                      profile.isVerified == true
+                                          ? Icons.verified_rounded
+                                          : Icons.error_outline_rounded,
+                                  label:
+                                      profile.isVerified == true
+                                          ? "Verified Account"
+                                          : "Unverified Account",
+                                  foreground:
+                                      profile.isVerified == true
+                                          ? AppColors.success
+                                          : AppColors.danger,
+                                  background:
+                                      profile.isVerified == true
+                                          ? const Color(0xFFEEF8F2)
+                                          : const Color(0xFFFDECEC),
+                                ),
+                                _StatusChip(
+                                  icon: Icons.workspace_premium_outlined,
+                                  label: _formatCapitalized(
+                                    profile.subscriptionPlan,
+                                  ),
+                                  foreground: AppColors.accent,
+                                  background: AppColors.accentSoft,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _QuickAction(
+                                    icon: Icons.account_balance_outlined,
+                                    label: "Wallet",
+                                    onTap: () {
+                                      Nav.push(context, MyBanksPage());
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _QuickAction(
+                                    icon: Icons.receipt_long_outlined,
+                                    label: "Transactions",
+                                    onTap: () {
+                                      Nav.push(context, Transactions());
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 16),
-                      CustomText(
-                        _userProfile!.fullName ?? "N/A",
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                      const SizedBox(height: 4),
-                      CustomText(
-                        _userProfile!.email ?? "",
-                        fontSize: 14,
-                        color: Colors.black54,
-                      ),
-                      const SizedBox(height: 20),
-
-                      // ✅ Verified Badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          color:
-                              _userProfile!.isVerified == true
-                                  ? Colors.green
-                                  : Colors.red,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: CustomText(
-                          _userProfile!.isVerified == true
-                              ? "Verified Account"
-                              : "Unverified Account",
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-
-                      const SizedBox(height: 25),
-                      const Divider(color: Colors.black12, thickness: 1),
-
-                      // 🧱 Info Cards
-                      const SizedBox(height: 15),
-
+                      const _SectionTitle("Account Details"),
                       ProfileInfoCard(
-                        icon: Icons.person,
+                        icon: Icons.person_outline_rounded,
                         title: "Full Name",
-                        value: _userProfile!.fullName ?? "N/A",
+                        value: _formatLabel(profile.fullName),
                       ),
-
-                      GestureDetector(
-                        onTap: () {
-                          Nav.push(context, MyBanksPage());
-                        },
-                        child: ProfileInfoCard(
-                          icon: Icons.account_balance,
-                          title: "Wallet",
-                          value: "Wallet Balances",
-                        ),
-                      ),
-
-                      GestureDetector(
-                        onTap: () {
-                          Nav.push(context, Transactions());
-                        },
-                        child: ProfileInfoCard(
-                          icon: Icons.account_balance,
-                          title: "Transactions",
-                          value: "View wallet transactions",
-                        ),
-                      ),
-
                       ProfileInfoCard(
-                        icon: Icons.email,
+                        icon: Icons.email_outlined,
                         title: "Email",
-                        value: _userProfile!.email ?? "N/A",
+                        value: _formatLabel(profile.email),
                       ),
-
                       ProfileInfoCard(
-                        icon: Icons.phone,
+                        icon: Icons.phone_outlined,
                         title: "Phone Number",
-                        value: _userProfile!.phoneNumber ?? "N/A",
+                        value: _formatLabel(profile.phoneNumber),
                       ),
-
                       ProfileInfoCard(
-                        icon: Icons.home,
+                        icon: Icons.home_outlined,
                         title: "Address",
-                        value: _userProfile!.address ?? "N/A",
+                        value: _formatLabel(profile.address),
                       ),
-
                       ProfileInfoCard(
-                        icon: Icons.flag,
+                        icon: Icons.flag_outlined,
                         title: "Country",
-                        value: _userProfile!.country ?? "N/A",
+                        value: _formatLabel(profile.country),
                       ),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ProfileInfoCard(
-                              icon: Icons.workspace_premium,
-                              title: "Subscription Plan",
-                              value:
-                                  _userProfile!.subscriptionPlan != null &&
-                                          _userProfile!
-                                              .subscriptionPlan!
-                                              .isNotEmpty
-                                      ? "${_userProfile!.subscriptionPlan![0].toUpperCase()}${_userProfile!.subscriptionPlan!.substring(1)}"
-                                      : "Free",
-                            ),
-                          ),
-
-                          // ✅ Show icon if plan is "free"
-                          if (_userProfile!.subscriptionPlan == null ||
-                              _userProfile!.subscriptionPlan!.isEmpty ||
-                              _userProfile!.subscriptionPlan!.toLowerCase() ==
-                                  "free")
-                            IconButton(
-                              icon: const Icon(
-                                Icons.arrow_forward_ios,
-                                color: Colors.purple,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                Nav.push(context, Subscription());
-                              },
-                            ),
-                        ],
-                      ),
-
                       ProfileInfoCard(
-                        icon: Icons.verified_user,
+                        icon: Icons.verified_user_outlined,
                         title: "Account Type",
-                        value:
-                            _userProfile!.role != null &&
-                                    _userProfile!.role!.isNotEmpty
-                                ? "${_userProfile!.role![0].toUpperCase()}${_userProfile!.role!.substring(1)}"
-                                : "Tailor",
+                        value: _formatCapitalized(
+                          profile.role,
+                          fallback: "Tailor",
+                        ),
                       ),
-
                       const SizedBox(height: 10),
-
+                      const _SectionTitle("Support"),
                       GestureDetector(
                         onTap: () => _launchWhatsApp("2348137159066"),
-                        child: ProfileInfoCard(
-                          icon: Icons.chat_bubble,
+                        child: const ProfileInfoCard(
+                          icon: Icons.chat_bubble_outline_rounded,
                           title: "WhatsApp Support",
-                          value: "Admin",
+                          value: "Chat with Admin",
+                          showArrow: true,
+                          accent: true,
                         ),
                       ),
                       GestureDetector(
                         onTap: () => _launchEmail("macsonline500@gmail.com"),
-                        child: ProfileInfoCard(
-                          icon: Icons.support_agent,
+                        child: const ProfileInfoCard(
+                          icon: Icons.support_agent_outlined,
                           title: "Email Support",
-                          value: "Regional Admin",
+                          value: "Contact Regional Admin",
+                          showArrow: true,
                         ),
                       ),
-
+                      if ((profile.subscriptionPlan == null ||
+                          profile.subscriptionPlan!.isEmpty ||
+                          profile.subscriptionPlan!.toLowerCase() ==
+                              "free")) ...[
+                        const SizedBox(height: 10),
+                        const _SectionTitle("Upgrade"),
+                        GestureDetector(
+                          onTap: () {
+                            Nav.push(context, Subscription());
+                          },
+                          child: const ProfileInfoCard(
+                            icon: Icons.workspace_premium_outlined,
+                            title: "Subscription Plan",
+                            value: "Upgrade from Free",
+                            showArrow: true,
+                            accent: true,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 10),
+                      const _SectionTitle("Session"),
                       GestureDetector(
-                        onTap: () {
-                          Nav.pushReplacementAll(context, Signin());
+                        onTap: () async {
+                          await SecurePrefs.clearAll();
+                          if (!mounted) return;
+                          Nav.pushReplacementAll(context, const Signin());
                         },
-                        child: ProfileInfoCard(
-                          icon: Icons.exit_to_app,
+                        child: const ProfileInfoCard(
+                          icon: Icons.logout_rounded,
                           title: "Exit App",
                           value: "Log off",
+                          showArrow: true,
                         ),
                       ),
                     ],
                   ),
                 ),
+      ),
+    );
+  }
+}
+
+class _QuickAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _QuickAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: AppColors.accent),
+            const SizedBox(width: 8),
+            Expanded(
+              child: CustomText(
+                label,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+                textAlign: TextAlign.left,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color foreground;
+  final Color background;
+
+  const _StatusChip({
+    required this.icon,
+    required this.label,
+    required this.foreground,
+    required this.background,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: foreground),
+          const SizedBox(width: 6),
+          CustomText(
+            label,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: foreground,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+
+  const _SectionTitle(this.title);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 0, 4, 4),
+      child: CustomText(
+        title,
+        fontSize: 14,
+        fontWeight: FontWeight.w800,
+        color: AppColors.ink,
+        textAlign: TextAlign.left,
       ),
     );
   }

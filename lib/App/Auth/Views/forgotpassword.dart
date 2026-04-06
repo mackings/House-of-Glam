@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Auth/Api/authclass.dart';
 import 'package:hog/App/Auth/Views/resetpassword.dart';
-import 'package:hog/App/Auth/Views/verify.dart';
 import 'package:hog/components/Navigator.dart';
+import 'package:hog/components/authShell.dart';
 import 'package:hog/components/button.dart';
-import 'package:hog/components/customAppbar.dart';
 import 'package:hog/components/dialogs.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
-import 'package:hog/components/texts.dart';
 
 class ForgotPassword extends ConsumerStatefulWidget {
   const ForgotPassword({super.key});
@@ -19,6 +17,7 @@ class ForgotPassword extends ConsumerStatefulWidget {
 }
 
 class _ForgotPasswordState extends ConsumerState<ForgotPassword> {
+  final _formKey = GlobalKey<FormState>();
   late TextEditingController emailController;
   bool isLoading = false;
 
@@ -35,25 +34,28 @@ class _ForgotPasswordState extends ConsumerState<ForgotPassword> {
   }
 
   Future<void> _handleForgotPassword() async {
-    final email = emailController.text.trim();
-
-    if (email.isEmpty) {
-      await showErrorDialog(context, "Please enter your email");
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
+    final email = emailController.text.trim();
+
     setState(() => isLoading = true);
-
     final response = await ApiService.forgotPassword(email: email);
-
     setState(() => isLoading = false);
+
+    if (!mounted) {
+      return;
+    }
 
     if (response["success"]) {
       await showSuccessDialog(
         context,
         "Password reset token sent to your email",
       );
-      // Navigate to reset password page and pass email
+      if (!mounted) {
+        return;
+      }
       Nav.push(context, Resetpassword(email: email));
     } else {
       await showErrorDialog(context, response["error"]);
@@ -64,38 +66,46 @@ class _ForgotPasswordState extends ConsumerState<ForgotPassword> {
   Widget build(BuildContext context) {
     return LoadingOverlay(
       isLoading: isLoading,
-      child: Scaffold(
-        appBar: CustomAppBar(title: "Forgot password", enableAction: false),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              children: [
-                const SizedBox(height: 30),
-                GestureDetector(
-                  onTap: () {
-                    Nav.push(context, Verify());
-                  },
-                  child: const CustomText(
-                    "Enter your email to receive a password reset token",
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 30),
-                CustomTextField(
-                  title: "Email",
-                  hintText: "Enter email",
-                  fieldKey: "Email",
-                  controller: emailController,
-                ),
-                const SizedBox(height: 400),
-                CustomButton(
-                  title: "Continue",
-                  onPressed: _handleForgotPassword,
-                ),
-              ],
-            ),
+      child: AuthShell(
+        eyebrow: 'Recovery',
+        title: 'Reset access without losing your progress.',
+        subtitle:
+            'We will send a verification token to your email so you can choose a new password securely.',
+        showBackButton: true,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Forgot password",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                "Enter the email attached to your account to continue.",
+                style: TextStyle(height: 1.5, color: Color(0xFF686271)),
+              ),
+              const SizedBox(height: 22),
+              CustomTextField(
+                title: "Email address",
+                hintText: "name@example.com",
+                fieldKey: "forgot_email",
+                controller: emailController,
+                prefixIcon: Icons.mail_outline_rounded,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Email is required';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 18),
+              CustomButton(
+                title: "Continue",
+                onPressed: _handleForgotPassword,
+              ),
+            ],
           ),
         ),
       ),

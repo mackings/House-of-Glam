@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hog/App/Auth/Model/trackingmodel.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
+import 'package:intl/intl.dart';
 
 class TrackingCard extends StatelessWidget {
   final TrackingRecord record;
@@ -12,136 +14,202 @@ class TrackingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final images = record.material.sampleImages;
+    final delivered = record.isDelivered;
+    final statusColor = delivered ? AppColors.success : AppColors.warning;
+    final statusBg =
+        delivered ? const Color(0xFFEEF8F2) : const Color(0xFFFFF4DE);
 
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200, width: 1),
-          boxShadow: [
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: AppColors.border),
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+              color: AppColors.shadow,
+              blurRadius: 16,
+              offset: Offset(0, 10),
             ),
           ],
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Thumbnail
             ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(18),
               child:
                   images.isNotEmpty
                       ? Image.network(
                         images.first,
-                        width: 55,
-                        height: 55,
+                        width: 88,
+                        height: 106,
                         fit: BoxFit.cover,
                       )
                       : Container(
-                        width: 55,
-                        height: 55,
-                        color: Colors.purple.shade50,
+                        width: 88,
+                        height: 106,
+                        color: AppColors.accentSoft,
                         child: const Icon(
                           Icons.image_outlined,
-                          color: Colors.purple,
+                          color: AppColors.accent,
+                          size: 28,
                         ),
                       ),
             ),
-            const SizedBox(width: 12),
-
-            // Details
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Tracking ID row with copy
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Flexible(
+                      Expanded(
                         child: CustomText(
-                          "ID: ${record.trackingNumber}",
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          record.material.attireType,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.ink,
+                          textAlign: TextAlign.left,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      GestureDetector(
-                        onTap: () {
-                          Clipboard.setData(
-                            ClipboardData(
-                              text: record.trackingNumber.toString(),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusBg,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              delivered
+                                  ? Icons.check_circle_rounded
+                                  : Icons.local_shipping_rounded,
+                              size: 14,
+                              color: statusColor,
                             ),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("📋 Tracking ID copied"),
-                              duration: Duration(seconds: 1),
+                            const SizedBox(width: 5),
+                            CustomText(
+                              delivered ? "Delivered" : "In Transit",
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: statusColor,
                             ),
-                          );
-                        },
-                        child: const Icon(
-                          Icons.copy,
-                          size: 14,
-                          color: Colors.purple,
+                          ],
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 6),
-
-                  // Cloth
+                  const SizedBox(height: 8),
                   CustomText(
-                    record.material.attireType,
+                    record.material.clothMaterial,
                     fontSize: 13,
-                    color: Colors.black87,
+                    color: AppColors.subtext,
+                    textAlign: TextAlign.left,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-
-                  const SizedBox(height: 6),
-
-                  // Status
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceMuted,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const CustomText(
+                                "Tracking ID",
+                                fontSize: 10,
+                                color: AppColors.subtext,
+                                textAlign: TextAlign.left,
+                              ),
+                              const SizedBox(height: 3),
+                              CustomText(
+                                record.trackingNumber.toString(),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.ink,
+                                textAlign: TextAlign.left,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            Clipboard.setData(
+                              ClipboardData(
+                                text: record.trackingNumber.toString(),
+                              ),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Tracking ID copied"),
+                                duration: Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.copy_rounded,
+                              size: 16,
+                              color: AppColors.accent,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
-                      Icon(
-                        record.isDelivered
-                            ? Icons.check_circle_rounded
-                            : Icons.local_shipping_rounded,
-                        size: 16,
-                        color:
-                            record.isDelivered ? Colors.green : Colors.purple,
+                      const Icon(
+                        Icons.calendar_today_rounded,
+                        size: 14,
+                        color: AppColors.subtext,
                       ),
-                      const SizedBox(width: 4),
-                      Flexible(
+                      const SizedBox(width: 6),
+                      Expanded(
                         child: CustomText(
-                          record.isDelivered ? "Delivered" : "In Progress",
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color:
-                              record.isDelivered ? Colors.green : Colors.purple,
+                          DateFormat("dd MMM yyyy").format(record.createdAt),
+                          fontSize: 11,
+                          color: AppColors.subtext,
+                          textAlign: TextAlign.left,
                         ),
+                      ),
+                      const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
+                        color: AppColors.subtext,
                       ),
                     ],
                   ),
                 ],
               ),
-            ),
-
-            // Arrow
-            const Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: Colors.black26,
             ),
           ],
         ),

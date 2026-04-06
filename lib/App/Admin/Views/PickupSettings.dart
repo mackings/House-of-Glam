@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Admin/Api/DeliveryRservice.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/country_list.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class PickupSettings extends StatefulWidget {
   const PickupSettings({super.key});
@@ -49,7 +50,8 @@ class _PickupSettingsState extends State<PickupSettings> {
   String _normalize(String value) => value.trim().toLowerCase();
 
   Future<String?> _ensureCountryId(String countryName) async {
-    Map<String, dynamic>? found = _hierarchy.cast<Map<String, dynamic>>().firstWhere(
+    Map<String, dynamic>?
+    found = _hierarchy.cast<Map<String, dynamic>>().firstWhere(
       (c) => _normalize(c["name"]?.toString() ?? "") == _normalize(countryName),
       orElse: () => <String, dynamic>{},
     );
@@ -58,7 +60,9 @@ class _PickupSettingsState extends State<PickupSettings> {
       return found["_id"].toString();
     }
 
-    final created = await DeliveryRateService.createPickupCountry(name: countryName);
+    final created = await DeliveryRateService.createPickupCountry(
+      name: countryName,
+    );
     if (!created) return null;
 
     final refreshed = await DeliveryRateService.getPickupHierarchy();
@@ -80,7 +84,9 @@ class _PickupSettingsState extends State<PickupSettings> {
       orElse: () => <String, dynamic>{},
     );
 
-    final states = List<Map<String, dynamic>>.from(country["states"] ?? const []);
+    final states = List<Map<String, dynamic>>.from(
+      country["states"] ?? const [],
+    );
     Map<String, dynamic>? found = states.firstWhere(
       (s) => _normalize(s["name"]?.toString() ?? "") == _normalize(stateName),
       orElse: () => <String, dynamic>{},
@@ -139,7 +145,10 @@ class _PickupSettingsState extends State<PickupSettings> {
       return;
     }
 
-    final stateId = await _ensureStateId(countryId: countryId, stateName: state);
+    final stateId = await _ensureStateId(
+      countryId: countryId,
+      stateName: state,
+    );
     if (stateId == null) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
@@ -188,14 +197,26 @@ class _PickupSettingsState extends State<PickupSettings> {
           child: SizedBox(
             height: MediaQuery.of(context).size.height * 0.7,
             child: Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Center(
+                    child: Container(
+                      width: 48,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: AppColors.border,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
                   const CustomText(
                     "Existing Pickup Locations",
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.w700,
+                    textAlign: TextAlign.left,
                   ),
                   const SizedBox(height: 10),
                   Expanded(
@@ -210,19 +231,26 @@ class _PickupSettingsState extends State<PickupSettings> {
                             : ListView(
                               children:
                                   _hierarchy.map((country) {
-                                    final states = List<Map<String, dynamic>>.from(
-                                      country["states"] ?? const [],
-                                    );
+                                    final states =
+                                        List<Map<String, dynamic>>.from(
+                                          country["states"] ?? const [],
+                                        );
                                     return ExpansionTile(
-                                      title: Text(country["name"]?.toString() ?? "Country"),
+                                      title: Text(
+                                        country["name"]?.toString() ??
+                                            "Country",
+                                      ),
                                       children:
                                           states.map((state) {
-                                            final locations = List<Map<String, dynamic>>.from(
-                                              state["locations"] ?? const [],
-                                            );
+                                            final locations =
+                                                List<Map<String, dynamic>>.from(
+                                                  state["locations"] ??
+                                                      const [],
+                                                );
                                             return ExpansionTile(
                                               title: Text(
-                                                state["name"]?.toString() ?? "State",
+                                                state["name"]?.toString() ??
+                                                    "State",
                                               ),
                                               children:
                                                   locations
@@ -230,11 +258,14 @@ class _PickupSettingsState extends State<PickupSettings> {
                                                         (loc) => ListTile(
                                                           dense: true,
                                                           title: Text(
-                                                            loc["name"]?.toString() ??
+                                                            loc["name"]
+                                                                    ?.toString() ??
                                                                 "Location",
                                                           ),
                                                           subtitle: Text(
-                                                            loc["address"]?.toString() ?? "",
+                                                            loc["address"]
+                                                                    ?.toString() ??
+                                                                "",
                                                           ),
                                                         ),
                                                       )
@@ -257,20 +288,22 @@ class _PickupSettingsState extends State<PickupSettings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7FB),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: Colors.purple,
+        backgroundColor: AppColors.canvas,
+        surfaceTintColor: Colors.transparent,
+        iconTheme: const IconThemeData(color: AppColors.ink),
         title: const CustomText(
           "Set Pickup Location",
-          color: Colors.white,
+          color: AppColors.ink,
           fontSize: 18,
+          fontWeight: FontWeight.w700,
         ),
         actions: [
           IconButton(
             tooltip: "View Existing Locations",
             onPressed: _showExistingLocations,
-            icon: const Icon(Icons.visibility_outlined, color: Colors.white),
+            icon: const Icon(Icons.visibility_outlined, color: AppColors.ink),
           ),
         ],
       ),
@@ -278,13 +311,59 @@ class _PickupSettingsState extends State<PickupSettings> {
           _isLoading
               ? const Center(child: CircularProgressIndicator())
               : ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
                 children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFF7F2FF), Color(0xFFFFFFFF)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(28),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: const Icon(
+                            Icons.place_outlined,
+                            color: AppColors.accent,
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        const CustomText(
+                          "Pickup hierarchy",
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.ink,
+                          textAlign: TextAlign.left,
+                        ),
+                        const SizedBox(height: 8),
+                        const CustomText(
+                          "Create country, state, and address pickup points that the order flow can reuse.",
+                          fontSize: 13,
+                          color: AppColors.subtext,
+                          textAlign: TextAlign.left,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: AppColors.border),
                       boxShadow: const [
                         BoxShadow(
                           color: Color(0x14000000),
@@ -318,7 +397,8 @@ class _PickupSettingsState extends State<PickupSettings> {
                                 );
                               }).toList(),
                           onChanged:
-                              (value) => setState(() => _selectedCountry = value),
+                              (value) =>
+                                  setState(() => _selectedCountry = value),
                         ),
                         const SizedBox(height: 10),
                         TextField(
@@ -335,7 +415,8 @@ class _PickupSettingsState extends State<PickupSettings> {
                           maxLines: 2,
                           decoration: const InputDecoration(
                             labelText: "Address",
-                            hintText: "e.g. 12 Allen Avenue, Ikeja, Lagos, Nigeria",
+                            hintText:
+                                "e.g. 12 Allen Avenue, Ikeja, Lagos, Nigeria",
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -345,7 +426,8 @@ class _PickupSettingsState extends State<PickupSettings> {
                           child: ElevatedButton(
                             onPressed: _isSubmitting ? null : _saveSingleForm,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple,
+                              backgroundColor: AppColors.accent,
+                              minimumSize: const Size(double.infinity, 54),
                             ),
                             child:
                                 _isSubmitting

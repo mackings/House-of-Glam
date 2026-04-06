@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class CarouselSlider extends StatefulWidget {
   final List<Widget> items;
@@ -45,11 +46,14 @@ class _CarouselSliderState extends State<CarouselSlider> {
             return AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: _currentIndex == index ? 12 : 8,
-              height: _currentIndex == index ? 12 : 8,
+              width: _currentIndex == index ? 24 : 8,
+              height: 8,
               decoration: BoxDecoration(
-                color: _currentIndex == index ? Colors.redAccent : Colors.grey,
-                shape: BoxShape.circle,
+                color:
+                    _currentIndex == index
+                        ? AppColors.accent
+                        : AppColors.border,
+                borderRadius: BorderRadius.circular(999),
               ),
             );
           }),

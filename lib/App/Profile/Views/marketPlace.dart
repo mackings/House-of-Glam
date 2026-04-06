@@ -7,6 +7,7 @@ import 'package:hog/App/Profile/widgets/productCard.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class MarketPlace extends StatefulWidget {
   const MarketPlace({super.key});
@@ -42,21 +43,20 @@ class _MarketPlaceState extends State<MarketPlace> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        backgroundColor: Colors.purple,
-        title: const CustomText(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        title: const Text(
           "Market Place",
-          fontSize: 18,
-          color: Colors.white,
+          style: TextStyle(fontWeight: FontWeight.w700),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             onPressed: () {
               Nav.push(context, Uploadlisting());
             },
-            icon: const Icon(Icons.upload_file),
+            icon: const Icon(Icons.add_business_outlined),
           ),
         ],
       ),
@@ -65,11 +65,9 @@ class _MarketPlaceState extends State<MarketPlace> {
           future: _futureListings,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(color: Colors.purple),
-              );
+              return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return Center(
+              return const Center(
                 child: CustomText(
                   "Something went wrong!",
                   fontSize: 16,
@@ -77,7 +75,7 @@ class _MarketPlaceState extends State<MarketPlace> {
                 ),
               );
             } else if (!snapshot.hasData || snapshot.data!.data.isEmpty) {
-              return Center(
+              return const Center(
                 child: CustomText(
                   "No products available",
                   fontSize: 16,
@@ -86,12 +84,10 @@ class _MarketPlaceState extends State<MarketPlace> {
               );
             }
 
-            // Save data if not yet saved
             if (_allListings.isEmpty) {
               _allListings = snapshot.data!.data;
             }
 
-            // Apply search filter
             final filteredListings =
                 _searchQuery.isEmpty
                     ? _allListings
@@ -110,23 +106,49 @@ class _MarketPlaceState extends State<MarketPlace> {
             return Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(left: 15, right: 15),
+                  padding: const EdgeInsets.fromLTRB(14, 6, 14, 4),
                   child: CustomTextField(
                     title: "",
-                    hintText: "Search Marketplace",
-                    fieldKey: "",
-                    prefixIcon: Icons.search_sharp,
+                    hintText: "Search marketplace",
+                    fieldKey: "marketplace_search",
+                    prefixIcon: Icons.search_rounded,
                     controller: _searchController,
+                    isCompact: true,
                   ),
                 ),
-
-                // 🛍️ Product List
+                Container(
+                  margin: const EdgeInsets.fromLTRB(14, 4, 14, 8),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomText(
+                        "Browse approved listings",
+                        textAlign: TextAlign.left,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      SizedBox(height: 4),
+                      CustomText(
+                        "Search by title, description, or category and open any item for details.",
+                        textAlign: TextAlign.left,
+                        fontSize: 12,
+                        color: AppColors.subtext,
+                      ),
+                    ],
+                  ),
+                ),
                 Expanded(
                   child:
                       filteredListings.isEmpty
                           ? const Center(child: Text('No products found'))
                           : ListView.builder(
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.fromLTRB(14, 6, 14, 24),
                             itemCount: filteredListings.length,
                             itemBuilder: (context, index) {
                               final product = filteredListings[index];

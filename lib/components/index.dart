@@ -18,10 +18,10 @@ class _MainPageState extends State<MainPage> {
 
   final List<Widget> _pages = const [
     Home(),
-    PlaceOrder(),
-    OrderHistory(),
-    Transactions(),
-    Pool(),
+    PlaceOrder(showBackButton: false),
+    OrderHistory(showBackButton: false),
+    Transactions(showBackButton: false),
+    Pool(showBackButton: false),
   ];
 
   void _onNavTap(int index) {
@@ -34,9 +34,13 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _pages[_currentIndex],
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _onNavTap,
+      bottomNavigationBar: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: CustomBottomNavBar(
+          currentIndex: _currentIndex,
+          onTap: _onNavTap,
+        ),
       ),
     );
   }

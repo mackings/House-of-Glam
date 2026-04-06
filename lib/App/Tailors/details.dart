@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Home/Api/home.dart';
 import 'package:hog/App/Home/Model/vendor.dart';
-import 'package:hog/components/texts.dart';
+import 'package:hog/components/button.dart';
+import 'package:hog/components/customAppbar.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class Details extends StatefulWidget {
   final Vendor vendor;
@@ -17,25 +19,6 @@ class _DetailsState extends State<Details> {
   int _selectedRating = 0;
   bool _isSubmittingRating = false;
 
-  Widget _buildInfoTile(IconData icon, String title, String subtitle) {
-    return Column(
-      children: [
-        ListTile(
-          leading: Icon(icon, color: Colors.blueAccent),
-          title: Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          subtitle: Text(
-            subtitle.isNotEmpty ? subtitle : "Not provided",
-            style: const TextStyle(color: Colors.black87, fontSize: 14),
-          ),
-        ),
-        const Divider(thickness: 1, height: 0),
-      ],
-    );
-  }
-
   void _showRatingBottomSheet() {
     showModalBottomSheet(
       context: context,
@@ -46,7 +29,6 @@ class _DetailsState extends State<Details> {
   }
 
   Widget _buildRatingSheet() {
-    // Use StatefulBuilder to manage local state within the bottom sheet
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setModalState) {
         return Container(
@@ -54,38 +36,35 @@ class _DetailsState extends State<Details> {
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 20,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(28),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header
+              Container(
+                width: 44,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              const SizedBox(height: 16),
               Text(
                 "Rate ${widget.vendor.businessName}",
                 style: const TextStyle(
                   fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.purple,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.ink,
                 ),
               ),
-              const SizedBox(height: 16),
-
-              // Rating Description
+              const SizedBox(height: 10),
               const Text(
                 "How was your experience with this designer?",
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.black54),
+                style: TextStyle(fontSize: 14, color: AppColors.subtext),
               ),
-              const SizedBox(height: 24),
-
-              // Star Rating
+              const SizedBox(height: 22),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(5, (index) {
@@ -95,25 +74,22 @@ class _DetailsState extends State<Details> {
                         _selectedRating = index + 1;
                       });
                     },
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
                       child: Icon(
                         index < _selectedRating
-                            ? Icons.star
-                            : Icons.star_border,
-                        size: 40,
-                        color:
-                            index < _selectedRating
-                                ? Colors.amber
-                                : Colors.grey,
+                            ? Icons.star_rounded
+                            : Icons.star_border_rounded,
+                        size: 38,
+                        color: index < _selectedRating
+                            ? Colors.amber
+                            : AppColors.border,
                       ),
                     ),
                   );
                 }),
               ),
-              const SizedBox(height: 16),
-
-              // Rating Text
+              const SizedBox(height: 14),
               Text(
                 _selectedRating == 0
                     ? "Tap a star to rate"
@@ -127,69 +103,26 @@ class _DetailsState extends State<Details> {
                     ? "Very Good"
                     : "Excellent",
                 style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.purple,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.accent,
                 ),
               ),
-              const SizedBox(height: 32),
-
-              // Rate Button
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed:
-                      _selectedRating == 0 || _isSubmittingRating
-                          ? null
-                          : () => _submitRating(setModalState),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
-                    disabledBackgroundColor: Colors.purple.withOpacity(0.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 2,
-                  ),
-                  child:
-                      _isSubmittingRating
-                          ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation(Colors.white),
-                            ),
-                          )
-                          : const Text(
-                            "Rate Designer",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                ),
+              const SizedBox(height: 24),
+              CustomButton(
+                title: "Rate Designer",
+                onPressed:
+                    _selectedRating == 0 || _isSubmittingRating
+                        ? null
+                        : () => _submitRating(setModalState),
+                isLoading: _isSubmittingRating,
               ),
-              const SizedBox(height: 12),
-
-              // Cancel Button
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    "Cancel",
-                    style: TextStyle(fontSize: 16, color: Colors.black54),
-                  ),
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(color: AppColors.subtext),
                 ),
               ),
             ],
@@ -213,25 +146,25 @@ class _DetailsState extends State<Details> {
       _isSubmittingRating = false;
     });
 
+    if (!mounted) {
+      return;
+    }
+
     if (success) {
-      if (mounted) {
-        Navigator.pop(context); // Close bottom sheet
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Thanks for rating ${widget.vendor.businessName}!"),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Thanks for rating ${widget.vendor.businessName}!"),
+          backgroundColor: AppColors.success,
+        ),
+      );
     } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Failed to submit rating. Please try again."),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Failed to submit rating. Please try again."),
+          backgroundColor: AppColors.danger,
+        ),
+      );
     }
   }
 
@@ -241,113 +174,276 @@ class _DetailsState extends State<Details> {
     final userProfile = widget.userProfile;
 
     return Scaffold(
-      appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: CustomText(
-          vendor.businessName,
-          color: Colors.white,
-          fontSize: 20,
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.purple,
+      backgroundColor: AppColors.canvas,
+      appBar: CustomAppBar(
+        title: vendor.businessName,
+        enableAction: false,
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(18, 8, 18, 120),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Profile Image or Fallback Avatar
             Container(
-              padding: const EdgeInsets.all(16),
-              child:
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                children: [
                   userProfile.image.isNotEmpty
                       ? CircleAvatar(
-                        radius: 60,
-                        backgroundImage: NetworkImage(userProfile.image),
-                      )
+                          radius: 46,
+                          backgroundImage: NetworkImage(userProfile.image),
+                        )
                       : CircleAvatar(
-                        radius: 60,
-                        backgroundColor: Colors.blueAccent,
-                        child: Text(
-                          userProfile.fullName.isNotEmpty
-                              ? userProfile.fullName[0].toUpperCase()
-                              : "?",
-                          style: const TextStyle(
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                          radius: 46,
+                          backgroundColor: AppColors.accentSoft,
+                          child: Text(
+                            userProfile.fullName.isNotEmpty
+                                ? userProfile.fullName[0].toUpperCase()
+                                : "?",
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.accent,
+                            ),
                           ),
                         ),
+                  const SizedBox(height: 14),
+                  Text(
+                    userProfile.fullName,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    vendor.description.isEmpty
+                        ? "No description provided yet."
+                        : vendor.description,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColors.subtext,
+                      height: 1.55,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _StatChip(
+                        icon: Icons.star_rounded,
+                        label: "${vendor.totalRatings} reviews",
                       ),
-            ),
-
-            // Name
-            Text(
-              userProfile.fullName,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Business Description
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                vendor.description,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.black54, fontSize: 14),
+                      _StatChip(
+                        icon: Icons.workspace_premium_outlined,
+                        label: "${vendor.rate}/5 rating",
+                      ),
+                      _StatChip(
+                        icon: Icons.work_outline_rounded,
+                        label: "${vendor.yearOfExperience} yrs",
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-
-            const SizedBox(height: 20),
-            const Divider(thickness: 1),
-
-            // Details with icons
-            // _buildInfoTile(Icons.email, "Business Email", vendor.businessEmail),
-            //   _buildInfoTile(Icons.phone, "Business Phone", ""),
-            _buildInfoTile(
-              Icons.location_on,
-              "Business Address",
-              vendor.address,
+            const SizedBox(height: 18),
+            _InfoSection(
+              title: "Business Information",
+              children: [
+                _InfoTile(
+                  icon: Icons.location_on_outlined,
+                  title: "Business Address",
+                  subtitle: vendor.address,
+                ),
+                _InfoTile(
+                  icon: Icons.location_city_outlined,
+                  title: "City",
+                  subtitle: vendor.city,
+                ),
+                _InfoTile(
+                  icon: Icons.map_outlined,
+                  title: "State",
+                  subtitle: vendor.state,
+                ),
+                _InfoTile(
+                  icon: Icons.call_outlined,
+                  title: "Business Phone",
+                  subtitle: vendor.businessPhone,
+                ),
+                _InfoTile(
+                  icon: Icons.mail_outline_rounded,
+                  title: "Business Email",
+                  subtitle: vendor.businessEmail,
+                ),
+              ],
             ),
-            _buildInfoTile(Icons.location_city, "City", vendor.city),
-            _buildInfoTile(Icons.map, "State", vendor.state),
-            _buildInfoTile(
-              Icons.work,
-              "Experience",
-              "${vendor.yearOfExperience} years",
+            const SizedBox(height: 18),
+            _InfoSection(
+              title: "Profile",
+              children: [
+                _InfoTile(
+                  icon: Icons.person_outline_rounded,
+                  title: "Full Name",
+                  subtitle: userProfile.fullName,
+                ),
+                _InfoTile(
+                  icon: Icons.phone_outlined,
+                  title: "Phone Number",
+                  subtitle: userProfile.phoneNumber,
+                ),
+                _InfoTile(
+                  icon: Icons.home_outlined,
+                  title: "Address",
+                  subtitle: userProfile.address,
+                ),
+                _InfoTile(
+                  icon: Icons.alternate_email_rounded,
+                  title: "Email",
+                  subtitle: userProfile.email,
+                ),
+              ],
             ),
-            _buildInfoTile(
-              Icons.star,
-              "Ratings",
-              "${vendor.totalRatings} (${vendor.rate}/5)",
-            ),
-            // _buildInfoTile(
-            //   Icons.home_repair_service,
-            //   "Owner Email",
-            //   userProfile.email,
-            // ),
           ],
         ),
       ),
-
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: ElevatedButton.icon(
-            onPressed: _showRatingBottomSheet,
-            icon: const Icon(Icons.star, color: Colors.white),
-            label: const CustomText("Rate Designer", color: Colors.white),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.fromLTRB(18, 0, 18, 12),
+        child: CustomButton(
+          title: "Rate Designer",
+          onPressed: _showRatingBottomSheet,
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+}
+
+class _InfoSection extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
+
+  const _InfoSection({required this.title, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 12),
+          ...children,
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _InfoTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: AppColors.accent, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.subtext,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle.isEmpty ? "Not provided" : subtitle,
+                    style: const TextStyle(fontSize: 14, height: 1.45),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _StatChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: AppColors.accent),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
     );
   }
 }

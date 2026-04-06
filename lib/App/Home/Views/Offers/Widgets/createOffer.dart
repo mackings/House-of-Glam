@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hog/App/Home/Model/reviewModel.dart';
 import 'package:hog/App/Home/Views/Offers/Api/OfferService.dart';
 import 'package:hog/App/Home/Views/Offers/Widgets/offerdetail_v2.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currencyHelper.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
-/// Modal bottom sheet for creating initial offer
 class CreateOfferSheet extends StatefulWidget {
   final Review review;
   final VoidCallback? onOfferCreated;
@@ -32,12 +31,10 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
   @override
   void initState() {
     super.initState();
-    // Pre-fill with review amounts (converted to display currency)
     _initializeAmounts();
   }
 
   Future<void> _initializeAmounts() async {
-    // Pre-fill with vendor's quoted amounts as starting point
     setState(() {
       _totalCtrl.text = NumberFormat('#,###').format(widget.review.totalCost);
     });
@@ -112,10 +109,8 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
 
         if (offerId != null) {
           widget.onOfferCreated?.call();
-          // Close this sheet
           if (mounted) Navigator.pop(context);
 
-          // Navigate to offer detail chat screen
           if (mounted) {
             await Navigator.push(
               context,
@@ -124,7 +119,6 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
               ),
             );
 
-            // Pop back to refresh the quotations list
             if (mounted) Navigator.pop(context);
           }
         } else {
@@ -145,343 +139,354 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
   @override
   Widget build(BuildContext context) {
     final total = double.tryParse(_totalCtrl.text.replaceAll(',', '')) ?? 0;
+    final quotedAmount = widget.review.totalCost.toDouble();
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Drag Handle
-          Container(
-            margin: const EdgeInsets.only(top: 12, bottom: 8),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-
-          Flexible(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.only(
-                left: 24,
-                right: 24,
-                top: 16,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+    return SafeArea(
+      top: true,
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 52,
+              height: 5,
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(999),
               ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF6B21A8), Color(0xFF7C3AED)],
-                            ),
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF6B21A8).withOpacity(0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.local_offer,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              CustomText(
-                                "Make Your Offer",
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF1F2937),
-                              ),
-                              CustomText(
-                                "Propose your desired pricing",
-                                fontSize: 13,
-                                color: Color(0xFF6B7280),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Vendor's Quote (Reference)
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF3F4F6),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE5E7EB)),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  top: 18,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          const CustomText(
-                            "Vendor's Original Quote:",
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF6B7280),
+                          _HeaderButton(
+                            icon: Icons.close_rounded,
+                            onTap: () => Navigator.pop(context),
                           ),
-                          const SizedBox(height: 8),
-                          CustomText(
-                            CurrencyHelper.formatAmount(
-                              widget.review.totalCost,
-                              currencyCode: 'NGN',
-                            ),
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1F2937),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Your Offer Section
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFAF5FF),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: const Color(0xFF6B21A8).withOpacity(0.1),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF6B21A8,
-                                  ).withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CustomText(
+                                  "Make an Offer",
+                                  fontSize: 21,
+                                  fontWeight: FontWeight.w800,
+                                  textAlign: TextAlign.left,
                                 ),
-                                child: const Icon(
-                                  Icons.attach_money_rounded,
-                                  size: 18,
-                                  color: Color(0xFF6B21A8),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                          const CustomText(
-                            "Your Proposed Price",
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF1F2937),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFF7ED),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: const Color(0xFFF59E0B).withOpacity(0.4),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.info_outline,
-                              size: 18,
-                              color: Color(0xFFF59E0B),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                "You can only make one offer for this quote.",
-                                style: GoogleFonts.poppins(
+                                SizedBox(height: 2),
+                                CustomText(
+                                  "Suggest your preferred amount without changing the negotiation logic.",
                                   fontSize: 12,
-                                  color: const Color(0xFF92400E),
-                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.subtext,
+                                  textAlign: TextAlign.left,
                                 ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFF8F3FF), Colors.white],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(26),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 46,
+                                  height: 46,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.accentSoft,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: const Icon(
+                                    Icons.local_offer_outlined,
+                                    color: AppColors.accent,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const CustomText(
+                                        "Vendor Quote",
+                                        fontSize: 12,
+                                        color: AppColors.subtext,
+                                        textAlign: TextAlign.left,
+                                      ),
+                                      const SizedBox(height: 3),
+                                      CustomText(
+                                        CurrencyHelper.formatAmount(
+                                          quotedAmount,
+                                          currencyCode: 'NGN',
+                                        ),
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w800,
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 14),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFF7ED),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: const Color(0xFFF5D08A),
+                                ),
+                              ),
+                              child: const Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.info_outline_rounded,
+                                    size: 18,
+                                    color: AppColors.warning,
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: CustomText(
+                                      "You can only send one initial offer for this quotation.",
+                                      fontSize: 12,
+                                      color: AppColors.warning,
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
-
-                          // Total Cost
-                          const CustomText(
-                            "Total Amount (NGN)",
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF1F2937),
-                          ),
-                          const SizedBox(height: 8),
-                          TextFormField(
-                            controller: _totalCtrl,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              hintText: "e.g., 75,000",
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: Colors.grey.shade300,
+                      const SizedBox(height: 18),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: AppColors.border),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: AppColors.shadow,
+                              blurRadius: 18,
+                              offset: Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const CustomText(
+                              "Your Offer",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              textAlign: TextAlign.left,
+                            ),
+                            const SizedBox(height: 6),
+                            CustomText(
+                              "Enter the amount you want the vendor to consider.",
+                              fontSize: 12,
+                              color: AppColors.subtext,
+                              textAlign: TextAlign.left,
+                            ),
+                            const SizedBox(height: 14),
+                            const CustomText(
+                              "Total Amount (NGN)",
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              textAlign: TextAlign.left,
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _totalCtrl,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                hintText: "e.g. 75,000",
+                                prefixIcon: const Icon(
+                                  Icons.payments_outlined,
+                                  size: 20,
+                                  color: AppColors.subtext,
                                 ),
                               ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: Colors.grey.shade300,
+                              validator:
+                                  (v) =>
+                                      v == null || v.isEmpty
+                                          ? "Required"
+                                          : null,
+                              enabled: !_isSubmitting,
+                              onChanged: (v) {
+                                final formatted = _formatNumber(v);
+                                if (formatted != v) {
+                                  _totalCtrl.value = TextEditingValue(
+                                    text: formatted,
+                                    selection: TextSelection.collapsed(
+                                      offset: formatted.length,
+                                    ),
+                                  );
+                                }
+                                setState(() {});
+                              },
+                            ),
+                            const SizedBox(height: 14),
+                            Container(
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceMuted,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: Column(
+                                children: [
+                                  _SummaryRow(
+                                    label: "Proposed total",
+                                    value: CurrencyHelper.formatAmount(
+                                      total,
+                                      currencyCode: 'NGN',
+                                    ),
+                                    emphasize: true,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const CustomText(
+                                    "The system will still split the amount into material and workmanship for processing.",
+                                    fontSize: 11,
+                                    color: AppColors.subtext,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      const CustomText(
+                        "Message to Vendor",
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        textAlign: TextAlign.left,
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _commentCtrl,
+                        maxLines: 4,
+                        keyboardType: TextInputType.multiline,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: const InputDecoration(
+                          hintText: "Explain why this amount works for you...",
+                          prefixIcon: Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            size: 20,
+                            color: AppColors.subtext,
+                          ),
+                          alignLabelWithHint: true,
+                        ),
+                        validator:
+                            (v) =>
+                                v == null || v.isEmpty
+                                    ? "Please add a comment"
+                                    : null,
+                        enabled: !_isSubmitting,
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed:
+                                  _isSubmitting
+                                      ? null
+                                      : () => Navigator.pop(context),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(54),
+                                side: const BorderSide(color: AppColors.border),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                              ),
+                              child: const Text("Cancel"),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 2,
+                            child: SizedBox(
+                              height: 54,
+                              child: ElevatedButton.icon(
+                                onPressed:
+                                    _isSubmitting ? null : _handleCreateOffer,
+                                icon:
+                                    _isSubmitting
+                                        ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                        : const Icon(
+                                          Icons.send_rounded,
+                                          color: Colors.white,
+                                        ),
+                                label: CustomText(
+                                  _isSubmitting ? "Sending..." : "Send Offer",
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.accent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                  elevation: 0,
                                 ),
                               ),
                             ),
-                            validator:
-                                (v) =>
-                                    v == null || v.isEmpty ? "Required" : null,
-                            enabled: !_isSubmitting,
-                            onChanged: (v) {
-                              // Format with commas
-                              final formatted = _formatNumber(v);
-                              if (formatted != v) {
-                                _totalCtrl.value = TextEditingValue(
-                                  text: formatted,
-                                  selection: TextSelection.collapsed(
-                                    offset: formatted.length,
-                                  ),
-                                );
-                              }
-                              setState(() {}); // Update total
-                            },
-                          ),
-
-                          const SizedBox(height: 16),
-                          const Divider(),
-                          const SizedBox(height: 8),
-
-                          // Total
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const CustomText(
-                                "Total:",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF1F2937),
-                              ),
-                              CustomText(
-                                CurrencyHelper.formatAmount(
-                                  total,
-                                  currencyCode: 'NGN',
-                                ),
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF6B21A8),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          const CustomText(
-                            "We split this into material and workmanship for processing.",
-                            fontSize: 11,
-                            color: Color(0xFF6B7280),
                           ),
                         ],
                       ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Comment Field
-                    const CustomText(
-                      "Message to Vendor",
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1F2937),
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _commentCtrl,
-                      maxLines: 3,
-                      decoration: InputDecoration(
-                        hintText: "e.g., Can we negotiate the price a bit?",
-                        filled: true,
-                        fillColor: Colors.grey.shade100,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      validator:
-                          (v) =>
-                              v == null || v.isEmpty
-                                  ? "Please add a comment"
-                                  : null,
-                      enabled: !_isSubmitting,
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // Submit Button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton.icon(
-                        onPressed: _isSubmitting ? null : _handleCreateOffer,
-                        icon:
-                            _isSubmitting
-                                ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                                : const Icon(Icons.send, color: Colors.white),
-                        label: CustomText(
-                          _isSubmitting ? "Sending..." : "Send Offer",
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF6B21A8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 0,
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -491,5 +496,65 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
     final number = int.tryParse(value.replaceAll(",", ""));
     if (number == null) return value;
     return NumberFormat("#,###").format(number);
+  }
+}
+
+class _HeaderButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _HeaderButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          color: AppColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Icon(icon, size: 18, color: AppColors.ink),
+      ),
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool emphasize;
+
+  const _SummaryRow({
+    required this.label,
+    required this.value,
+    this.emphasize = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: CustomText(
+            label,
+            fontSize: 12,
+            color: AppColors.subtext,
+            textAlign: TextAlign.left,
+          ),
+        ),
+        CustomText(
+          value,
+          fontSize: emphasize ? 18 : 14,
+          fontWeight: FontWeight.w800,
+          color: emphasize ? AppColors.accent : AppColors.ink,
+          textAlign: TextAlign.left,
+        ),
+      ],
+    );
   }
 }

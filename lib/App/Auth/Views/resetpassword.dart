@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Auth/Api/authclass.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
+import 'package:hog/components/authShell.dart';
 import 'package:hog/components/button.dart';
-import 'package:hog/components/customAppbar.dart';
 import 'package:hog/components/dialogs.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
-import 'package:hog/components/texts.dart';
 import 'package:hog/components/tokenfields.dart';
 
 class Resetpassword extends ConsumerStatefulWidget {
@@ -50,16 +49,21 @@ class _ResetpasswordState extends ConsumerState<Resetpassword> {
     }
 
     setState(() => isLoading = true);
-
     final response = await ApiService.resetPassword(
       token: token!,
       password: password,
     );
-
     setState(() => isLoading = false);
+
+    if (!mounted) {
+      return;
+    }
 
     if (response["success"]) {
       await showSuccessDialog(context, "Password reset successfully!");
+      if (!mounted) {
+        return;
+      }
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const Signin()),
@@ -73,42 +77,45 @@ class _ResetpasswordState extends ConsumerState<Resetpassword> {
   Widget build(BuildContext context) {
     return LoadingOverlay(
       isLoading: isLoading,
-      child: Scaffold(
-        appBar: CustomAppBar(title: "Reset Password", enableAction: false),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              children: [
-                const SizedBox(height: 30),
-                const CustomText(
-                  "Enter the token sent to your email and choose a new password",
-                  fontSize: 17,
-                  fontWeight: FontWeight.w500,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 40),
-                FourDigitInput(
-                  onCompleted: (code) {
-                    setState(() => token = code);
-                  },
-                ),
-                const SizedBox(height: 30),
-                CustomTextField(
-                  title: "New Password",
-                  hintText: "Enter new password",
-                  fieldKey: "password",
-                  isPassword: true,
-                  controller: passwordController,
-                ),
-                const SizedBox(height: 50),
-                CustomButton(
-                  title: "Update Password",
-                  onPressed: _handleResetPassword,
-                ),
-              ],
+      child: AuthShell(
+        eyebrow: 'Set a new password',
+        title: 'Finish recovery and secure your account again.',
+        subtitle:
+            'Enter the token sent to ${widget.email} and choose a strong replacement password.',
+        showBackButton: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Reset password",
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-          ),
+            const SizedBox(height: 6),
+            const Text(
+              "Use the code from your email, then set a new password.",
+              style: TextStyle(height: 1.5, color: Color(0xFF686271)),
+            ),
+            const SizedBox(height: 24),
+            FourDigitInput(
+              onCompleted: (code) {
+                setState(() => token = code);
+              },
+            ),
+            const SizedBox(height: 20),
+            CustomTextField(
+              title: "New password",
+              hintText: "Enter new password",
+              fieldKey: "reset_password",
+              isPassword: true,
+              prefixIcon: Icons.lock_outline_rounded,
+              controller: passwordController,
+            ),
+            const SizedBox(height: 20),
+            CustomButton(
+              title: "Update password",
+              onPressed: _handleResetPassword,
+            ),
+          ],
         ),
       ),
     );
