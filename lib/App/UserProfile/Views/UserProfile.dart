@@ -368,7 +368,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                       GestureDetector(
                         onTap: () async {
                           await SecurePrefs.clearAll();
-                          if (!mounted) return;
+                          if (!context.mounted) return;
                           Nav.pushReplacementAll(context, const Signin());
                         },
                         child: const ProfileInfoCard(

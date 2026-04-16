@@ -9,6 +9,7 @@ import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
@@ -215,7 +216,7 @@ class _UploadlistingState extends State<Uploadlisting> {
             color: Colors.white,
             fontSize: 18,
           ),
-          backgroundColor: Colors.purple,
+          backgroundColor: AppColors.accent,
           iconTheme: const IconThemeData(color: Colors.white),
         ),
         body: SingleChildScrollView(

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:hog/App/Banks/Api/BamkService.dart';
 import 'package:hog/App/Banks/Model/BankCodes.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class AddBankAccountPage extends StatefulWidget {
   const AddBankAccountPage({Key? key}) : super(key: key);
@@ -202,11 +203,11 @@ class _AddBankAccountPageState extends State<AddBankAccountPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.purple[50]!, Colors.blue[50]!],
+                  gradient: const LinearGradient(
+                    colors: [AppColors.accentSoft, AppColors.surface],
                   ),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.purple[100]!),
+                  border: Border.all(color: AppColors.border),
                 ),
                 child: Row(
                   children: [
@@ -218,7 +219,7 @@ class _AddBankAccountPageState extends State<AddBankAccountPage> {
                       ),
                       child: Icon(
                         Icons.info_outline,
-                        color: Colors.purple[700],
+                        color: AppColors.accentDeep,
                         size: 20,
                       ),
                     ),
@@ -228,7 +229,7 @@ class _AddBankAccountPageState extends State<AddBankAccountPage> {
                         'Add your bank account for easy withdrawals',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.purple[900],
+                          color: AppColors.accentDeep,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -259,13 +260,13 @@ class _AddBankAccountPageState extends State<AddBankAccountPage> {
                     border: Border.all(
                       color:
                           _selectedBank != null
-                              ? Colors.purple
+                              ? AppColors.accent
                               : Colors.grey[300]!,
                       width: _selectedBank != null ? 2 : 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.05),
+                        color: Colors.grey.withValues(alpha: 0.05),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -278,7 +279,7 @@ class _AddBankAccountPageState extends State<AddBankAccountPage> {
                         decoration: BoxDecoration(
                           color:
                               _selectedBank != null
-                                  ? Colors.purple[50]
+                                  ? AppColors.accentSoft
                                   : Colors.grey[100],
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -286,7 +287,7 @@ class _AddBankAccountPageState extends State<AddBankAccountPage> {
                           Icons.account_balance,
                           color:
                               _selectedBank != null
-                                  ? Colors.purple[700]
+                                  ? AppColors.accentDeep
                                   : Colors.grey[600],
                           size: 20,
                         ),
@@ -354,7 +355,7 @@ class _AddBankAccountPageState extends State<AddBankAccountPage> {
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: const BorderSide(
-                      color: Colors.purple,
+                      color: AppColors.accent,
                       width: 2,
                     ),
                   ),
@@ -399,13 +400,13 @@ class _AddBankAccountPageState extends State<AddBankAccountPage> {
                 child: ElevatedButton(
                   onPressed: _isVerifying ? null : _verifyAccount,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple[700],
+                    backgroundColor: AppColors.accentDeep,
                     disabledBackgroundColor: Colors.grey[300],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                     elevation: 0,
-                    shadowColor: Colors.purple.withOpacity(0.3),
+                    shadowColor: AppColors.accent.withValues(alpha: 0.3),
                   ),
                   child:
                       _isVerifying
@@ -454,16 +455,16 @@ class _AddBankAccountPageState extends State<AddBankAccountPage> {
                   child: Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.purple[50]!, Colors.purple[100]!],
+                      gradient: const LinearGradient(
+                        colors: [AppColors.accentSoft, AppColors.surface],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.purple[700]!, width: 2),
+                      border: Border.all(color: AppColors.accentDeep, width: 2),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.purple.withOpacity(0.1),
+                          color: AppColors.accent.withValues(alpha: 0.1),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -475,7 +476,7 @@ class _AddBankAccountPageState extends State<AddBankAccountPage> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.purple[700],
+                            color: AppColors.accentDeep,
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -492,7 +493,7 @@ class _AddBankAccountPageState extends State<AddBankAccountPage> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.purple[900],
+                            color: AppColors.accentDeep,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -516,7 +517,7 @@ class _AddBankAccountPageState extends State<AddBankAccountPage> {
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.08),
+                                color: Colors.grey.withValues(alpha: 0.08),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -559,7 +560,7 @@ class _AddBankAccountPageState extends State<AddBankAccountPage> {
                   child: ElevatedButton(
                     onPressed: _isSubmitting ? null : _submitBankAccount,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple[700],
+                      backgroundColor: AppColors.accentDeep,
                       disabledBackgroundColor: Colors.grey[300],
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -716,10 +717,10 @@ class _BankSelectionSheetState extends State<_BankSelectionSheet> {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.purple[50] : Colors.white,
+                    color: isSelected ? AppColors.accentSoft : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isSelected ? Colors.purple : Colors.grey[200]!,
+                      color: isSelected ? AppColors.accent : Colors.grey[200]!,
                       width: isSelected ? 2 : 1,
                     ),
                   ),
@@ -732,13 +733,17 @@ class _BankSelectionSheetState extends State<_BankSelectionSheet> {
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color:
-                            isSelected ? Colors.purple[100] : Colors.grey[100],
+                            isSelected
+                                ? AppColors.accent.withValues(alpha: 0.14)
+                                : Colors.grey[100],
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.account_balance,
                         color:
-                            isSelected ? Colors.purple[700] : Colors.grey[600],
+                            isSelected
+                                ? AppColors.accentDeep
+                                : Colors.grey[600],
                         size: 24,
                       ),
                     ),
@@ -754,7 +759,7 @@ class _BankSelectionSheetState extends State<_BankSelectionSheet> {
                         isSelected
                             ? Icon(
                               Icons.check_circle,
-                              color: Colors.purple[700],
+                              color: AppColors.accentDeep,
                             )
                             : const Icon(
                               Icons.arrow_forward_ios,

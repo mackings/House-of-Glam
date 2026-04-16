@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 
 /// Reusable widget to display errors in a user-friendly way
 class ErrorDisplay extends StatelessWidget {
@@ -40,7 +41,7 @@ class ErrorDisplay extends StatelessWidget {
                 icon: const Icon(Icons.refresh, size: 20),
                 label: const Text("Try Again"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
+                  backgroundColor: AppColors.accent,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
@@ -120,7 +121,7 @@ class CompactErrorDisplay extends StatelessWidget {
             IconButton(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
-              color: Colors.purple,
+              color: AppColors.accent,
               tooltip: "Retry",
             ),
           ],
@@ -183,7 +184,7 @@ class CustomErrorDisplay extends StatelessWidget {
                 icon: const Icon(Icons.refresh, size: 20),
                 label: Text(retryButtonText ?? "Try Again"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
+                  backgroundColor: AppColors.accent,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,

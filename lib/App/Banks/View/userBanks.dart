@@ -9,6 +9,7 @@ import 'package:hog/App/Banks/View/transferPage.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:hog/constants/currencyHelper.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class MyBanksPage extends StatefulWidget {
@@ -201,10 +202,10 @@ class _MyBanksPageState extends State<MyBanksPage>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.purple[50],
+                color: AppColors.accentSoft,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(Icons.add, color: Colors.purple[700], size: 20),
+              child: Icon(Icons.add, color: AppColors.accentDeep, size: 20),
             ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -224,7 +225,7 @@ class _MyBanksPageState extends State<MyBanksPage>
                       children: [
                         Icon(
                           Icons.account_balance,
-                          color: Colors.purple[700],
+                          color: AppColors.accentDeep,
                           size: 20,
                         ),
                         const SizedBox(width: 12),
@@ -256,12 +257,12 @@ class _MyBanksPageState extends State<MyBanksPage>
       ),
       body: RefreshIndicator(
         onRefresh: _loadData,
-        color: Colors.purple,
+        color: AppColors.accent,
         child:
             _isLoading
                 ? const Center(
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.purple),
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.accent),
                   ),
                 )
                 : FadeTransition(
@@ -338,7 +339,7 @@ class _MyBanksPageState extends State<MyBanksPage>
           _banks.isNotEmpty
               ? FloatingActionButton.extended(
                 onPressed: _navigateToAddBank,
-                backgroundColor: Colors.purple[700],
+                backgroundColor: AppColors.accentDeep,
                 icon: const Icon(Icons.add, color: Colors.white),
                 label: const Text(
                   'Add Bank',
@@ -356,19 +357,15 @@ class _MyBanksPageState extends State<MyBanksPage>
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.purple.shade700,
-            Colors.purple.shade500,
-            Colors.deepPurple.shade400,
-          ],
+        gradient: const LinearGradient(
+          colors: [AppColors.ink, AppColors.accentDeep, AppColors.accent],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.purple.withOpacity(0.3),
+            color: AppColors.accent.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -485,7 +482,7 @@ class _MyBanksPageState extends State<MyBanksPage>
             icon: Icons.language,
             label: "Stripe",
             value: "$stripeCount",
-            color: Colors.purple,
+            color: AppColors.accent,
           ),
         ),
       ],
@@ -505,7 +502,7 @@ class _MyBanksPageState extends State<MyBanksPage>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
+            color: Colors.grey.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -516,7 +513,7 @@ class _MyBanksPageState extends State<MyBanksPage>
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -559,13 +556,13 @@ class _MyBanksPageState extends State<MyBanksPage>
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.purple[50],
+                color: AppColors.accentSoft,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.account_balance_outlined,
                 size: 64,
-                color: Colors.purple[300],
+                color: AppColors.accent,
               ),
             ),
             const SizedBox(height: 24),
@@ -600,7 +597,7 @@ class _MyBanksPageState extends State<MyBanksPage>
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple[700],
+                  backgroundColor: AppColors.accentDeep,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
@@ -657,7 +654,7 @@ class _MyBanksPageState extends State<MyBanksPage>
     // Existing local bank card code...
     final colors = [
       [Colors.blue.shade700, Colors.blue.shade500],
-      [Colors.purple.shade700, Colors.purple.shade500],
+      [AppColors.accentDeep, AppColors.accent],
       [Colors.green.shade700, Colors.green.shade500],
       [Colors.orange.shade700, Colors.orange.shade500],
       [Colors.teal.shade700, Colors.teal.shade500],
@@ -671,7 +668,7 @@ class _MyBanksPageState extends State<MyBanksPage>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
+            color: Colors.grey.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

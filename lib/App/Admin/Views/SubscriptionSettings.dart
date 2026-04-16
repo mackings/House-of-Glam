@@ -192,7 +192,7 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
                     if (result != null) _fetchPlans();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
+                    backgroundColor: AppColors.accent,
                   ),
                   child: Text(
                     plan == null ? "Create Plan" : "Update Plan",
@@ -301,11 +301,8 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.purple.shade600,
-                            Colors.purple.shade400,
-                          ],
+                        gradient: const LinearGradient(
+                          colors: [AppColors.accentDeep, AppColors.accent],
                         ),
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -365,13 +362,13 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.purple.shade50,
+                                      color: AppColors.accentSoft,
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: CustomText(
                                       plan.duration.toUpperCase(),
                                       fontSize: 11,
-                                      color: Colors.purple.shade700,
+                                      color: AppColors.accentDeep,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
@@ -381,7 +378,7 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
                               CustomText(
                                 "₦${_formatter.format(plan.amount)}",
                                 fontSize: 20,
-                                color: Colors.purple.shade700,
+                                color: AppColors.accentDeep,
                                 fontWeight: FontWeight.bold,
                               ),
                               const SizedBox(height: 6),

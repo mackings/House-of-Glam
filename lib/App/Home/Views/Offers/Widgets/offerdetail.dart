@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Home/Views/Offers/Api/OfferService.dart';
 import 'package:hog/App/Home/Views/Offers/Widgets/chatSection.dart';
-import 'package:hog/App/Home/Views/Offers/Widgets/chatSummary.dart';
 import 'package:hog/components/texts.dart';
-import 'package:hog/constants/currency.dart';
 import 'package:hog/constants/currencyHelper.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class OfferDetail extends StatefulWidget {
@@ -228,7 +227,7 @@ class _OfferDetailState extends State<OfferDetail> {
           fontSize: 16,
           fontWeight: FontWeight.w600,
         ),
-        backgroundColor: Colors.purple,
+        backgroundColor: AppColors.accent,
         elevation: 0,
       ),
       body:
@@ -346,34 +345,5 @@ class _OfferDetailState extends State<OfferDetail> {
                 ),
               ),
     );
-  }
-
-  Widget _buildBreakdownItem(String label, double amount, IconData icon) {
-    return Column(
-      children: [
-        Icon(icon, color: Colors.white, size: 20),
-        const SizedBox(height: 8),
-        CustomText(label, fontSize: 11, color: Colors.white70),
-        const SizedBox(height: 4),
-        CustomText(
-          "$currencySymbol${formatAmount(amount)}",
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ],
-    );
-  }
-
-  Future<Map<String, double>> _convertHeaderAmounts() async {
-    final materialNGN =
-        int.tryParse(offer["materialTotalCost"]?.toString() ?? "0") ?? 0;
-    final workmanshipNGN =
-        int.tryParse(offer["workmanshipTotalCost"]?.toString() ?? "0") ?? 0;
-
-    return {
-      'material': await CurrencyHelper.convertFromNGN(materialNGN),
-      'workmanship': await CurrencyHelper.convertFromNGN(workmanshipNGN),
-    };
   }
 }

@@ -26,7 +26,11 @@ class SecurePrefs {
   }
 
   static Future<String?> getToken() async {
-    return await _storage.read(key: _authTokenKey);
+    try {
+      return await _storage.read(key: _authTokenKey);
+    } catch (_) {
+      return null;
+    }
   }
 
   static Future<void> clearToken() async {
@@ -59,12 +63,16 @@ class SecurePrefs {
   }
 
   static Future<List<Category>> getCategories() async {
-    final categoriesJson = await _storage.read(key: _categoriesKey);
-    if (categoriesJson != null) {
-      final List<dynamic> decoded = jsonDecode(categoriesJson);
-      return decoded.map((c) => Category.fromJson(c)).toList();
+    try {
+      final categoriesJson = await _storage.read(key: _categoriesKey);
+      if (categoriesJson != null) {
+        final List<dynamic> decoded = jsonDecode(categoriesJson);
+        return decoded.map((c) => Category.fromJson(c)).toList();
+      }
+      return [];
+    } catch (_) {
+      return [];
     }
-    return [];
   }
 
   static Future<void> clearCategories() async {
@@ -79,7 +87,11 @@ class SecurePrefs {
   }
 
   static Future<String?> getAttireId() async {
-    return await _storage.read(key: _attireIdKey);
+    try {
+      return await _storage.read(key: _attireIdKey);
+    } catch (_) {
+      return null;
+    }
   }
 
   static Future<void> clearAttireId() async {
@@ -95,16 +107,20 @@ class SecurePrefs {
   }
 
   static Future<Map<String, dynamic>?> getUserData() async {
-    final userJson = await _storage.read(key: _userDataKey);
-    if (userJson != null) {
-      try {
-        final decoded = jsonDecode(userJson) as Map<String, dynamic>;
-        return decoded;
-      } catch (e) {
-        return null;
+    try {
+      final userJson = await _storage.read(key: _userDataKey);
+      if (userJson != null) {
+        try {
+          final decoded = jsonDecode(userJson) as Map<String, dynamic>;
+          return decoded;
+        } catch (_) {
+          return null;
+        }
       }
+      return null;
+    } catch (_) {
+      return null;
     }
-    return null;
   }
 
   static Future<void> clearUserData() async {
@@ -116,7 +132,11 @@ class SecurePrefs {
   }
 
   static Future<String?> getLastEmail() async {
-    return await _storage.read(key: _lastEmailKey);
+    try {
+      return await _storage.read(key: _lastEmailKey);
+    } catch (_) {
+      return null;
+    }
   }
 
   static Future<void> clearLastEmail() async {
@@ -124,27 +144,38 @@ class SecurePrefs {
   }
 
   static Future<void> saveOnboardingSeen(bool value) async {
-    await _storage.write(key: _onboardingSeenKey, value: value ? 'true' : 'false');
+    await _storage.write(
+      key: _onboardingSeenKey,
+      value: value ? 'true' : 'false',
+    );
   }
 
   static Future<bool> getOnboardingSeen() async {
-    final raw = await _storage.read(key: _onboardingSeenKey);
-    return raw == 'true';
+    try {
+      final raw = await _storage.read(key: _onboardingSeenKey);
+      return raw == 'true';
+    } catch (_) {
+      return false;
+    }
   }
 
   /// ✅ Convenience: return only the user's role
   static Future<String?> getUserRole() async {
-    final userJson = await _storage.read(key: _userDataKey);
-    if (userJson != null) {
-      try {
-        final Map<String, dynamic> userMap = jsonDecode(userJson);
-        final role = userMap['role'];
-        return role != null ? role.toString() : null;
-      } catch (e) {
-        return null;
+    try {
+      final userJson = await _storage.read(key: _userDataKey);
+      if (userJson != null) {
+        try {
+          final Map<String, dynamic> userMap = jsonDecode(userJson);
+          final role = userMap['role'];
+          return role?.toString();
+        } catch (_) {
+          return null;
+        }
       }
+      return null;
+    } catch (_) {
+      return null;
     }
-    return null;
   }
 
   // -------------------------
@@ -155,7 +186,11 @@ class SecurePrefs {
   }
 
   static Future<String?> getUserCurrency() async {
-    return await _storage.read(key: _userCurrencyKey);
+    try {
+      return await _storage.read(key: _userCurrencyKey);
+    } catch (_) {
+      return null;
+    }
   }
 
   static Future<void> clearUserCurrency() async {
@@ -171,33 +206,41 @@ class SecurePrefs {
   }
 
   static Future<Map<String, dynamic>?> getAdminSettings() async {
-    final settingsJson = await _storage.read(key: _adminSettingsKey);
-    if (settingsJson != null) {
-      try {
-        final decoded = jsonDecode(settingsJson) as Map<String, dynamic>;
-        return decoded;
-      } catch (e) {
-        return null;
+    try {
+      final settingsJson = await _storage.read(key: _adminSettingsKey);
+      if (settingsJson != null) {
+        try {
+          final decoded = jsonDecode(settingsJson) as Map<String, dynamic>;
+          return decoded;
+        } catch (_) {
+          return null;
+        }
       }
+      return null;
+    } catch (_) {
+      return null;
     }
-    return null;
   }
 
   // -------------------------
   // ✅ USER ID
   // -------------------------
   static Future<String?> getUserId() async {
-    final userJson = await _storage.read(key: _userDataKey);
-    if (userJson != null) {
-      try {
-        final Map<String, dynamic> userMap = jsonDecode(userJson);
-        final userId = userMap['_id'];
-        return userId != null ? userId.toString() : null;
-      } catch (e) {
-        return null;
+    try {
+      final userJson = await _storage.read(key: _userDataKey);
+      if (userJson != null) {
+        try {
+          final Map<String, dynamic> userMap = jsonDecode(userJson);
+          final userId = userMap['_id'] ?? userMap['id'];
+          return userId?.toString();
+        } catch (_) {
+          return null;
+        }
       }
+      return null;
+    } catch (_) {
+      return null;
     }
-    return null;
   }
 
   static Future<void> clearAdminSettings() async {

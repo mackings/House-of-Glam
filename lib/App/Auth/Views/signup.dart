@@ -83,6 +83,9 @@ class _SignupState extends ConsumerState<Signup> {
 
     if (response["success"]) {
       await SecurePrefs.saveLastEmail(emailController.text.trim());
+      if (!mounted) {
+        return;
+      }
       await showSuccessDialog(context, "Account created successfully!");
       if (!mounted) {
         return;
@@ -99,9 +102,9 @@ class _SignupState extends ConsumerState<Signup> {
       children: [
         Text(
           "Country",
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -298,10 +301,7 @@ class _SignupState extends ConsumerState<Signup> {
                 controller: passwordController,
               ),
               const SizedBox(height: 18),
-              CustomButton(
-                title: "Create account",
-                onPressed: _handleSignup,
-              ),
+              CustomButton(title: "Create account", onPressed: _handleSignup),
               const SizedBox(height: 14),
               OutlinedButton.icon(
                 onPressed: () {

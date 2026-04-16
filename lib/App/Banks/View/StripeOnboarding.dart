@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class StripeOnboardingPage extends StatefulWidget {
@@ -103,7 +104,7 @@ class _StripeOnboardingPageState extends State<StripeOnboardingPage> {
           if (_isLoading)
             const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.purple),
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.accent),
               ),
             ),
         ],

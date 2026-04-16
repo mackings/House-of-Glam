@@ -57,7 +57,7 @@ class _TailordashboardState extends State<Tailordashboard> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
-                child: CircularProgressIndicator(color: Colors.purple),
+                child: CircularProgressIndicator(color: AppColors.accent),
               );
             } else if (snapshot.hasError) {
               return ErrorDisplay(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hog/theme/app_theme.dart';
 
 void showAcceptOrderModal(BuildContext context, Function(String) onSubmit) {
   final TextEditingController trackingController = TextEditingController();
@@ -39,7 +40,7 @@ void showAcceptOrderModal(BuildContext context, Function(String) onSubmit) {
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
+                  backgroundColor: AppColors.accent,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),

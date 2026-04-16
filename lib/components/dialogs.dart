@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 
 // ✅ Success Dialog
 Future<void> showSuccessDialog(BuildContext context, String message) {
@@ -26,7 +27,7 @@ Future<void> showSuccessDialog(BuildContext context, String message) {
               child: const CustomText(
                 "OK",
                 fontWeight: FontWeight.bold,
-                color: Colors.blue,
+                color: AppColors.accent,
               ),
             ),
           ],
@@ -59,7 +60,7 @@ Future<void> showErrorDialog(BuildContext context, String message) {
               child: const CustomText(
                 "OK",
                 fontWeight: FontWeight.bold,
-                color: Colors.blue,
+                color: AppColors.accent,
               ),
             ),
           ],

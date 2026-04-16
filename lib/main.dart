@@ -7,7 +7,9 @@ import 'package:hog/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await loadCurrency();
+  try {
+    await loadCurrency();
+  } catch (_) {}
   runApp(const ProviderScope(child: MyApp()));
 }
 

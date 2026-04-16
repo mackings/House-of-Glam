@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hog/TailorApp/Home/Api/TailorHomeservice.dart';
-import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
-import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class UpdateQuotationBottomSheet extends StatefulWidget {
@@ -49,10 +48,10 @@ class _UpdateQuotationBottomSheetState
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFF6B21A8),
+              primary: AppColors.accent,
               onPrimary: Colors.white,
               surface: Colors.white,
-              onSurface: Color(0xFF1F2937),
+              onSurface: AppColors.ink,
             ),
           ),
           child: child!,
@@ -80,14 +79,14 @@ class _UpdateQuotationBottomSheetState
               style: GoogleFonts.poppins(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF1F2937),
+                color: AppColors.ink,
               ),
             ),
             content: Text(
               "Are you sure you want to update this quotation with the new values?",
               style: GoogleFonts.poppins(
                 fontSize: 14,
-                color: const Color(0xFF6B7280),
+                color: AppColors.subtext,
               ),
             ),
             actions: [
@@ -98,14 +97,14 @@ class _UpdateQuotationBottomSheetState
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF6B7280),
+                    color: AppColors.subtext,
                   ),
                 ),
               ),
               Container(
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF6B21A8), Color(0xFF7C3AED)],
+                    colors: [AppColors.accentDeep, AppColors.accent],
                   ),
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -226,12 +225,14 @@ class _UpdateQuotationBottomSheetState
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF6B21A8), Color(0xFF7C3AED)],
+                              colors: [AppColors.accentDeep, AppColors.accent],
                             ),
                             borderRadius: BorderRadius.circular(14),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF6B21A8).withOpacity(0.3),
+                                color: AppColors.accentDeep.withValues(
+                                  alpha: 0.3,
+                                ),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -253,14 +254,14 @@ class _UpdateQuotationBottomSheetState
                                 style: GoogleFonts.poppins(
                                   fontSize: 22,
                                   fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF1F2937),
+                                  color: AppColors.ink,
                                 ),
                               ),
                               Text(
                                 "Provide updated pricing details",
                                 style: GoogleFonts.poppins(
                                   fontSize: 13,
-                                  color: const Color(0xFF6B7280),
+                                  color: AppColors.subtext,
                                 ),
                               ),
                             ],
@@ -288,10 +289,10 @@ class _UpdateQuotationBottomSheetState
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFAF5FF),
+                        color: AppColors.surfaceMuted,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: const Color(0xFF6B21A8).withOpacity(0.1),
+                          color: AppColors.accent.withValues(alpha: 0.12),
                         ),
                       ),
                       child: Column(
@@ -302,15 +303,13 @@ class _UpdateQuotationBottomSheetState
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF6B21A8,
-                                  ).withOpacity(0.1),
+                                  color: AppColors.accentSoft,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Icon(
                                   Icons.attach_money_rounded,
                                   size: 18,
-                                  color: Color(0xFF6B21A8),
+                                  color: AppColors.accent,
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -319,7 +318,7 @@ class _UpdateQuotationBottomSheetState
                                 style: GoogleFonts.poppins(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF1F2937),
+                                  color: AppColors.ink,
                                 ),
                               ),
                             ],
@@ -381,10 +380,10 @@ class _UpdateQuotationBottomSheetState
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFAF5FF),
+                        color: AppColors.surfaceMuted,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: const Color(0xFF6B21A8).withOpacity(0.1),
+                          color: AppColors.accent.withValues(alpha: 0.12),
                         ),
                       ),
                       child: Column(
@@ -395,15 +394,13 @@ class _UpdateQuotationBottomSheetState
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF6B21A8,
-                                  ).withOpacity(0.1),
+                                  color: AppColors.accentSoft,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Icon(
                                   Icons.calendar_today_rounded,
                                   size: 18,
-                                  color: Color(0xFF6B21A8),
+                                  color: AppColors.accent,
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -412,7 +409,7 @@ class _UpdateQuotationBottomSheetState
                                 style: GoogleFonts.poppins(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF1F2937),
+                                  color: AppColors.ink,
                                 ),
                               ),
                             ],
@@ -465,12 +462,12 @@ class _UpdateQuotationBottomSheetState
                       height: 56,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF6B21A8), Color(0xFF7C3AED)],
+                          colors: [AppColors.accentDeep, AppColors.accent],
                         ),
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF6B21A8).withOpacity(0.4),
+                            color: AppColors.accentDeep.withValues(alpha: 0.4),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),
@@ -537,7 +534,7 @@ class _UpdateQuotationBottomSheetState
             style: GoogleFonts.poppins(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF1F2937),
+              color: AppColors.ink,
             ),
           ),
           if (required) ...[

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:hog/constants/currencyHelper.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class ChatSummaryCard extends StatelessWidget {
   final Map<String, dynamic> offer, user, vendor;
@@ -45,7 +46,7 @@ class ChatSummaryCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.grey.shade50, Colors.grey.shade100],
+              colors: [AppColors.surface, AppColors.surfaceMuted],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -58,8 +59,8 @@ class ChatSummaryCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.purple, Colors.purple.shade300],
+                  gradient: const LinearGradient(
+                    colors: [AppColors.accentDeep, AppColors.accent],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -70,7 +71,7 @@ class ChatSummaryCard extends StatelessWidget {
                   backgroundColor: Colors.white,
                   child: Icon(
                     Icons.person,
-                    color: Colors.purple.shade700,
+                    color: AppColors.accentDeep,
                     size: 24,
                   ),
                 ),
@@ -91,7 +92,7 @@ class ChatSummaryCard extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.purple.withOpacity(0.08),
+                        color: AppColors.accent.withValues(alpha: 0.08),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -110,7 +111,7 @@ class ChatSummaryCard extends StatelessWidget {
                                 Icon(
                                   Icons.store,
                                   size: 14,
-                                  color: Colors.purple.shade700,
+                                  color: AppColors.accentDeep,
                                 ),
                                 const SizedBox(width: 6),
                                 Expanded(
@@ -120,7 +121,7 @@ class ChatSummaryCard extends StatelessWidget {
                                         "Unknown User",
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
-                                    color: Colors.purple.shade700,
+                                    color: AppColors.accentDeep,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -135,10 +136,14 @@ class ChatSummaryCard extends StatelessWidget {
                               vertical: 5,
                             ),
                             decoration: BoxDecoration(
-                              color: _statusColor(status).withOpacity(0.1),
+                              color: _statusColor(
+                                status,
+                              ).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: _statusColor(status).withOpacity(0.3),
+                                color: _statusColor(
+                                  status,
+                                ).withValues(alpha: 0.3),
                                 width: 1,
                               ),
                             ),
@@ -227,10 +232,7 @@ class ChatSummaryCard extends StatelessWidget {
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [
-                              Colors.purple.shade50,
-                              Colors.purple.shade100.withOpacity(0.3),
-                            ],
+                            colors: [AppColors.accentSoft, AppColors.surface],
                           ),
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -242,14 +244,14 @@ class ChatSummaryCard extends StatelessWidget {
                                 Icon(
                                   Icons.attach_money,
                                   size: 18,
-                                  color: Colors.purple.shade700,
+                                  color: AppColors.accentDeep,
                                 ),
                                 const SizedBox(width: 6),
                                 CustomText(
                                   "Total Amount",
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.purple.shade700,
+                                  color: AppColors.accentDeep,
                                 ),
                               ],
                             ),
@@ -257,7 +259,7 @@ class ChatSummaryCard extends StatelessWidget {
                               "$currencySymbol${formatAmount(displayMaterial + displayWorkmanship)}",
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Colors.purple.shade700,
+                              color: AppColors.accentDeep,
                             ),
                           ],
                         ),
@@ -302,7 +304,7 @@ class ChatSummaryCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(icon, size: 14, color: Colors.purple.shade400),
+            Icon(icon, size: 14, color: AppColors.accent),
             const SizedBox(width: 6),
             CustomText(
               label,

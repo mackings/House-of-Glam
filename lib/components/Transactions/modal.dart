@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:hog/App/Home/Model/TransModel.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class TransactionDetailsModal extends StatelessWidget {
@@ -74,10 +75,7 @@ class TransactionDetailsModal extends StatelessWidget {
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          Colors.purple.shade700,
-                          Colors.purple.shade500,
-                        ],
+                        colors: const [AppColors.accentDeep, AppColors.accent],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -104,8 +102,8 @@ class TransactionDetailsModal extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color:
                                     isSuccess
-                                        ? Colors.green.withOpacity(0.2)
-                                        : Colors.red.withOpacity(0.2),
+                                        ? Colors.green.withValues(alpha: 0.2)
+                                        : Colors.red.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
@@ -255,12 +253,12 @@ class TransactionDetailsModal extends StatelessWidget {
                             leading: Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: Colors.purple.shade50,
+                                color: AppColors.accentSoft,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: const Icon(
                                 Icons.shopping_bag,
-                                color: Colors.purple,
+                                color: AppColors.accent,
                                 size: 24,
                               ),
                             ),
@@ -348,7 +346,7 @@ class TransactionDetailsModal extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
-                  Icon(rows[i].icon, color: Colors.purple, size: 20),
+                  Icon(rows[i].icon, color: AppColors.accent, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -377,7 +375,7 @@ class TransactionDetailsModal extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.copy, size: 18),
                       onPressed: rows[i].onCopy,
-                      color: Colors.purple,
+                      color: AppColors.accent,
                     ),
                   ],
                 ],

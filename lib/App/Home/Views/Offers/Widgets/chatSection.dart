@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:hog/constants/currencyHelper.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class ChatSection extends StatefulWidget {
@@ -83,13 +84,13 @@ class _ChatSectionState extends State<ChatSection> {
                             Container(
                               padding: const EdgeInsets.all(24),
                               decoration: BoxDecoration(
-                                color: Colors.purple.shade50,
+                                color: AppColors.accentSoft,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
                                 Icons.chat_bubble_outline,
                                 size: 48,
-                                color: Colors.purple.shade300,
+                                color: AppColors.accent,
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -137,7 +138,7 @@ class _ChatSectionState extends State<ChatSection> {
             bottom: 16,
             child: FloatingActionButton.extended(
               onPressed: () => setState(() => _showReplyForm = true),
-              backgroundColor: Colors.purple,
+              backgroundColor: AppColors.accent,
               icon: const Icon(Icons.reply_rounded, color: Colors.white),
               label: Text(
                 widget.userRole == "user" ? "Make Offer" : "Reply",
@@ -196,10 +197,7 @@ class _ChatSectionState extends State<ChatSection> {
                           colors:
                               isUser
                                   ? [Colors.white, Colors.grey.shade50]
-                                  : [
-                                    Colors.purple.shade50,
-                                    Colors.purple.shade100.withOpacity(0.5),
-                                  ],
+                                  : [AppColors.accentSoft, AppColors.surface],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -213,13 +211,15 @@ class _ChatSectionState extends State<ChatSection> {
                           color:
                               isUser
                                   ? Colors.grey.shade200
-                                  : Colors.purple.shade200,
+                                  : AppColors.accent.withValues(alpha: 0.28),
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: (isUser ? Colors.black : Colors.purple)
-                                .withOpacity(0.06),
+                            color: (isUser
+                                    ? Colors.black
+                                    : AppColors.accentDeep)
+                                .withValues(alpha: 0.06),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -235,9 +235,7 @@ class _ChatSectionState extends State<ChatSection> {
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                               color:
-                                  isUser
-                                      ? Colors.purple.shade700
-                                      : Colors.purple.shade900,
+                                  isUser ? AppColors.ink : AppColors.accentDeep,
                             ),
                           ),
 
@@ -259,7 +257,7 @@ class _ChatSectionState extends State<ChatSection> {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.7),
+                              color: Colors.white.withValues(alpha: 0.7),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Column(
@@ -293,7 +291,7 @@ class _ChatSectionState extends State<ChatSection> {
                                         Icon(
                                           Icons.attach_money,
                                           size: 14,
-                                          color: Colors.purple.shade700,
+                                          color: AppColors.accentDeep,
                                         ),
                                         const SizedBox(width: 4),
                                         const Text(
@@ -310,7 +308,7 @@ class _ChatSectionState extends State<ChatSection> {
                                       style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.purple.shade700,
+                                        color: AppColors.accentDeep,
                                       ),
                                     ),
                                   ],
@@ -498,7 +496,7 @@ class _ChatSectionState extends State<ChatSection> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.purple.shade700,
+                            color: AppColors.accentDeep,
                           ),
                         ),
                       ],
@@ -605,8 +603,8 @@ class _ChatSectionState extends State<ChatSection> {
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.purple, Colors.purple.shade300],
+        gradient: const LinearGradient(
+          colors: [AppColors.accentDeep, AppColors.accent],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -617,7 +615,7 @@ class _ChatSectionState extends State<ChatSection> {
         backgroundColor: Colors.white,
         child: Icon(
           isUser ? Icons.person : Icons.store,
-          color: Colors.purple.shade700,
+          color: AppColors.accentDeep,
           size: 18,
         ),
       ),
@@ -630,7 +628,7 @@ class _ChatSectionState extends State<ChatSection> {
       children: [
         Row(
           children: [
-            Icon(icon, size: 14, color: Colors.purple.shade400),
+            Icon(icon, size: 14, color: AppColors.accent),
             const SizedBox(width: 6),
             Text(
               label,
@@ -656,7 +654,7 @@ class _ChatSectionState extends State<ChatSection> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),
@@ -674,7 +672,7 @@ class _ChatSectionState extends State<ChatSection> {
                 children: [
                   Icon(
                     Icons.reply_rounded,
-                    color: Colors.purple.shade700,
+                    color: AppColors.accentDeep,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -708,10 +706,7 @@ class _ChatSectionState extends State<ChatSection> {
               hintText: "Write your message...",
               filled: true,
               fillColor: Colors.grey.shade50,
-              prefixIcon: Icon(
-                Icons.comment_outlined,
-                color: Colors.purple.shade400,
-              ),
+              prefixIcon: Icon(Icons.comment_outlined, color: AppColors.accent),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
                 borderSide: BorderSide(color: Colors.grey.shade200),
@@ -722,7 +717,7 @@ class _ChatSectionState extends State<ChatSection> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: Colors.purple.shade300, width: 2),
+                borderSide: const BorderSide(color: AppColors.accent, width: 2),
               ),
             ),
           ),
@@ -737,10 +732,7 @@ class _ChatSectionState extends State<ChatSection> {
                   keyboardType: TextInputType.number,
                   inputFormatters: [DecimalThousandsFormatter()],
                   decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.checkroom,
-                      color: Colors.purple.shade400,
-                    ),
+                    prefixIcon: Icon(Icons.checkroom, color: AppColors.accent),
                     hintText: "Material ($currencySymbol)",
                     filled: true,
                     fillColor: Colors.grey.shade50,
@@ -758,10 +750,7 @@ class _ChatSectionState extends State<ChatSection> {
                   keyboardType: TextInputType.number,
                   inputFormatters: [DecimalThousandsFormatter()],
                   decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.handyman,
-                      color: Colors.purple.shade400,
-                    ),
+                    prefixIcon: Icon(Icons.handyman, color: AppColors.accent),
                     hintText: "Work ($currencySymbol)",
                     filled: true,
                     fillColor: Colors.grey.shade50,
@@ -800,7 +789,7 @@ class _ChatSectionState extends State<ChatSection> {
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
           ),
           style: btnStyle.copyWith(
-            backgroundColor: WidgetStateProperty.all(Colors.purple),
+            backgroundColor: WidgetStateProperty.all(AppColors.accent),
           ),
           onPressed:
               widget.isSubmitting
@@ -950,7 +939,7 @@ class _ChatSectionState extends State<ChatSection> {
         actionMessage = "Send counter offer with your proposed amounts?";
         break;
       default:
-        actionColor = Colors.purple;
+        actionColor = AppColors.accent;
         actionIcon = Icons.help_outline;
         actionTitle = "Confirm Action";
         actionMessage = "Are you sure you want to proceed?";
@@ -1002,15 +991,15 @@ class _ChatSectionState extends State<ChatSection> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
+                      color: AppColors.accentSoft,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.blue.shade200),
+                      border: Border.all(color: AppColors.border),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           Icons.info_outline,
-                          color: Colors.blue.shade700,
+                          color: AppColors.accentDeep,
                           size: 18,
                         ),
                         const SizedBox(width: 8),

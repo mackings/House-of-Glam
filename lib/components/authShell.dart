@@ -37,7 +37,7 @@ class AuthShell extends StatelessWidget {
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
-                    colors: [Color(0x40A78BFA), Color(0x00A78BFA)],
+                    colors: [Color(0x404169E1), Color(0x004169E1)],
                   ),
                 ),
               ),
@@ -51,7 +51,7 @@ class AuthShell extends StatelessWidget {
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
-                    colors: [Color(0x3090CAF9), Color(0x0090CAF9)],
+                    colors: [Color(0x30C58A1D), Color(0x00C58A1D)],
                   ),
                 ),
               ),
@@ -77,7 +77,10 @@ class AuthShell extends StatelessWidget {
                                 side: const BorderSide(color: AppColors.border),
                               ),
                             ),
-                            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                            icon: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 18,
+                            ),
                           ),
                         ),
                       Container(
@@ -87,7 +90,7 @@ class AuthShell extends StatelessWidget {
                           gradient: const LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [Color(0xFF181420), Color(0xFF33275C)],
+                            colors: [AppColors.ink, AppColors.accentDeep],
                           ),
                           boxShadow: const [
                             BoxShadow(
@@ -101,7 +104,10 @@ class AuthShell extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(999),

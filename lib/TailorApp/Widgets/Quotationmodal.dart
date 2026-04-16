@@ -4,6 +4,7 @@ import 'package:hog/TailorApp/Home/Api/TailorHomeservice.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class QuotationBottomSheet extends StatefulWidget {
@@ -37,8 +38,7 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
 
   Future<void> _loadTailorCurrency() async {
     final user = await SecurePrefs.getUserData();
-    final country =
-        user?["country"]?.toString().trim().toUpperCase();
+    final country = user?["country"]?.toString().trim().toUpperCase();
     final isNigeria =
         country == "NG" || country == "NGA" || country == "NIGERIA";
     final savedCurrency = await SecurePrefs.getUserCurrency();
@@ -240,7 +240,7 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
 
               isLoading
                   ? const Center(
-                    child: CircularProgressIndicator(color: Colors.purple),
+                    child: CircularProgressIndicator(color: AppColors.accent),
                   )
                   : CustomButton(
                     title: "Submit Quotation",

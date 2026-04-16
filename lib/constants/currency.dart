@@ -1,11 +1,14 @@
 import 'package:hog/App/Auth/Api/secure.dart';
 
-late String Cur;
+String Cur = "NGN";
 
 /// Call this at app startup
 Future<void> loadCurrency() async {
-  // Fallback to NGN if not set
-  Cur = await SecurePrefs.getUserCurrency() ?? "NGN";
+  try {
+    Cur = await SecurePrefs.getUserCurrency() ?? "NGN";
+  } catch (_) {
+    Cur = "NGN";
+  }
 }
 
 /// Utility to return symbol from code

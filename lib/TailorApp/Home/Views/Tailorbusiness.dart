@@ -9,6 +9,7 @@ import 'package:hog/components/dialogs.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/loadingoverlay.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
 
 class TailorRegistrationPage extends StatefulWidget {
@@ -140,7 +141,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
             onPressed: () => Navigator.pop(context),
           ),
           elevation: 0,
-          backgroundColor: Colors.purple,
+          backgroundColor: AppColors.accent,
           title: const CustomText(
             "Business Registration",
             color: Colors.white,
@@ -157,15 +158,15 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.purple.shade400, Colors.purple.shade600],
+                  gradient: const LinearGradient(
+                    colors: [AppColors.accent, AppColors.accentDeep],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.purple.withValues(alpha: 0.3),
+                      color: AppColors.accent.withValues(alpha: 0.3),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -361,9 +362,11 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.purple.shade50,
+                      color: AppColors.accentSoft,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.purple.shade100),
+                      border: Border.all(
+                        color: AppColors.accent.withValues(alpha: 0.18),
+                      ),
                     ),
                     child: Column(
                       children: [
@@ -372,7 +375,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                             children: const [
                               Icon(
                                 Icons.verified,
-                                color: Colors.purple,
+                                color: AppColors.accent,
                                 size: 20,
                               ),
                               SizedBox(width: 8),
@@ -396,18 +399,21 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                           ),
                           value: true,
                           groupValue: _isRegisteredBusiness,
-                          activeColor: Colors.purple,
+                          activeColor: AppColors.accent,
                           onChanged: (val) {
                             setState(() => _isRegisteredBusiness = val!);
                           },
                         ),
-                        Divider(height: 1, color: Colors.purple.shade100),
+                        Divider(
+                          height: 1,
+                          color: AppColors.accent.withValues(alpha: 0.18),
+                        ),
                         RadioListTile<bool>(
                           title: Row(
                             children: const [
                               Icon(
                                 Icons.person_outline,
-                                color: Colors.purple,
+                                color: AppColors.accent,
                                 size: 20,
                               ),
                               SizedBox(width: 8),
@@ -431,7 +437,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                           ),
                           value: false,
                           groupValue: _isRegisteredBusiness,
-                          activeColor: Colors.purple,
+                          activeColor: AppColors.accent,
                           onChanged: (val) {
                             setState(() => _isRegisteredBusiness = val!);
                           },
@@ -496,10 +502,10 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.purple.shade50,
+                  color: AppColors.accentSoft,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: Colors.purple, size: 20),
+                child: Icon(icon, color: AppColors.accent, size: 20),
               ),
               const SizedBox(width: 12),
               Text(
@@ -652,7 +658,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                       icon: const Icon(Icons.refresh, size: 18),
                       label: const Text("Change Document"),
                       style: TextButton.styleFrom(
-                        foregroundColor: Colors.purple,
+                        foregroundColor: AppColors.accent,
                       ),
                     ),
                   ],
@@ -662,13 +668,13 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.purple.shade50,
+                        color: AppColors.accentSoft,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.cloud_upload_outlined,
                         size: 40,
-                        color: Colors.purple.shade300,
+                        color: AppColors.accent,
                       ),
                     ),
                     const SizedBox(height: 16),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Admin/Model/PendingListing.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class ModerationListingCard extends StatefulWidget {
@@ -83,7 +84,7 @@ class _ModerationListingCardState extends State<ModerationListingCard> {
                           _formatPrice(listing),
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Colors.purple,
+                          color: AppColors.accent,
                           textAlign: TextAlign.left,
                         ),
                       ],
@@ -100,9 +101,10 @@ class _ModerationListingCardState extends State<ModerationListingCard> {
                 children: [
                   _MetaPill(
                     icon: Icons.category_outlined,
-                    label: listing.category?.name.isNotEmpty == true
-                        ? listing.category!.name
-                        : 'Uncategorized',
+                    label:
+                        listing.category?.name.isNotEmpty == true
+                            ? listing.category!.name
+                            : 'Uncategorized',
                   ),
                   if (listing.condition.isNotEmpty)
                     _MetaPill(
@@ -114,7 +116,9 @@ class _ModerationListingCardState extends State<ModerationListingCard> {
                   if (listing.createdAt != null)
                     _MetaPill(
                       icon: Icons.schedule,
-                      label: DateFormat.yMMMd().format(listing.createdAt!.toLocal()),
+                      label: DateFormat.yMMMd().format(
+                        listing.createdAt!.toLocal(),
+                      ),
                     ),
                 ],
               ),
@@ -141,8 +145,8 @@ class _ModerationListingCardState extends State<ModerationListingCard> {
                       icon: const Icon(Icons.visibility_outlined),
                       label: const Text('Review'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.purple,
-                        side: const BorderSide(color: Colors.purple),
+                        foregroundColor: AppColors.accent,
+                        side: const BorderSide(color: AppColors.accent),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -202,7 +206,10 @@ class _ModerationListingCardState extends State<ModerationListingCard> {
                       (_, __, ___) => Container(
                         color: Colors.grey.shade200,
                         alignment: Alignment.center,
-                        child: const Icon(Icons.broken_image_outlined, size: 42),
+                        child: const Icon(
+                          Icons.broken_image_outlined,
+                          size: 42,
+                        ),
                       ),
                 );
               },
@@ -213,7 +220,10 @@ class _ModerationListingCardState extends State<ModerationListingCard> {
               right: 12,
               bottom: 12,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(30),
@@ -416,11 +426,7 @@ class _InfoBlock extends StatelessWidget {
   final String value;
   final Color? valueColor;
 
-  const _InfoBlock({
-    required this.title,
-    required this.value,
-    this.valueColor,
-  });
+  const _InfoBlock({required this.title, required this.value, this.valueColor});
 
   @override
   Widget build(BuildContext context) {

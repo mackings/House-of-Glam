@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class PaymentWebView extends StatelessWidget {
@@ -16,8 +17,8 @@ class PaymentWebView extends StatelessWidget {
           color: Colors.white,
           fontSize: 18,
         ),
-        iconTheme: IconThemeData(color: Colors.white),
-        backgroundColor: Colors.purple,
+        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: AppColors.accent,
       ),
       body: WebViewWidget(
         controller:

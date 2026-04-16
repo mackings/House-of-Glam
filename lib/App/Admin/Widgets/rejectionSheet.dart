@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/components/button.dart';
+import 'package:hog/theme/app_theme.dart';
 
 Future<List<String>?> showRejectReasonSheet(BuildContext context) async {
   final controller = TextEditingController();
@@ -48,7 +49,7 @@ Future<List<String>?> showRejectReasonSheet(BuildContext context) async {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: Colors.purple.shade700,
+                      color: AppColors.accentDeep,
                       width: 1.5,
                     ),
                     borderRadius: BorderRadius.circular(12),

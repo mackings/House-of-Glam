@@ -34,7 +34,7 @@ class CustomTextField extends ConsumerWidget {
   final bool isCompact;
 
   const CustomTextField({
-    Key? key,
+    super.key,
     required this.title,
     required this.hintText,
     required this.fieldKey,
@@ -56,7 +56,7 @@ class CustomTextField extends ConsumerWidget {
     this.autofocus = false,
     this.useGlobalCountryPicker =
         false, // ✅ default = false (backward compatible)
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -83,7 +83,7 @@ class CustomTextField extends ConsumerWidget {
           // 🧩 Dropdown Text Field
           dropdownItems != null
               ? DropdownButtonFormField<String>(
-                value: selectedValue,
+                initialValue: selectedValue,
                 decoration: InputDecoration(
                   hintText: hintText,
                   prefixIcon:
@@ -149,7 +149,8 @@ class CustomTextField extends ConsumerWidget {
                         : SizedBox(
                           width: 100,
                           child: DropdownButtonFormField<String>(
-                            value: selectedCountryCode ?? countryCodes.first,
+                            initialValue:
+                                selectedCountryCode ?? countryCodes.first,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.symmetric(
                                 vertical: 15,
@@ -177,9 +178,9 @@ class CustomTextField extends ConsumerWidget {
                       autofocus: autofocus,
                       readOnly: readOnly,
                       keyboardType: keyboardType,
-                        inputFormatters: inputFormatters,
-                        obscureText: isPassword ? obscureText : false,
-                        onChanged: onChanged,
+                      inputFormatters: inputFormatters,
+                      obscureText: isPassword ? obscureText : false,
+                      onChanged: onChanged,
                       validator: (value) {
                         if (isPassword) {
                           if (value == null || value.isEmpty) {

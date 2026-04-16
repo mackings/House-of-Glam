@@ -25,33 +25,37 @@ class _AppEntryGateState extends State<AppEntryGate> {
   }
 
   Future<_EntryState> _resolveEntryState() async {
-    final onboardingSeen = await SecurePrefs.getOnboardingSeen();
-    final token = await SecurePrefs.getToken();
-    final userData = await SecurePrefs.getUserData();
-    final lastEmail = await SecurePrefs.getLastEmail();
+    try {
+      final onboardingSeen = await SecurePrefs.getOnboardingSeen();
+      final token = await SecurePrefs.getToken();
+      final userData = await SecurePrefs.getUserData();
+      final lastEmail = await SecurePrefs.getLastEmail();
 
-    if (!onboardingSeen) {
-      return _EntryState.onboarding(lastEmail: lastEmail);
-    }
-
-    if (token != null && token.isNotEmpty && userData != null) {
-      final role = (userData['role'] ?? '').toString().toLowerCase();
-      final isVendorEnabled = userData['isVendorEnabled'] == true;
-
-      if (role == 'tailor') {
-        return _EntryState.home(
-          screen: TailorMainPage(isVendorEnabled: isVendorEnabled),
-        );
+      if (!onboardingSeen) {
+        return _EntryState.onboarding(lastEmail: lastEmail);
       }
 
-      if (role == 'admin' || role == 'superadmin') {
-        return _EntryState.home(screen: const AdminHome());
+      if (token != null && token.isNotEmpty && userData != null) {
+        final role = (userData['role'] ?? '').toString().toLowerCase();
+        final isVendorEnabled = userData['isVendorEnabled'] == true;
+
+        if (role == 'tailor') {
+          return _EntryState.home(
+            screen: TailorMainPage(isVendorEnabled: isVendorEnabled),
+          );
+        }
+
+        if (role == 'admin' || role == 'superadmin') {
+          return _EntryState.home(screen: const AdminHome());
+        }
+
+        return _EntryState.home(screen: const MainPage());
       }
 
-      return _EntryState.home(screen: const MainPage());
+      return _EntryState.signin(lastEmail: lastEmail);
+    } catch (_) {
+      return _EntryState.signin();
     }
-
-    return _EntryState.signin(lastEmail: lastEmail);
   }
 
   @override
@@ -59,6 +63,9 @@ class _AppEntryGateState extends State<AppEntryGate> {
     return FutureBuilder<_EntryState>(
       future: _entryState,
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Signin();
+        }
         if (snapshot.connectionState != ConnectionState.done) {
           return const _LaunchSplash();
         }
@@ -88,24 +95,14 @@ class _EntryState {
   final Widget? screen;
   final String? lastEmail;
 
-  const _EntryState._({
-    required this.type,
-    this.screen,
-    this.lastEmail,
-  });
+  const _EntryState._({required this.type, this.screen, this.lastEmail});
 
   factory _EntryState.onboarding({String? lastEmail}) {
-    return _EntryState._(
-      type: _EntryType.onboarding,
-      lastEmail: lastEmail,
-    );
+    return _EntryState._(type: _EntryType.onboarding, lastEmail: lastEmail);
   }
 
   factory _EntryState.signin({String? lastEmail}) {
-    return _EntryState._(
-      type: _EntryType.signin,
-      lastEmail: lastEmail,
-    );
+    return _EntryState._(type: _EntryType.signin, lastEmail: lastEmail);
   }
 
   factory _EntryState.home({required Widget screen}) {

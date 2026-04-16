@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Banks/View/userBanks.dart';
 import 'package:hog/components/Navigator.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class BankDetailsCard extends StatefulWidget {
   final double borderRadius;
@@ -53,7 +54,7 @@ class _BankDetailsCardState extends State<BankDetailsCard> {
           child: Container(
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF16131E), Color(0xFF7C3AED)],
+                colors: [AppColors.ink, AppColors.accent],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

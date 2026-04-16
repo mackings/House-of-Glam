@@ -47,13 +47,11 @@ void showTailorMaterialDetails(
                     material.sampleImages.isNotEmpty
                         ? material.sampleImages.first
                         : "";
-                final displayAmounts = _getDisplayAmounts(currentItem);
                 final agreedAmount = currentItem.resolvedVendorBaseTotal;
                 final payableBalance = currentItem.resolvedDesignerPayableTotal;
-                final outstandingUserPayment =
-                    (displayAmounts['amountToPay'] ?? 0.0) > 0;
-                final paidDisplay =
-                    outstandingUserPayment ? 0.0 : payableBalance;
+                // Temporary modal-only override: keep outstanding at zero.
+                const outstandingDisplay = 0.0;
+                final paidDisplay = payableBalance;
 
                 Future<void> deliverAttire() async {
                   try {
@@ -214,10 +212,7 @@ void showTailorMaterialDetails(
                                   payableBalance,
                                 ),
                                 icon: Icons.account_balance_wallet_outlined,
-                                tone:
-                                    outstandingUserPayment
-                                        ? AppColors.warning
-                                        : AppColors.success,
+                                tone: AppColors.success,
                               ),
                             ),
                           ],
@@ -238,49 +233,14 @@ void showTailorMaterialDetails(
                               child: _SummaryTile(
                                 label: "Outstanding",
                                 value: CurrencyHelper.formatAmount(
-                                  displayAmounts['amountToPay'] ?? 0.0,
+                                  outstandingDisplay,
                                 ),
                                 icon: Icons.schedule_rounded,
-                                tone:
-                                    outstandingUserPayment
-                                        ? AppColors.warning
-                                        : AppColors.subtext,
+                                tone: AppColors.subtext,
                               ),
                             ),
                           ],
                         ),
-                        if (outstandingUserPayment) ...[
-                          const SizedBox(height: 14),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFF4E6),
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(
-                                color: const Color(0xFFF8D3A1),
-                              ),
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(
-                                  Icons.info_outline_rounded,
-                                  color: AppColors.warning,
-                                  size: 18,
-                                ),
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: CustomText(
-                                    "User still has an outstanding balance before full settlement.",
-                                    fontSize: 12,
-                                    color: Color(0xFF8A5A12),
-                                    textAlign: TextAlign.left,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
                         const SizedBox(height: 20),
                         const CustomText(
                           "People",
@@ -675,55 +635,6 @@ class _StatusPill extends StatelessWidget {
       ),
     );
   }
-}
-
-Map<String, double> _getDisplayAmounts(TailorAssignedMaterial item) {
-  final countryCode = item.country?.trim().toUpperCase();
-  final isInternational =
-      item.isInternationalVendor ||
-      (countryCode != null && countryCode != 'NG' && countryCode != 'NIGERIA');
-
-  if (isInternational) {
-    final material = item.materialTotalCostUSD ?? 0.0;
-    final workmanship = item.workmanshipTotalCostUSD ?? 0.0;
-    final total =
-        (item.totalCostUSD ?? 0.0) > 0
-            ? item.totalCostUSD!
-            : (material + workmanship > 0
-                ? material + workmanship
-                : (item.amountPaidUSD ?? 0.0) + (item.amountToPayUSD ?? 0.0));
-    final paid =
-        (item.amountPaidUSD ?? 0.0) > 0
-            ? item.amountPaidUSD!
-            : (total > 0 && (item.amountToPayUSD ?? 0.0) > 0
-                ? (total - (item.amountToPayUSD ?? 0.0))
-                : 0.0);
-    final toPay =
-        (item.amountToPayUSD ?? 0.0) > 0
-            ? item.amountToPayUSD!
-            : (total > 0 && paid > 0 ? (total - paid) : 0.0);
-    return {'totalCost': total, 'amountPaid': paid, 'amountToPay': toPay};
-  }
-
-  final material = item.materialTotalCost;
-  final workmanship = item.workmanshipTotalCost;
-  final total =
-      item.totalCost > 0
-          ? item.totalCost
-          : (material + workmanship > 0
-              ? material + workmanship
-              : (item.amountPaid ?? 0.0) + (item.amountToPay ?? 0.0));
-  final paid =
-      (item.amountPaid ?? 0.0) > 0
-          ? item.amountPaid!
-          : (total > 0 && (item.amountToPay ?? 0.0) > 0
-              ? (total - (item.amountToPay ?? 0.0))
-              : 0.0);
-  final toPay =
-      (item.amountToPay ?? 0.0) > 0
-          ? item.amountToPay!
-          : (total > 0 && paid > 0 ? (total - paid) : 0.0);
-  return {'totalCost': total, 'amountPaid': paid, 'amountToPay': toPay};
 }
 
 String _formatStatus(String status) {

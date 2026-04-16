@@ -4,6 +4,7 @@ import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currencyHelper.dart';
 import 'package:hog/theme/app_theme.dart';
 
+
 class TailorAssignedCard extends StatelessWidget {
   final TailorAssignedMaterial item;
   final VoidCallback onTap;
@@ -154,7 +155,7 @@ class TailorAssignedCard extends StatelessWidget {
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFFFBFAFF), Color(0xFFF6F2FF)],
+                          colors: [AppColors.surface, AppColors.surfaceMuted],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -212,9 +213,9 @@ class TailorAssignedCard extends StatelessWidget {
                         width: double.infinity,
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFF4E6),
+                          color: AppColors.secondarySoft,
                           borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: const Color(0xFFF8D3A1)),
+                          border: Border.all(color: AppColors.warning),
                         ),
                         child: Row(
                           children: [
@@ -228,7 +229,7 @@ class TailorAssignedCard extends StatelessWidget {
                               child: CustomText(
                                 "User still has an outstanding balance before full settlement.",
                                 fontSize: 12,
-                                color: Color(0xFF8A5A12),
+                                color: AppColors.secondaryDeep,
                                 textAlign: TextAlign.left,
                               ),
                             ),
@@ -424,7 +425,6 @@ class _StatusPill extends StatelessWidget {
     );
   }
 }
-
 
 Map<String, double> _getDisplayAmounts(TailorAssignedMaterial item) {
   final countryCode = item.country?.trim().toUpperCase();

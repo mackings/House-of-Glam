@@ -2,24 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  static const Color ink = Color(0xFF1C1A22);
-  static const Color subtext = Color(0xFF686271);
+  static const Color ink = Color(0xFF172033);
+  static const Color subtext = Color(0xFF5F6980);
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceMuted = Color(0xFFF7F5FA);
-  static const Color canvas = Color(0xFFF4F1F8);
-  static const Color accent = Color(0xFF7C3AED);
-  static const Color accentSoft = Color(0xFFEFE7FF);
+  static const Color surfaceMuted = Color(0xFFF3F6FF);
+  static const Color canvas = Color(0xFFEEF3FB);
+  static const Color accent = Color(0xFF4169E1);
+  static const Color accentDeep = Color(0xFF1F3F99);
+  static const Color accentSoft = Color(0xFFE2EAFF);
+  static const Color secondary = Color(0xFFC58A1D);
+  static const Color secondarySoft = Color(0xFFF7E7C2);
+  static const Color secondaryDeep = Color(0xFF8A6505);
   static const Color success = Color(0xFF0F9D69);
-  static const Color warning = Color(0xFFC77B13);
+  static const Color warning = secondary;
   static const Color danger = Color(0xFFD64545);
-  static const Color border = Color(0xFFE6E0EE);
-  static const Color shadow = Color(0x140F0D14);
+  static const Color border = Color(0xFFD7E0F0);
+  static const Color shadow = Color(0x1A10213F);
 }
 
 class AppTheme {
   static ThemeData light() {
     final base = ThemeData.light(useMaterial3: true);
-    final textTheme = GoogleFonts.plusJakartaSansTextTheme(base.textTheme).copyWith(
+    final textTheme = GoogleFonts.plusJakartaSansTextTheme(
+      base.textTheme,
+    ).copyWith(
       displayLarge: GoogleFonts.plusJakartaSans(
         fontSize: 34,
         fontWeight: FontWeight.w700,
@@ -71,11 +77,13 @@ class AppTheme {
       seedColor: AppColors.accent,
       brightness: Brightness.light,
       primary: AppColors.accent,
-      secondary: const Color(0xFF0EA5E9),
+      secondary: AppColors.secondary,
       surface: AppColors.surface,
     ).copyWith(
       primary: AppColors.accent,
       onPrimary: Colors.white,
+      secondary: AppColors.secondary,
+      onSecondary: Colors.white,
       surface: AppColors.surface,
       onSurface: AppColors.ink,
       outline: AppColors.border,
@@ -103,7 +111,10 @@ class AppTheme {
         hintStyle: textTheme.bodyMedium?.copyWith(color: AppColors.subtext),
         prefixIconColor: AppColors.subtext,
         suffixIconColor: AppColors.subtext,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 18,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: const BorderSide(color: AppColors.border),

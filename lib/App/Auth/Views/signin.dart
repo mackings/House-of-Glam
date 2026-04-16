@@ -270,10 +270,7 @@ class _SigninState extends ConsumerState<Signin> {
                 ],
               ),
               const SizedBox(height: 20),
-              CustomButton(
-                title: "Login",
-                onPressed: _handleSignin,
-              ),
+              CustomButton(title: "Login", onPressed: _handleSignin),
             ],
           ),
         ),

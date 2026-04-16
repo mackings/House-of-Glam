@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/Home/Views/PuB/widgets/imageEnlarge.dart';
 import 'package:hog/TailorApp/Home/Model/PublishedModel.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/theme/app_theme.dart';
 
 class UserInfo extends StatelessWidget {
   final TailorUser user;
@@ -33,7 +34,7 @@ class UserInfo extends StatelessWidget {
               radius: 22,
               backgroundImage:
                   user.image != null ? NetworkImage(user.image!) : null,
-              backgroundColor: Colors.purple[100],
+              backgroundColor: AppColors.accentSoft,
               child:
                   user.image == null
                       ? const Icon(Icons.person, color: Colors.white)

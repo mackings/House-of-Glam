@@ -25,7 +25,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       description:
           'Move smoothly between discovery, tailoring, and customer orders with clearer journeys for both sides.',
       icon: Icons.checkroom_rounded,
-      accent: Color(0xFF7C3AED),
+      accent: AppColors.accent,
       highlight: 'Built for both buyers and designers',
     ),
     _OnboardingItem(
@@ -33,7 +33,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       description:
           'Coordinate orders, reviews, and marketplace activity whether your customers are local or international.',
       icon: Icons.public_rounded,
-      accent: Color(0xFF0EA5E9),
+      accent: AppColors.warning,
       highlight: 'Support for a global audience',
     ),
     _OnboardingItem(
@@ -41,7 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       description:
           'Keep pricing conversations structured, track changes clearly, and close decisions with less friction.',
       icon: Icons.handshake_rounded,
-      accent: Color(0xFF0F9D69),
+      accent: AppColors.accentDeep,
       highlight: 'Cleaner offer and counter-offer flow',
     ),
   ];
@@ -55,10 +55,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _completeOnboarding() async {
     await SecurePrefs.saveOnboardingSeen(true);
     if (!mounted) return;
-    Nav.pushReplacementAll(
-      context,
-      AppEntryGate(),
-    );
+    Nav.pushReplacementAll(context, AppEntryGate());
   }
 
   @override
@@ -208,102 +205,119 @@ class _OnboardingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.all(26),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [item.accent.withValues(alpha: 0.12), Colors.white],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: AppColors.border),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 20,
-            offset: Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 78,
-            height: 78,
-            decoration: BoxDecoration(
-              color: item.accent.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(24),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxHeight < 620;
+        final titleSize = compact ? 22.0 : 26.0;
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          padding: EdgeInsets.all(compact ? 20 : 26),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [item.accent.withValues(alpha: 0.12), Colors.white],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            child: Icon(item.icon, color: item.accent, size: 38),
-          ),
-          const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Text(
-              item.highlight,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: item.accent,
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: AppColors.border),
+            boxShadow: const [
+              BoxShadow(
+                color: AppColors.shadow,
+                blurRadius: 20,
+                offset: Offset(0, 12),
               ),
-            ),
+            ],
           ),
-          const SizedBox(height: 20),
-          Text(
-            item.title,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              height: 1.15,
-              color: AppColors.ink,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            item.description,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 15,
-              height: 1.65,
-              color: AppColors.subtext,
-            ),
-          ),
-          const Spacer(),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Row(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.bolt_rounded, color: item.accent, size: 18),
-                const SizedBox(width: 10),
-                Expanded(
+                Container(
+                  width: compact ? 64 : 74,
+                  height: compact ? 64 : 74,
+                  decoration: BoxDecoration(
+                    color: item.accent.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Icon(
+                    item.icon,
+                    color: item.accent,
+                    size: compact ? 32 : 36,
+                  ),
+                ),
+                SizedBox(height: compact ? 16 : 22),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: AppColors.border),
+                  ),
                   child: Text(
-                    'Cleaner journeys, better account continuity, and a more intentional marketplace experience.',
+                    item.highlight,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      height: 1.5,
-                      color: AppColors.ink,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: item.accent,
                     ),
+                  ),
+                ),
+                SizedBox(height: compact ? 16 : 20),
+                Text(
+                  item.title,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: titleSize,
+                    fontWeight: FontWeight.w800,
+                    height: 1.12,
+                    color: AppColors.ink,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  item.description,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: compact ? 14 : 15,
+                    height: 1.6,
+                    color: AppColors.subtext,
+                  ),
+                ),
+                SizedBox(height: compact ? 18 : 24),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(compact ? 14 : 18),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.bolt_rounded, color: item.accent, size: 18),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Cleaner journeys, better account continuity, and a more intentional marketplace experience.',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            height: 1.45,
+                            color: AppColors.ink,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
