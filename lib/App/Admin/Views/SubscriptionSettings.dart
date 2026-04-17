@@ -299,19 +299,30 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
                     ),
                     const SizedBox(height: 14),
                     Container(
-                      padding: const EdgeInsets.all(14),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [AppColors.accentDeep, AppColors.accent],
                         ),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(22),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      child: Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        alignment: WrapAlignment.spaceBetween,
                         children: [
-                          _metric("Plans", "$totalPlans"),
-                          _metric("Monthly", "$monthlyCount"),
-                          _metric("Yearly", "$yearlyCount"),
+                          SizedBox(
+                            width: (MediaQuery.of(context).size.width - 68) / 3,
+                            child: _metric("Plans", "$totalPlans"),
+                          ),
+                          SizedBox(
+                            width: (MediaQuery.of(context).size.width - 68) / 3,
+                            child: _metric("Monthly", "$monthlyCount"),
+                          ),
+                          SizedBox(
+                            width: (MediaQuery.of(context).size.width - 68) / 3,
+                            child: _metric("Yearly", "$yearlyCount"),
+                          ),
                         ],
                       ),
                     ),
@@ -332,10 +343,11 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
                       ..._plans.map((plan) {
                         return Container(
                           margin: const EdgeInsets.only(bottom: 10),
-                          padding: const EdgeInsets.all(14),
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(22),
+                            border: Border.all(color: AppColors.border),
                             boxShadow: const [
                               BoxShadow(
                                 color: Color(0x14000000),
@@ -348,14 +360,17 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  CustomText(
-                                    plan.name,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
+                                  Expanded(
+                                    child: CustomText(
+                                      plan.name,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      textAlign: TextAlign.left,
+                                    ),
                                   ),
+                                  const SizedBox(width: 10),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 10,
@@ -388,8 +403,10 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
                                 color: Colors.black87,
                               ),
                               const SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
+                              Wrap(
+                                alignment: WrapAlignment.end,
+                                spacing: 8,
+                                runSpacing: 8,
                                 children: [
                                   TextButton.icon(
                                     onPressed:
@@ -431,8 +448,14 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
           color: Colors.white,
           fontSize: 20,
           fontWeight: FontWeight.bold,
+          textAlign: TextAlign.center,
         ),
-        CustomText(label, color: Colors.white70, fontSize: 12),
+        CustomText(
+          label,
+          color: Colors.white70,
+          fontSize: 12,
+          textAlign: TextAlign.center,
+        ),
       ],
     );
   }

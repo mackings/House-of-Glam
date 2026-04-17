@@ -584,11 +584,7 @@ class _PickupMetric extends StatelessWidget {
             color: AppColors.ink,
           ),
           const SizedBox(height: 2),
-          CustomText(
-            label,
-            fontSize: 11,
-            color: AppColors.subtext,
-          ),
+          CustomText(label, fontSize: 11, color: AppColors.subtext),
         ],
       ),
     );

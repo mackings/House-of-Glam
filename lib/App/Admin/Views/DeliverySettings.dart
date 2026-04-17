@@ -114,50 +114,98 @@ class _DeliverySettingsState extends State<DeliverySettings> {
 
     showDialog(
       context: context,
-      builder:
-          (_) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
-            title: const CustomText(
-              "Edit Delivery Rate",
-              fontWeight: FontWeight.w700,
-              textAlign: TextAlign.left,
-            ),
-            content: CustomTextField(
-              title: "Rate",
-              fieldKey: "rate",
-              controller: amountCtrl,
-              hintText: "Enter new amount",
-              keyboardType: TextInputType.number,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cancel"),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                ),
-                onPressed: () async {
-                  final cleanAmount = amountCtrl.text.replaceAll(',', '');
-                  final updated = await DeliveryRateService.updateDeliveryRate(
-                    rateId: id,
-                    amount: double.parse(cleanAmount),
-                  );
-                  Navigator.pop(context);
-                  if (updated) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("✅ Rate updated")),
-                    );
-                    fetchDeliveryRates();
-                  }
-                },
-                child: const CustomText("Update", color: Colors.white),
-              ),
-            ],
+      builder: (dialogContext) {
+        return Dialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
           ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const CustomText(
+                    "Edit Delivery Rate",
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    textAlign: TextAlign.left,
+                  ),
+                  const SizedBox(height: 6),
+                  const CustomText(
+                    "Update the percentage for this delivery type.",
+                    fontSize: 12,
+                    color: AppColors.subtext,
+                    textAlign: TextAlign.left,
+                  ),
+                  const SizedBox(height: 18),
+                  const CustomText(
+                    "Rate",
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    textAlign: TextAlign.left,
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: amountCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      hintText: "Enter new amount",
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext),
+                        child: const Text("Cancel"),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.accent,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(110, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        onPressed: () async {
+                          final cleanAmount = amountCtrl.text.replaceAll(
+                            ',',
+                            '',
+                          );
+                          final updated =
+                              await DeliveryRateService.updateDeliveryRate(
+                                rateId: id,
+                                amount: double.parse(cleanAmount),
+                              );
+                          if (!mounted) return;
+                          Navigator.pop(dialogContext);
+                          if (updated) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("✅ Rate updated")),
+                            );
+                            fetchDeliveryRates();
+                          }
+                        },
+                        child: const Text("Update"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -242,6 +290,8 @@ class _DeliverySettingsState extends State<DeliverySettings> {
 
   @override
   Widget build(BuildContext context) {
+    final totalRates = deliveryRates.length;
+
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
@@ -266,107 +316,170 @@ class _DeliverySettingsState extends State<DeliverySettings> {
                 ? const Center(
                   child: CircularProgressIndicator(color: AppColors.accent),
                 )
-                : Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  child:
-                      deliveryRates.isEmpty
-                          ? ListView(
-                            children: const [
-                              _HeaderCard(
-                                title: "No delivery rates yet",
-                                subtitle:
-                                    "Create shipping percentages for the available delivery types and manage them from here.",
+                : ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+                  children: [
+                    _HeaderCard(
+                      title:
+                          deliveryRates.isEmpty
+                              ? "No delivery rates yet"
+                              : "Delivery rate manager",
+                      subtitle:
+                          deliveryRates.isEmpty
+                              ? "Create shipping percentages for the available delivery types and manage them from here."
+                              : "Adjust delivery percentages and keep available logistics options in sync.",
+                    ),
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: AppColors.border),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: AppColors.shadow,
+                            blurRadius: 16,
+                            offset: Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _DeliveryMetric(
+                              label: "Rates",
+                              value: "$totalRates",
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _DeliveryMetric(
+                              label: "Fastest",
+                              value:
+                                  deliveryRates.isEmpty
+                                      ? "N/A"
+                                      : (deliveryRates.first["deliveryType"] ??
+                                              "Set")
+                                          .toString(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    if (deliveryRates.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: const CustomText(
+                          "No delivery rates configured yet. Tap the add button to create one.",
+                          fontSize: 13,
+                          color: AppColors.subtext,
+                          textAlign: TextAlign.left,
+                        ),
+                      )
+                    else
+                      ...deliveryRates.map((rate) {
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(22),
+                            border: Border.all(color: AppColors.border),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: AppColors.shadow,
+                                blurRadius: 16,
+                                offset: Offset(0, 8),
                               ),
-                            ],
-                          )
-                          : ListView(
-                            children: [
-                              const _HeaderCard(
-                                title: "Delivery rate manager",
-                                subtitle:
-                                    "Adjust delivery percentages and keep available logistics options in sync.",
-                              ),
-                              const SizedBox(height: 14),
-                              ...deliveryRates.map((rate) {
-                                return Container(
-                                  margin: const EdgeInsets.only(bottom: 12),
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(22),
-                                    border: Border.all(color: AppColors.border),
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        color: AppColors.shadow,
-                                        blurRadius: 16,
-                                        offset: Offset(0, 8),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 48,
-                                        height: 48,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.accentSoft,
-                                          borderRadius: BorderRadius.circular(
-                                            16,
-                                          ),
-                                        ),
-                                        child: const Icon(
-                                          Icons.local_shipping_outlined,
-                                          color: AppColors.accent,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            CustomText(
-                                              rate["deliveryType"] ?? "N/A",
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w700,
-                                              textAlign: TextAlign.left,
-                                            ),
-                                            const SizedBox(height: 4),
-                                            CustomText(
-                                              "${_formatter.format(rate["amount"])}%",
-                                              color: AppColors.subtext,
-                                              textAlign: TextAlign.left,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.edit_outlined,
-                                          color: AppColors.ink,
-                                        ),
-                                        onPressed:
-                                            () => _editRate(
-                                              rate["_id"],
-                                              double.parse(
-                                                rate["amount"].toString(),
-                                              ),
-                                            ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.delete_outline,
-                                          color: AppColors.danger,
-                                        ),
-                                        onPressed:
-                                            () => _deleteRate(rate["_id"]),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }),
                             ],
                           ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.accentSoft,
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Icon(
+                                      Icons.local_shipping_outlined,
+                                      color: AppColors.accent,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        CustomText(
+                                          rate["deliveryType"] ?? "N/A",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          textAlign: TextAlign.left,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        CustomText(
+                                          "${_formatter.format(rate["amount"])}%",
+                                          color: AppColors.subtext,
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Wrap(
+                                spacing: 10,
+                                runSpacing: 10,
+                                children: [
+                                  OutlinedButton.icon(
+                                    onPressed:
+                                        () => _editRate(
+                                          rate["_id"],
+                                          double.parse(
+                                            rate["amount"].toString(),
+                                          ),
+                                        ),
+                                    icon: const Icon(Icons.edit_outlined),
+                                    label: const Text("Edit"),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: AppColors.ink,
+                                      side: const BorderSide(
+                                        color: AppColors.border,
+                                      ),
+                                    ),
+                                  ),
+                                  OutlinedButton.icon(
+                                    onPressed: () => _deleteRate(rate["_id"]),
+                                    icon: const Icon(Icons.delete_outline),
+                                    label: const Text("Delete"),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: AppColors.danger,
+                                      side: const BorderSide(
+                                        color: AppColors.border,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                  ],
                 ),
       ),
     );
@@ -418,6 +531,42 @@ class _HeaderCard extends StatelessWidget {
             fontSize: 13,
             color: AppColors.subtext,
             textAlign: TextAlign.left,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DeliveryMetric extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _DeliveryMetric({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          CustomText(
+            value,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: AppColors.ink,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          CustomText(
+            label,
+            fontSize: 11,
+            color: AppColors.subtext,
+            textAlign: TextAlign.center,
           ),
         ],
       ),
