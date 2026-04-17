@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/UserProfile/model/profileViewModel.dart';
 import 'package:hog/constants/api_config.dart';
+import 'package:hog/utils/session_expiry_handler.dart';
 import 'package:http/http.dart' as http;
 
 class UserProfileViewService {
@@ -23,6 +24,13 @@ class UserProfileViewService {
 
       print("➡️ GET Request: $url");
       print("⬅️ Response: ${response.body}");
+
+      if (await SessionExpiryHandler.handleIfExpired(
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      )) {
+        return null;
+      }
 
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
@@ -52,6 +60,13 @@ class UserProfileViewService {
       final responseBody = await response.stream.bytesToString();
       print("➡️ PUT Request: $url");
       print("⬅️ Response: $responseBody");
+
+      if (await SessionExpiryHandler.handleIfExpired(
+        statusCode: response.statusCode,
+        responseBody: responseBody,
+      )) {
+        return false;
+      }
 
       if (response.statusCode == 200) {
         return true;

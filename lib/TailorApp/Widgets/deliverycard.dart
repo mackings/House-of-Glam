@@ -76,7 +76,7 @@ class DeliveryCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             CustomText(
-                              "Tracking #${tracking.trackingNumber}",
+                              "Tracking ID: ${tracking.trackingNumber}",
                               fontSize: 13,
                               color: AppColors.subtext,
                               textAlign: TextAlign.left,
@@ -128,7 +128,7 @@ class DeliveryCard extends StatelessWidget {
                         child: CustomText(
                           isDelivered
                               ? "Delivery has been completed successfully."
-                              : "Open to review delivery details and confirm status.",
+                              : "View delivery details and confirm completion.",
                           fontSize: 12,
                           color: AppColors.subtext,
                           textAlign: TextAlign.left,
@@ -194,7 +194,7 @@ class _StatusPill extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           CustomText(
-            isDelivered ? "Delivered" : "Pending",
+            isDelivered ? "Completed" : "In Transit",
             fontSize: 11,
             fontWeight: FontWeight.w700,
             color: isDelivered ? AppColors.success : AppColors.accent,

@@ -3,6 +3,7 @@ import 'package:hog/App/Admin/Model/PendingListing.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/theme/app_theme.dart';
+import 'package:hog/utils/ui_label_formatter.dart';
 import 'package:intl/intl.dart';
 
 class ModerationListingCard extends StatefulWidget {
@@ -109,7 +110,7 @@ class _ModerationListingCardState extends State<ModerationListingCard> {
                   if (listing.condition.isNotEmpty)
                     _MetaPill(
                       icon: Icons.verified_outlined,
-                      label: listing.condition,
+                      label: formatUiLabel(listing.condition),
                     ),
                   if (listing.size.isNotEmpty)
                     _MetaPill(icon: Icons.straighten, label: listing.size),
@@ -280,7 +281,7 @@ class _StatusChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        status.isEmpty ? 'unknown' : status,
+        formatUiLabel(status, fallback: 'Unknown'),
         style: TextStyle(
           color: foreground,
           fontWeight: FontWeight.w600,

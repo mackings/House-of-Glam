@@ -52,21 +52,22 @@ class _VerifyState extends ConsumerState<Verify> {
     return LoadingOverlay(
       isLoading: isLoading,
       child: AuthShell(
-        eyebrow: 'Email verification',
-        title: 'Confirm your account before you enter the app.',
+        eyebrow: 'Verify Your Email',
+        title: 'Confirm your House of GLAME account.',
         subtitle:
-            'Use the 4-digit code sent to your email to activate your profile and continue.',
+            'Use the 4-digit code sent to your email to activate your profile and begin exploring.',
         showBackButton: true,
+        highlights: const ['Account Activation', 'Secure Sign-In'],
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Verification code",
+              "Verification Code",
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 6),
             const Text(
-              "We've sent a code to your email address.",
+              "We have sent a code to your email address.",
               style: TextStyle(height: 1.5, color: Color(0xFF686271)),
             ),
             const SizedBox(height: 24),

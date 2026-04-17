@@ -4,6 +4,7 @@ import 'package:hog/App/Home/Model/category.dart';
 import 'package:hog/App/Home/Model/tailor.dart';
 import 'package:hog/App/Home/Model/vendor.dart';
 import 'package:hog/constants/api_config.dart';
+import 'package:hog/utils/session_expiry_handler.dart';
 import 'package:http/http.dart' as http;
 
 class HomeApiService {
@@ -26,6 +27,13 @@ class HomeApiService {
 
       print("➡️ GET Request: $url");
       print("⬅️ Response: ${response.body}");
+
+      if (await SessionExpiryHandler.handleIfExpired(
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      )) {
+        return [];
+      }
 
       if (response.statusCode == 200) {
         final List<dynamic> tailorsJson =
@@ -54,6 +62,13 @@ class HomeApiService {
 
       print("➡️ GET Request: $url");
       print("⬅️ Response: ${response.body}");
+
+      if (await SessionExpiryHandler.handleIfExpired(
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      )) {
+        return [];
+      }
 
       if (response.statusCode == 200) {
         final List<dynamic> categoriesJson =
@@ -133,6 +148,13 @@ class HomeApiService {
       print("➡️ GET Request: $url");
       print("⬅️ Response: ${response.body}");
 
+      if (await SessionExpiryHandler.handleIfExpired(
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      )) {
+        return null;
+      }
+
       if (response.statusCode == 200) {
         return VendorDetailsResponse.fromJson(jsonDecode(response.body));
       }
@@ -166,6 +188,13 @@ class HomeApiService {
       print("📦 Request Body: {\"rating\": $rating}");
       print("⬅️ Response: ${response.body}");
 
+      if (await SessionExpiryHandler.handleIfExpired(
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      )) {
+        return false;
+      }
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;
       } else {
@@ -194,6 +223,13 @@ class HomeApiService {
 
       print("➡️ DELETE Request: $url");
       print("⬅️ Response: ${response.body}");
+
+      if (await SessionExpiryHandler.handleIfExpired(
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      )) {
+        return false;
+      }
 
       if (response.statusCode == 200) {
         return true;

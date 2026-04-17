@@ -18,7 +18,7 @@ class TailorAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
-      toolbarHeight: 76,
+      toolbarHeight: 88,
       backgroundColor: AppColors.canvas,
       surfaceTintColor: Colors.transparent,
       scrolledUnderElevation: 0,
@@ -35,10 +35,11 @@ class TailorAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           const SizedBox(height: 3),
           CustomText(
-            "Fresh assignments and deliveries in one place",
+            "Manage production, payments, and delivery in one place",
             fontSize: 12,
             color: AppColors.subtext,
             textAlign: TextAlign.left,
+            maxLines: 2,
           ),
         ],
       ),
@@ -59,7 +60,7 @@ class TailorAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(88);
 }
 
 class _ActionButton extends StatelessWidget {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Admin/Model/PendingListing.dart';
+import 'package:hog/utils/ui_label_formatter.dart';
 import 'package:intl/intl.dart';
 
 class ModerationHistoryCard extends StatelessWidget {
@@ -28,13 +29,16 @@ class ModerationHistoryCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: background,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  item.action,
+                  formatUiLabel(item.action),
                   style: TextStyle(
                     color: accent,
                     fontWeight: FontWeight.w600,
@@ -45,7 +49,9 @@ class ModerationHistoryCard extends StatelessWidget {
               const Spacer(),
               if (item.moderatedAt != null)
                 Text(
-                  DateFormat.yMMMd().add_jm().format(item.moderatedAt!.toLocal()),
+                  DateFormat.yMMMd().add_jm().format(
+                    item.moderatedAt!.toLocal(),
+                  ),
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
             ],
@@ -57,12 +63,12 @@ class ModerationHistoryCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Moderator: ${item.moderatorName.isEmpty ? 'Unknown' : item.moderatorName} (${item.moderatorRole.isEmpty ? 'admin' : item.moderatorRole})',
+            'Moderator: ${item.moderatorName.isEmpty ? 'Unknown' : item.moderatorName} (${formatUiLabel(item.moderatorRole, fallback: 'Admin')})',
             style: TextStyle(color: Colors.grey.shade800),
           ),
           const SizedBox(height: 4),
           Text(
-            'Current status: ${item.currentStatus}',
+            'Current status: ${formatUiLabel(item.currentStatus)}',
             style: TextStyle(color: Colors.grey.shade800),
           ),
           if (item.reason != null && item.reason!.trim().isNotEmpty) ...[

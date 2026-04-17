@@ -38,7 +38,7 @@ class _TailorDeliveriesState extends State<TailorDeliveries> {
         surfaceTintColor: Colors.transparent,
         iconTheme: const IconThemeData(color: AppColors.ink),
         title: const CustomText(
-          "Deliverables",
+          "Logistics",
           color: AppColors.ink,
           fontSize: 18,
           fontWeight: FontWeight.w700,
@@ -67,7 +67,7 @@ class _TailorDeliveriesState extends State<TailorDeliveries> {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                   children: const [
                     _DeliveryHeader(
-                      title: "No live deliveries yet",
+                      title: "No live logistics yet",
                       subtitle:
                           "Completed or pending dispatch jobs will appear here for quick tracking and confirmation.",
                       total: "0",
@@ -89,9 +89,9 @@ class _TailorDeliveriesState extends State<TailorDeliveries> {
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
                 children: [
                   _DeliveryHeader(
-                    title: "Manage outward deliveries",
+                    title: "Delivery Management",
                     subtitle:
-                        "Track dispatches, review materials, and close delivery loops quickly.",
+                        "Track shipments, review materials, and finalize delivery cycles efficiently.",
                     total: "${deliveries.length}",
                     delivered: "$deliveredCount",
                   ),
@@ -164,7 +164,7 @@ class _DeliveryHeader extends StatelessWidget {
               const Spacer(),
               _DeliveryStat(label: "Total", value: total),
               const SizedBox(width: 8),
-              _DeliveryStat(label: "Done", value: delivered),
+              _DeliveryStat(label: "Completed", value: delivered),
             ],
           ),
           const SizedBox(height: 18),

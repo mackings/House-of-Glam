@@ -6,6 +6,7 @@ import 'package:hog/constants/api_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Home/Model/useractivitymodel.dart';
+import 'package:hog/utils/session_expiry_handler.dart';
 
 class UserActivityService {
   static const String baseUrl = ApiConfig.apiBaseUrl;
@@ -52,6 +53,13 @@ class UserActivityService {
 
       print("⬅️ Response: ${response.body}");
 
+      if (await SessionExpiryHandler.handleIfExpired(
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      )) {
+        return null;
+      }
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         return MaterialResponse.fromJson(jsonDecode(response.body));
       }
@@ -78,6 +86,13 @@ class UserActivityService {
 
       print("➡️ GET Request: $url");
       print("⬅️ Response: ${response.body}");
+
+      if (await SessionExpiryHandler.handleIfExpired(
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      )) {
+        return null;
+      }
 
       if (response.statusCode == 200) {
         return MaterialReviewResponse.fromJson(jsonDecode(response.body));
@@ -108,6 +123,13 @@ class UserActivityService {
 
       print("➡️ GET Request: $url");
       print("⬅️ Response: ${response.body}");
+
+      if (await SessionExpiryHandler.handleIfExpired(
+        statusCode: response.statusCode,
+        responseBody: response.body,
+      )) {
+        return null;
+      }
 
       if (response.statusCode == 200) {
         return ReviewResponse.fromJson(jsonDecode(response.body));

@@ -3,6 +3,7 @@ import 'package:hog/App/Admin/Api/adminService.dart';
 import 'package:hog/App/Admin/Model/PendingListing.dart';
 import 'package:hog/App/Admin/Widgets/rejectionSheet.dart';
 import 'package:hog/components/button.dart';
+import 'package:hog/utils/ui_label_formatter.dart';
 import 'package:intl/intl.dart';
 
 class ModerationListingDetailSheet extends StatefulWidget {
@@ -37,14 +38,16 @@ class _ModerationListingDetailSheetState
     try {
       await AdminService.approveListing(widget.listingId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Listing approved')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Listing approved')));
       Navigator.pop(context, true);
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString().replaceFirst('Exception: ', ''))),
+        SnackBar(
+          content: Text(error.toString().replaceFirst('Exception: ', '')),
+        ),
       );
     } finally {
       if (mounted) {
@@ -63,14 +66,16 @@ class _ModerationListingDetailSheetState
     try {
       await AdminService.rejectListing(widget.listingId, reasons);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Listing rejected')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Listing rejected')));
       Navigator.pop(context, true);
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString().replaceFirst('Exception: ', ''))),
+        SnackBar(
+          content: Text(error.toString().replaceFirst('Exception: ', '')),
+        ),
       );
     } finally {
       if (mounted) {
@@ -97,7 +102,10 @@ class _ModerationListingDetailSheetState
 
             if (snapshot.hasError) {
               return _DetailError(
-                message: snapshot.error.toString().replaceFirst('Exception: ', ''),
+                message: snapshot.error.toString().replaceFirst(
+                  'Exception: ',
+                  '',
+                ),
                 onRetry: () {
                   setState(() {
                     _future = AdminService.getListingById(widget.listingId);
@@ -156,27 +164,29 @@ class _ModerationListingDetailSheetState
                           children: [
                             _DetailRow(
                               label: 'Price',
-                              value: listing.price == 0
-                                  ? 'Free'
-                                  : '${listing.currency} ${NumberFormat('#,##0', 'en_US').format(listing.price)}',
+                              value:
+                                  listing.price == 0
+                                      ? 'Free'
+                                      : '${listing.currency} ${NumberFormat('#,##0', 'en_US').format(listing.price)}',
                             ),
                             _DetailRow(
                               label: 'Category',
-                              value: listing.category?.name.isNotEmpty == true
-                                  ? listing.category!.name
-                                  : 'Uncategorized',
+                              value:
+                                  listing.category?.name.isNotEmpty == true
+                                      ? listing.category!.name
+                                      : 'Uncategorized',
                             ),
                             if (listing.size.isNotEmpty)
                               _DetailRow(label: 'Size', value: listing.size),
                             if (listing.condition.isNotEmpty)
                               _DetailRow(
                                 label: 'Condition',
-                                value: listing.condition,
+                                value: formatUiLabel(listing.condition),
                               ),
                             if (listing.status.isNotEmpty)
                               _DetailRow(
                                 label: 'Availability',
-                                value: listing.status,
+                                value: formatUiLabel(listing.status),
                               ),
                             if (listing.yards.isNotEmpty)
                               _DetailRow(
@@ -200,9 +210,10 @@ class _ModerationListingDetailSheetState
                           children: [
                             _DetailRow(
                               label: 'Name',
-                              value: listing.user.fullName.isEmpty
-                                  ? 'Unknown seller'
-                                  : listing.user.fullName,
+                              value:
+                                  listing.user.fullName.isEmpty
+                                      ? 'Unknown seller'
+                                      : listing.user.fullName,
                             ),
                             if (listing.user.email.isNotEmpty)
                               _DetailRow(
@@ -223,7 +234,9 @@ class _ModerationListingDetailSheetState
                             if (listing.user.subscriptionPlan.isNotEmpty)
                               _DetailRow(
                                 label: 'Plan',
-                                value: listing.user.subscriptionPlan,
+                                value: formatUiLabel(
+                                  listing.user.subscriptionPlan,
+                                ),
                               ),
                           ],
                         ),
@@ -236,7 +249,7 @@ class _ModerationListingDetailSheetState
                           children: [
                             _DetailRow(
                               label: 'Approval status',
-                              value: listing.approvalStatus,
+                              value: formatUiLabel(listing.approvalStatus),
                             ),
                             if (listing.approvedBy != null)
                               _DetailRow(
@@ -246,9 +259,9 @@ class _ModerationListingDetailSheetState
                             if (listing.approvedAt != null)
                               _DetailRow(
                                 label: 'Approved at',
-                                value: DateFormat.yMMMd()
-                                    .add_jm()
-                                    .format(listing.approvedAt!.toLocal()),
+                                value: DateFormat.yMMMd().add_jm().format(
+                                  listing.approvedAt!.toLocal(),
+                                ),
                               ),
                             if (listing.rejectedBy != null)
                               _DetailRow(
@@ -258,9 +271,9 @@ class _ModerationListingDetailSheetState
                             if (listing.rejectedAt != null)
                               _DetailRow(
                                 label: 'Rejected at',
-                                value: DateFormat.yMMMd()
-                                    .add_jm()
-                                    .format(listing.rejectedAt!.toLocal()),
+                                value: DateFormat.yMMMd().add_jm().format(
+                                  listing.rejectedAt!.toLocal(),
+                                ),
                               ),
                             if (listing.rejectionReasons.isNotEmpty)
                               _DetailRow(
@@ -278,9 +291,7 @@ class _ModerationListingDetailSheetState
                           child: Column(
                             children:
                                 listing.moderationHistory
-                                    .map(
-                                      (entry) => _HistoryTile(entry: entry),
-                                    )
+                                    .map((entry) => _HistoryTile(entry: entry))
                                     .toList(),
                           ),
                         ),
@@ -384,7 +395,7 @@ class _DetailStatusChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        status,
+        formatUiLabel(status),
         style: TextStyle(
           color: foreground,
           fontWeight: FontWeight.w600,

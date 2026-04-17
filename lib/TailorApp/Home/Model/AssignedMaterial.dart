@@ -203,6 +203,21 @@ class TailorAssignedMaterial {
 
   bool get isRequestingStatus => normalizedStatus == 'requesting';
 
+  bool get isPartPaymentStatus => normalizedStatus == 'part payment';
+
+  bool get isFullPaymentStatus {
+    const fullySettledStatuses = {
+      'full payment',
+      'sent for delivery',
+      'attire sent for delivery',
+      'for delivery',
+      'delivery',
+      'delivered',
+      'delivered attire',
+    };
+    return fullySettledStatuses.contains(normalizedStatus);
+  }
+
   bool get isSentForDeliveryStatus {
     const sentStatuses = {
       'sent for delivery',
@@ -262,6 +277,62 @@ class TailorAssignedMaterial {
     }
 
     return (baseTotal * 0.90).abs();
+  }
+
+  double get resolvedClientPayableTotal {
+    final explicit =
+        isInternationalVendor
+            ? (userPayableTotalUSD ?? userPayableTotal)
+            : userPayableTotal;
+    if (explicit != null && explicit > 0) {
+      return explicit;
+    }
+
+    final explicitOutstanding =
+        isInternationalVendor ? (amountToPayUSD ?? 0.0) : (amountToPay ?? 0.0);
+    final explicitPaid =
+        isInternationalVendor ? (amountPaidUSD ?? 0.0) : (amountPaid ?? 0.0);
+
+    if ((explicitPaid + explicitOutstanding) > 0) {
+      return explicitPaid + explicitOutstanding;
+    }
+
+    return resolvedVendorBaseTotal;
+  }
+
+  double get resolvedAmountPaidForUi {
+    final explicitPaid =
+        isInternationalVendor ? (amountPaidUSD ?? 0.0) : (amountPaid ?? 0.0);
+    if (explicitPaid > 0) {
+      return explicitPaid;
+    }
+
+    if (isFullPaymentStatus) {
+      return resolvedClientPayableTotal;
+    }
+
+    return 0.0;
+  }
+
+  double get resolvedOutstandingForUi {
+    final explicitOutstanding =
+        isInternationalVendor ? (amountToPayUSD ?? 0.0) : (amountToPay ?? 0.0);
+    if (explicitOutstanding > 0) {
+      return explicitOutstanding;
+    }
+
+    final payableTotal = resolvedClientPayableTotal;
+    final paid = resolvedAmountPaidForUi;
+
+    if (isFullPaymentStatus) {
+      return 0.0;
+    }
+
+    if (payableTotal > paid) {
+      return payableTotal - paid;
+    }
+
+    return 0.0;
   }
 }
 

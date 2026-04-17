@@ -97,7 +97,8 @@ void showDeliveryDetails(
                             children: [
                               _InfoChip(
                                 icon: Icons.confirmation_number_outlined,
-                                label: "Tracking #${tracking.trackingNumber}",
+                                label:
+                                    "Tracking ID: ${tracking.trackingNumber}",
                               ),
                               _InfoChip(
                                 icon:
@@ -106,8 +107,8 @@ void showDeliveryDetails(
                                         : Icons.local_shipping_outlined,
                                 label:
                                     tracking.isDelivered
-                                        ? "Delivered"
-                                        : "Pending",
+                                        ? "Completed"
+                                        : "In Transit",
                                 tone:
                                     tracking.isDelivered
                                         ? AppColors.success
@@ -120,7 +121,7 @@ void showDeliveryDetails(
                             children: [
                               Expanded(
                                 child: _SummaryTile(
-                                  label: "Tracking Number",
+                                  label: "Tracking ID",
                                   value: tracking.trackingNumber.toString(),
                                   icon: Icons.pin_outlined,
                                 ),

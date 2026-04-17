@@ -4,6 +4,7 @@ import 'package:hog/components/Orders/PaymentOp.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currencyHelper.dart';
 import 'package:hog/theme/app_theme.dart';
+import 'package:hog/utils/ui_label_formatter.dart';
 import 'package:intl/intl.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -279,7 +280,11 @@ class QuotationCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.attach_money_rounded, size: 16, color: AppColors.accent),
+          const Icon(
+            Icons.attach_money_rounded,
+            size: 16,
+            color: AppColors.accent,
+          ),
           const SizedBox(width: 6),
           Expanded(
             child: RichText(
@@ -456,7 +461,7 @@ class _StatusTag extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        status,
+        formatUiLabel(status),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,

@@ -78,21 +78,22 @@ class _ResetpasswordState extends ConsumerState<Resetpassword> {
     return LoadingOverlay(
       isLoading: isLoading,
       child: AuthShell(
-        eyebrow: 'Set a new password',
-        title: 'Finish recovery and secure your account again.',
+        eyebrow: 'Create a New Password',
+        title: 'Set a fresh password for House of GLAME.',
         subtitle:
-            'Enter the token sent to ${widget.email} and choose a strong replacement password.',
+            'Enter the code sent to ${widget.email} and choose a strong new password for your account.',
         showBackButton: true,
+        highlights: const ['Verified Access', 'Secure Password Reset'],
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Reset password",
+              "Reset Password",
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 6),
             const Text(
-              "Use the code from your email, then set a new password.",
+              "Use the code from your email, then create a new secure password.",
               style: TextStyle(height: 1.5, color: Color(0xFF686271)),
             ),
             const SizedBox(height: 24),

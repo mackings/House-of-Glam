@@ -287,6 +287,26 @@ class _PickupSettingsState extends State<PickupSettings> {
 
   @override
   Widget build(BuildContext context) {
+    final totalStates = _hierarchy.fold<int>(
+      0,
+      (sum, country) =>
+          sum +
+          List<Map<String, dynamic>>.from(country["states"] ?? const []).length,
+    );
+    final totalLocations = _hierarchy.fold<int>(
+      0,
+      (sum, country) =>
+          sum +
+          List<Map<String, dynamic>>.from(country["states"] ?? const []).fold(
+            0,
+            (stateSum, state) =>
+                stateSum +
+                List<Map<String, dynamic>>.from(
+                  state["locations"] ?? const [],
+                ).length,
+          ),
+    );
+
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
@@ -327,17 +347,38 @@ class _PickupSettingsState extends State<PickupSettings> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: const Icon(
-                            Icons.place_outlined,
-                            color: AppColors.accent,
-                          ),
+                        Row(
+                          children: [
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: const Icon(
+                                Icons.place_outlined,
+                                color: AppColors.accent,
+                              ),
+                            ),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: CustomText(
+                                "$totalLocations saved",
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.ink,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 18),
                         const CustomText(
@@ -353,6 +394,31 @@ class _PickupSettingsState extends State<PickupSettings> {
                           fontSize: 13,
                           color: AppColors.subtext,
                           textAlign: TextAlign.left,
+                        ),
+                        const SizedBox(height: 14),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _PickupMetric(
+                                label: "Countries",
+                                value: "${_hierarchy.length}",
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _PickupMetric(
+                                label: "States",
+                                value: "$totalStates",
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _PickupMetric(
+                                label: "Locations",
+                                value: "$totalLocations",
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -377,15 +443,23 @@ class _PickupSettingsState extends State<PickupSettings> {
                       children: [
                         const CustomText(
                           "Pickup Location Form",
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        const SizedBox(height: 6),
+                        const CustomText(
+                          "Add a reusable pickup entry with a country, state, and full address.",
+                          fontSize: 12,
+                          color: AppColors.subtext,
+                          textAlign: TextAlign.left,
                         ),
                         const SizedBox(height: 12),
                         DropdownButtonFormField<CountryOption>(
-                          value: _selectedCountry,
+                          initialValue: _selectedCountry,
+                          isExpanded: true,
                           decoration: const InputDecoration(
                             labelText: "Country",
-                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.public_rounded),
                           ),
                           items:
                               allCountries.map((country) {
@@ -393,9 +467,25 @@ class _PickupSettingsState extends State<PickupSettings> {
                                   value: country,
                                   child: Text(
                                     "${country.flagEmoji} ${country.name}",
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                   ),
                                 );
                               }).toList(),
+                          selectedItemBuilder:
+                              (context) =>
+                                  allCountries
+                                      .map(
+                                        (country) => Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            "${country.flagEmoji} ${country.name}",
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
                           onChanged:
                               (value) =>
                                   setState(() => _selectedCountry = value),
@@ -452,6 +542,14 @@ class _PickupSettingsState extends State<PickupSettings> {
                             onPressed: _showExistingLocations,
                             icon: const Icon(Icons.list_alt_outlined),
                             label: const Text("View Added Locations"),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.accent,
+                              minimumSize: const Size(double.infinity, 52),
+                              side: const BorderSide(color: AppColors.border),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -459,6 +557,40 @@ class _PickupSettingsState extends State<PickupSettings> {
                   ),
                 ],
               ),
+    );
+  }
+}
+
+class _PickupMetric extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _PickupMetric({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          CustomText(
+            value,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: AppColors.ink,
+          ),
+          const SizedBox(height: 2),
+          CustomText(
+            label,
+            fontSize: 11,
+            color: AppColors.subtext,
+          ),
+        ],
+      ),
     );
   }
 }

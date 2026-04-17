@@ -4,6 +4,7 @@ import 'package:hog/App/Home/Model/TransModel.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:hog/theme/app_theme.dart';
+import 'package:hog/utils/ui_label_formatter.dart';
 import 'package:intl/intl.dart';
 
 class TransactionDetailsModal extends StatelessWidget {
@@ -107,7 +108,7 @@ class TransactionDetailsModal extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                statusField,
+                                formatUiLabel(statusField),
                                 style: TextStyle(
                                   color:
                                       isSuccess
@@ -217,7 +218,7 @@ class TransactionDetailsModal extends StatelessWidget {
                       _DetailRow(
                         icon: Icons.assignment_turned_in,
                         label: "Order Status",
-                        value: txn.orderStatus ?? "N/A",
+                        value: formatUiLabel(txn.orderStatus),
                       ),
                       _DetailRow(
                         icon: Icons.credit_card,

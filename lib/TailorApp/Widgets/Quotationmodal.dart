@@ -94,7 +94,7 @@ class _QuotationBottomSheetState extends State<QuotationBottomSheet> {
             title: const Text("Confirm Quotation"),
             content: const Text(
               "By submitting, you confirm that the prices are correct, "
-              "originality and authenticity of the quotation have been verified. "
+              "and the originality and authenticity of the quotation have been verified. "
               "Do you wish to proceed?",
             ),
             actions: [

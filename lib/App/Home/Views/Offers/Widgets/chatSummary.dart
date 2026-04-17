@@ -3,6 +3,7 @@ import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:hog/constants/currencyHelper.dart';
 import 'package:hog/theme/app_theme.dart';
+import 'package:hog/utils/ui_label_formatter.dart';
 
 class ChatSummaryCard extends StatelessWidget {
   final Map<String, dynamic> offer, user, vendor;
@@ -160,7 +161,7 @@ class ChatSummaryCard extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 6),
                                 CustomText(
-                                  status.toUpperCase(),
+                                  formatUiLabel(status),
                                   fontSize: 10,
                                   fontWeight: FontWeight.w700,
                                   color: _statusColor(status),

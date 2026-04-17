@@ -40,7 +40,7 @@ class _AssignedMaterialsState extends State<AssignedMaterials> {
         backgroundColor: AppColors.canvas,
         iconTheme: const IconThemeData(color: AppColors.ink),
         title: const CustomText(
-          "Assigned Materials",
+          "Project Materials",
           fontSize: 18,
           color: AppColors.ink,
           fontWeight: FontWeight.w700,
@@ -79,7 +79,7 @@ class _AssignedMaterialsState extends State<AssignedMaterials> {
                     SizedBox(height: 200),
                     Center(
                       child: CustomText(
-                        "No assigned materials found",
+                        "No project materials found",
                         fontSize: 16,
                         color: AppColors.subtext,
                       ),
@@ -102,10 +102,10 @@ class _AssignedMaterialsState extends State<AssignedMaterials> {
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
                 children: [
                   _TailorIntroCard(
-                    title: "Customer-approved jobs",
+                    title: "Approved Projects",
                     subtitle:
-                        "Open any assignment to review the quotation, delivery, and final tailoring instructions.",
-                    primaryLabel: "Assigned",
+                        "Review quotations, delivery timelines, and final production specifications.",
+                    primaryLabel: "Active Projects",
                     primaryValue: "${materials.length}",
                     secondaryLabel: "Quoted",
                     secondaryValue: "$quoted",

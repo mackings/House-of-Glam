@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:hog/utils/session_expiry_handler.dart';
 
 /// Utility class for handling API errors and converting them to user-friendly messages
 class ErrorHandler {
@@ -46,6 +49,7 @@ class ErrorHandler {
 
       if (cleanError.toLowerCase().contains('unauthorized') ||
           cleanError.toLowerCase().contains('401')) {
+        unawaited(SessionExpiryHandler.handleExpiredSession());
         return "Your session has expired. Please login again.";
       }
 
@@ -108,6 +112,10 @@ class ErrorHandler {
 
   /// Formats message to be more user-friendly
   static String _formatMessage(String message) {
+    if (SessionExpiryHandler.isSessionExpiredResponse(message: message)) {
+      unawaited(SessionExpiryHandler.handleExpiredSession());
+    }
+
     // Capitalize first letter
     if (message.isNotEmpty) {
       message = message[0].toUpperCase() + message.substring(1);
@@ -124,8 +132,11 @@ class ErrorHandler {
     final Map<String, String> messageMap = {
       'materials not found': 'No materials available at the moment.',
       'user not found': 'User account not found.',
+      'token has expired': 'Your session has expired. Please login again.',
       'invalid token': 'Your session has expired. Please login again.',
       'token expired': 'Your session has expired. Please login again.',
+      'session expired': 'Your session has expired. Please login again.',
+      'unauthorized': 'Your session has expired. Please login again.',
       'validation failed': 'Please check your input and try again.',
       'invalid credentials': 'Invalid email or password.',
       'email already exists': 'This email is already registered.',
@@ -144,6 +155,13 @@ class ErrorHandler {
 
   /// Parses API error response and returns user-friendly message
   static String parseApiError(String responseBody, int statusCode) {
+    if (SessionExpiryHandler.isSessionExpiredResponse(
+      statusCode: statusCode,
+      responseBody: responseBody,
+    )) {
+      unawaited(SessionExpiryHandler.handleExpiredSession());
+    }
+
     try {
       final jsonData = json.decode(responseBody);
 

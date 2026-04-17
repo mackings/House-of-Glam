@@ -120,7 +120,10 @@ class TailorMaterialDetailSheet extends StatelessWidget {
                     Expanded(
                       child: _SummaryTile(
                         label: "Status",
-                        value: material.isDelivered ? "Delivered" : "Pending",
+                        value:
+                            material.isDelivered
+                                ? "Completed"
+                                : "Awaiting Action",
                         icon:
                             material.isDelivered
                                 ? Icons.done_all_rounded

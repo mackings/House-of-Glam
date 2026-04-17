@@ -6,6 +6,7 @@ import 'package:hog/App/Profile/widgets/Payment.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:hog/theme/app_theme.dart';
+import 'package:hog/utils/ui_label_formatter.dart';
 import 'package:intl/intl.dart';
 
 void showProductDetails(BuildContext context, SellerListing listing) {
@@ -238,7 +239,7 @@ void showProductDetails(BuildContext context, SellerListing listing) {
                   ),
                   _MetaChip(
                     icon: Icons.info_outline_rounded,
-                    label: listing.condition,
+                    label: formatUiLabel(listing.condition),
                   ),
                   if (listing.size.isNotEmpty)
                     _MetaChip(

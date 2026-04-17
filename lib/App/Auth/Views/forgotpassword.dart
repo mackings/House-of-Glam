@@ -67,23 +67,24 @@ class _ForgotPasswordState extends ConsumerState<ForgotPassword> {
     return LoadingOverlay(
       isLoading: isLoading,
       child: AuthShell(
-        eyebrow: 'Recovery',
-        title: 'Reset access without losing your progress.',
+        eyebrow: 'Recover Access',
+        title: 'Reset your House of GLAME password.',
         subtitle:
-            'We will send a verification token to your email so you can choose a new password securely.',
+            'Enter the email linked to your account and we will send a secure code so you can continue your style journey.',
         showBackButton: true,
+        highlights: const ['Secure Recovery', 'Email Verification'],
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Forgot password",
+                "Password Recovery",
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 6),
               const Text(
-                "Enter the email attached to your account to continue.",
+                "Enter the email attached to your House of GLAME profile to continue.",
                 style: TextStyle(height: 1.5, color: Color(0xFF686271)),
               ),
               const SizedBox(height: 22),
@@ -101,10 +102,7 @@ class _ForgotPasswordState extends ConsumerState<ForgotPassword> {
                 },
               ),
               const SizedBox(height: 18),
-              CustomButton(
-                title: "Continue",
-                onPressed: _handleForgotPassword,
-              ),
+              CustomButton(title: "Continue", onPressed: _handleForgotPassword),
             ],
           ),
         ),

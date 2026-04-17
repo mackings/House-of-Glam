@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Auth/Api/authclass.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/App/Auth/Views/auth_choice.dart';
 import 'package:hog/App/Auth/Views/forgotpassword.dart';
-import 'package:hog/App/Auth/Views/signup.dart';
 import 'package:hog/App/Admin/Views/adminHome.dart';
 import 'package:hog/TailorApp/TailorMain.dart';
 import 'package:hog/components/Navigator.dart';
@@ -126,10 +126,15 @@ class _SigninState extends ConsumerState<Signin> {
     return LoadingOverlay(
       isLoading: isLoading,
       child: AuthShell(
-        eyebrow: 'Welcome back',
-        title: 'Sign in to continue your tailoring flow.',
+        eyebrow: 'Welcome Back',
+        title: 'Sign in to your House of GLAME account.',
         subtitle:
-            'Track orders, manage marketplace activity, and keep your account in sync across the app.',
+            'Return to your custom orders, quote approvals, delivery updates, and curated fashion finds.',
+        highlights: const [
+          'Quote Approvals',
+          'Delivery Updates',
+          'Pre-Loved Discovery',
+        ],
         footer: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -142,7 +147,10 @@ class _SigninState extends ConsumerState<Signin> {
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (_) => const Signup()),
+                  MaterialPageRoute(
+                    builder:
+                        (_) => const AuthChoiceScreen(showBackButton: true),
+                  ),
                 );
               },
               child: const CustomText(
@@ -160,12 +168,12 @@ class _SigninState extends ConsumerState<Signin> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Account Login",
+                "Account Access",
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 6),
               const Text(
-                "Use the email and password linked to your House of Glam account.",
+                "Use the email and password linked to your House of GLAME profile.",
                 style: TextStyle(color: AppColors.subtext, height: 1.5),
               ),
               if (emailController.text.trim().isNotEmpty) ...[
@@ -196,7 +204,7 @@ class _SigninState extends ConsumerState<Signin> {
                       const SizedBox(width: 10),
                       const Expanded(
                         child: CustomText(
-                          "Your last email is already filled in. Enter your password to continue quickly.",
+                          "Your last email is already filled in so you can continue your fashion journey quickly.",
                           fontSize: 12,
                           color: AppColors.subtext,
                           textAlign: TextAlign.left,
@@ -270,7 +278,7 @@ class _SigninState extends ConsumerState<Signin> {
                 ],
               ),
               const SizedBox(height: 20),
-              CustomButton(title: "Login", onPressed: _handleSignin),
+              CustomButton(title: "Sign In", onPressed: _handleSignin),
             ],
           ),
         ),

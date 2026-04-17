@@ -45,7 +45,7 @@ class _TailordashboardState extends State<Tailordashboard> {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: TailorAppBar(
-        title: "Attire Pool",
+        title: "Project Hub",
         onRefresh: _refreshMaterials,
         onProfileClick: () {
           Nav.push(context, UserProfileView());
@@ -112,20 +112,20 @@ class _TailordashboardState extends State<Tailordashboard> {
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
                     children: [
                       _TailorHeroCard(
-                        title: "Incoming assignments",
+                        title: "New Projects",
                         subtitle:
-                            "Review customer materials, measurements, and delivery progress from one place.",
+                            "Access client materials, measurements, and delivery progress in one streamlined view.",
                         icon: Icons.design_services_outlined,
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             _MetricPill(
-                              label: "Assigned",
+                              label: "Active Projects",
                               value: "${materials.length}",
                             ),
                             const SizedBox(width: 8),
                             _MetricPill(
-                              label: "Pending",
+                              label: "Awaiting Action",
                               value: "$pendingCount",
                             ),
                           ],
@@ -135,19 +135,19 @@ class _TailordashboardState extends State<Tailordashboard> {
                       _SummaryStrip(
                         items: [
                           _SummaryItem(
-                            label: "Delivered",
+                            label: "Completed",
                             value: "$deliveredCount",
                             icon: Icons.verified_rounded,
                             color: AppColors.success,
                           ),
                           _SummaryItem(
-                            label: "Awaiting",
+                            label: "In Progress",
                             value: "$pendingCount",
                             icon: Icons.timelapse_rounded,
                             color: AppColors.warning,
                           ),
                           _SummaryItem(
-                            label: "Today",
+                            label: "Due Today",
                             value: "${materials.take(6).length}",
                             icon: Icons.auto_awesome_rounded,
                             color: AppColors.accent,
@@ -414,7 +414,7 @@ class _FilterRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const CustomText(
-          "Filter Attires",
+          "Filter Projects",
           fontSize: 15,
           fontWeight: FontWeight.w700,
           color: AppColors.ink,
@@ -426,19 +426,19 @@ class _FilterRow extends StatelessWidget {
           runSpacing: 10,
           children: [
             _FilterChip(
-              label: "All",
+              label: "All Projects",
               count: totalCount,
               selected: activeFilter == _AttireFilter.all,
               onTap: () => onChanged(_AttireFilter.all),
             ),
             _FilterChip(
-              label: "Pending",
+              label: "Awaiting Action",
               count: pendingCount,
               selected: activeFilter == _AttireFilter.pending,
               onTap: () => onChanged(_AttireFilter.pending),
             ),
             _FilterChip(
-              label: "Delivered",
+              label: "Completed",
               count: deliveredCount,
               selected: activeFilter == _AttireFilter.delivered,
               onTap: () => onChanged(_AttireFilter.delivered),

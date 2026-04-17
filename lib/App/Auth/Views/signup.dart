@@ -150,10 +150,15 @@ class _SignupState extends ConsumerState<Signup> {
     return LoadingOverlay(
       isLoading: isLoading,
       child: AuthShell(
-        eyebrow: 'Create your profile',
-        title: 'Step into a cleaner, better-tailored experience.',
+        eyebrow: 'Join House of GLAME',
+        title: 'Create your account',
         subtitle:
-            'Set up your account once and move across shopping, tailoring, and marketplace flows with a consistent interface.',
+            'Join House of GLAME and step into a world of culture, creativity, and style.',
+        highlights: const [
+          'Custom Orders',
+          'Delivery Tracking',
+          'Pre-Loved Discovery',
+        ],
         footer: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -184,12 +189,12 @@ class _SignupState extends ConsumerState<Signup> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Personal Details",
+                "Customer Profile",
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 6),
               const Text(
-                "Fill in your core details to create your customer account.",
+                "Tell us who you are so we can personalise your couture journey.",
                 style: TextStyle(color: AppColors.subtext, height: 1.5),
               ),
               const SizedBox(height: 22),
@@ -301,14 +306,17 @@ class _SignupState extends ConsumerState<Signup> {
                 controller: passwordController,
               ),
               const SizedBox(height: 18),
-              CustomButton(title: "Create account", onPressed: _handleSignup),
+              CustomButton(
+                title: "Create My Account",
+                onPressed: _handleSignup,
+              ),
               const SizedBox(height: 14),
               OutlinedButton.icon(
                 onPressed: () {
                   Nav.push(context, TailorRegistrationPage());
                 },
                 icon: const Icon(Icons.design_services_outlined),
-                label: const Text("Register as a tailor instead"),
+                label: const Text("Apply as a Designer"),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.accent,
                   minimumSize: const Size.fromHeight(54),

@@ -265,7 +265,7 @@ class _StatusChip extends StatelessWidget {
     final border =
         isDelivered ? const Color(0xFFB8E2C8) : const Color(0xFFF8D3A1);
     final fg = isDelivered ? AppColors.success : AppColors.warning;
-    final label = isDelivered ? "Delivered" : "Pending";
+    final label = isDelivered ? "Completed" : "Awaiting Action";
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -321,7 +321,7 @@ class _FallbackImage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: CustomText(
-              attireType.isEmpty ? "Assigned material" : attireType,
+              attireType.isEmpty ? "Project material" : attireType,
               fontSize: 13,
               fontWeight: FontWeight.w700,
               color: AppColors.ink,

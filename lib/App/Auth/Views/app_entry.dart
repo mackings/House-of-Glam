@@ -117,65 +117,119 @@ class _LaunchSplash extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      body: Center(
-        child: Container(
-          width: 240,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFF7F1FF), Colors.white],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+      body: Stack(
+        children: [
+          Positioned(
+            top: -120,
+            right: -40,
+            child: _LaunchAura(
+              size: 300,
+              color: AppColors.secondary.withValues(alpha: 0.18),
             ),
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: AppColors.border),
-            boxShadow: const [
-              BoxShadow(
-                color: AppColors.shadow,
-                blurRadius: 20,
-                offset: Offset(0, 12),
-              ),
-            ],
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 68,
-                height: 68,
-                decoration: BoxDecoration(
-                  color: AppColors.accentSoft,
-                  borderRadius: BorderRadius.circular(22),
-                ),
-                child: const Icon(
-                  Icons.auto_awesome_rounded,
-                  color: AppColors.accent,
-                  size: 32,
-                ),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                'House of Glam',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.ink,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Preparing your workspace...',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.subtext,
-                ),
-              ),
-              const SizedBox(height: 18),
-              const CircularProgressIndicator(color: AppColors.accent),
-            ],
+          Positioned(
+            left: -60,
+            bottom: 40,
+            child: _LaunchAura(
+              size: 240,
+              color: AppColors.accent.withValues(alpha: 0.18),
+            ),
           ),
-        ),
+          Center(
+            child: Container(
+              width: 300,
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 34),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFFFCF6), Colors.white, Color(0xFFF5F1E5)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(34),
+                border: Border.all(color: AppColors.border),
+                boxShadow: const [
+                  BoxShadow(
+                    color: AppColors.shadow,
+                    blurRadius: 28,
+                    offset: Offset(0, 14),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 74,
+                    height: 74,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppColors.secondary, AppColors.accent],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: const Icon(
+                      Icons.auto_awesome_rounded,
+                      color: Colors.white,
+                      size: 34,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'House of GLAME',
+                    style: GoogleFonts.cormorantGaramond(
+                      fontSize: 38,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Where Culture Meets Couture',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.subtext,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const CircularProgressIndicator(color: AppColors.accent),
+                  const SizedBox(height: 18),
+                  Text(
+                    'Authentically African • Globally Styled',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.subtext,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LaunchAura extends StatelessWidget {
+  final double size;
+  final Color color;
+
+  const _LaunchAura({required this.size, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(colors: [color, color.withValues(alpha: 0.0)]),
       ),
     );
   }

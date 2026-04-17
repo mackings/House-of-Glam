@@ -187,6 +187,265 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     );
   }
 
+  bool _matchesCountryQuery(CountryOption country, String query) {
+    final normalized = query.trim().toLowerCase();
+    if (normalized.isEmpty) return true;
+    return country.name.toLowerCase().contains(normalized) ||
+        country.isoCode.toLowerCase().contains(normalized);
+  }
+
+  Future<void> _showCountrySelector() async {
+    final selected = await showModalBottomSheet<CountryOption>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        var searchQuery = '';
+
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final filteredCountries =
+                allCountries.where((country) {
+                  return _matchesCountryQuery(country, searchQuery);
+                }).toList();
+
+            return SafeArea(
+              child: FractionallySizedBox(
+                heightFactor: 0.82,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(28),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 12),
+                      Container(
+                        width: 52,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: AppColors.border,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceMuted,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: AppColors.border),
+                              ),
+                              child: const Icon(
+                                Icons.public_rounded,
+                                size: 18,
+                                color: AppColors.ink,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CustomText(
+                                    "Select Country",
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w800,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  SizedBox(height: 2),
+                                  CustomText(
+                                    "Search and choose your delivery country.",
+                                    fontSize: 12,
+                                    color: AppColors.subtext,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => Navigator.of(sheetContext).pop(),
+                              behavior: HitTestBehavior.opaque,
+                              child: Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceMuted,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(color: AppColors.border),
+                                ),
+                                child: const Icon(
+                                  Icons.close_rounded,
+                                  size: 18,
+                                  color: AppColors.ink,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                        child: TextField(
+                          autofocus: true,
+                          onChanged:
+                              (value) =>
+                                  setSheetState(() => searchQuery = value),
+                          decoration: const InputDecoration(
+                            hintText: "Search country",
+                            prefixIcon: Icon(Icons.search_rounded),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child:
+                            filteredCountries.isEmpty
+                                ? const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                    ),
+                                    child: CustomText(
+                                      "No country matches your search.",
+                                      fontSize: 13,
+                                      color: AppColors.subtext,
+                                    ),
+                                  ),
+                                )
+                                : ListView.separated(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    20,
+                                    0,
+                                    20,
+                                    24,
+                                  ),
+                                  itemCount: filteredCountries.length,
+                                  separatorBuilder:
+                                      (_, __) => const SizedBox(height: 10),
+                                  itemBuilder: (context, index) {
+                                    final country = filteredCountries[index];
+                                    final isSelected =
+                                        selectedCountry?.isoCode ==
+                                        country.isoCode;
+
+                                    return GestureDetector(
+                                      onTap:
+                                          () => Navigator.of(
+                                            sheetContext,
+                                          ).pop(country),
+                                      behavior: HitTestBehavior.opaque,
+                                      child: AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 180,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                          vertical: 14,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              isSelected
+                                                  ? AppColors.accentSoft
+                                                  : Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            18,
+                                          ),
+                                          border: Border.all(
+                                            color:
+                                                isSelected
+                                                    ? AppColors.accent
+                                                    : AppColors.border,
+                                            width: isSelected ? 1.4 : 1,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 42,
+                                              height: 42,
+                                              alignment: Alignment.center,
+                                              decoration: BoxDecoration(
+                                                color:
+                                                    isSelected
+                                                        ? Colors.white
+                                                        : AppColors
+                                                            .surfaceMuted,
+                                                borderRadius:
+                                                    BorderRadius.circular(14),
+                                              ),
+                                              child: Text(
+                                                country.flagEmoji,
+                                                style: const TextStyle(
+                                                  fontSize: 20,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  CustomText(
+                                                    country.name,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w700,
+                                                    textAlign: TextAlign.left,
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  CustomText(
+                                                    country.isoCode,
+                                                    fontSize: 11,
+                                                    color: AppColors.subtext,
+                                                    textAlign: TextAlign.left,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Icon(
+                                              isSelected
+                                                  ? Icons.check_circle_rounded
+                                                  : Icons
+                                                      .keyboard_arrow_right_rounded,
+                                              color:
+                                                  isSelected
+                                                      ? AppColors.accent
+                                                      : AppColors.subtext,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    if (!mounted || selected == null) return;
+
+    setState(() {
+      selectedCountry = selected;
+      if (showCountryError) {
+        showCountryError = false;
+      }
+    });
+    _scheduleDeliveryCostRefresh();
+  }
+
   void _clearDeliveryQuote() {
     _deliveryQuoteDebounce?.cancel();
     if (!mounted) return;
@@ -1006,7 +1265,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                       children: [
                         Expanded(
                           child: _buildSelectionTile(
-                            title: "Full Payment",
+                            title: "Paid in Full",
                             subtitle: "Pay the complete amount now",
                             icon: Icons.account_balance_wallet_outlined,
                             selected: paymentType == "full",
@@ -1145,31 +1404,11 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                         ),
                         const SizedBox(height: 16),
                         if (deliveryMode == "address") ...[
-                          _buildDropdownField<CountryOption>(
-                            value: selectedCountry,
+                          _buildCountrySelectorField(
                             hintText: "Select country",
                             icon: Icons.public_rounded,
                             errorText:
                                 showCountryError ? "Country is required" : null,
-                            items:
-                                allCountries.map((country) {
-                                  return DropdownMenuItem<CountryOption>(
-                                    value: country,
-                                    child: Text(
-                                      '${country.flagEmoji} ${country.name}',
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  );
-                                }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedCountry = value;
-                                if (showCountryError && value != null) {
-                                  showCountryError = false;
-                                }
-                              });
-                              _scheduleDeliveryCostRefresh();
-                            },
                           ),
                           const SizedBox(height: 12),
                           _buildTextField(
@@ -1666,6 +1905,45 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
       ),
       items: items,
       onChanged: onChanged,
+    );
+  }
+
+  Widget _buildCountrySelectorField({
+    required String hintText,
+    required IconData icon,
+    String? errorText,
+  }) {
+    final hasValue = selectedCountry != null;
+
+    return GestureDetector(
+      onTap: _showCountrySelector,
+      behavior: HitTestBehavior.opaque,
+      child: InputDecorator(
+        isEmpty: !hasValue,
+        decoration: InputDecoration(
+          prefixIcon: Icon(icon, size: 20, color: AppColors.subtext),
+          suffixIcon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 22,
+            color: AppColors.subtext,
+          ),
+          errorText: errorText,
+        ),
+        child: Text(
+          hasValue
+              ? '${selectedCountry!.flagEmoji} ${selectedCountry!.name}'
+              : hintText,
+          style:
+              hasValue
+                  ? Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.ink,
+                    fontWeight: FontWeight.w600,
+                  )
+                  : Theme.of(context).inputDecorationTheme.hintStyle?.copyWith(
+                    color: AppColors.subtext,
+                  ),
+        ),
+      ),
     );
   }
 

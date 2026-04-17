@@ -4,7 +4,6 @@ import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currencyHelper.dart';
 import 'package:hog/theme/app_theme.dart';
 
-
 class TailorAssignedCard extends StatelessWidget {
   final TailorAssignedMaterial item;
   final VoidCallback onTap;
@@ -21,10 +20,29 @@ class TailorAssignedCard extends StatelessWidget {
     final imageUrl =
         material.sampleImages.isNotEmpty ? material.sampleImages.first : "";
     final payableBalance = item.resolvedDesignerPayableTotal;
-    final displayAmounts = _getDisplayAmounts(item);
-    final outstandingUserPayment = (displayAmounts['amountToPay'] ?? 0.0) > 0;
-    final isFullyPaid = !outstandingUserPayment;
-    final mainPayment = displayAmounts['amountPaid'] ?? 0.0;
+    final outstandingUserPayment = item.resolvedOutstandingForUi > 0;
+    final hasClientPayment = item.resolvedAmountPaidForUi > 0;
+    final isFullyPaid =
+        item.isFullPaymentStatus ||
+        (hasClientPayment && !outstandingUserPayment);
+    final paymentStatusLabel =
+        isFullyPaid
+            ? "Paid in Full"
+            : hasClientPayment
+            ? "Part Payment"
+            : "Unpaid";
+    final paymentStatusTone =
+        isFullyPaid
+            ? AppColors.success
+            : hasClientPayment
+            ? AppColors.warning
+            : AppColors.subtext;
+    final paymentStatusIcon =
+        isFullyPaid
+            ? Icons.check_circle_rounded
+            : hasClientPayment
+            ? Icons.payments_rounded
+            : Icons.schedule_rounded;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -169,22 +187,22 @@ class TailorAssignedCard extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: _PaymentMiniTile(
-                                  label: "Main Payment Snapshot",
-                                  value: CurrencyHelper.formatAmount(
-                                    mainPayment,
-                                  ),
-                                  tone: AppColors.success,
-                                  icon: Icons.check_circle_rounded,
+                                  label: "Payment Status",
+                                  value: paymentStatusLabel,
+                                  tone: paymentStatusTone,
+                                  icon: paymentStatusIcon,
                                   subtitle:
                                       isFullyPaid
-                                          ? "User payment completed"
-                                          : "Amount user paid",
+                                          ? "Client payment completed"
+                                          : hasClientPayment
+                                          ? "Client payment recorded"
+                                          : "No client payment yet",
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: _PaymentMiniTile(
-                                  label: "Tailor Payable",
+                                  label: "Production Payout",
                                   value: CurrencyHelper.formatAmount(
                                     payableBalance,
                                   ),
@@ -198,8 +216,10 @@ class TailorAssignedCard extends StatelessWidget {
                                           : Icons.schedule_rounded,
                                   subtitle:
                                       outstandingUserPayment
-                                          ? "Awaiting settlement"
-                                          : "Ready for payout",
+                                          ? hasClientPayment
+                                              ? "Awaiting full settlement"
+                                              : "Awaiting client payment"
+                                          : "Ready for Disbursement",
                                 ),
                               ),
                             ],
@@ -227,7 +247,7 @@ class TailorAssignedCard extends StatelessWidget {
                             const SizedBox(width: 10),
                             const Expanded(
                               child: CustomText(
-                                "User still has an outstanding balance before full settlement.",
+                                "Client payment is still pending, so payout is not ready yet.",
                                 fontSize: 12,
                                 color: AppColors.secondaryDeep,
                                 textAlign: TextAlign.left,
@@ -424,55 +444,6 @@ class _StatusPill extends StatelessWidget {
       ),
     );
   }
-}
-
-Map<String, double> _getDisplayAmounts(TailorAssignedMaterial item) {
-  final countryCode = item.country?.trim().toUpperCase();
-  final isInternational =
-      item.isInternationalVendor ||
-      (countryCode != null && countryCode != 'NG' && countryCode != 'NIGERIA');
-
-  if (isInternational) {
-    final material = item.materialTotalCostUSD ?? 0.0;
-    final workmanship = item.workmanshipTotalCostUSD ?? 0.0;
-    final total =
-        (item.totalCostUSD ?? 0.0) > 0
-            ? item.totalCostUSD!
-            : (material + workmanship > 0
-                ? material + workmanship
-                : (item.amountPaidUSD ?? 0.0) + (item.amountToPayUSD ?? 0.0));
-    final paid =
-        (item.amountPaidUSD ?? 0.0) > 0
-            ? item.amountPaidUSD!
-            : (total > 0 && (item.amountToPayUSD ?? 0.0) > 0
-                ? (total - (item.amountToPayUSD ?? 0.0))
-                : 0.0);
-    final toPay =
-        (item.amountToPayUSD ?? 0.0) > 0
-            ? item.amountToPayUSD!
-            : (total > 0 && paid > 0 ? (total - paid) : 0.0);
-    return {'totalCost': total, 'amountPaid': paid, 'amountToPay': toPay};
-  }
-
-  final material = item.materialTotalCost;
-  final workmanship = item.workmanshipTotalCost;
-  final total =
-      item.totalCost > 0
-          ? item.totalCost
-          : (material + workmanship > 0
-              ? material + workmanship
-              : (item.amountPaid ?? 0.0) + (item.amountToPay ?? 0.0));
-  final paid =
-      (item.amountPaid ?? 0.0) > 0
-          ? item.amountPaid!
-          : (total > 0 && (item.amountToPay ?? 0.0) > 0
-              ? (total - (item.amountToPay ?? 0.0))
-              : 0.0);
-  final toPay =
-      (item.amountToPay ?? 0.0) > 0
-          ? item.amountToPay!
-          : (total > 0 && paid > 0 ? (total - paid) : 0.0);
-  return {'totalCost': total, 'amountPaid': paid, 'amountToPay': toPay};
 }
 
 Color _statusTone(String status) {

@@ -49,9 +49,19 @@ void showTailorMaterialDetails(
                         : "";
                 final agreedAmount = currentItem.resolvedVendorBaseTotal;
                 final payableBalance = currentItem.resolvedDesignerPayableTotal;
-                // Temporary modal-only override: keep outstanding at zero.
-                const outstandingDisplay = 0.0;
-                final paidDisplay = payableBalance;
+                final outstandingUserPayment =
+                    currentItem.resolvedOutstandingForUi > 0;
+                final hasClientPayment =
+                    currentItem.resolvedAmountPaidForUi > 0;
+                final isFullyPaid =
+                    currentItem.isFullPaymentStatus ||
+                    (hasClientPayment && !outstandingUserPayment);
+                final paymentStatusLabel =
+                    isFullyPaid
+                        ? "Paid in Full"
+                        : hasClientPayment
+                        ? "Part Payment"
+                        : "Unpaid";
 
                 Future<void> deliverAttire() async {
                   try {
@@ -137,7 +147,7 @@ void showTailorMaterialDetails(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const CustomText(
-                                    "Assigned Material",
+                                    "Project Material",
                                     fontSize: 20,
                                     fontWeight: FontWeight.w800,
                                     textAlign: TextAlign.left,
@@ -207,7 +217,7 @@ void showTailorMaterialDetails(
                             const SizedBox(width: 12),
                             Expanded(
                               child: _SummaryTile(
-                                label: "Tailor Payable",
+                                label: "Production Payout",
                                 value: CurrencyHelper.formatAmount(
                                   payableBalance,
                                 ),
@@ -222,21 +232,48 @@ void showTailorMaterialDetails(
                           children: [
                             Expanded(
                               child: _SummaryTile(
-                                label: "Paid",
-                                value: CurrencyHelper.formatAmount(paidDisplay),
-                                icon: Icons.check_circle_outline_rounded,
-                                tone: AppColors.success,
+                                label: "Payment Status",
+                                value: paymentStatusLabel,
+                                icon:
+                                    isFullyPaid
+                                        ? Icons.check_circle_outline_rounded
+                                        : hasClientPayment
+                                        ? Icons.payments_outlined
+                                        : Icons.schedule_rounded,
+                                tone:
+                                    isFullyPaid
+                                        ? AppColors.success
+                                        : hasClientPayment
+                                        ? AppColors.warning
+                                        : AppColors.subtext,
+                                subtitle:
+                                    isFullyPaid
+                                        ? "Client payment completed"
+                                        : hasClientPayment
+                                        ? "Client payment recorded"
+                                        : "No client payment yet",
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: _SummaryTile(
-                                label: "Outstanding",
-                                value: CurrencyHelper.formatAmount(
-                                  outstandingDisplay,
-                                ),
-                                icon: Icons.schedule_rounded,
-                                tone: AppColors.subtext,
+                                label: "Payout Status",
+                                value:
+                                    outstandingUserPayment
+                                        ? "Pending"
+                                        : "Ready",
+                                icon:
+                                    outstandingUserPayment
+                                        ? Icons.schedule_rounded
+                                        : Icons.check_circle_outline_rounded,
+                                tone:
+                                    outstandingUserPayment
+                                        ? AppColors.warning
+                                        : AppColors.success,
+                                subtitle:
+                                    outstandingUserPayment
+                                        ? "Waiting for client settlement"
+                                        : "Eligible for disbursement",
                               ),
                             ),
                           ],
@@ -494,12 +531,14 @@ class _SummaryTile extends StatelessWidget {
   final String value;
   final IconData icon;
   final Color tone;
+  final String? subtitle;
 
   const _SummaryTile({
     required this.label,
     required this.value,
     required this.icon,
     this.tone = AppColors.accent,
+    this.subtitle,
   });
 
   @override
@@ -545,8 +584,18 @@ class _SummaryTile extends StatelessWidget {
                   value,
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
+                  color: tone,
                   textAlign: TextAlign.left,
                 ),
+                if ((subtitle ?? '').isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  CustomText(
+                    subtitle!,
+                    fontSize: 10,
+                    color: AppColors.subtext,
+                    textAlign: TextAlign.left,
+                  ),
+                ],
               ],
             ),
           ),

@@ -161,7 +161,7 @@ class _BankTransferPageState extends State<BankTransferPage>
                   const SizedBox(height: 8),
 
                   Text(
-                    'has been sent to ${widget.bank.accountName}',
+                    'Has been sent to ${widget.bank.accountName}',
                     style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     textAlign: TextAlign.center,
                   ),

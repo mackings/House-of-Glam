@@ -3,6 +3,7 @@ import 'package:hog/App/Home/Model/TransModel.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:hog/theme/app_theme.dart';
+import 'package:hog/utils/ui_label_formatter.dart';
 import 'package:intl/intl.dart';
 
 class TransactionCard extends StatelessWidget {
@@ -40,7 +41,7 @@ class TransactionCard extends StatelessWidget {
     if (txn.isBankTransfer) {
       return "${txn.bankName ?? 'Bank'} • ${txn.accountNumber ?? ''}";
     } else if (txn.orderStatus != null) {
-      return txn.orderStatus!;
+      return formatUiLabel(txn.orderStatus);
     } else {
       return "Payment";
     }
@@ -53,9 +54,7 @@ class TransactionCard extends StatelessWidget {
         statusField.toLowerCase() == "success" ||
         statusField.toLowerCase() == "successfull";
     final accent = isSuccess ? AppColors.success : AppColors.danger;
-    final badge = isSuccess
-        ? const Color(0xFFEAF8F1)
-        : const Color(0xFFFFEEEE);
+    final badge = isSuccess ? const Color(0xFFEAF8F1) : const Color(0xFFFFEEEE);
 
     return InkWell(
       onTap: onTap,
@@ -151,7 +150,7 @@ class TransactionCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(999),
               ),
               child: CustomText(
-                statusField,
+                formatUiLabel(statusField),
                 color: accent,
                 fontWeight: FontWeight.w700,
                 fontSize: 12,

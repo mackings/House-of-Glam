@@ -3,6 +3,7 @@ import 'package:hog/App/Profile/Model/SellerListing.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:hog/theme/app_theme.dart';
+import 'package:hog/utils/ui_label_formatter.dart';
 import 'package:intl/intl.dart';
 
 class ProductCard extends StatelessWidget {
@@ -123,7 +124,7 @@ class ProductCard extends StatelessWidget {
                           ),
                         _MetaChip(
                           icon: Icons.info_outline_rounded,
-                          label: listing.condition,
+                          label: formatUiLabel(listing.condition),
                         ),
                       ],
                     ),
