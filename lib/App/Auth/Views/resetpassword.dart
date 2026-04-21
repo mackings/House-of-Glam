@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Auth/Api/authclass.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
+import 'package:hog/App/Auth/widgets/password_requirements.dart';
 import 'package:hog/components/authShell.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/dialogs.dart';
@@ -21,30 +22,64 @@ class Resetpassword extends ConsumerStatefulWidget {
 class _ResetpasswordState extends ConsumerState<Resetpassword> {
   String? token;
   late TextEditingController passwordController;
+  late TextEditingController confirmPasswordController;
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
     passwordController = TextEditingController();
+    confirmPasswordController = TextEditingController();
   }
 
   @override
   void dispose() {
     passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  String? _passwordValidationError(String password) {
+    if (password.isEmpty) {
+      return "Please enter your new password";
+    }
+    if (password.length < 8) {
+      return "Password must be at least 8 characters long";
+    }
+    if (!RegExp(r'[A-Z]').hasMatch(password)) {
+      return "Password must contain at least one uppercase letter";
+    }
+    if (!RegExp(r'[0-9]').hasMatch(password)) {
+      return "Password must contain at least one number";
+    }
+    if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(password)) {
+      return "Password must contain at least one special character";
+    }
+    return null;
   }
 
   Future<void> _handleResetPassword() async {
     final password = passwordController.text.trim();
+    final confirmPassword = confirmPasswordController.text;
 
     if (token == null || token!.isEmpty) {
       await showErrorDialog(context, "Please enter the 4-digit token");
       return;
     }
 
-    if (password.isEmpty) {
-      await showErrorDialog(context, "Please enter your new password");
+    final passwordError = _passwordValidationError(password);
+    if (passwordError != null) {
+      await showErrorDialog(context, passwordError);
+      return;
+    }
+
+    if (confirmPassword.isEmpty) {
+      await showErrorDialog(context, "Please confirm your new password");
+      return;
+    }
+
+    if (confirmPassword != passwordController.text) {
+      await showErrorDialog(context, "Passwords do not match");
       return;
     }
 
@@ -110,6 +145,21 @@ class _ResetpasswordState extends ConsumerState<Resetpassword> {
               isPassword: true,
               prefixIcon: Icons.lock_outline_rounded,
               controller: passwordController,
+              onChanged: (_) => setState(() {}),
+            ),
+            PasswordRequirements(
+              password: passwordController.text,
+              confirmPassword: confirmPasswordController.text,
+            ),
+            CustomTextField(
+              title: "Confirm new password",
+              hintText: "Re-enter new password",
+              fieldKey: "reset_confirm_password",
+              isPassword: true,
+              validatePasswordRules: false,
+              prefixIcon: Icons.lock_outline_rounded,
+              controller: confirmPasswordController,
+              onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: 20),
             CustomButton(

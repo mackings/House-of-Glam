@@ -19,6 +19,7 @@ class CustomTextField extends ConsumerWidget {
   final String fieldKey;
   final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onChanged;
+  final bool validatePasswordRules;
 
   final List<String>? dropdownItems;
   final String? selectedValue;
@@ -45,6 +46,7 @@ class CustomTextField extends ConsumerWidget {
     this.keyboardType = TextInputType.text,
     this.inputFormatters,
     this.onChanged,
+    this.validatePasswordRules = true,
     this.dropdownItems,
     this.selectedValue,
     this.isCompact = false,
@@ -182,7 +184,7 @@ class CustomTextField extends ConsumerWidget {
                       obscureText: isPassword ? obscureText : false,
                       onChanged: onChanged,
                       validator: (value) {
-                        if (isPassword) {
+                        if (isPassword && validatePasswordRules) {
                           if (value == null || value.isEmpty) {
                             return 'Password is required';
                           }

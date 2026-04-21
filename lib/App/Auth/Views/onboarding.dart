@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
@@ -16,6 +18,7 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
+  Timer? _autoScrollTimer;
   int _currentPage = 0;
 
   final List<_OnboardingItem> _items = const [
@@ -67,12 +70,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _startAutoScroll();
+  }
+
+  @override
   void dispose() {
+    _autoScrollTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
 
+  void _startAutoScroll() {
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!mounted || !_pageController.hasClients) {
+        return;
+      }
+
+      final nextPage = (_currentPage + 1) % _items.length;
+      _pageController.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 420),
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
+
   Future<void> _completeOnboarding() async {
+    _autoScrollTimer?.cancel();
     await SecurePrefs.saveOnboardingSeen(true);
     if (!mounted) {
       return;

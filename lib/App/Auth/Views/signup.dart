@@ -5,6 +5,7 @@ import 'package:hog/App/Auth/Api/authclass.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
 import 'package:hog/App/Auth/Views/verify.dart';
+import 'package:hog/App/Auth/widgets/password_requirements.dart';
 import 'package:hog/TailorApp/Home/Views/Tailorbusiness.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/authShell.dart';
@@ -28,6 +29,7 @@ class _SignupState extends ConsumerState<Signup> {
   late TextEditingController emailController;
   late TextEditingController phoneController;
   late TextEditingController passwordController;
+  late TextEditingController confirmPasswordController;
   late TextEditingController addressController;
   late TextEditingController countryController;
 
@@ -41,6 +43,7 @@ class _SignupState extends ConsumerState<Signup> {
     emailController = TextEditingController();
     phoneController = TextEditingController();
     passwordController = TextEditingController();
+    confirmPasswordController = TextEditingController();
     addressController = TextEditingController();
     countryController = TextEditingController();
   }
@@ -51,6 +54,7 @@ class _SignupState extends ConsumerState<Signup> {
     emailController.dispose();
     phoneController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     addressController.dispose();
     countryController.dispose();
     super.dispose();
@@ -304,6 +308,30 @@ class _SignupState extends ConsumerState<Signup> {
                 isPassword: true,
                 fieldKey: "password",
                 controller: passwordController,
+                onChanged: (_) => setState(() {}),
+              ),
+              PasswordRequirements(
+                password: passwordController.text,
+                confirmPassword: confirmPasswordController.text,
+              ),
+              CustomTextField(
+                title: "Confirm password",
+                hintText: "Re-enter your password",
+                prefixIcon: Icons.lock_outline_rounded,
+                isPassword: true,
+                validatePasswordRules: false,
+                fieldKey: "confirm_password",
+                controller: confirmPasswordController,
+                onChanged: (_) => setState(() {}),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please confirm your password';
+                  }
+                  if (value != passwordController.text) {
+                    return 'Passwords do not match';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 18),
               CustomButton(
