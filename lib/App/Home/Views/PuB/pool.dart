@@ -122,7 +122,7 @@ class _PoolState extends State<Pool> {
                   return const Padding(
                     padding: EdgeInsets.fromLTRB(4, 0, 4, 12),
                     child: CustomText(
-                      "Explore finished work, inspiration, and current check-room drops from active tailors.",
+                      "Explore finished work, inspiration, and current check-room drops from active designers.",
                       color: AppColors.subtext,
                       textAlign: TextAlign.left,
                     ),

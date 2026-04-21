@@ -98,6 +98,7 @@ class _UserProfileViewState extends State<UserProfileView> {
   String _formatCapitalized(String? value, {String fallback = "Free"}) {
     final normalized = value?.trim() ?? '';
     if (normalized.isEmpty) return fallback;
+    if (normalized.toLowerCase() == 'tailor') return 'Designer';
     return "${normalized[0].toUpperCase()}${normalized.substring(1)}";
   }
 
@@ -320,7 +321,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                         title: "Account Type",
                         value: _formatCapitalized(
                           profile.role,
-                          fallback: "Tailor",
+                          fallback: "Designer",
                         ),
                       ),
                       const SizedBox(height: 10),

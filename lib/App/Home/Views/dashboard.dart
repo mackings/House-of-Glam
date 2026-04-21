@@ -13,7 +13,6 @@ import 'package:hog/TailorApp/Home/Views/Tailorbusiness.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/Tailors/tailorcard.dart';
 import 'package:hog/components/bankCard.dart';
-import 'package:hog/components/button.dart';
 import 'package:hog/components/header.dart';
 import 'package:hog/components/slideritem.dart';
 import 'package:hog/components/sliders.dart';
@@ -147,7 +146,7 @@ class _HomeState extends ConsumerState<Home> {
 
     if (vendorDetails == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to load tailor details")),
+        const SnackBar(content: Text("Failed to load designer details")),
       );
       return;
     }
@@ -173,7 +172,7 @@ class _HomeState extends ConsumerState<Home> {
           onRefresh: _refreshData,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
+            padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -184,11 +183,11 @@ class _HomeState extends ConsumerState<Home> {
                     Nav.push(context, TrackingDelivery());
                   },
                 ),
-                const SizedBox(height: 22),
+                const SizedBox(height: 14),
                 Container(
-                  padding: const EdgeInsets.all(18),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: BorderRadius.circular(22),
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -200,54 +199,113 @@ class _HomeState extends ConsumerState<Home> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const CustomText(
-                        "Discover skilled tailors and marketplace drops in one place.",
+                        "Discover skilled designers and marketplace drops in one place.",
                         textAlign: TextAlign.left,
-                        fontSize: 20,
+                        fontSize: 17,
                         fontWeight: FontWeight.w700,
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 6),
                       const CustomText(
                         "Browse categories, review top-rated creators, and manage wallet activity with a cleaner experience.",
                         textAlign: TextAlign.left,
                         color: AppColors.subtext,
-                        fontSize: 13,
+                        fontSize: 12,
                       ),
-                      const SizedBox(height: 18),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: CustomButton(
-                              title: "Become a tailor",
+                      const SizedBox(height: 12),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final stackActions = constraints.maxWidth < 320;
+                          final primaryAction = SizedBox(
+                            height: 46,
+                            child: ElevatedButton(
                               onPressed: () {
                                 Nav.push(context, TailorRegistrationPage());
                               },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () {
-                                Nav.push(context, TrackingDelivery());
-                              },
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.accent,
-                                minimumSize: const Size.fromHeight(54),
-                                side: const BorderSide(color: AppColors.border),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.accent,
+                                foregroundColor: Colors.white,
+                                elevation: 1,
+                                shadowColor: AppColors.shadow,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 10,
+                                ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(18),
+                                  borderRadius: BorderRadius.circular(15),
                                 ),
                               ),
-                              child: const Text("Track activity"),
+                              child: const Text(
+                                "Become a Designer",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          );
+                          final secondaryAction = OutlinedButton(
+                            onPressed: () {
+                              Nav.push(context, TrackingDelivery());
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.accent,
+                              minimumSize: const Size.fromHeight(46),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 10,
+                              ),
+                              side: const BorderSide(color: AppColors.border),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                            ),
+                            child: const Text(
+                              "Track activity",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          );
+
+                          if (stackActions) {
+                            return Column(
+                              children: [
+                                primaryAction,
+                                const SizedBox(height: 10),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 46,
+                                  child: secondaryAction,
+                                ),
+                              ],
+                            );
+                          }
+
+                          return Row(
+                            children: [
+                              Expanded(child: primaryAction),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: SizedBox(
+                                  height: 46,
+                                  child: secondaryAction,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 22),
+                const SizedBox(height: 14),
                 CarouselSlider(
-                  height: 196,
+                  height: 150,
                   items: const [
                     BankDetailsCard(),
                     CarouselItemWidget(
@@ -268,7 +326,7 @@ class _HomeState extends ConsumerState<Home> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 26),
+                const SizedBox(height: 18),
                 _SectionHeader(
                   title: "Top Categories",
                   actionLabel: "Explore",
@@ -276,9 +334,9 @@ class _HomeState extends ConsumerState<Home> {
                     Nav.push(context, TailorRegistrationPage());
                   },
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
                 SizedBox(
-                  height: 126,
+                  height: 112,
                   child:
                       _isLoadingCategories
                           ? const Center(child: CircularProgressIndicator())
@@ -291,18 +349,18 @@ class _HomeState extends ConsumerState<Home> {
                             itemBuilder: (context, index) {
                               final cat = _categories[index];
                               return Container(
-                                width: 100,
-                                padding: const EdgeInsets.all(10),
+                                width: 92,
+                                padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(22),
+                                  borderRadius: BorderRadius.circular(18),
                                   border: Border.all(color: AppColors.border),
                                 ),
                                 child: Column(
                                   children: [
                                     Expanded(
                                       child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(16),
+                                        borderRadius: BorderRadius.circular(14),
                                         child: Image.network(
                                           cat.image.isNotEmpty
                                               ? cat.image
@@ -321,11 +379,13 @@ class _HomeState extends ConsumerState<Home> {
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 6),
                                     CustomText(
-                                      cat.name.isNotEmpty ? cat.name : "Unnamed",
+                                      cat.name.isNotEmpty
+                                          ? cat.name
+                                          : "Unnamed",
                                       textAlign: TextAlign.center,
-                                      fontSize: 11,
+                                      fontSize: 10.5,
                                       fontWeight: FontWeight.w700,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
@@ -336,9 +396,9 @@ class _HomeState extends ConsumerState<Home> {
                             },
                           ),
                 ),
-                const SizedBox(height: 26),
+                const SizedBox(height: 18),
                 _SectionHeader(
-                  title: "Top Rated Tailors",
+                  title: "Top Rated Designers",
                   actionLabel: "See all",
                   onTap: () {
                     Navigator.push(

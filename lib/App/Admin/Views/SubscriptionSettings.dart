@@ -281,7 +281,7 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
                           ),
                           const SizedBox(height: 18),
                           const CustomText(
-                            "Tailor subscription control",
+                            "Designer subscription control",
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
                             color: AppColors.ink,

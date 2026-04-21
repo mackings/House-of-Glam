@@ -232,7 +232,7 @@ class _PatronizeFormState extends State<PatronizeForm> {
                         const SizedBox(width: 12),
                         const Expanded(
                           child: CustomText(
-                            "Use accurate body measurements so the tailor can process the request correctly.",
+                            "Use accurate body measurements so the designer can process the request correctly.",
                             fontSize: 13,
                             color: AppColors.subtext,
                             textAlign: TextAlign.left,

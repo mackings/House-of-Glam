@@ -86,7 +86,10 @@ class _QuotationState extends State<Quotation> {
         builder:
             (_) => Scaffold(
               backgroundColor: AppColors.canvas,
-              appBar: const CustomAppBar(title: "Payments", enableAction: false),
+              appBar: const CustomAppBar(
+                title: "Payments",
+                enableAction: false,
+              ),
               body: WebViewWidget(controller: controller),
             ),
       ),
@@ -124,11 +127,11 @@ class _QuotationState extends State<Quotation> {
                 ? const Center(child: CircularProgressIndicator())
                 : reviews.isEmpty
                 ? ListView(
-                    children: const [
-                      SizedBox(height: 220),
-                      Center(child: CustomText("No quotations found")),
-                    ],
-                  )
+                  children: const [
+                    SizedBox(height: 220),
+                    Center(child: CustomText("No quotations found")),
+                  ],
+                )
                 : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(14, 8, 14, 24),
                   itemCount: reviews.length + 1,
@@ -146,7 +149,7 @@ class _QuotationState extends State<Quotation> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CustomText(
-                              "Review tailor quotations, accept the right fit, or negotiate with offers before payment.",
+                              "Review designer quotations, accept the right fit, or negotiate with offers before payment.",
                               textAlign: TextAlign.left,
                               fontSize: 18,
                               fontWeight: FontWeight.w700,

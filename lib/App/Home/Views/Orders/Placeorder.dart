@@ -367,7 +367,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
                     ),
                     SizedBox(height: 6),
                     CustomText(
-                      "Provide attire details, measurements, and sample images so tailors can respond accurately.",
+                      "Provide attire details, measurements, and sample images so designers can respond accurately.",
                       textAlign: TextAlign.left,
                       color: AppColors.subtext,
                     ),

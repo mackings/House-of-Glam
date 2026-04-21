@@ -178,7 +178,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                     Icon(Icons.business_center, color: Colors.white, size: 32),
                     SizedBox(height: 12),
                     Text(
-                      "Register Your Tailoring Business",
+                      "Register Your Designer Business",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 22,
@@ -187,7 +187,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      "Join our network of professional tailors and grow your business",
+                      "Join our network of professional designers and grow your business",
                       style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ],
@@ -335,8 +335,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                   const SizedBox(height: 16),
                   CustomTextField(
                     title: "Description",
-                    hintText:
-                        "Describe your tailoring services and specialties",
+                    hintText: "Describe your design services and specialties",
                     fieldKey: "description",
                     controller: descriptionController,
                     keyboardType: TextInputType.multiline,
@@ -428,7 +427,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                           subtitle: const Padding(
                             padding: EdgeInsets.only(left: 28, top: 4),
                             child: Text(
-                              "Individual tailor without registration",
+                              "Individual designer without registration",
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey,

@@ -446,6 +446,7 @@ class _StatusPill extends StatelessWidget {
   }
 }
 
+
 Color _statusTone(String status) {
   switch (status.toLowerCase()) {
     case "full payment":

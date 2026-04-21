@@ -74,7 +74,7 @@ class _AlltailorsState extends ConsumerState<Alltailors> {
 
     if (vendorDetails == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to load tailor details")),
+        const SnackBar(content: Text("Failed to load designer details")),
       );
       return;
     }
@@ -95,21 +95,18 @@ class _AlltailorsState extends ConsumerState<Alltailors> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: const CustomAppBar(
-        title: "All Tailors",
-        enableAction: false,
-      ),
+      appBar: const CustomAppBar(title: "All Designers", enableAction: false),
       body: SafeArea(
         child:
             widget.tailors.isEmpty
-                ? const Center(child: Text("No tailors available"))
+                ? const Center(child: Text("No designers available"))
                 : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Padding(
                       padding: EdgeInsets.fromLTRB(20, 6, 20, 0),
                       child: CustomText(
-                        "Browse the full directory of available tailors.",
+                        "Browse the full directory of available designers.",
                         textAlign: TextAlign.left,
                         color: AppColors.subtext,
                       ),

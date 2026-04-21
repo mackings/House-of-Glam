@@ -131,7 +131,7 @@ class _SubscriptionState extends State<Subscription> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CustomText(
-                              "Choose the plan that fits your tailoring workflow",
+                              "Choose the plan that fits your design workflow",
                               textAlign: TextAlign.left,
                               fontSize: 18,
                               fontWeight: FontWeight.w800,

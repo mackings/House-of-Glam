@@ -77,7 +77,7 @@ class _OrderHistoryState extends State<OrderHistory> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CustomText(
-                              "Track every submitted outfit request and review tailor quotations from one place.",
+                              "Track every submitted outfit request and review designer quotations from one place.",
                               textAlign: TextAlign.left,
                               color: AppColors.subtext,
                             ),

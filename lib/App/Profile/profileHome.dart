@@ -191,7 +191,7 @@ class _UserProfileState extends State<UserProfile> {
                 ProfileMenuItem(
                   icon: Icons.workspace_premium_outlined,
                   text: "My Subscription",
-                  subtitle: "Check or upgrade your tailor plan",
+                  subtitle: "Check or upgrade your designer plan",
                   onTap: () {
                     Nav.push(context, const Subscription());
                   },
