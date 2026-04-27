@@ -149,14 +149,14 @@ class _QuotationState extends State<Quotation> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CustomText(
-                              "Review designer quotations, accept the right fit, or negotiate with offers before payment.",
+                              "Review & Compare Quotes",
                               textAlign: TextAlign.left,
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
                             ),
                             SizedBox(height: 6),
                             CustomText(
-                              "Use the offer flow when you want to negotiate, or hire directly when the quote already works for you.",
+                              "Choose the best offer or negotiate before making payment.",
                               textAlign: TextAlign.left,
                               color: AppColors.subtext,
                             ),

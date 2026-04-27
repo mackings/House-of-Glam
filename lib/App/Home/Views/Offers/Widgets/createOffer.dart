@@ -192,7 +192,7 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                                 ),
                                 SizedBox(height: 2),
                                 CustomText(
-                                  "Suggest your preferred amount without changing the negotiation logic.",
+                                  "Enter the amount you'd like to pay for this project.",
                                   fontSize: 12,
                                   color: AppColors.subtext,
                                   textAlign: TextAlign.left,
@@ -280,7 +280,7 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                                   SizedBox(width: 10),
                                   Expanded(
                                     child: CustomText(
-                                      "You can only send one initial offer for this quotation.",
+                                      "You can send only one initial offer for this quote.",
                                       fontSize: 12,
                                       color: AppColors.warning,
                                       textAlign: TextAlign.left,
@@ -319,14 +319,14 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                             ),
                             const SizedBox(height: 6),
                             CustomText(
-                              "Enter the amount you want the vendor to consider.",
+                              "Enter your offer amount.",
                               fontSize: 12,
                               color: AppColors.subtext,
                               textAlign: TextAlign.left,
                             ),
                             const SizedBox(height: 14),
                             const CustomText(
-                              "Total Amount (NGN)",
+                              "Your Offer (₦)",
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               textAlign: TextAlign.left,
@@ -372,7 +372,7 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                               child: Column(
                                 children: [
                                   _SummaryRow(
-                                    label: "Proposed total",
+                                    label: "Your total",
                                     value: CurrencyHelper.formatAmount(
                                       total,
                                       currencyCode: 'NGN',
@@ -381,7 +381,7 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                                   ),
                                   const SizedBox(height: 8),
                                   const CustomText(
-                                    "The system will still split the amount into material and workmanship for processing.",
+                                    "We'll automatically split this into materials and labour.",
                                     fontSize: 11,
                                     color: AppColors.subtext,
                                     textAlign: TextAlign.left,
@@ -406,7 +406,7 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                         keyboardType: TextInputType.multiline,
                         textCapitalization: TextCapitalization.sentences,
                         decoration: const InputDecoration(
-                          hintText: "Explain why this amount works for you...",
+                          hintText: "Add a message (optional)",
                           prefixIcon: Icon(
                             Icons.chat_bubble_outline_rounded,
                             size: 20,
@@ -463,7 +463,7 @@ class _CreateOfferSheetState extends State<CreateOfferSheet> {
                                           color: Colors.white,
                                         ),
                                 label: CustomText(
-                                  _isSubmitting ? "Sending..." : "Send Offer",
+                                  _isSubmitting ? "Sending..." : "Submit Offer",
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
                                   color: Colors.white,

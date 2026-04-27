@@ -110,7 +110,6 @@ class QuotationCard extends StatelessWidget {
           _buildTotalCost(
             displayTotal,
             currencyCode: currencyCode,
-            includesVat: hasAcceptedOffer,
           ),
           if (showOriginalUSD) ...[
             const SizedBox(height: 8),
@@ -165,7 +164,7 @@ class QuotationCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "Partial payment made",
+                          "Partial payment received",
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -174,7 +173,7 @@ class QuotationCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          "Balance: ${CurrencyHelper.formatAmount(displayAmountToPay, currencyCode: currencyCode)}",
+                          "Remaining balance: ${CurrencyHelper.formatAmount(displayAmountToPay, currencyCode: currencyCode)}",
                           style: const TextStyle(
                             fontSize: 11,
                             color: AppColors.warning,
@@ -190,7 +189,7 @@ class QuotationCard extends StatelessWidget {
           const SizedBox(height: 18),
           if (isFullPayment)
             _FilledAction(
-              title: "Paid",
+              title: "Payment completed",
               icon: Icons.check_circle_rounded,
               onPressed: null,
               background: Colors.grey.shade400,
@@ -198,7 +197,7 @@ class QuotationCard extends StatelessWidget {
           else if (hasPartPayment)
             _FilledAction(
               title:
-                  "Pay Balance (${CurrencyHelper.formatAmount(displayAmountToPay, currencyCode: currencyCode)})",
+                  "Pay ${CurrencyHelper.formatAmount(displayAmountToPay, currencyCode: currencyCode)}",
               icon: Icons.payment_rounded,
               onPressed: () => onCompletePayment(displayAmountToPay.round()),
             )
@@ -207,13 +206,13 @@ class QuotationCard extends StatelessWidget {
               children: [
                 _FilledAction(
                   title:
-                      "Pay in Full (${CurrencyHelper.formatAmount(displayTotal, currencyCode: currencyCode)})",
+                      "Pay in Full - ${CurrencyHelper.formatAmount(displayTotal, currencyCode: currencyCode)}",
                   icon: Icons.payment_rounded,
                   onPressed: () => onCompletePayment(displayTotal.round()),
                 ),
                 const SizedBox(height: 10),
                 _OutlineAction(
-                  title: "Pay Half (Part Payment)",
+                  title: "Pay 50% Deposit",
                   icon: Icons.payments_outlined,
                   onPressed: () {
                     showModalBottomSheet(
@@ -249,13 +248,13 @@ class QuotationCard extends StatelessWidget {
               children: [
                 _FilledAction(
                   title:
-                      "Hire Designer (${CurrencyHelper.formatAmount(displayTotal, currencyCode: currencyCode)})",
+                      "Accept Quote - ${CurrencyHelper.formatAmount(displayTotal, currencyCode: currencyCode)}",
                   icon: Icons.person_add_alt_1_rounded,
                   onPressed: onHireDesigner,
                 ),
                 const SizedBox(height: 10),
                 _OutlineAction(
-                  title: hasSubmittedOffer ? "Offer Submitted" : "Make Offer",
+                  title: hasSubmittedOffer ? "Offer Submitted" : "Negotiate Price",
                   icon: Icons.local_offer_outlined,
                   onPressed: hasSubmittedOffer ? null : onMakeOffer,
                 ),
@@ -269,9 +268,8 @@ class QuotationCard extends StatelessWidget {
   Widget _buildTotalCost(
     double total, {
     required String currencyCode,
-    required bool includesVat,
   }) {
-    final vatLabel = includesVat ? "Including VAT" : "Excluding VAT";
+    const vatLabel = "(incl. VAT)";
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -291,8 +289,7 @@ class QuotationCard extends StatelessWidget {
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text:
-                        "Total: ${CurrencyHelper.formatAmount(total, currencyCode: currencyCode)} ",
+                    text: "Total: ${CurrencyHelper.formatAmount(total, currencyCode: currencyCode)} ",
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -461,7 +458,9 @@ class _StatusTag extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        formatUiLabel(status),
+        status.toLowerCase() == 'part payment'
+            ? 'Partial payment'
+            : formatUiLabel(status),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,

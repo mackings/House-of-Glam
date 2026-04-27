@@ -108,7 +108,7 @@ class _UserProfileState extends State<UserProfile> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const CustomText(
-                                "Manage your account tools",
+                                "Account & Tools",
                                 textAlign: TextAlign.left,
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
@@ -126,10 +126,8 @@ class _UserProfileState extends State<UserProfile> {
                       ],
                     ),
                     const SizedBox(height: 14),
-                    CustomText(
-                      isAdmin
-                          ? "Marketplace, delivery, and admin controls are available below based on your access."
-                          : "Reach your marketplace, deliveries, listings, and subscription tools from one consistent hub.",
+                    const CustomText(
+                      "Manage your marketplace activity, deliveries, listings, and subscriptions.",
                       textAlign: TextAlign.left,
                       color: AppColors.subtext,
                     ),

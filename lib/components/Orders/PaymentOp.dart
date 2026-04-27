@@ -564,6 +564,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     ].join('|');
   }
 
+
   Future<bool> _showDeliveryFeeSheet(String amountLabel) async {
     if (!mounted) return false;
 
@@ -716,7 +717,72 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     super.dispose();
   }
 
+  bool _validatePaymentForm() {
+    FocusScope.of(context).unfocus();
+
+    if (deliveryMode == "pickup") {
+      final pickupCountry = selectedPickupCountry;
+      final pickupState = selectedPickupState;
+      final pickupLocation = selectedPickupLocation;
+      final hasValidPickup =
+          pickupCountry != null &&
+          pickupState != null &&
+          pickupLocation != null;
+
+      setState(() {
+        showPickupCountryError = pickupCountry == null;
+        showPickupStateError = pickupState == null;
+        showPickupLocationError = pickupLocation == null;
+      });
+
+      if (!hasValidPickup) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Please choose your pickup country, state, and pickup point.",
+              ),
+            ),
+          );
+        return false;
+      }
+
+      return true;
+    }
+
+    final hasValidAddress =
+        selectedCountry != null &&
+        addressLine1Controller.text.trim().isNotEmpty &&
+        cityController.text.trim().isNotEmpty &&
+        regionController.text.trim().isNotEmpty;
+
+    setState(() {
+      showCountryError = selectedCountry == null;
+      showAddressLine1Error = addressLine1Controller.text.trim().isEmpty;
+      showCityError = cityController.text.trim().isEmpty;
+      showRegionError = regionController.text.trim().isEmpty;
+    });
+
+    if (!hasValidAddress) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Please complete your country, street address, city, and state/region.",
+            ),
+          ),
+        );
+      return false;
+    }
+
+    return true;
+  }
+
   Future<void> _makePayment() async {
+    if (!_validatePaymentForm()) return;
+
     final shouldContinue = await _showDeliveryFeeBeforePaymentIfNeeded();
     if (!shouldContinue || !mounted) return;
     await _processPayment();
@@ -1229,14 +1295,14 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const CustomText(
-                              "Payment Options",
+                              "Secure Your Order",
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
                               textAlign: TextAlign.left,
                             ),
                             const SizedBox(height: 2),
                             CustomText(
-                              "Choose how you want to complete this payment.",
+                              "Choose your preferred payment method.",
                               fontSize: 12,
                               color: AppColors.subtext,
                               textAlign: TextAlign.left,
@@ -1265,8 +1331,8 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                       children: [
                         Expanded(
                           child: _buildSelectionTile(
-                            title: "Paid in Full",
-                            subtitle: "Pay the complete amount now",
+                            title: "Pay in full",
+                            subtitle: "Pay the full amount now",
                             icon: Icons.account_balance_wallet_outlined,
                             selected: paymentType == "full",
                             onTap: () {
@@ -1277,8 +1343,8 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _buildSelectionTile(
-                            title: "Part Payment",
-                            subtitle: "Pay half and complete later",
+                            title: "Pay in installments",
+                            subtitle: "Pay part now and the rest later",
                             icon: Icons.payments_outlined,
                             selected: paymentType == "part",
                             onTap: () {
@@ -1330,7 +1396,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                     items: const [
                       DropdownMenuItem(
                         value: "Regular",
-                        child: Text("Regular (1–8 days)"),
+                        child: Text("Standard Delivery (1–8 days)"),
                       ),
                       DropdownMenuItem(
                         value: "Express",
@@ -1377,7 +1443,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                           children: [
                             Expanded(
                               child: _buildSelectionTile(
-                                title: "Address",
+                                title: "Home Delivery",
                                 subtitle: "Deliver to your address",
                                 icon: Icons.location_on_outlined,
                                 selected: deliveryMode == "address",
@@ -1390,7 +1456,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: _buildSelectionTile(
-                                title: "Pickup",
+                                title: "Pickup Point",
                                 subtitle: "Collect from a location",
                                 icon: Icons.store_mall_directory_outlined,
                                 selected: deliveryMode == "pickup",
@@ -1413,12 +1479,11 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                           const SizedBox(height: 12),
                           _buildTextField(
                             controller: addressLine1Controller,
-                            hintText:
-                                "Address line 1 (Street, House/Building No.)",
+                            hintText: "Street address",
                             icon: Icons.home_work_outlined,
                             errorText:
                                 showAddressLine1Error
-                                    ? "Address line 1 is required"
+                                    ? "Street address is required"
                                     : null,
                             onChanged: (value) {
                               if (showAddressLine1Error &&
@@ -1431,8 +1496,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                           const SizedBox(height: 12),
                           _buildTextField(
                             controller: addressLine2Controller,
-                            hintText:
-                                "Address line 2 (Apartment, Suite, Landmark) - Optional",
+                            hintText: "Apartment, suite, etc. (optional)",
                             icon: Icons.pin_drop_outlined,
                             onChanged: (_) => _scheduleDeliveryCostRefresh(),
                           ),
@@ -1498,7 +1562,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                                 ),
                               ),
                               child: const CustomText(
-                                "No pickup locations configured by admin yet.",
+                                "No pickup points configured by admin yet.",
                                 fontSize: 12,
                                 color: AppColors.warning,
                                 textAlign: TextAlign.left,
@@ -1570,11 +1634,11 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                             const SizedBox(height: 12),
                             _buildDropdownField<PickupLocationOption>(
                               value: selectedPickupLocation,
-                              hintText: "Select pickup address",
+                              hintText: "Select pickup point",
                               icon: Icons.storefront_outlined,
                               errorText:
                                   showPickupLocationError
-                                      ? "Pickup location is required"
+                                      ? "Pickup point is required"
                                       : null,
                               items:
                                   (selectedPickupState?.locations ?? const [])
@@ -1702,8 +1766,8 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                         const SizedBox(height: 10),
                         CustomText(
                           deliveryMode == "pickup"
-                              ? "Choose an admin-configured pickup destination to continue."
-                              : "Use your full address so delivery costs and destination details stay accurate.",
+                              ? "Choose an available pickup point to continue."
+                              : "Enter your full address to ensure accurate delivery and pricing.",
                           fontSize: 11,
                           color: AppColors.subtext,
                           textAlign: TextAlign.left,
@@ -1715,6 +1779,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                   Row(
                     children: [
                       Expanded(
+                        flex: 4,
                         child: OutlinedButton.icon(
                           onPressed:
                               isLoading
@@ -1733,8 +1798,9 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                       ),
                       const SizedBox(width: 12),
                       Expanded(
+                        flex: 5,
                         child: CustomButton(
-                          title: "Continue to Pay",
+                          title: "Proceed to Payment",
                           onPressed: isLoading ? null : _makePayment,
                           isLoading: isLoading,
                         ),
@@ -1781,7 +1847,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     final subtitle =
         isInternationalVendor
             ? "Checkout will continue with Stripe"
-            : "Checkout will continue with Paystack";
+            : "You'll complete payment securely via Paystack.";
 
     return Container(
       width: double.infinity,

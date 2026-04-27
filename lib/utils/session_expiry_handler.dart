@@ -105,7 +105,7 @@ class SessionExpiryHandler {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      'Session expired',
+                      'You\'ve been signed out',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
@@ -114,7 +114,7 @@ class SessionExpiryHandler {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Your session has expired. Please sign in again to continue.',
+                      'For security, you\'ve been signed out. Please sign in to continue.',
                       style: TextStyle(
                         fontSize: 14,
                         height: 1.5,
@@ -134,7 +134,7 @@ class SessionExpiryHandler {
                             borderRadius: BorderRadius.circular(18),
                           ),
                         ),
-                        child: const Text('Sign in again'),
+                        child: const Text('Sign in'),
                       ),
                     ),
                   ],

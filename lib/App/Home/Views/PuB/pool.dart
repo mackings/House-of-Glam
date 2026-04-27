@@ -121,10 +121,22 @@ class _PoolState extends State<Pool> {
                 if (index == 0) {
                   return const Padding(
                     padding: EdgeInsets.fromLTRB(4, 0, 4, 12),
-                    child: CustomText(
-                      "Explore finished work, inspiration, and current check-room drops from active designers.",
-                      color: AppColors.subtext,
-                      textAlign: TextAlign.left,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomText(
+                          "Discover Designs & Inspiration",
+                          textAlign: TextAlign.left,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        SizedBox(height: 6),
+                        CustomText(
+                          "Browse completed work and latest creations from designers.",
+                          color: AppColors.subtext,
+                          textAlign: TextAlign.left,
+                        ),
+                      ],
                     ),
                   );
                 }

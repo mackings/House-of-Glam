@@ -29,7 +29,7 @@ class TailorAssignedCard extends StatelessWidget {
         isFullyPaid
             ? "Paid in Full"
             : hasClientPayment
-            ? "Part Payment"
+            ? "Partial payment"
             : "Unpaid";
     final paymentStatusTone =
         isFullyPaid

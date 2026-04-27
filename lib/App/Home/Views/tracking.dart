@@ -85,13 +85,13 @@ class _TrackingDeliveryState extends State<TrackingDelivery> {
                         ),
                         const SizedBox(height: 22),
                         const CustomText(
-                          "No tracking records yet",
+                          "No Deliveries Yet",
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
                         ),
                         const SizedBox(height: 8),
                         const CustomText(
-                          "Once a material order has shipping activity, it will appear here for you to monitor and confirm delivery.",
+                          "Your orders will appear here once they are shipped.",
                           color: AppColors.subtext,
                         ),
                       ],

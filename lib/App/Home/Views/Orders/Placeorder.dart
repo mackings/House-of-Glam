@@ -360,14 +360,14 @@ class _PlaceOrderState extends State<PlaceOrder> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CustomText(
-                      "Submit a clearer design brief for faster quotations.",
+                      "Create Your Custom Order",
                       textAlign: TextAlign.left,
                       fontSize: 19,
                       fontWeight: FontWeight.w700,
                     ),
                     SizedBox(height: 6),
                     CustomText(
-                      "Provide attire details, measurements, and sample images so designers can respond accurately.",
+                      "Share your design details, measurements, and inspiration to receive accurate quotes faster.",
                       textAlign: TextAlign.left,
                       color: AppColors.subtext,
                     ),
@@ -388,7 +388,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
               const SizedBox(height: 20),
 
               CustomDropdown(
-                label: "Choose Material",
+                label: "Fabric Type",
                 options: [...materials, "Others"],
                 selectedValue: selectedMaterial,
                 onChanged: (val) {
@@ -410,7 +410,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
               const SizedBox(height: 10),
 
               CustomDropdown(
-                label: "Select Attire Type",
+                label: "Attire Style",
                 options: [...categories.map((c) => c.name).toList(), "Others"],
                 selectedValue: selectedCategory?.name,
                 onChanged: (val) {
@@ -440,7 +440,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
 
               // UPDATED: Color dropdown with "Others" option
               CustomDropdown(
-                label: "Select Color",
+                label: "Preferred Colour",
                 options: [...colors, "Others"],
                 selectedValue: selectedColor,
                 onChanged: (val) => setState(() => selectedColor = val),
@@ -457,7 +457,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
 
               const SizedBox(height: 20),
               CustomText(
-                "Brand *",
+                "Add Branding (Optional)",
                 color: AppColors.ink,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -466,7 +466,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
               const Divider(),
               CustomTextField(
                 title: "Branding",
-                hintText: "Name / Logo embroidery",
+                hintText: "Enter name or upload logo for embroidery",
                 fieldKey: "branding",
                 controller: brandingController,
               ),
@@ -482,20 +482,26 @@ class _PlaceOrderState extends State<PlaceOrder> {
               const Divider(),
               CustomTextField(
                 title: "Special Instructions",
-                hintText: "I want it slim fit",
+                hintText: "e.g. Slim fit, extra pockets, longer sleeves...",
                 fieldKey: "specialInstructions",
                 controller: specialInstructionsController,
               ),
 
               const SizedBox(height: 20),
               CustomText(
-                "Measurements (CM)*",
+                "Your Measurements (cm)",
                 color: AppColors.ink,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 textAlign: TextAlign.left,
               ),
               const Divider(),
+              const CustomText(
+                "Provide accurate measurements for the best fit",
+                textAlign: TextAlign.left,
+                color: AppColors.subtext,
+              ),
+              const SizedBox(height: 12),
               buildMeasurementFields(),
 
               const SizedBox(height: 20),

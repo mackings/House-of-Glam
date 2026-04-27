@@ -60,7 +60,7 @@ void showTailorMaterialDetails(
                     isFullyPaid
                         ? "Paid in Full"
                         : hasClientPayment
-                        ? "Part Payment"
+                        ? "Partial payment"
                         : "Unpaid";
 
                 Future<void> deliverAttire() async {

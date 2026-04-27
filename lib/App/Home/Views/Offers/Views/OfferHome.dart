@@ -157,7 +157,7 @@ class _OfferHomeState extends State<OfferHome>
             ),
             SizedBox(width: 6),
             CustomText(
-              "Both Agreed",
+              "Agreement Reached",
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: AppColors.success,
@@ -324,14 +324,14 @@ class _OfferHomeState extends State<OfferHome>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const CustomText(
-                      "Track every offer clearly",
+                      "Manage Your Offers",
                       textAlign: TextAlign.left,
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                     ),
                     const SizedBox(height: 4),
                     CustomText(
-                      "Review active conversations, accepted prices, and pending decisions in one place.",
+                      "Track conversations, agreed prices, and pending decisions.",
                       textAlign: TextAlign.left,
                       fontSize: 13,
                       color: AppColors.subtext,
