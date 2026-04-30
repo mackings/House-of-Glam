@@ -183,6 +183,45 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ],
                   ),
+                  if (_currentPage == 0) ...[
+                    SizedBox(height: veryCompactScreen ? 8 : 10),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: veryCompactScreen ? 10 : 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFFCF6),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '🌍 Join a global network of African fashion designers.',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: compactScreen ? 13 : 14,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.ink,
+                              height: 1.35,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Connect with customers locally and internationally.',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: compactScreen ? 11 : 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.subtext,
+                              height: 1.35,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   SizedBox(height: veryCompactScreen ? 8 : 12),
                   Expanded(
                     child: PageView.builder(

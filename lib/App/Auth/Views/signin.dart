@@ -127,13 +127,13 @@ class _SigninState extends ConsumerState<Signin> {
       isLoading: isLoading,
       child: AuthShell(
         eyebrow: 'Welcome Back',
-        title: 'Sign in to your House of GLAME account.',
+        title: 'Access Your House of GLAME Account.',
         subtitle:
-            'Return to your custom orders, quote approvals, delivery updates, and curated fashion finds.',
+            'Access your custom orders, quote approvals, delivery tracking, and curated fashion collections.',
         highlights: const [
-          'Quote Approvals',
-          'Delivery Updates',
-          'Pre-Loved Discovery',
+          'Manage Quotes',
+          'Track Orders',
+          'Explore Pre-Loved',
         ],
         footer: Row(
           mainAxisAlignment: MainAxisAlignment.center,

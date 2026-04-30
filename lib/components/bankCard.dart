@@ -18,6 +18,14 @@ class _BankDetailsCardState extends State<BankDetailsCard> {
   double walletBalance = 0.0;
   bool isLoading = true;
 
+  String get _maskedAccountNumber {
+    final digits = accountNumber.replaceAll(RegExp(r'\D'), '');
+    if (digits.length < 8) {
+      return accountNumber;
+    }
+    return '${digits.substring(0, 4)} •••• ${digits.substring(digits.length - 4)}';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -108,7 +116,7 @@ class _BankDetailsCardState extends State<BankDetailsCard> {
                                       borderRadius: BorderRadius.circular(999),
                                     ),
                                     child: Text(
-                                      "HOG Bank",
+                                      "HOG Wallet",
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: compact ? 11 : 12,
@@ -122,7 +130,7 @@ class _BankDetailsCardState extends State<BankDetailsCard> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "₦${walletBalance.toStringAsFixed(2)}",
+                                    "₦ ${walletBalance.toStringAsFixed(2)}",
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
@@ -144,18 +152,35 @@ class _BankDetailsCardState extends State<BankDetailsCard> {
                                     ),
                                   ),
                                   SizedBox(height: compact ? 6 : 12),
-                                  Text(
-                                    accountNumber,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.92,
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "Account No.",
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                          fontSize: compact ? 10 : 11,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                      fontSize: compact ? 12 : 14,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 1.2,
-                                    ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          _maskedAccountNumber,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.92,
+                                            ),
+                                            fontSize: compact ? 12 : 14,
+                                            fontWeight: FontWeight.w600,
+                                            letterSpacing: 1.2,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),

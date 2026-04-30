@@ -30,6 +30,7 @@ class Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final greeting = _getGreeting();
+    final firstName = userName.trim().split(RegExp(r'\s+')).first;
     final theme = Theme.of(context);
 
     return Container(
@@ -76,7 +77,7 @@ class Header extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        userName,
+                        firstName.isEmpty ? "User" : firstName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleMedium?.copyWith(
@@ -94,11 +95,13 @@ class Header extends StatelessWidget {
             children: [
               _HeaderIconButton(
                 icon: Icons.local_shipping_outlined,
+                tooltip: "Orders / Deliveries",
                 onTap: onNotificationTap ?? () {},
               ),
               const SizedBox(width: 8),
               _HeaderIconButton(
                 icon: Icons.storefront_outlined,
+                tooltip: "Marketplace",
                 onTap: () {
                   Nav.push(context, UserProfile());
                 },
@@ -113,23 +116,35 @@ class Header extends StatelessWidget {
 
 class _HeaderIconButton extends StatelessWidget {
   final IconData icon;
+  final String tooltip;
   final VoidCallback onTap;
 
-  const _HeaderIconButton({required this.icon, required this.onTap});
+  const _HeaderIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Ink(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceMuted,
+    return Tooltip(
+      message: tooltip,
+      child: Semantics(
+        button: true,
+        label: tooltip,
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(16),
+          child: Ink(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.surfaceMuted,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, size: 22, color: AppColors.ink),
+          ),
         ),
-        child: Icon(icon, size: 22, color: AppColors.ink),
       ),
     );
   }

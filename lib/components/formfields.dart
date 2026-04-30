@@ -11,6 +11,7 @@ final obscureTextProvider = StateProvider.family<bool, String>(
 class CustomTextField extends ConsumerWidget {
   final String title;
   final String hintText;
+  final String? helperText;
   final IconData? prefixIcon;
   final bool isPassword;
   final TextEditingController? controller;
@@ -39,6 +40,7 @@ class CustomTextField extends ConsumerWidget {
     required this.title,
     required this.hintText,
     required this.fieldKey,
+    this.helperText,
     this.prefixIcon,
     this.isPassword = false,
     this.controller,
@@ -80,6 +82,16 @@ class CustomTextField extends ConsumerWidget {
               color: AppColors.ink,
             ),
           ),
+          if (helperText != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              helperText!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppColors.subtext,
+                height: 1.35,
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
 
           // 🧩 Dropdown Text Field

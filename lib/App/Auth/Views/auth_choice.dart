@@ -142,7 +142,7 @@ class AuthChoiceScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 18),
                           Text(
-                            'How would you like to use House of GLAME?',
+                            'How would you like to experience House of GLAME?',
                             style: GoogleFonts.cormorantGaramond(
                               fontSize: 38,
                               fontWeight: FontWeight.w700,
@@ -152,7 +152,7 @@ class AuthChoiceScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            'Choose your experience to get started.',
+                            'Start your journey your way.',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -165,9 +165,9 @@ class AuthChoiceScreen extends StatelessWidget {
                             spacing: 10,
                             runSpacing: 10,
                             children: const [
-                              _ModeChip(label: 'Quote Flow'),
-                              _ModeChip(label: 'Delivery Updates'),
-                              _ModeChip(label: 'Pre-Loved Finds'),
+                              _ModeChip(label: 'Custom Orders'),
+                              _ModeChip(label: 'Track Orders'),
+                              _ModeChip(label: 'Pre-Loved Styles'),
                             ],
                           ),
                         ],
@@ -175,13 +175,13 @@ class AuthChoiceScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     _ModeCard(
-                      title: 'Shop as a Customer',
+                      title: 'Find styles made for you.',
                       description:
-                          'Discover African fashion, request custom styles, and order from talented designers.',
+                          "Discover, customise, and shop from Africa's finest designers.",
                       badge: 'Customer',
                       icon: Icons.shopping_bag_outlined,
                       accent: AppColors.secondary,
-                      cta: 'Continue as Customer',
+                      cta: 'Start Shopping',
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -191,13 +191,13 @@ class AuthChoiceScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 14),
                     _ModeCard(
-                      title: 'Create and grow as a Designer',
+                      title: 'Build and grow your fashion brand.',
                       description:
-                          'Offer custom craftsmanship, manage quote requests, fulfil orders, and reach a global African fashion audience.',
+                          'Showcase your craft, manage orders seamlessly, and reach a global audience.',
                       badge: 'Designer',
                       icon: Icons.design_services_outlined,
                       accent: AppColors.accent,
-                      cta: 'Continue as Designer',
+                      cta: 'Build Your Brand',
                       onPressed: () {
                         Navigator.push(
                           context,

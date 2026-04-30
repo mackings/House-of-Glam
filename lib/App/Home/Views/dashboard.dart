@@ -199,14 +199,14 @@ class _HomeState extends ConsumerState<Home> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const CustomText(
-                        "Discover skilled designers and marketplace drops in one place.",
+                        "Discover Africa's finest designers and fashion drops.",
                         textAlign: TextAlign.left,
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
                       ),
                       const SizedBox(height: 6),
                       const CustomText(
-                        "Browse categories, review top-rated creators, and manage wallet activity with a cleaner experience.",
+                        "Discover designers, explore collections, and manage your journey seamlessly.",
                         textAlign: TextAlign.left,
                         color: AppColors.subtext,
                         fontSize: 12,
@@ -219,7 +219,10 @@ class _HomeState extends ConsumerState<Home> {
                             height: 46,
                             child: ElevatedButton(
                               onPressed: () {
-                                Nav.push(context, TailorRegistrationPage());
+                                Nav.push(
+                                  context,
+                                  Alltailors(tailors: _tailors),
+                                );
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.accent,
@@ -235,7 +238,7 @@ class _HomeState extends ConsumerState<Home> {
                                 ),
                               ),
                               child: const Text(
-                                "Become a Designer",
+                                "Explore Designers",
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -262,7 +265,7 @@ class _HomeState extends ConsumerState<Home> {
                               ),
                             ),
                             child: const Text(
-                              "Track activity",
+                              "Track Orders",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -304,25 +307,60 @@ class _HomeState extends ConsumerState<Home> {
                   ),
                 ),
                 const SizedBox(height: 14),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    children: [
+                      const Expanded(
+                        child: CustomText(
+                          "Ready to sell your designs?",
+                          textAlign: TextAlign.left,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Nav.push(context, TailorRegistrationPage());
+                        },
+                        child: const Text("Become a Designer"),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
                 CarouselSlider(
                   height: 150,
                   items: const [
                     BankDetailsCard(),
                     CarouselItemWidget(
-                      title: "",
+                      title: "Agbada that commands every step.",
                       assetImage: 'assets/Img/agbada.png',
+                      ctaLabel: "Shop Now",
                     ),
                     CarouselItemWidget(
-                      title: "",
+                      title: "BLOUSE and GELE",
                       assetImage: 'assets/Img/gele.png',
+                      ctaLabel: "Explore Styles",
                     ),
                     CarouselItemWidget(
                       title: "",
                       assetImage: 'assets/Img/kaftan.png',
+                      ctaLabel: "View Collection",
                     ),
                     CarouselItemWidget(
                       title: "",
                       assetImage: 'assets/Img/suits.png',
+                      ctaLabel: "View Collection",
                     ),
                   ],
                 ),

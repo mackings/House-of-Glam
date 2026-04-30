@@ -178,7 +178,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                     Icon(Icons.business_center, color: Colors.white, size: 32),
                     SizedBox(height: 12),
                     Text(
-                      "Register Your Designer Business",
+                      "Set Up Your Business Profile",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 22,
@@ -187,7 +187,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      "Join our network of professional designers and grow your business",
+                      "Provide your business details to start receiving orders globally.",
                       style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ],
@@ -199,10 +199,14 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
               // Business Information Section
               _buildSectionCard(
                 title: "Business Information",
+                subtitle:
+                    "This helps customers trust your brand and increases your visibility.",
                 icon: Icons.store,
                 children: [
                   CustomTextField(
                     title: "Business Name",
+                    helperText:
+                        "This is how customers will identify your brand.",
                     hintText: "Enter your business name",
                     fieldKey: "businessName",
                     controller: businessNameController,
@@ -216,6 +220,8 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                   const SizedBox(height: 16),
                   CustomTextField(
                     title: "Business Email",
+                    helperText:
+                        "Used for orders, payouts, and important updates.",
                     hintText: "Enter your business email",
                     fieldKey: "businessEmail",
                     controller: businessEmailController,
@@ -235,6 +241,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                   const SizedBox(height: 16),
                   CustomTextField(
                     title: "Business Phone",
+                    helperText: "Improves communication and order coordination",
                     hintText: "Enter your business phone number",
                     fieldKey: "businessPhone",
                     controller: businessPhoneController,
@@ -256,7 +263,9 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
 
               // Location Section
               _buildSectionCard(
-                title: "Business Location",
+                title: "Business Location & Coverage",
+                subtitle:
+                    "Helps match you with nearby and international customers.",
                 icon: Icons.location_on,
                 children: [
                   CustomTextField(
@@ -312,11 +321,12 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
 
               // Professional Details Section
               _buildSectionCard(
-                title: "Professional Details",
+                title: "Your Expertise",
+                subtitle: "Improves your chances of receiving relevant orders.",
                 icon: Icons.work_outline,
                 children: [
                   CustomTextField(
-                    title: "Years of Experience",
+                    title: "Your experience in fashion design",
                     hintText: "Enter number of years",
                     fieldKey: "yearOfExperience",
                     controller: yearController,
@@ -334,7 +344,9 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                   ),
                   const SizedBox(height: 16),
                   CustomTextField(
-                    title: "Description",
+                    title: "Brand Overview",
+                    helperText:
+                        "This helps customers understand your style and choose you confidently.",
                     hintText: "Describe your design services and specialties",
                     fieldKey: "description",
                     controller: descriptionController,
@@ -380,7 +392,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                               SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  "Registered Business",
+                                  "Verified Business Entity",
                                   style: TextStyle(fontWeight: FontWeight.w500),
                                 ),
                               ),
@@ -388,12 +400,39 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                           ),
                           subtitle: const Padding(
                             padding: EdgeInsets.only(left: 28, top: 4),
-                            child: Text(
-                              "I have official business registration",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Registered and legally recognized business.",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.check_circle_outline,
+                                      size: 14,
+                                      color: AppColors.accent,
+                                    ),
+                                    SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        "Verified designers get higher visibility.",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.subtext,
+                                          height: 1.35,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                           value: true,
@@ -418,7 +457,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                               SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  "Not Registered",
+                                  "Independent Designer",
                                   style: TextStyle(fontWeight: FontWeight.w500),
                                 ),
                               ),
@@ -427,7 +466,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                           subtitle: const Padding(
                             padding: EdgeInsets.only(left: 28, top: 4),
                             child: Text(
-                              "Individual designer without registration",
+                              "Operating as an individual without formal registration.",
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey,
@@ -455,16 +494,79 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                             ? _buildRegisteredBusinessSection()
                             : _buildUnregisteredBusinessSection(),
                   ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(
+                        Icons.public_rounded,
+                        size: 14,
+                        color: AppColors.subtext,
+                      ),
+                      SizedBox(width: 5),
+                      Text(
+                        "Trusted by global customers.",
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.subtext,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
 
               const SizedBox(height: 32),
 
               // Submit Button
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.accentSoft,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppColors.accent.withValues(alpha: 0.14),
+                  ),
+                ),
+                child: const Text(
+                  "🎯 Verified profiles receive up to 3x more customer requests.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.ink,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
               CustomButton(
                 title: "Submit Registration",
                 isOutlined: false,
                 onPressed: _submitForm,
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.lock_outline, size: 15, color: AppColors.subtext),
+                  SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      "Your information is securely processed and protected.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.subtext,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 20),
@@ -479,6 +581,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
     required String title,
     required IconData icon,
     required List<Widget> children,
+    String? subtitle,
   }) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -507,16 +610,29 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                 child: Icon(icon, color: AppColors.accent, size: 20),
               ),
               const SizedBox(width: 12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                 ),
               ),
             ],
           ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.subtext,
+                height: 1.45,
+              ),
+            ),
+          ],
           const SizedBox(height: 20),
           ...children,
         ],
@@ -559,6 +675,39 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
         ),
         const SizedBox(height: 12),
         _buildImagePicker(),
+        const SizedBox(height: 10),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Icon(Icons.lock_outline, size: 16, color: AppColors.subtext),
+            SizedBox(width: 6),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Secure verification process.",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.subtext,
+                      fontWeight: FontWeight.w700,
+                      height: 1.4,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    "Your documents are encrypted and used strictly for compliance.",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.subtext,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }

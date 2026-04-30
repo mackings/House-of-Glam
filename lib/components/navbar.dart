@@ -16,9 +16,9 @@ class CustomBottomNavBar extends StatelessWidget {
     final items = [
       {"icon": Icons.home_rounded, "label": "Home"},
       {"icon": Icons.shopping_bag_outlined, "label": "Order"},
-      {"icon": Icons.history_toggle_off_rounded, "label": "History"},
+      {"icon": Icons.history_toggle_off_rounded, "label": "Activity"},
       {"icon": Icons.account_balance_wallet_outlined, "label": "Wallet"},
-      {"icon": Icons.design_services_outlined, "label": "Designs"},
+      {"icon": Icons.design_services_outlined, "label": "My Designs"},
     ];
 
     return Container(
@@ -48,7 +48,10 @@ class CustomBottomNavBar extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color:
                         isSelected ? AppColors.accentSoft : Colors.transparent,

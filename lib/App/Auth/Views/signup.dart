@@ -155,13 +155,13 @@ class _SignupState extends ConsumerState<Signup> {
       isLoading: isLoading,
       child: AuthShell(
         eyebrow: 'Join House of GLAME',
-        title: 'Create your account',
+        title: 'Step into House of GLAME',
         subtitle:
-            'Join House of GLAME and step into a world of culture, creativity, and style.',
+            'Join a world of African culture, creativity, and refined style.',
         highlights: const [
           'Custom Orders',
-          'Delivery Tracking',
-          'Pre-Loved Discovery',
+          'Order Tracking',
+          'Pre-Loved Styles',
         ],
         footer: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -193,18 +193,18 @@ class _SignupState extends ConsumerState<Signup> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Customer Profile",
+                "Tell us about you",
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 6),
               const Text(
-                "Tell us who you are so we can personalise your couture journey.",
+                "Share a few details so we can personalise your couture journey.",
                 style: TextStyle(color: AppColors.subtext, height: 1.5),
               ),
               const SizedBox(height: 22),
               CustomTextField(
-                title: "Full name",
-                hintText: "Enter your full name",
+                title: "Your full name",
+                hintText: "e.g. Ada Okafor",
                 prefixIcon: Icons.person_outline_rounded,
                 fieldKey: "fullname",
                 controller: fullnameController,
@@ -218,7 +218,7 @@ class _SignupState extends ConsumerState<Signup> {
               ),
               CustomTextField(
                 title: "Email address",
-                hintText: "name@example.com",
+                hintText: "e.g. ada@email.com",
                 prefixIcon: Icons.mail_outline_rounded,
                 fieldKey: "email",
                 controller: emailController,
