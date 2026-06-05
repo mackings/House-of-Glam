@@ -228,7 +228,7 @@ class _TrackingDetailSheetState extends State<TrackingDetailSheet> {
                         Expanded(
                           child: _InfoTile(
                             icon: Icons.palette_outlined,
-                            label: "Color",
+                            label: "Colour",
                             value: record.material.color,
                           ),
                         ),

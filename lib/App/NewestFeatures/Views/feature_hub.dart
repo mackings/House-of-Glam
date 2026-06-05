@@ -13,6 +13,7 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/theme/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class FeatureHub extends StatefulWidget {
   const FeatureHub({super.key});
@@ -25,7 +26,7 @@ class _FeatureHubState extends State<FeatureHub> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 8,
+      length: 7,
       child: Scaffold(
         backgroundColor: AppColors.canvas,
         appBar: AppBar(
@@ -39,7 +40,6 @@ class _FeatureHubState extends State<FeatureHub> {
               Tab(text: 'Explore'),
               Tab(text: 'My Sizes'),
               Tab(text: 'Saved'),
-              Tab(text: 'Custom'),
               Tab(text: 'Chats'),
               Tab(text: 'Protection'),
               Tab(text: 'Help'),
@@ -52,7 +52,6 @@ class _FeatureHubState extends State<FeatureHub> {
             DiscoveryTab(),
             MeasurementsTab(),
             MoodboardsTab(),
-            CustomOrderTab(),
             MessagingCenter(),
             EscrowWorkspace(),
             SupportTab(),
@@ -369,7 +368,7 @@ class _MeasurementsTabState extends State<MeasurementsTab> {
                   ),
                   const SizedBox(height: 8),
                   const CustomText(
-                    'Create casual, fitted, native, or custom fit records. Designers can request extra measurements from their project view.',
+                    'Create casual, fitted, native, or custom fit records. Related designers can view your latest saved profiles during an active request or purchase.',
                     color: AppColors.subtext,
                     textAlign: TextAlign.left,
                   ),
@@ -612,6 +611,7 @@ class _CustomOrderTabState extends State<CustomOrderTab> {
   bool _saving = false;
   Map<String, dynamic> _lastWorkflow = const {};
   Map<String, dynamic> _lastEscrow = const {};
+  String _lastPaymentReference = '';
 
   @override
   void initState() {
@@ -703,9 +703,66 @@ class _CustomOrderTabState extends State<CustomOrderTab> {
     final result = await NewestFeatureService.payCustomRequest(
       _requestId.text.trim(),
       milestoneName,
+      callbackUrl: 'https://houseofglam.app/escrow/callback',
     );
     if (!mounted) return;
     setState(() => _saving = false);
+
+    if (!result.success) {
+      _showResult(context, result);
+      return;
+    }
+
+    final data = apiMap(result.data);
+    final authorizationUrl =
+        data['authorizationUrl']?.toString() ??
+        data['authorization_url']?.toString() ??
+        '';
+    final paymentReference =
+        data['paymentReference']?.toString() ??
+        data['reference']?.toString() ??
+        apiMap(data['milestone'])['reference']?.toString() ??
+        '';
+
+    setState(() => _lastPaymentReference = paymentReference);
+
+    if (authorizationUrl.isEmpty) {
+      _showResult(
+        context,
+        ApiResult.failure('Payment checkout link was not returned.'),
+      );
+      return;
+    }
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (_) => _EscrowCheckoutScreen(
+              authorizationUrl: authorizationUrl,
+              paymentReference: paymentReference,
+            ),
+      ),
+    );
+
+    if (!mounted || paymentReference.isEmpty) return;
+    await _verifyPayment(paymentReference);
+  }
+
+  Future<void> _verifyPayment(String paymentReference) async {
+    setState(() => _saving = true);
+    final result = await NewestFeatureService.verifyEscrowPayment(
+      paymentReference,
+    );
+    if (!mounted) return;
+    final data = apiMap(result.data);
+    setState(() {
+      _saving = false;
+      final escrow = apiMap(data['escrow']);
+      if (escrow.isNotEmpty) {
+        _lastEscrow = escrow;
+      }
+    });
     _showResult(context, result);
   }
 
@@ -930,11 +987,175 @@ class _CustomOrderTabState extends State<CustomOrderTab> {
                     ),
                   ],
                 ),
+                if (_lastPaymentReference.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceMuted,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomText(
+                          'Reference: $_lastPaymentReference',
+                          fontSize: 12,
+                          color: AppColors.subtext,
+                          textAlign: TextAlign.left,
+                        ),
+                        const SizedBox(height: 8),
+                        CustomButton(
+                          title: 'Verify payment',
+                          isOutlined: true,
+                          isLoading: _saving,
+                          onPressed:
+                              _saving
+                                  ? null
+                                  : () => _verifyPayment(_lastPaymentReference),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
         ],
       ],
+    );
+  }
+}
+
+class _EscrowCheckoutScreen extends StatefulWidget {
+  final String authorizationUrl;
+  final String paymentReference;
+
+  const _EscrowCheckoutScreen({
+    required this.authorizationUrl,
+    required this.paymentReference,
+  });
+
+  @override
+  State<_EscrowCheckoutScreen> createState() => _EscrowCheckoutScreenState();
+}
+
+class _EscrowCheckoutScreenState extends State<_EscrowCheckoutScreen> {
+  late final WebViewController _controller;
+  bool _loading = true;
+  String _errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        WebViewController()
+          ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..setNavigationDelegate(
+            NavigationDelegate(
+              onPageStarted: (_) {
+                if (!mounted) return;
+                setState(() {
+                  _loading = true;
+                  _errorMessage = '';
+                });
+              },
+              onPageFinished: (_) {
+                if (!mounted) return;
+                setState(() => _loading = false);
+              },
+              onWebResourceError: (error) {
+                if (!mounted || error.isForMainFrame == false) return;
+                setState(() {
+                  _loading = false;
+                  _errorMessage = error.description;
+                });
+              },
+              onNavigationRequest: (request) {
+                final uri = Uri.tryParse(request.url);
+                if (uri != null &&
+                    uri.host == 'houseofglam.app' &&
+                    uri.path == '/escrow/callback') {
+                  Navigator.pop(context);
+                  return NavigationDecision.prevent;
+                }
+                return NavigationDecision.navigate;
+              },
+            ),
+          )
+          ..loadRequest(Uri.parse(widget.authorizationUrl));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Escrow checkout'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Verify'),
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          if (_loading) const Center(child: CircularProgressIndicator()),
+          if (_errorMessage.isNotEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline_rounded,
+                      color: AppColors.subtext,
+                      size: 32,
+                    ),
+                    const SizedBox(height: 10),
+                    CustomText(
+                      _errorMessage,
+                      color: AppColors.subtext,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    CustomButton(
+                      title: 'Retry checkout',
+                      isOutlined: true,
+                      onPressed: () {
+                        setState(() {
+                          _loading = true;
+                          _errorMessage = '';
+                        });
+                        _controller.loadRequest(
+                          Uri.parse(widget.authorizationUrl),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+      bottomNavigationBar:
+          widget.paymentReference.isEmpty
+              ? null
+              : SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                  child: CustomText(
+                    'Reference: ${widget.paymentReference}',
+                    fontSize: 12,
+                    color: AppColors.subtext,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
     );
   }
 }

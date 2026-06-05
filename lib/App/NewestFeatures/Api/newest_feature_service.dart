@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/constants/api_config.dart';
 import 'package:hog/utils/session_expiry_handler.dart';
@@ -58,6 +59,43 @@ class ApiResult {
 class NewestFeatureService {
   static const String _baseUrl = ApiConfig.apiBaseUrl;
 
+  static void _log(String message) {
+    if (kDebugMode) {
+      debugPrint('[DesignerToolsApi] $message');
+    }
+  }
+
+  static String _formatJson(dynamic value) {
+    if (value == null) return 'null';
+    try {
+      return const JsonEncoder.withIndent('  ').convert(value);
+    } catch (_) {
+      return value.toString();
+    }
+  }
+
+  static void _logRequest({
+    required String method,
+    required Uri uri,
+    dynamic body,
+  }) {
+    _log('REQUEST $method $uri');
+    _log('Body: ${_formatJson(body)}');
+  }
+
+  static void _logResponse({
+    required String method,
+    required Uri uri,
+    required http.Response response,
+    required Duration duration,
+  }) {
+    _log(
+      'RESPONSE $method $uri '
+      '[${response.statusCode}] in ${duration.inMilliseconds}ms',
+    );
+    _log('Response body: ${response.body.isEmpty ? '<empty>' : response.body}');
+  }
+
   static Future<Map<String, String>> _headers({bool auth = true}) async {
     final headers = {'Content-Type': 'application/json'};
     if (auth) {
@@ -75,10 +113,12 @@ class NewestFeatureService {
     Map<String, dynamic>? body,
     bool auth = true,
   }) async {
+    final stopwatch = Stopwatch()..start();
+    final uri = Uri.parse('$_baseUrl$path');
     try {
-      final uri = Uri.parse('$_baseUrl$path');
       final headers = await _headers(auth: auth);
       final payload = body == null ? null : jsonEncode(body);
+      _logRequest(method: method, uri: uri, body: body);
 
       late final http.Response response;
       switch (method) {
@@ -94,11 +134,19 @@ class NewestFeatureService {
         default:
           response = await http.get(uri, headers: headers);
       }
+      stopwatch.stop();
+      _logResponse(
+        method: method,
+        uri: uri,
+        response: response,
+        duration: stopwatch.elapsed,
+      );
 
-      if (await SessionExpiryHandler.handleIfExpired(
-        statusCode: response.statusCode,
-        responseBody: response.body,
-      )) {
+      if (auth &&
+          await SessionExpiryHandler.handleIfExpired(
+            statusCode: response.statusCode,
+            responseBody: response.body,
+          )) {
         return ApiResult.failure(
           'Session expired',
           statusCode: response.statusCode,
@@ -106,7 +154,10 @@ class NewestFeatureService {
       }
 
       return ApiResult.fromResponse(response);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      stopwatch.stop();
+      _log('ERROR $method $uri after ${stopwatch.elapsedMilliseconds}ms: $e');
+      _log('Stack trace: $stackTrace');
       return ApiResult.failure(e.toString());
     }
   }
@@ -119,8 +170,9 @@ class NewestFeatureService {
     String fileField = 'images',
     bool auth = true,
   }) async {
+    final stopwatch = Stopwatch()..start();
+    final uri = Uri.parse('$_baseUrl$path');
     try {
-      final uri = Uri.parse('$_baseUrl$path');
       final request = http.MultipartRequest(method, uri);
       if (auth) {
         final token = await SecurePrefs.getToken();
@@ -129,19 +181,41 @@ class NewestFeatureService {
         }
       }
       request.fields.addAll(fields ?? const {});
+      final fileDetails = <Map<String, dynamic>>[];
       for (final file in files) {
-        request.files.add(
-          await http.MultipartFile.fromPath(fileField, file.path),
+        final multipartFile = await http.MultipartFile.fromPath(
+          fileField,
+          file.path,
         );
+        request.files.add(multipartFile);
+        fileDetails.add({
+          'field': fileField,
+          'name': multipartFile.filename,
+          'bytes': multipartFile.length,
+          'contentType': multipartFile.contentType.toString(),
+        });
       }
+      _logRequest(
+        method: method,
+        uri: uri,
+        body: {'multipartFields': request.fields, 'files': fileDetails},
+      );
 
       final streamed = await request.send();
       final response = await http.Response.fromStream(streamed);
+      stopwatch.stop();
+      _logResponse(
+        method: method,
+        uri: uri,
+        response: response,
+        duration: stopwatch.elapsed,
+      );
 
-      if (await SessionExpiryHandler.handleIfExpired(
-        statusCode: response.statusCode,
-        responseBody: response.body,
-      )) {
+      if (auth &&
+          await SessionExpiryHandler.handleIfExpired(
+            statusCode: response.statusCode,
+            responseBody: response.body,
+          )) {
         return ApiResult.failure(
           'Session expired',
           statusCode: response.statusCode,
@@ -149,7 +223,10 @@ class NewestFeatureService {
       }
 
       return ApiResult.fromResponse(response);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      stopwatch.stop();
+      _log('ERROR $method $uri after ${stopwatch.elapsedMilliseconds}ms: $e');
+      _log('Stack trace: $stackTrace');
       return ApiResult.failure(e.toString());
     }
   }
@@ -193,6 +270,10 @@ class NewestFeatureService {
     return _send('GET', '/measurements/profiles');
   }
 
+  static Future<ApiResult> getDesignerCustomerMeasurementProfiles() {
+    return _send('GET', '/measurements/designer/customer-profiles');
+  }
+
   static Future<ApiResult> requestMeasurements(Map<String, dynamic> body) {
     return _send('POST', '/measurements/requests', body: body);
   }
@@ -216,6 +297,10 @@ class NewestFeatureService {
     return _send('GET', '/measurements/requests');
   }
 
+  static Future<ApiResult> getOwnTailorProfile() {
+    return _send('GET', '/tailor/getTailor');
+  }
+
   static Future<ApiResult> updatePortfolio(Map<String, dynamic> body) {
     return _send('PUT', '/tailor/portfolio', body: body);
   }
@@ -235,6 +320,49 @@ class NewestFeatureService {
       files: images,
       fileField: 'images',
     );
+  }
+
+  static Future<ApiResult> updatePortfolioItemVisibility(
+    String itemId,
+    bool isVisible,
+  ) {
+    return _send(
+      'PUT',
+      '/tailor/portfolio/items/$itemId/visibility',
+      body: {'isVisible': isVisible},
+    );
+  }
+
+  static Future<ApiResult> updatePortfolioItem(
+    String itemId, {
+    required String caption,
+    required String category,
+    required bool isVisible,
+    File? image,
+  }) {
+    final fields = {
+      'caption': caption,
+      'category': category,
+      'isVisible': isVisible.toString(),
+    };
+    if (image != null) {
+      return _sendMultipart(
+        'PUT',
+        '/tailor/portfolio/items/$itemId',
+        fields: fields,
+        files: [image],
+        fileField: 'images',
+      );
+    }
+    return _send(
+      'PUT',
+      '/tailor/portfolio/items/$itemId',
+      body: {'caption': caption, 'category': category, 'isVisible': isVisible},
+    );
+  }
+
+  static Future<ApiResult> deletePortfolioItem(String itemId) {
+    return _send('DELETE', '/tailor/portfolio/items/$itemId');
   }
 
   static Future<ApiResult> getDesignerProfile(String designerId) {
@@ -269,11 +397,7 @@ class NewestFeatureService {
   }
 
   static Future<ApiResult> getDesignerReviews(String designerId) {
-    return _send(
-      'GET',
-      '/reputation/designers/$designerId/reviews',
-      auth: false,
-    );
+    return _send('GET', '/reputation/designers/$designerId/reviews');
   }
 
   static Future<ApiResult> recordEscrowPayment(
@@ -289,13 +413,19 @@ class NewestFeatureService {
 
   static Future<ApiResult> payCustomRequest(
     String requestId,
-    String milestoneName,
-  ) {
-    return _send(
-      'POST',
-      '/custom-orders/requests/$requestId/pay',
-      body: {'milestoneName': milestoneName},
-    );
+    String milestoneName, {
+    String? callbackUrl,
+  }) {
+    final body = {'milestoneName': milestoneName};
+    if (callbackUrl != null && callbackUrl.isNotEmpty) {
+      body['callbackUrl'] = callbackUrl;
+    }
+    return _send('POST', '/custom-orders/requests/$requestId/pay', body: body);
+  }
+
+  static Future<ApiResult> verifyEscrowPayment(String paymentReference) {
+    final reference = Uri.encodeComponent(paymentReference);
+    return _send('GET', '/custom-orders/escrow/verify/$reference');
   }
 
   static Future<ApiResult> getDesignerEscrowWallet() {
@@ -318,6 +448,25 @@ class NewestFeatureService {
 
   static Future<ApiResult> updateWorkflow(Map<String, dynamic> body) {
     return _send('PUT', '/custom-orders/workflow', body: body);
+  }
+
+  static Future<ApiResult> getDesignerWorkflows() {
+    return _send('GET', '/custom-orders/workflows');
+  }
+
+  static Future<ApiResult> createDesignerWorkflow(Map<String, dynamic> body) {
+    return _send('POST', '/custom-orders/workflows', body: body);
+  }
+
+  static Future<ApiResult> updateDesignerWorkflowStatus(
+    String workflowId,
+    Map<String, dynamic> body,
+  ) {
+    return _send(
+      'PUT',
+      '/custom-orders/workflows/$workflowId/status',
+      body: body,
+    );
   }
 
   static Future<ApiResult> createMoodboard(Map<String, dynamic> body) {
@@ -501,10 +650,10 @@ class NewestFeatureService {
     String conversationId,
     Map<String, dynamic> body,
   ) {
-    return _send(
+    return _sendMultipart(
       'POST',
       '/messaging/conversations/$conversationId/messages',
-      body: body,
+      fields: body.map((key, value) => MapEntry(key, value.toString())),
     );
   }
 

@@ -47,9 +47,9 @@ class _UserProfileState extends State<UserProfile> {
     return role.contains('admin');
   }
 
-  bool get isTailor {
+  bool get isDesigner {
     final role = (userRole ?? '').trim().toLowerCase();
-    return role.contains('tailor');
+    return const {'tailor', 'designer', 'vendor', 'seller'}.contains(role);
   }
 
   String get roleLabel {
@@ -126,8 +126,10 @@ class _UserProfileState extends State<UserProfile> {
                       ],
                     ),
                     const SizedBox(height: 14),
-                    const CustomText(
-                      "Manage your marketplace activity, deliveries, listings, and subscriptions.",
+                    CustomText(
+                      isDesigner
+                          ? "Manage your marketplace activity, deliveries, listings, and subscriptions."
+                          : "Manage your marketplace activity, orders, and deliveries.",
                       textAlign: TextAlign.left,
                       color: AppColors.subtext,
                     ),
@@ -176,7 +178,7 @@ class _UserProfileState extends State<UserProfile> {
                   Nav.push(context, const MarketDelivery());
                 },
               ),
-              if (isTailor) ...[
+              if (isDesigner) ...[
                 const Padding(
                   padding: EdgeInsets.fromLTRB(18, 12, 18, 8),
                   child: CustomText(

@@ -166,7 +166,7 @@ void showDeliveryDetails(
                                 value: tracking.material.clothMaterial,
                               ),
                               _DetailRow(
-                                label: "Color",
+                                label: "Colour",
                                 value: tracking.material.color,
                               ),
                               _DetailRow(
@@ -423,6 +423,7 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
+
 class _SummaryTile extends StatelessWidget {
   final String label;
   final String value;
@@ -490,6 +491,7 @@ class _SummaryTile extends StatelessWidget {
   }
 }
 
+
 class _SectionCard extends StatelessWidget {
   final List<Widget> children;
 
@@ -509,6 +511,7 @@ class _SectionCard extends StatelessWidget {
     );
   }
 }
+
 
 class _DetailRow extends StatelessWidget {
   final String label;

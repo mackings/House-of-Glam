@@ -2,111 +2,106 @@ import 'package:flutter/material.dart';
 
 class CarouselItemWidget extends StatelessWidget {
   final String title;
-  final String assetImage;
-  final String? ctaLabel;
+  final String subtitle;
+  final String eyebrow;
+  final String ctaLabel;
+  final IconData icon;
+  final Color background;
+  final Color accent;
   final double borderRadius;
 
   const CarouselItemWidget({
-    Key? key,
+    super.key,
     required this.title,
-    required this.assetImage,
-    this.ctaLabel,
+    required this.subtitle,
+    required this.eyebrow,
+    required this.ctaLabel,
+    required this.icon,
+    required this.background,
+    required this.accent,
     this.borderRadius = 16,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 9),
-      color: Colors.white,
-      child: ClipRRect(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: background,
         borderRadius: BorderRadius.circular(borderRadius),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.asset(assetImage, fit: BoxFit.cover),
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.black.withValues(alpha: 0.58),
-                      Colors.black.withValues(alpha: 0.08),
-                    ],
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
+        border: Border.all(color: accent.withValues(alpha: 0.22)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  eyebrow.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: accent,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-              ),
-            ),
-            Positioned(
-              left: 14,
-              right: 14,
-              bottom: 12,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (title.isNotEmpty)
+                const SizedBox(height: 7),
+                Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF172033),
+                    fontSize: 18,
+                    height: 1.08,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF667085),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 9),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(
-                            blurRadius: 4,
-                            color: Colors.black45,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
+                      ctaLabel,
+                      style: TextStyle(
+                        color: accent,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                  if (ctaLabel != null) ...[
-                    if (title.isNotEmpty) const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.92),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        ctaLabel!,
-                        style: const TextStyle(
-                          color: Color(0xFF172033),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.arrow_forward_rounded, size: 15, color: accent),
                   ],
-                ],
-              ),
-            ),
-            if (title.isEmpty && ctaLabel == null)
-              Container(
-                alignment: Alignment.bottomCenter,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.black.withValues(alpha: 0.5),
-                      Colors.transparent,
-                    ],
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                  ),
                 ),
-                child: const SizedBox.shrink(),
-              ),
-          ],
-        ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            width: 72,
+            height: 96,
+            decoration: BoxDecoration(
+              color: accent,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.white, size: 34),
+          ),
+        ],
       ),
     );
   }

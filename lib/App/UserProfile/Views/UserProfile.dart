@@ -105,6 +105,7 @@ class _UserProfileViewState extends State<UserProfileView> {
   @override
   Widget build(BuildContext context) {
     final profile = _userProfile;
+    final isDesigner = _isDesignerRole(profile?.role);
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
@@ -252,14 +253,15 @@ class _UserProfileViewState extends State<UserProfileView> {
                                           ? const Color(0xFFEEF8F2)
                                           : const Color(0xFFFDECEC),
                                 ),
-                                _StatusChip(
-                                  icon: Icons.workspace_premium_outlined,
-                                  label: _formatCapitalized(
-                                    profile.subscriptionPlan,
+                                if (isDesigner)
+                                  _StatusChip(
+                                    icon: Icons.workspace_premium_outlined,
+                                    label: _formatCapitalized(
+                                      profile.subscriptionPlan,
+                                    ),
+                                    foreground: AppColors.accent,
+                                    background: AppColors.accentSoft,
                                   ),
-                                  foreground: AppColors.accent,
-                                  background: AppColors.accentSoft,
-                                ),
                               ],
                             ),
                             const SizedBox(height: 16),
@@ -345,10 +347,11 @@ class _UserProfileViewState extends State<UserProfileView> {
                           showArrow: true,
                         ),
                       ),
-                      if ((profile.subscriptionPlan == null ||
-                          profile.subscriptionPlan!.isEmpty ||
-                          profile.subscriptionPlan!.toLowerCase() ==
-                              "free")) ...[
+                      if (isDesigner &&
+                          (profile.subscriptionPlan == null ||
+                              profile.subscriptionPlan!.isEmpty ||
+                              profile.subscriptionPlan!.toLowerCase() ==
+                                  "free")) ...[
                         const SizedBox(height: 10),
                         const _SectionTitle("Upgrade"),
                         GestureDetector(
@@ -385,6 +388,11 @@ class _UserProfileViewState extends State<UserProfileView> {
       ),
     );
   }
+}
+
+bool _isDesignerRole(String? role) {
+  final normalized = role?.trim().toLowerCase() ?? '';
+  return const {'tailor', 'designer', 'vendor', 'seller'}.contains(normalized);
 }
 
 class _QuickAction extends StatelessWidget {

@@ -22,15 +22,17 @@ class Alltailors extends ConsumerStatefulWidget {
 class _AlltailorsState extends ConsumerState<Alltailors> {
   final Set<String> _openingTailorIds = <String>{};
   final Map<String, String> _prefetchedVendorImages = {};
+  late List<Tailor> _tailors;
 
   @override
   void initState() {
     super.initState();
+    _tailors = List<Tailor>.from(widget.tailors);
     _primeVendorProfiles();
   }
 
   void _primeVendorProfiles() {
-    for (final tailor in widget.tailors) {
+    for (final tailor in _tailors) {
       final cachedImage = HomeApiService.getCachedVendorImage(tailor.id);
       if (cachedImage != null && cachedImage.isNotEmpty) {
         _prefetchedVendorImages[tailor.id] = cachedImage;
@@ -51,6 +53,13 @@ class _AlltailorsState extends ConsumerState<Alltailors> {
         }),
       );
     }
+  }
+
+  Future<void> _refreshTailors() async {
+    final tailors = await HomeApiService.getAllTailors();
+    if (!mounted) return;
+    setState(() => _tailors = tailors);
+    _primeVendorProfiles();
   }
 
   Future<void> _openTailor(Tailor tailor) async {
@@ -86,6 +95,7 @@ class _AlltailorsState extends ConsumerState<Alltailors> {
             (context) => Details(
               vendor: vendorDetails.vendor,
               userProfile: vendorDetails.userProfile,
+              onRatingUpdated: _refreshTailors,
             ),
       ),
     );
@@ -101,7 +111,7 @@ class _AlltailorsState extends ConsumerState<Alltailors> {
       ),
       body: SafeArea(
         child:
-            widget.tailors.isEmpty
+            _tailors.isEmpty
                 ? const Center(child: Text("No designers available"))
                 : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +127,7 @@ class _AlltailorsState extends ConsumerState<Alltailors> {
                     Expanded(
                       child: GridView.builder(
                         padding: const EdgeInsets.all(20),
-                        itemCount: widget.tailors.length,
+                        itemCount: _tailors.length,
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
@@ -126,7 +136,7 @@ class _AlltailorsState extends ConsumerState<Alltailors> {
                               mainAxisSpacing: 12,
                             ),
                         itemBuilder: (context, index) {
-                          final tailor = widget.tailors[index];
+                          final tailor = _tailors[index];
                           return TailorCard(
                             tailor: tailor,
                             imageUrl: _prefetchedVendorImages[tailor.id],

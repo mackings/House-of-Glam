@@ -8,8 +8,14 @@ import 'package:hog/theme/app_theme.dart';
 class Details extends StatefulWidget {
   final Vendor vendor;
   final UserProfile userProfile;
+  final VoidCallback? onRatingUpdated;
 
-  const Details({super.key, required this.vendor, required this.userProfile});
+  const Details({
+    super.key,
+    required this.vendor,
+    required this.userProfile,
+    this.onRatingUpdated,
+  });
 
   @override
   State<Details> createState() => _DetailsState();
@@ -18,6 +24,13 @@ class Details extends StatefulWidget {
 class _DetailsState extends State<Details> {
   int _selectedRating = 0;
   bool _isSubmittingRating = false;
+  late Vendor _vendor;
+
+  @override
+  void initState() {
+    super.initState();
+    _vendor = widget.vendor;
+  }
 
   void _showRatingBottomSheet() {
     showModalBottomSheet(
@@ -51,7 +64,7 @@ class _DetailsState extends State<Details> {
               ),
               const SizedBox(height: 16),
               Text(
-                "Rate ${widget.vendor.businessName}",
+                "Rate ${_vendor.businessName}",
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -81,9 +94,10 @@ class _DetailsState extends State<Details> {
                             ? Icons.star_rounded
                             : Icons.star_border_rounded,
                         size: 38,
-                        color: index < _selectedRating
-                            ? Colors.amber
-                            : AppColors.border,
+                        color:
+                            index < _selectedRating
+                                ? Colors.amber
+                                : AppColors.border,
                       ),
                     ),
                   );
@@ -137,10 +151,7 @@ class _DetailsState extends State<Details> {
       _isSubmittingRating = true;
     });
 
-    final success = await HomeApiService.rateVendor(
-      widget.vendor.id,
-      _selectedRating,
-    );
+    final result = await HomeApiService.rateVendor(_vendor.id, _selectedRating);
 
     setModalState(() {
       _isSubmittingRating = false;
@@ -150,11 +161,13 @@ class _DetailsState extends State<Details> {
       return;
     }
 
-    if (success) {
+    if (result != null) {
+      setState(() => _vendor = result.vendor);
       Navigator.pop(context);
+      widget.onRatingUpdated?.call();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Thanks for rating ${widget.vendor.businessName}!"),
+          content: Text("Thanks for rating ${_vendor.businessName}!"),
           backgroundColor: AppColors.success,
         ),
       );
@@ -170,15 +183,12 @@ class _DetailsState extends State<Details> {
 
   @override
   Widget build(BuildContext context) {
-    final vendor = widget.vendor;
+    final vendor = _vendor;
     final userProfile = widget.userProfile;
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: CustomAppBar(
-        title: vendor.businessName,
-        enableAction: false,
-      ),
+      appBar: CustomAppBar(title: vendor.businessName, enableAction: false),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(18, 8, 18, 120),
         child: Column(
@@ -196,23 +206,23 @@ class _DetailsState extends State<Details> {
                 children: [
                   userProfile.image.isNotEmpty
                       ? CircleAvatar(
-                          radius: 46,
-                          backgroundImage: NetworkImage(userProfile.image),
-                        )
+                        radius: 46,
+                        backgroundImage: NetworkImage(userProfile.image),
+                      )
                       : CircleAvatar(
-                          radius: 46,
-                          backgroundColor: AppColors.accentSoft,
-                          child: Text(
-                            userProfile.fullName.isNotEmpty
-                                ? userProfile.fullName[0].toUpperCase()
-                                : "?",
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.accent,
-                            ),
+                        radius: 46,
+                        backgroundColor: AppColors.accentSoft,
+                        child: Text(
+                          userProfile.fullName.isNotEmpty
+                              ? userProfile.fullName[0].toUpperCase()
+                              : "?",
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.accent,
                           ),
                         ),
+                      ),
                   const SizedBox(height: 14),
                   Text(
                     userProfile.fullName,
@@ -245,7 +255,7 @@ class _DetailsState extends State<Details> {
                       ),
                       _StatChip(
                         icon: Icons.workspace_premium_outlined,
-                        label: "${vendor.rate}/5 rating",
+                        label: "${_ratingText(vendor.rate)}/5 rating",
                       ),
                       _StatChip(
                         icon: Icons.work_outline_rounded,
@@ -261,11 +271,6 @@ class _DetailsState extends State<Details> {
               title: "Business Information",
               children: [
                 _InfoTile(
-                  icon: Icons.location_on_outlined,
-                  title: "Business Address",
-                  subtitle: vendor.address,
-                ),
-                _InfoTile(
                   icon: Icons.location_city_outlined,
                   title: "City",
                   subtitle: vendor.city,
@@ -274,42 +279,6 @@ class _DetailsState extends State<Details> {
                   icon: Icons.map_outlined,
                   title: "State",
                   subtitle: vendor.state,
-                ),
-                _InfoTile(
-                  icon: Icons.call_outlined,
-                  title: "Business Phone",
-                  subtitle: vendor.businessPhone,
-                ),
-                _InfoTile(
-                  icon: Icons.mail_outline_rounded,
-                  title: "Business Email",
-                  subtitle: vendor.businessEmail,
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            _InfoSection(
-              title: "Profile",
-              children: [
-                _InfoTile(
-                  icon: Icons.person_outline_rounded,
-                  title: "Full Name",
-                  subtitle: userProfile.fullName,
-                ),
-                _InfoTile(
-                  icon: Icons.phone_outlined,
-                  title: "Phone Number",
-                  subtitle: userProfile.phoneNumber,
-                ),
-                _InfoTile(
-                  icon: Icons.home_outlined,
-                  title: "Address",
-                  subtitle: userProfile.address,
-                ),
-                _InfoTile(
-                  icon: Icons.alternate_email_rounded,
-                  title: "Email",
-                  subtitle: userProfile.email,
                 ),
               ],
             ),
@@ -326,6 +295,12 @@ class _DetailsState extends State<Details> {
       ),
     );
   }
+}
+
+String _ratingText(double value) {
+  return value == value.roundToDouble()
+      ? value.toInt().toString()
+      : value.toStringAsFixed(1);
 }
 
 class _InfoSection extends StatelessWidget {

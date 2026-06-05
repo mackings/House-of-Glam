@@ -19,6 +19,7 @@ class DesignerProfileDetail extends StatefulWidget {
 
 class _DesignerProfileDetailState extends State<DesignerProfileDetail> {
   late Future<ApiResult> _future;
+  bool _showPortfolio = false;
 
   @override
   void initState() {
@@ -170,22 +171,41 @@ class _DesignerProfileDetailState extends State<DesignerProfileDetail> {
               const SizedBox(height: 14),
               _SocialProof(socialProof: socialProof),
               const SizedBox(height: 14),
-              _GallerySection(title: 'Portfolio Gallery', urls: gallery),
-              const SizedBox(height: 14),
-              ...sections.entries.map(
-                (entry) => Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: _GallerySection(
-                    title: _sectionLabel(entry.key),
-                    urls:
-                        entry.value is List
-                            ? (entry.value as List)
-                                .map((e) => e.toString())
-                                .toList()
-                            : const <String>[],
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  key: const ValueKey('view_designer_portfolio'),
+                  onPressed:
+                      () => setState(() => _showPortfolio = !_showPortfolio),
+                  icon: Icon(
+                    _showPortfolio
+                        ? Icons.expand_less_rounded
+                        : Icons.photo_library_outlined,
+                  ),
+                  label: Text(
+                    _showPortfolio ? 'Hide portfolio' : 'View portfolio',
                   ),
                 ),
               ),
+              if (_showPortfolio) ...[
+                const SizedBox(height: 14),
+                _GallerySection(title: 'Portfolio Gallery', urls: gallery),
+                const SizedBox(height: 14),
+                ...sections.entries.map(
+                  (entry) => Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: _GallerySection(
+                      title: _sectionLabel(entry.key),
+                      urls:
+                          entry.value is List
+                              ? (entry.value as List)
+                                  .map((e) => e.toString())
+                                  .toList()
+                              : const <String>[],
+                    ),
+                  ),
+                ),
+              ],
             ],
           );
         },

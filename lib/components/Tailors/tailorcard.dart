@@ -66,11 +66,13 @@ class _TailorCardState extends State<TailorCard> {
     final cardWidth = (screenWidth - 64) / 2;
     final imageHeight = cardWidth * 0.74;
     final isSmallScreen = screenWidth < 360;
-    final imageToUse = (widget.imageUrl != null && widget.imageUrl!.trim().isNotEmpty)
-        ? widget.imageUrl!.trim()
-        : ((tailor.user?.image != null && tailor.user!.image!.trim().isNotEmpty)
-            ? tailor.user!.image!.trim()
-            : null);
+    final imageToUse =
+        (widget.imageUrl != null && widget.imageUrl!.trim().isNotEmpty)
+            ? widget.imageUrl!.trim()
+            : ((tailor.user?.image != null &&
+                    tailor.user!.image!.trim().isNotEmpty)
+                ? tailor.user!.image!.trim()
+                : null);
 
     return GestureDetector(
       onTap: widget.onTap,
@@ -96,17 +98,18 @@ class _TailorCardState extends State<TailorCard> {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(22),
                   ),
-                  child: imageToUse != null
-                      ? Image.network(
-                          imageToUse,
-                          height: imageHeight,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return _placeholder(imageHeight);
-                          },
-                        )
-                      : _placeholder(imageHeight),
+                  child:
+                      imageToUse != null
+                          ? Image.network(
+                            imageToUse,
+                            height: imageHeight,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return _placeholder(imageHeight);
+                            },
+                          )
+                          : _placeholder(imageHeight),
                 ),
                 Positioned(
                   top: 10,
@@ -130,7 +133,8 @@ class _TailorCardState extends State<TailorCard> {
                         isFavorite
                             ? Icons.favorite_rounded
                             : Icons.favorite_border_rounded,
-                        color: isFavorite ? AppColors.danger : AppColors.subtext,
+                        color:
+                            isFavorite ? AppColors.danger : AppColors.subtext,
                         size: isSmallScreen ? 16 : 18,
                       ),
                     ),
@@ -190,7 +194,7 @@ class _TailorCardState extends State<TailorCard> {
                             ),
                             const SizedBox(width: 4),
                             CustomText(
-                              "${tailor.totalRatings} reviews",
+                              "${_averageRating(tailor)} • ${tailor.totalRatings} ${tailor.totalRatings == 1 ? 'review' : 'reviews'}",
                               fontSize: isSmallScreen ? 10 : 11,
                               color: AppColors.subtext,
                               fontWeight: FontWeight.w600,
@@ -209,13 +213,22 @@ class _TailorCardState extends State<TailorCard> {
     );
   }
 
+  String _averageRating(Tailor tailor) {
+    final count = tailor.totalRatings ?? 0;
+    if (count == 0) return '0';
+    final average = (tailor.ratingSum ?? 0) / count;
+    return average == average.roundToDouble()
+        ? average.toInt().toString()
+        : average.toStringAsFixed(1);
+  }
+
   Widget _placeholder(double imageHeight) {
     final initialsSource =
-        widget.tailor.businessName ??
-        widget.tailor.user?.fullName ??
-        "T";
+        widget.tailor.businessName ?? widget.tailor.user?.fullName ?? "T";
     final initials =
-        initialsSource.trim().isEmpty ? "T" : initialsSource.trim()[0].toUpperCase();
+        initialsSource.trim().isEmpty
+            ? "T"
+            : initialsSource.trim()[0].toUpperCase();
 
     return Container(
       height: imageHeight,

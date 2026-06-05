@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
 import 'package:hog/App/NewestFeatures/Api/newest_feature_service.dart';
+import 'package:hog/App/NewestFeatures/Views/designer_profile_detail.dart';
 import 'package:hog/App/NewestFeatures/Views/feature_hub.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/button.dart';
@@ -139,6 +140,17 @@ class _GuestExploreState extends State<GuestExplore> {
                           item: item,
                           icon: Icons.design_services_outlined,
                           onProtectedAction: _requireAccount,
+                          onOpen:
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) => DesignerProfileDetail(
+                                        designerId: _designerId(item),
+                                        initialData: item,
+                                      ),
+                                ),
+                              ),
                         ),
                       ),
               ],
@@ -206,11 +218,13 @@ class _PublicResultCard extends StatelessWidget {
   final Map<String, dynamic> item;
   final IconData icon;
   final VoidCallback onProtectedAction;
+  final VoidCallback? onOpen;
 
   const _PublicResultCard({
     required this.item,
     required this.icon,
     required this.onProtectedAction,
+    this.onOpen,
   });
 
   @override
@@ -228,70 +242,79 @@ class _PublicResultCard extends StatelessWidget {
         'Open an account to interact with this item.';
     final image = _firstImage(item);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child:
-                image == null
-                    ? Container(
-                      width: 72,
-                      height: 72,
-                      color: AppColors.surfaceMuted,
-                      child: Icon(icon, color: AppColors.accent),
-                    )
-                    : Image.network(
-                      image,
-                      width: 72,
-                      height: 72,
-                      fit: BoxFit.cover,
-                      errorBuilder:
-                          (_, __, ___) => Container(
-                            width: 72,
-                            height: 72,
-                            color: AppColors.surfaceMuted,
-                            child: Icon(icon, color: AppColors.accent),
-                          ),
-                    ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText(
-                  title,
-                  fontWeight: FontWeight.w800,
-                  textAlign: TextAlign.left,
-                ),
-                const SizedBox(height: 4),
-                CustomText(
-                  subtitle,
-                  fontSize: 12,
-                  color: AppColors.subtext,
-                  textAlign: TextAlign.left,
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    onPressed: onProtectedAction,
-                    icon: const Icon(Icons.favorite_border_rounded, size: 18),
-                    label: const Text('Save'),
-                  ),
-                ),
-              ],
+    return InkWell(
+      onTap: onOpen,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child:
+                  image == null
+                      ? Container(
+                        width: 72,
+                        height: 72,
+                        color: AppColors.surfaceMuted,
+                        child: Icon(icon, color: AppColors.accent),
+                      )
+                      : Image.network(
+                        image,
+                        width: 72,
+                        height: 72,
+                        fit: BoxFit.cover,
+                        errorBuilder:
+                            (_, __, ___) => Container(
+                              width: 72,
+                              height: 72,
+                              color: AppColors.surfaceMuted,
+                              child: Icon(icon, color: AppColors.accent),
+                            ),
+                      ),
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(
+                    title,
+                    fontWeight: FontWeight.w800,
+                    textAlign: TextAlign.left,
+                  ),
+                  const SizedBox(height: 4),
+                  CustomText(
+                    subtitle,
+                    fontSize: 12,
+                    color: AppColors.subtext,
+                    textAlign: TextAlign.left,
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: onOpen ?? onProtectedAction,
+                      icon: Icon(
+                        onOpen == null
+                            ? Icons.favorite_border_rounded
+                            : Icons.person_outline_rounded,
+                        size: 18,
+                      ),
+                      label: Text(onOpen == null ? 'Save' : 'View profile'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -311,6 +334,14 @@ class _PublicResultCard extends StatelessWidget {
     }
     return item['image']?.toString();
   }
+}
+
+String _designerId(Map<String, dynamic> item) {
+  return item['_id']?.toString() ??
+      item['id']?.toString() ??
+      item['designerId']?.toString() ??
+      item['tailorId']?.toString() ??
+      '';
 }
 
 class _SectionHeader extends StatelessWidget {

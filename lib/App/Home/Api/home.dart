@@ -170,7 +170,10 @@ class HomeApiService {
   }
 
   // ✅ ADD RATING API
-  static Future<bool> rateVendor(String vendorId, int rating) async {
+  static Future<VendorRatingResult?> rateVendor(
+    String vendorId,
+    int rating,
+  ) async {
     try {
       final token = await SecurePrefs.getToken();
       final url = Uri.parse("$baseUrl/rate/rate/$vendorId");
@@ -192,18 +195,39 @@ class HomeApiService {
         statusCode: response.statusCode,
         responseBody: response.body,
       )) {
-        return false;
+        return null;
       }
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return true;
+        final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+        final vendorJson = Map<String, dynamic>.from(
+          decoded['vendor'] as Map? ?? const {},
+        );
+        vendorJson['averageRating'] = decoded['averageRating'];
+        final vendor = Vendor.fromJson(vendorJson);
+        final cached = _vendorCache[vendorId];
+        if (cached != null) {
+          _vendorCache[vendorId] = VendorDetailsResponse(
+            success: true,
+            message: decoded['message']?.toString() ?? '',
+            vendor: vendor,
+            userProfile: cached.userProfile,
+          );
+        }
+        return VendorRatingResult(
+          message:
+              decoded['message']?.toString() ?? 'Vendor rated successfully',
+          averageRating:
+              (decoded['averageRating'] as num?)?.toDouble() ?? vendor.rate,
+          vendor: vendor,
+        );
       } else {
         print("❌ Rating failed with status: ${response.statusCode}");
-        return false;
+        return null;
       }
     } catch (e) {
       print("❌ Error rating vendor: $e");
-      return false;
+      return null;
     }
   }
 
@@ -242,4 +266,16 @@ class HomeApiService {
       return false;
     }
   }
+}
+
+class VendorRatingResult {
+  final String message;
+  final double averageRating;
+  final Vendor vendor;
+
+  const VendorRatingResult({
+    required this.message,
+    required this.averageRating,
+    required this.vendor,
+  });
 }

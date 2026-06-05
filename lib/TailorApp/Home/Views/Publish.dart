@@ -360,7 +360,7 @@ class _PublishMaterialState extends State<PublishMaterial> {
                           children: [
                             _buildFieldLabel("Color", true),
                             _buildStyledDropdown(
-                              hint: "Select color",
+                              hint: "Select colour",
                               value: selectedColor,
                               options: colors,
                               onChanged: (val) {
@@ -530,7 +530,7 @@ class _PublishMaterialState extends State<PublishMaterial> {
             children: [
               _buildMiniInfoChip(
                 icon: Icons.style_outlined,
-                text: "Category, type, color",
+                text: "Category, Type, Colour",
               ),
               _buildMiniInfoChip(
                 icon: Icons.image_outlined,

@@ -33,12 +33,14 @@ class Vendor {
   final String state;
   final String yearOfExperience;
   final String description;
-  final int rate;
+  final double _rate;
   final String createdAt;
   final String updatedAt;
   final int ratingSum;
   final int totalRatings;
   final List<String> ratings;
+
+  double get rate => _rate;
 
   Vendor({
     required this.id,
@@ -52,13 +54,13 @@ class Vendor {
     required this.state,
     required this.yearOfExperience,
     required this.description,
-    required this.rate,
+    required num rate,
     required this.createdAt,
     required this.updatedAt,
     required this.ratingSum,
     required this.totalRatings,
     required this.ratings,
-  });
+  }) : _rate = rate.toDouble();
 
   factory Vendor.fromJson(Map<String, dynamic> json) {
     return Vendor(
@@ -73,7 +75,10 @@ class Vendor {
       state: json['state'] ?? '',
       yearOfExperience: json['yearOfExperience'] ?? '',
       description: json['description'] ?? '',
-      rate: json['rate'] ?? 0,
+      rate:
+          (json['averageRating'] as num?)?.toDouble() ??
+          (json['rate'] as num?)?.toDouble() ??
+          0.0,
       createdAt: json['createdAt'] ?? '',
       updatedAt: json['updatedAt'] ?? '',
       ratingSum: json['ratingSum'] ?? 0,

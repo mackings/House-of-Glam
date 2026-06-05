@@ -109,7 +109,6 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     return merged.values.toList();
   }
 
-
   @override
   void initState() {
     super.initState();
@@ -156,29 +155,27 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
   }
 
   void _autoFillHalfPayment() {
-    // Calculate half of the total amount to pay
+    // Checkout APIs receive NGN for Nigerian users, including Stripe orders.
+    // Use the accepted offer total when available so the deposit matches the
+    // amount shown on the quotation card.
     final totalToPay =
-        widget.review.isInternationalVendor
+        _isUserInNigeria
+            ? widget.review.userPayableTotal ?? widget.review.totalCost
+            : widget.review.isInternationalVendor
             ? widget.review.totalCostUSD
-            : widget.review.totalCost;
+            : widget.review.userPayableTotal ?? widget.review.totalCost;
     final halfAmount = totalToPay / 2;
     amountController.text = _formatAmount(halfAmount);
   }
 
   String _formatAmount(double value) {
-    if (_isUserInNigeria) {
-      return NumberFormat('#,###').format(value.round());
-    }
     return NumberFormat('#,##0.##').format(value);
   }
 
   void _handleAmountChange(String value) {
     final cleaned = value.replaceAll(',', '');
     if (cleaned.isEmpty) return;
-    final parsed =
-        _isUserInNigeria
-            ? double.tryParse(cleaned)?.roundToDouble()
-            : double.tryParse(cleaned);
+    final parsed = double.tryParse(cleaned);
     if (parsed == null) return;
     final formatted = _formatAmount(parsed);
     if (formatted == value) return;
@@ -293,7 +290,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                           ],
                         ),
                       ),
-                      
+
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                         child: TextField(
@@ -567,7 +564,6 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
       postalCodeController.text.trim(),
     ].join('|');
   }
-
 
   Future<bool> _showDeliveryFeeSheet(String amountLabel) async {
     if (!mounted) return false;
@@ -995,7 +991,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
 
           if (isUserInNigeria) {
             // ✅ Nigerian user entering NGN - send as-is, backend handles conversion
-            amountToSend = userEnteredAmount.round().toString();
+            amountToSend = userEnteredAmount.toString();
             print('✅ NO CONVERSION NEEDED - Backend will convert');
             print('   User entered: ₦$userEnteredAmount');
             print('   Sending to backend: $amountToSend NGN');
@@ -1367,19 +1363,15 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                     CustomTextField(
                       title: _isUserInNigeria ? "Amount (NGN)" : "Amount (USD)",
                       fieldKey: "amount",
-                      hintText:
-                          _isUserInNigeria
-                              ? "Enter amount e.g., 23,000"
-                              : "Enter amount e.g., 120.50",
+                      hintText: "50% of the quotation total",
                       controller: amountController,
+                      readOnly: true,
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(
-                          _isUserInNigeria
-                              ? RegExp(r'^[0-9,]*$')
-                              : RegExp(r'^[0-9,]*\.?\d{0,2}$'),
+                          RegExp(r'^[0-9,]*\.?\d{0,2}$'),
                         ),
                       ],
                       onChanged: _handleAmountChange,

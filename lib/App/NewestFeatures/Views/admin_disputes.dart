@@ -57,6 +57,7 @@ class _AdminDisputesState extends State<AdminDisputes> {
   }
 
   Future<void> _releaseEscrow() async {
+    if (!_validateEscrowAction()) return;
     setState(() => _saving = true);
     final result =
         await NewestFeatureService.releaseEscrow(_escrowId.text.trim(), {
@@ -69,6 +70,7 @@ class _AdminDisputesState extends State<AdminDisputes> {
   }
 
   Future<void> _refundEscrow() async {
+    if (!_validateEscrowAction()) return;
     setState(() => _saving = true);
     final result =
         await NewestFeatureService.refundEscrow(_escrowId.text.trim(), {
@@ -78,6 +80,23 @@ class _AdminDisputesState extends State<AdminDisputes> {
     if (!mounted) return;
     setState(() => _saving = false);
     _showResult(result);
+  }
+
+  bool _validateEscrowAction() {
+    final amount = double.tryParse(_escrowAmount.text.trim());
+    if (_escrowId.text.trim().isEmpty) {
+      _showResult(ApiResult.failure('Enter an escrow ID.'));
+      return false;
+    }
+    if (amount == null || amount <= 0) {
+      _showResult(ApiResult.failure('Enter a valid amount greater than zero.'));
+      return false;
+    }
+    if (_escrowNote.text.trim().isEmpty) {
+      _showResult(ApiResult.failure('Enter an admin note.'));
+      return false;
+    }
+    return true;
   }
 
   void _showResult(ApiResult result) {

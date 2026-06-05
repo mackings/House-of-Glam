@@ -352,15 +352,18 @@ class _OnboardingCard extends StatelessWidget {
       builder: (context, constraints) {
         final compact = constraints.maxHeight < 720;
         final veryCompact = constraints.maxHeight < 620;
+        final ultraCompact = constraints.maxHeight < 420;
 
         return SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: constraints.maxHeight - 16),
             child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 8),
+              margin: EdgeInsets.symmetric(vertical: ultraCompact ? 4 : 8),
               padding: EdgeInsets.all(
-                veryCompact
+                ultraCompact
+                    ? 12
+                    : veryCompact
                     ? 18
                     : compact
                     ? 22
@@ -392,20 +395,28 @@ class _OnboardingCard extends StatelessWidget {
                 children: [
                   Container(
                     width:
-                        veryCompact
+                        ultraCompact
+                            ? 44
+                            : veryCompact
                             ? 60
                             : compact
                             ? 70
                             : 88,
                     height:
-                        veryCompact
+                        ultraCompact
+                            ? 44
+                            : veryCompact
                             ? 60
                             : compact
                             ? 70
                             : 88,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(
-                        veryCompact ? 20 : 28,
+                        ultraCompact
+                            ? 15
+                            : veryCompact
+                            ? 20
+                            : 28,
                       ),
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -423,7 +434,9 @@ class _OnboardingCard extends StatelessWidget {
                       item.icon,
                       color: item.accent,
                       size:
-                          veryCompact
+                          ultraCompact
+                              ? 22
+                              : veryCompact
                               ? 28
                               : compact
                               ? 32
@@ -432,7 +445,9 @@ class _OnboardingCard extends StatelessWidget {
                   ),
                   SizedBox(
                     height:
-                        veryCompact
+                        ultraCompact
+                            ? 8
+                            : veryCompact
                             ? 12
                             : compact
                             ? 16
@@ -440,8 +455,8 @@ class _OnboardingCard extends StatelessWidget {
                   ),
                   Container(
                     padding: EdgeInsets.symmetric(
-                      horizontal: veryCompact ? 10 : 12,
-                      vertical: veryCompact ? 6 : 8,
+                      horizontal: ultraCompact ? 8 : (veryCompact ? 10 : 12),
+                      vertical: ultraCompact ? 4 : (veryCompact ? 6 : 8),
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -451,7 +466,7 @@ class _OnboardingCard extends StatelessWidget {
                     child: Text(
                       item.tag,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: veryCompact ? 10 : 12,
+                        fontSize: ultraCompact ? 9 : (veryCompact ? 10 : 12),
                         fontWeight: FontWeight.w800,
                         color: item.accent,
                         letterSpacing: 0.2,
@@ -460,7 +475,9 @@ class _OnboardingCard extends StatelessWidget {
                   ),
                   SizedBox(
                     height:
-                        veryCompact
+                        ultraCompact
+                            ? 8
+                            : veryCompact
                             ? 14
                             : compact
                             ? 18
@@ -470,7 +487,9 @@ class _OnboardingCard extends StatelessWidget {
                     item.heading,
                     style: GoogleFonts.cormorantGaramond(
                       fontSize:
-                          veryCompact
+                          ultraCompact
+                              ? 25
+                              : veryCompact
                               ? 29
                               : compact
                               ? 36
@@ -480,39 +499,47 @@ class _OnboardingCard extends StatelessWidget {
                       height: 0.96,
                     ),
                   ),
-                  SizedBox(height: veryCompact ? 8 : 12),
+                  SizedBox(height: ultraCompact ? 6 : (veryCompact ? 8 : 12)),
                   Text(
                     item.body,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize:
-                          veryCompact
+                          ultraCompact
+                              ? 10.5
+                              : veryCompact
                               ? 12.5
                               : compact
                               ? 13.5
                               : 15,
                       fontWeight: FontWeight.w500,
-                      height: veryCompact ? 1.5 : 1.65,
+                      height: ultraCompact ? 1.35 : (veryCompact ? 1.5 : 1.65),
                       color: AppColors.subtext,
                     ),
                   ),
                   SizedBox(
                     height:
-                        veryCompact
+                        ultraCompact
+                            ? 8
+                            : veryCompact
                             ? 12
                             : compact
                             ? 16
                             : 20,
                   ),
                   Wrap(
-                    spacing: veryCompact ? 8 : 10,
-                    runSpacing: veryCompact ? 8 : 10,
+                    spacing: ultraCompact ? 6 : (veryCompact ? 8 : 10),
+                    runSpacing: ultraCompact ? 6 : (veryCompact ? 8 : 10),
                     children:
                         item.features
                             .map(
                               (feature) => Container(
                                 padding: EdgeInsets.symmetric(
-                                  horizontal: veryCompact ? 10 : 12,
-                                  vertical: veryCompact ? 6 : 8,
+                                  horizontal:
+                                      ultraCompact
+                                          ? 8
+                                          : (veryCompact ? 10 : 12),
+                                  vertical:
+                                      ultraCompact ? 4 : (veryCompact ? 6 : 8),
                                 ),
                                 decoration: BoxDecoration(
                                   color: item.accent.withValues(alpha: 0.10),
@@ -521,7 +548,10 @@ class _OnboardingCard extends StatelessWidget {
                                 child: Text(
                                   feature,
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: veryCompact ? 10 : 11,
+                                    fontSize:
+                                        ultraCompact
+                                            ? 9
+                                            : (veryCompact ? 10 : 11),
                                     fontWeight: FontWeight.w700,
                                     color: item.accent,
                                   ),
@@ -532,7 +562,9 @@ class _OnboardingCard extends StatelessWidget {
                   ),
                   SizedBox(
                     height:
-                        veryCompact
+                        ultraCompact
+                            ? 8
+                            : veryCompact
                             ? 14
                             : compact
                             ? 18
@@ -541,7 +573,9 @@ class _OnboardingCard extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.all(
-                      veryCompact
+                      ultraCompact
+                          ? 8
+                          : veryCompact
                           ? 12
                           : compact
                           ? 14
@@ -561,7 +595,9 @@ class _OnboardingCard extends StatelessWidget {
                           '✦',
                           style: TextStyle(
                             fontSize:
-                                veryCompact
+                                ultraCompact
+                                    ? 14
+                                    : veryCompact
                                     ? 16
                                     : compact
                                     ? 18
@@ -569,14 +605,20 @@ class _OnboardingCard extends StatelessWidget {
                             color: item.accent,
                           ),
                         ),
-                        SizedBox(width: veryCompact ? 8 : 10),
+                        SizedBox(
+                          width: ultraCompact ? 6 : (veryCompact ? 8 : 10),
+                        ),
                         Expanded(
                           child: Text(
                             item.highlight,
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: veryCompact ? 11.5 : 13,
+                              fontSize:
+                                  ultraCompact ? 10 : (veryCompact ? 11.5 : 13),
                               fontWeight: FontWeight.w700,
-                              height: veryCompact ? 1.35 : 1.45,
+                              height:
+                                  ultraCompact
+                                      ? 1.25
+                                      : (veryCompact ? 1.35 : 1.45),
                               color: AppColors.ink,
                             ),
                           ),

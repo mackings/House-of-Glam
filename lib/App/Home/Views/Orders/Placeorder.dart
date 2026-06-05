@@ -156,7 +156,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
               child: Padding(
                 padding: const EdgeInsets.only(right: 8.0),
                 child: MeasurementField(
-                  label: measurementFields[i],
+                  label: "${measurementFields[i]} *",
                   controller: measurementControllers[measurementFields[i]]!,
                   isNumeric: measurementFields[i] != "Arm Type",
                 ),
@@ -167,7 +167,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
                 child: Padding(
                   padding: const EdgeInsets.only(left: 8.0),
                   child: MeasurementField(
-                    label: measurementFields[i + 1],
+                    label: "${measurementFields[i + 1]} *",
                     controller:
                         measurementControllers[measurementFields[i + 1]]!,
                     isNumeric: measurementFields[i + 1] != "Arm Type",
@@ -183,7 +183,6 @@ class _PlaceOrderState extends State<PlaceOrder> {
   }
 
   Future<void> _submitOrder() async {
-    // Handle "Others" for material and attire type
     final String finalMaterial =
         selectedMaterial == "Others"
             ? customMaterialController.text.trim()
@@ -194,54 +193,78 @@ class _PlaceOrderState extends State<PlaceOrder> {
             ? customAttireController.text.trim()
             : selectedCategory?.name ?? '';
 
-    // Handle "Others" for color - NEW
     final String finalColor =
         selectedColor == "Others"
             ? customColorController.text.trim()
             : selectedColor ?? '';
 
-    // Validation - UPDATED
-    if (finalAttireType.isEmpty ||
-        finalMaterial.isEmpty ||
-        finalColor.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please select or specify attire, material, and color"),
-        ),
+    final missingFields = <String>[];
+    if (finalMaterial.isEmpty) missingFields.add("fabric type");
+    if (finalAttireType.isEmpty) missingFields.add("attire style");
+    if (finalColor.isEmpty) missingFields.add("preferred colour");
+    if (brandingController.text.trim().isEmpty) {
+      missingFields.add("branding");
+    }
+    if (specialInstructionsController.text.trim().isEmpty) {
+      missingFields.add("special instructions");
+    }
+
+    for (final field in measurementFields) {
+      final value = measurementControllers[field]!.text.trim();
+      if (value.isEmpty) {
+        missingFields.add(field.toLowerCase());
+        continue;
+      }
+      if (field != "Arm Type") {
+        final measurement = double.tryParse(value);
+        if (measurement == null || measurement <= 0) {
+          _showValidationMessage(
+            "Enter a valid measurement greater than zero for $field.",
+          );
+          return;
+        }
+      }
+    }
+
+    if (sampleImages.isEmpty) {
+      missingFields.add("design sample");
+    }
+
+    if (missingFields.isNotEmpty) {
+      _showValidationMessage(
+        "Complete all required fields. Missing: ${missingFields.join(', ')}.",
       );
       return;
     }
 
     setState(() => isLoading = true);
 
-    // Only save category ID if not "Others"
     if (selectedCategory != null) {
       await SecurePrefs.saveAttireId(selectedCategory!.id);
     }
 
-    // Build measurement map
     final measurement = measurementControllers.map((key, controller) {
-      if (key == "Arm Type") return MapEntry("armType", controller.text);
+      if (key == "Arm Type") {
+        return MapEntry("armType", controller.text.trim());
+      }
       return MapEntry(
         key.replaceAll(' ', '').toLowerCase(),
-        double.tryParse(controller.text) ?? 0,
+        double.parse(controller.text.trim()),
       );
     });
 
-    // Send request - UPDATED
     final response = await UserActivityService.createMaterial(
       clothMaterial: finalMaterial,
       color: finalColor,
-      brand: brandingController.text,
+      brand: brandingController.text.trim(),
       images: sampleImages,
-      specialInstructions: specialInstructionsController.text,
+      specialInstructions: specialInstructionsController.text.trim(),
       measurement: measurement,
     );
 
     if (!mounted) return;
     setState(() => isLoading = false);
 
-    // Feedback
     if (response != null && response.success) {
       _resetForm();
       _showOrderSubmittedSheet(response.message);
@@ -250,6 +273,12 @@ class _PlaceOrderState extends State<PlaceOrder> {
         context,
       ).showSnackBar(const SnackBar(content: Text("❌ Failed to submit order")));
     }
+  }
+
+  void _showValidationMessage(String message) {
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _resetForm() {
@@ -328,7 +357,9 @@ class _PlaceOrderState extends State<PlaceOrder> {
     customMaterialController.dispose();
     customAttireController.dispose();
     customColorController.dispose(); // NEW
-    measurementControllers.values.forEach((c) => c.dispose());
+    for (final controller in measurementControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -388,7 +419,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
               const SizedBox(height: 20),
 
               CustomDropdown(
-                label: "Fabric Type",
+                label: "Fabric Type *",
                 options: [...materials, "Others"],
                 selectedValue: selectedMaterial,
                 onChanged: (val) {
@@ -400,7 +431,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
               if (selectedMaterial == "Others") ...[
                 const SizedBox(height: 10),
                 CustomTextField(
-                  title: "Specify Material",
+                  title: "Specify Material *",
                   hintText: "Enter material name",
                   fieldKey: "customMaterial",
                   controller: customMaterialController,
@@ -410,8 +441,8 @@ class _PlaceOrderState extends State<PlaceOrder> {
               const SizedBox(height: 10),
 
               CustomDropdown(
-                label: "Attire Style",
-                options: [...categories.map((c) => c.name).toList(), "Others"],
+                label: "Attire Style *",
+                options: [...categories.map((c) => c.name), "Others"],
                 selectedValue: selectedCategory?.name,
                 onChanged: (val) {
                   setState(() {
@@ -429,7 +460,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
               if (selectedAttireType == "Others") ...[
                 const SizedBox(height: 10),
                 CustomTextField(
-                  title: "Specify Attire Type",
+                  title: "Specify Attire Type *",
                   hintText: "Enter attire type",
                   fieldKey: "customAttireType",
                   controller: customAttireController,
@@ -440,7 +471,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
 
               // UPDATED: Color dropdown with "Others" option
               CustomDropdown(
-                label: "Preferred Colour",
+                label: "Preferred Colour *",
                 options: [...colors, "Others"],
                 selectedValue: selectedColor,
                 onChanged: (val) => setState(() => selectedColor = val),
@@ -448,7 +479,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
               if (selectedColor == "Others") ...[
                 const SizedBox(height: 10),
                 CustomTextField(
-                  title: "Specify Color",
+                  title: "Specify Color *",
                   hintText: "Enter color name",
                   fieldKey: "customColor",
                   controller: customColorController,
@@ -457,7 +488,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
 
               const SizedBox(height: 20),
               CustomText(
-                "Add Branding (Optional)",
+                "Add Branding *",
                 color: AppColors.ink,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -465,7 +496,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
               ),
               const Divider(),
               CustomTextField(
-                title: "Branding",
+                title: "Branding *",
                 hintText: "Enter name or upload logo for embroidery",
                 fieldKey: "branding",
                 controller: brandingController,
@@ -481,7 +512,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
               ),
               const Divider(),
               CustomTextField(
-                title: "Special Instructions",
+                title: "Special Instructions *",
                 hintText: "e.g. Slim fit, extra pockets, longer sleeves...",
                 fieldKey: "specialInstructions",
                 controller: specialInstructionsController,
@@ -489,7 +520,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
 
               const SizedBox(height: 20),
               CustomText(
-                "Your Measurements (cm)",
+                "Your Measurements (cm) *",
                 color: AppColors.ink,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,

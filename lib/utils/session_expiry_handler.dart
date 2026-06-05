@@ -26,7 +26,6 @@ class SessionExpiryHandler {
       'invalid token',
       'jwt expired',
       'session expired',
-      'unauthorized',
     ];
 
     return expiredSignals.any(
