@@ -4,10 +4,12 @@ import 'package:hog/App/Admin/Views/PickupSettings.dart';
 import 'package:hog/App/Admin/Views/PricingSettings.dart';
 import 'package:hog/App/Admin/Views/SubscriptionSettings.dart';
 import 'package:hog/App/Admin/Views/analytics.dart';
+import 'package:hog/App/Admin/Views/admin_profile.dart';
 import 'package:hog/App/Admin/Views/billing.dart';
 import 'package:hog/App/Admin/Widgets/moderationHistoryTab.dart';
 import 'package:hog/App/Admin/Widgets/moderationListingsTab.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/App/NewestFeatures/Views/admin_disputes.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/theme/app_theme.dart';
 
@@ -82,21 +84,36 @@ class _AdminHomeState extends State<AdminHome> {
             Padding(
               padding: const EdgeInsets.only(right: 16),
               child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: CustomText(
-                    _isSuperAdmin ? 'Super Admin' : 'Admin',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.accent,
+                child: InkWell(
+                  onTap: () => _openScreen(context, const AdminProfile()),
+                  borderRadius: BorderRadius.circular(999),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.person_outline_rounded,
+                          size: 16,
+                          color: AppColors.accent,
+                        ),
+                        const SizedBox(width: 6),
+                        CustomText(
+                          _isSuperAdmin ? 'Super Admin' : 'Admin',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.accent,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -172,6 +189,9 @@ class _AdminHomeState extends State<AdminHome> {
                                   context,
                                   const SubscriptionSettings(),
                                 ),
+                            onOpenDisputes:
+                                () =>
+                                    _openScreen(context, const AdminDisputes()),
                           ),
                         ),
                       ),
@@ -229,6 +249,7 @@ class _AdminQuickAccess extends StatefulWidget {
   final VoidCallback onOpenPickup;
   final VoidCallback onOpenPricing;
   final VoidCallback onOpenSubscriptions;
+  final VoidCallback onOpenDisputes;
 
   const _AdminQuickAccess({
     required this.onOpenAnalytics,
@@ -237,6 +258,7 @@ class _AdminQuickAccess extends StatefulWidget {
     required this.onOpenPickup,
     required this.onOpenPricing,
     required this.onOpenSubscriptions,
+    required this.onOpenDisputes,
   });
 
   @override
@@ -284,6 +306,12 @@ class _AdminQuickAccessState extends State<_AdminQuickAccess> {
         icon: Icons.workspace_premium_outlined,
         tint: const Color(0xFFEC4899),
         onTap: widget.onOpenSubscriptions,
+      ),
+      (
+        label: 'Disputes',
+        icon: Icons.support_agent_rounded,
+        tint: AppColors.danger,
+        onTap: widget.onOpenDisputes,
       ),
     ];
     final visibleShortcuts = _showAll ? shortcuts : shortcuts.take(2).toList();

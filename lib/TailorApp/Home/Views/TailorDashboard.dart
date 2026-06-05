@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/App/NewestFeatures/Views/designer_growth_hub.dart';
 import 'package:hog/App/UserProfile/Views/UserProfile.dart';
 import 'package:hog/TailorApp/Home/Api/TailorHomeservice.dart';
 import 'package:hog/TailorApp/Home/Model/materialModel.dart';
@@ -130,6 +131,11 @@ class _TailordashboardState extends State<Tailordashboard> {
                             ),
                           ],
                         ),
+                      ),
+                      const SizedBox(height: 16),
+                      _DesignerToolsCard(
+                        onTap:
+                            () => Nav.push(context, const DesignerGrowthHub()),
                       ),
                       const SizedBox(height: 16),
                       _SummaryStrip(
@@ -534,6 +540,66 @@ class _DashboardEmptyState extends StatelessWidget {
             color: AppColors.subtext,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DesignerToolsCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _DesignerToolsCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(22),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.accentSoft,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(
+                Icons.insights_rounded,
+                color: AppColors.accent,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(
+                    "Designer Tools",
+                    fontWeight: FontWeight.w800,
+                    textAlign: TextAlign.left,
+                  ),
+                  SizedBox(height: 4),
+                  CustomText(
+                    "Portfolio, measurement requests, workflow updates, analytics, and review responses.",
+                    fontSize: 12,
+                    color: AppColors.subtext,
+                    textAlign: TextAlign.left,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.subtext),
+          ],
+        ),
       ),
     );
   }

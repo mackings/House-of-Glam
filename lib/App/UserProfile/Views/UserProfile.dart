@@ -241,7 +241,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                                           : Icons.error_outline_rounded,
                                   label:
                                       profile.isVerified == true
-                                          ? "Verified Account"
+                                          ? "Verified"
                                           : "Unverified Account",
                                   foreground:
                                       profile.isVerified == true
@@ -268,7 +268,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                                 Expanded(
                                   child: _QuickAction(
                                     icon: Icons.account_balance_outlined,
-                                    label: "Wallet",
+                                    label: "My Wallet",
                                     onTap: () {
                                       Nav.push(context, MyBanksPage());
                                     },
@@ -278,7 +278,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                                 Expanded(
                                   child: _QuickAction(
                                     icon: Icons.receipt_long_outlined,
-                                    label: "Transactions",
+                                    label: "Transaction History",
                                     onTap: () {
                                       Nav.push(context, Transactions());
                                     },
@@ -331,7 +331,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                         child: const ProfileInfoCard(
                           icon: Icons.chat_bubble_outline_rounded,
                           title: "WhatsApp Support",
-                          value: "Chat with Admin",
+                          value: "Chat with Support",
                           showArrow: true,
                           accent: true,
                         ),
@@ -341,7 +341,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                         child: const ProfileInfoCard(
                           icon: Icons.support_agent_outlined,
                           title: "Email Support",
-                          value: "Contact Regional Admin",
+                          value: "Email Support Team",
                           showArrow: true,
                         ),
                       ),
@@ -358,7 +358,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                           child: const ProfileInfoCard(
                             icon: Icons.workspace_premium_outlined,
                             title: "Subscription Plan",
-                            value: "Upgrade from Free",
+                            value: "Upgrade Your Plan",
                             showArrow: true,
                             accent: true,
                           ),
@@ -375,7 +375,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                         child: const ProfileInfoCard(
                           icon: Icons.logout_rounded,
                           title: "Exit App",
-                          value: "Log off",
+                          value: "Log Out",
                           showArrow: true,
                         ),
                       ),

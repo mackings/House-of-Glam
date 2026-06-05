@@ -95,7 +95,10 @@ class _AlltailorsState extends ConsumerState<Alltailors> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: const CustomAppBar(title: "All Designers", enableAction: false),
+      appBar: const CustomAppBar(
+        title: "Browse Designers",
+        enableAction: false,
+      ),
       body: SafeArea(
         child:
             widget.tailors.isEmpty
@@ -106,7 +109,7 @@ class _AlltailorsState extends ConsumerState<Alltailors> {
                     const Padding(
                       padding: EdgeInsets.fromLTRB(20, 6, 20, 0),
                       child: CustomText(
-                        "Browse the full directory of available designers.",
+                        "Find and connect with skilled designers near you.",
                         textAlign: TextAlign.left,
                         color: AppColors.subtext,
                       ),

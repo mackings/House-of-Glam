@@ -8,6 +8,7 @@ import 'package:hog/App/Home/Model/category.dart';
 import 'package:hog/App/Home/Model/tailor.dart';
 import 'package:hog/App/Home/Views/alltailors.dart';
 import 'package:hog/App/Home/Views/tracking.dart';
+import 'package:hog/App/NewestFeatures/Views/feature_hub.dart';
 import 'package:hog/App/Tailors/details.dart';
 import 'package:hog/TailorApp/Home/Views/Tailorbusiness.dart';
 import 'package:hog/components/Navigator.dart';
@@ -250,7 +251,7 @@ class _HomeState extends ConsumerState<Home> {
                           );
                           final secondaryAction = OutlinedButton(
                             onPressed: () {
-                              Nav.push(context, TrackingDelivery());
+                              Nav.push(context, const FeatureHub());
                             },
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.accent,
@@ -265,7 +266,7 @@ class _HomeState extends ConsumerState<Home> {
                               ),
                             ),
                             child: const Text(
-                              "Track Orders",
+                              "Style Studio",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(

@@ -42,7 +42,7 @@ class _UploadlistingState extends State<Uploadlisting> {
 
   final ImagePicker _picker = ImagePicker();
 
-  String condition = "Newly Sewed";
+  String condition = "Brand New";
   String status = "Available";
   bool isLoading = false;
 
@@ -150,6 +150,7 @@ class _UploadlistingState extends State<Uploadlisting> {
       yards: yards, // ✅ New optional field
     );
 
+    if (!mounted) return;
     setState(() => isLoading = false);
 
     if (success) {
@@ -212,7 +213,7 @@ class _UploadlistingState extends State<Uploadlisting> {
       child: Scaffold(
         appBar: AppBar(
           title: const CustomText(
-            "List Item",
+            "Create Listing",
             color: Colors.white,
             fontSize: 18,
           ),
@@ -250,14 +251,14 @@ class _UploadlistingState extends State<Uploadlisting> {
 
               CustomTextField(
                 title: "Title",
-                hintText: "Enter product title",
+                hintText: "e.g. Men's Corporate Suit (Black, XL)",
                 fieldKey: "title",
                 controller: titleController,
               ),
               const SizedBox(height: 16),
 
               CustomTextField(
-                title: "Size (If Applicable)",
+                title: "Size (Optional)",
                 hintText: "e.g. M, L, XL",
                 fieldKey: "size",
                 controller: sizeController,
@@ -266,21 +267,22 @@ class _UploadlistingState extends State<Uploadlisting> {
 
               CustomTextField(
                 title: "Price",
-                hintText: "Enter price (0 if free)",
+                hintText: "Enter price (₦0 if free)",
                 fieldKey: "price",
                 controller: priceController,
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 4),
               const Text(
-                "💡 Enter 0 if this item is listed for free",
+                "Enter ₦0 if the item is free",
                 style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
               const SizedBox(height: 16),
 
               CustomTextField(
                 title: "Description",
-                hintText: "Describe the item",
+                hintText:
+                    "Provide details about the item (condition, material, usage, etc.)",
                 fieldKey: "description",
                 controller: descriptionController,
               ),
@@ -308,16 +310,16 @@ class _UploadlistingState extends State<Uploadlisting> {
 
               CustomDropdown(
                 label: "Condition",
-                options: const ["New", "Preloved", "Newly Sewed"],
+                options: const ["Brand New", "Like New", "Used"],
                 selectedValue: condition,
                 onChanged:
-                    (val) => setState(() => condition = val ?? "Newly Sewed"),
+                    (val) => setState(() => condition = val ?? "Brand New"),
               ),
               const SizedBox(height: 16),
 
               CustomDropdown(
                 label: "Status",
-                options: const ["Available", "Incoming", "For Sales"],
+                options: const ["Available", "Sold", "Reserved"],
                 selectedValue: status,
                 onChanged: (val) => setState(() => status = val ?? "Available"),
               ),
@@ -335,17 +337,25 @@ class _UploadlistingState extends State<Uploadlisting> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   imagePickerCard(
-                    "Front",
+                    "Front View",
                     frontImage,
                     () => pickImage("front"),
                   ),
-                  imagePickerCard("Side", sideImage, () => pickImage("side")),
-                  imagePickerCard("Back", backImage, () => pickImage("back")),
+                  imagePickerCard(
+                    "Side View",
+                    sideImage,
+                    () => pickImage("side"),
+                  ),
+                  imagePickerCard(
+                    "Back View",
+                    backImage,
+                    () => pickImage("back"),
+                  ),
                 ],
               ),
 
               const SizedBox(height: 30),
-              CustomButton(title: "Upload Listing", onPressed: _submitListing),
+              CustomButton(title: "Publish Listing", onPressed: _submitListing),
             ],
           ),
         ),

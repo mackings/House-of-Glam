@@ -109,6 +109,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     return merged.values.toList();
   }
 
+
   @override
   void initState() {
     super.initState();
@@ -230,6 +231,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                           borderRadius: BorderRadius.circular(999),
                         ),
                       ),
+
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
                         child: Row(
@@ -269,6 +271,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                                 ],
                               ),
                             ),
+
                             GestureDetector(
                               onTap: () => Navigator.of(sheetContext).pop(),
                               behavior: HitTestBehavior.opaque,
@@ -290,6 +293,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                           ],
                         ),
                       ),
+                      
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                         child: TextField(

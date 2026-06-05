@@ -5,6 +5,7 @@ import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Auth/Views/auth_choice.dart';
 import 'package:hog/App/Auth/Views/forgotpassword.dart';
 import 'package:hog/App/Admin/Views/adminHome.dart';
+import 'package:hog/App/NewestFeatures/Views/guest_explore.dart';
 import 'package:hog/TailorApp/TailorMain.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/authShell.dart';
@@ -279,6 +280,17 @@ class _SigninState extends ConsumerState<Signin> {
               ),
               const SizedBox(height: 20),
               CustomButton(title: "Sign In", onPressed: _handleSignin),
+              const SizedBox(height: 12),
+              CustomButton(
+                title: "Continue as guest",
+                isOutlined: true,
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const GuestExplore()),
+                  );
+                },
+              ),
             ],
           ),
         ),

@@ -4,6 +4,7 @@ import 'package:hog/App/Admin/Views/adminHome.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Auth/Views/onboarding.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
+import 'package:hog/App/NewestFeatures/Views/guest_explore.dart';
 import 'package:hog/TailorApp/TailorMain.dart';
 import 'package:hog/components/index.dart';
 import 'package:hog/theme/app_theme.dart';
@@ -52,7 +53,7 @@ class _AppEntryGateState extends State<AppEntryGate> {
         return _EntryState.home(screen: const MainPage());
       }
 
-      return _EntryState.signin(lastEmail: lastEmail);
+      return _EntryState.guest(lastEmail: lastEmail);
     } catch (_) {
       return _EntryState.signin();
     }
@@ -80,6 +81,8 @@ class _AppEntryGateState extends State<AppEntryGate> {
             return OnboardingScreen(initialEmail: state.lastEmail);
           case _EntryType.signin:
             return Signin(initialEmail: state.lastEmail);
+          case _EntryType.guest:
+            return const GuestExplore();
           case _EntryType.home:
             return state.screen ?? const MainPage();
         }
@@ -88,7 +91,7 @@ class _AppEntryGateState extends State<AppEntryGate> {
   }
 }
 
-enum _EntryType { onboarding, signin, home }
+enum _EntryType { onboarding, signin, guest, home }
 
 class _EntryState {
   final _EntryType type;
@@ -103,6 +106,10 @@ class _EntryState {
 
   factory _EntryState.signin({String? lastEmail}) {
     return _EntryState._(type: _EntryType.signin, lastEmail: lastEmail);
+  }
+
+  factory _EntryState.guest({String? lastEmail}) {
+    return _EntryState._(type: _EntryType.guest, lastEmail: lastEmail);
   }
 
   factory _EntryState.home({required Widget screen}) {
