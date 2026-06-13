@@ -6,10 +6,10 @@ class CustomBottomNavBar extends StatelessWidget {
   final Function(int) onTap;
 
   const CustomBottomNavBar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class CustomBottomNavBar extends StatelessWidget {
       {"icon": Icons.shopping_bag_outlined, "label": "Order"},
       {"icon": Icons.history_toggle_off_rounded, "label": "Activity"},
       {"icon": Icons.account_balance_wallet_outlined, "label": "My Wallet"},
-      {"icon": Icons.design_services_outlined, "label": "My Designs"},
+      {"icon": Icons.design_services_outlined, "label": "Checkroom"},
     ];
 
     return Container(

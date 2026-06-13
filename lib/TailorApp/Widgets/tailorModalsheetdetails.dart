@@ -53,9 +53,10 @@ void showTailorMaterialDetails(
                     currentItem.resolvedOutstandingForUi > 0;
                 final hasClientPayment =
                     currentItem.resolvedAmountPaidForUi > 0;
-                final isFullyPaid =
-                    currentItem.isFullPaymentStatus ||
-                    (hasClientPayment && !outstandingUserPayment);
+                final isFullyPaid = currentItem.isClientPaymentComplete;
+                final isDeliveryAction = !isRequestingStatus();
+                final deliveryBlockedByPayment =
+                    isDeliveryAction && !isFullyPaid;
                 final paymentStatusLabel =
                     isFullyPaid
                         ? "Paid in Full"
@@ -368,9 +369,11 @@ void showTailorMaterialDetails(
                         SizedBox(
                           width: double.infinity,
                           child: FilledButton(
+                            key: const ValueKey('deliver_attire_button'),
                             onPressed:
                                 (isLoading ||
-                                        currentItem.isSentForDeliveryStatus)
+                                        currentItem.isSentForDeliveryStatus ||
+                                        deliveryBlockedByPayment)
                                     ? null
                                     : () {
                                       if (isRequestingStatus()) {
@@ -389,6 +392,8 @@ void showTailorMaterialDetails(
                                     },
                             style: FilledButton.styleFrom(
                               backgroundColor: AppColors.accent,
+                              disabledBackgroundColor: Colors.grey.shade300,
+                              disabledForegroundColor: Colors.grey.shade600,
                               minimumSize: const Size(double.infinity, 56),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(18),
@@ -407,6 +412,16 @@ void showTailorMaterialDetails(
                                     : Text(currentActionLabel()),
                           ),
                         ),
+                        if (deliveryBlockedByPayment) ...[
+                          const SizedBox(height: 10),
+                          const Center(
+                            child: CustomText(
+                              "Full client payment is required before delivery.",
+                              fontSize: 11,
+                              color: AppColors.subtext,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

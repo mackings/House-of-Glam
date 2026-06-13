@@ -2146,32 +2146,12 @@ class DesignerAnalyticsTab extends StatefulWidget {
 class _DesignerAnalyticsTabState extends State<DesignerAnalyticsTab> {
   late Future<ApiResult> _future;
   late Future<ApiResult> _escrowWalletFuture;
-  late Future<ApiResult> _listingsFuture;
-  Map<String, dynamic>? _selectedListing;
-  bool _saving = false;
 
   @override
   void initState() {
     super.initState();
     _future = NewestFeatureService.getDesignerAnalytics();
     _escrowWalletFuture = NewestFeatureService.getDesignerEscrowWallet();
-    _listingsFuture = NewestFeatureService.getListings();
-  }
-
-  Future<void> _feature(bool value) async {
-    final listing = _selectedListing;
-    if (listing == null) {
-      _showResult(context, ApiResult.failure('Choose a listing first.'));
-      return;
-    }
-    setState(() => _saving = true);
-    final result = await NewestFeatureService.featureListing(
-      _recordId(listing),
-      value,
-    );
-    if (!mounted) return;
-    setState(() => _saving = false);
-    _showResult(context, result);
   }
 
   @override
@@ -2360,78 +2340,6 @@ class _DesignerAnalyticsTabState extends State<DesignerAnalyticsTab> {
                   ),
                 );
               },
-            ),
-            const SizedBox(height: 14),
-            _Panel(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const CustomText(
-                    'Featured listing',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    textAlign: TextAlign.left,
-                  ),
-                  const SizedBox(height: 6),
-                  const CustomText(
-                    'Choose one of your listings to feature or remove from featured placement.',
-                    color: AppColors.subtext,
-                    textAlign: TextAlign.left,
-                  ),
-                  const SizedBox(height: 12),
-                  FutureBuilder<ApiResult>(
-                    future: _listingsFuture,
-                    builder: (context, snapshot) {
-                      final listings =
-                          snapshot.hasData
-                              ? apiList(snapshot.data!.data)
-                              : const <Map<String, dynamic>>[];
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-                      return _TargetChooser(
-                        title: 'Choose listing',
-                        records: listings,
-                        selected: _selectedListing,
-                        idKey: '_id',
-                        emptyText: 'No listings available yet.',
-                        onSelected:
-                            (listing) =>
-                                setState(() => _selectedListing = listing),
-                      );
-                    },
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomButton(
-                          title: 'Remove feature',
-                          isOutlined: true,
-                          isLoading: _saving,
-                          onPressed:
-                              _saving || _selectedListing == null
-                                  ? null
-                                  : () => _feature(false),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: CustomButton(
-                          title: 'Feature listing',
-                          isLoading: _saving,
-                          onPressed:
-                              _saving || _selectedListing == null
-                                  ? null
-                                  : () => _feature(true),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
             ),
           ],
         );

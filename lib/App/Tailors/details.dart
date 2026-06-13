@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Home/Api/home.dart';
 import 'package:hog/App/Home/Model/vendor.dart';
+import 'package:hog/App/NewestFeatures/Api/newest_feature_service.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/customAppbar.dart';
 import 'package:hog/theme/app_theme.dart';
@@ -25,11 +26,26 @@ class _DetailsState extends State<Details> {
   int _selectedRating = 0;
   bool _isSubmittingRating = false;
   late Vendor _vendor;
+  late Future<ApiResult> _designerProfileFuture;
 
   @override
   void initState() {
     super.initState();
     _vendor = widget.vendor;
+    _designerProfileFuture = _loadDesignerProfile();
+  }
+
+  Future<ApiResult> _loadDesignerProfile() async {
+    final vendorResult = await NewestFeatureService.getDesignerProfile(
+      widget.vendor.id,
+    );
+    if (vendorResult.success ||
+        widget.vendor.userId.isEmpty ||
+        widget.vendor.userId == widget.vendor.id) {
+      return vendorResult;
+    }
+
+    return NewestFeatureService.getDesignerProfile(widget.vendor.userId);
   }
 
   void _showRatingBottomSheet() {
@@ -267,6 +283,8 @@ class _DetailsState extends State<Details> {
               ),
             ),
             const SizedBox(height: 18),
+            _DesignerPortfolio(future: _designerProfileFuture),
+            const SizedBox(height: 18),
             _InfoSection(
               title: "Business Information",
               children: [
@@ -295,6 +313,196 @@ class _DetailsState extends State<Details> {
       ),
     );
   }
+}
+
+class _DesignerPortfolio extends StatelessWidget {
+  final Future<ApiResult> future;
+
+  const _DesignerPortfolio({required this.future});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<ApiResult>(
+      future: future,
+      builder: (context, snapshot) {
+        final result = snapshot.data;
+        final portfolio =
+            result?.success == true
+                ? designerPortfolioItems(result?.data)
+                : const <DesignerPortfolioItem>[];
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Portfolio",
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                "Completed work shared by this designer.",
+                style: TextStyle(color: AppColors.subtext),
+              ),
+              const SizedBox(height: 14),
+              if (snapshot.connectionState == ConnectionState.waiting)
+                const Center(child: CircularProgressIndicator())
+              else if (portfolio.isEmpty)
+                const Text(
+                  "No public portfolio work added yet.",
+                  style: TextStyle(color: AppColors.subtext),
+                )
+              else
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: portfolio.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 0.82,
+                  ),
+                  itemBuilder: (context, index) {
+                    final item = portfolio[index];
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.network(
+                            item.imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (_, __, ___) => Container(
+                                  color: AppColors.surfaceMuted,
+                                  child: const Icon(
+                                    Icons.broken_image_outlined,
+                                    color: AppColors.subtext,
+                                  ),
+                                ),
+                          ),
+                          if (item.caption.isNotEmpty)
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.transparent,
+                                      Color(0xCC000000),
+                                    ],
+                                  ),
+                                ),
+                                child: Text(
+                                  item.caption,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class DesignerPortfolioItem {
+  final String imageUrl;
+  final String caption;
+
+  const DesignerPortfolioItem({required this.imageUrl, this.caption = ''});
+}
+
+List<DesignerPortfolioItem> designerPortfolioItems(dynamic data) {
+  final profile = _designerProfileMap(data);
+  final items = <DesignerPortfolioItem>[];
+  final seenUrls = <String>{};
+
+  void addItem(dynamic value) {
+    if (value is Map && value['isVisible'] == false) {
+      return;
+    }
+
+    final imageUrl =
+        value is Map
+            ? (value['imageUrl'] ?? value['url'] ?? value['image'])?.toString()
+            : value?.toString();
+    final normalizedUrl = imageUrl?.trim() ?? '';
+    if (normalizedUrl.isEmpty || !seenUrls.add(normalizedUrl)) {
+      return;
+    }
+
+    items.add(
+      DesignerPortfolioItem(
+        imageUrl: normalizedUrl,
+        caption: value is Map ? value['caption']?.toString().trim() ?? '' : '',
+      ),
+    );
+  }
+
+  final gallery = profile['portfolioGallery'];
+  if (gallery is List) {
+    for (final item in gallery) {
+      addItem(item);
+    }
+  }
+
+  final sections = profile['categorizedWorkSections'];
+  if (sections is Map) {
+    for (final section in sections.values) {
+      if (section is List) {
+        for (final item in section) {
+          addItem(item);
+        }
+      }
+    }
+  }
+
+  return items;
+}
+
+Map<String, dynamic> _designerProfileMap(dynamic data) {
+  if (data is! Map) {
+    return const <String, dynamic>{};
+  }
+
+  final map = Map<String, dynamic>.from(data);
+  for (final key in const ['designer', 'profile', 'tailor']) {
+    final nested = map[key];
+    if (nested is Map) {
+      final nestedMap = Map<String, dynamic>.from(nested);
+      if (nestedMap.containsKey('portfolioGallery') ||
+          nestedMap.containsKey('categorizedWorkSections')) {
+        return nestedMap;
+      }
+    }
+  }
+  return map;
 }
 
 String _ratingText(double value) {

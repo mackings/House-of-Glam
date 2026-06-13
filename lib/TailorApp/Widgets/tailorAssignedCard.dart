@@ -22,9 +22,7 @@ class TailorAssignedCard extends StatelessWidget {
     final payableBalance = item.resolvedDesignerPayableTotal;
     final outstandingUserPayment = item.resolvedOutstandingForUi > 0;
     final hasClientPayment = item.resolvedAmountPaidForUi > 0;
-    final isFullyPaid =
-        item.isFullPaymentStatus ||
-        (hasClientPayment && !outstandingUserPayment);
+    final isFullyPaid = item.isClientPaymentComplete;
     final paymentStatusLabel =
         isFullyPaid
             ? "Paid in Full"
@@ -445,7 +443,6 @@ class _StatusPill extends StatelessWidget {
     );
   }
 }
-
 
 Color _statusTone(String status) {
   switch (status.toLowerCase()) {

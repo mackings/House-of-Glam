@@ -334,6 +334,16 @@ class TailorAssignedMaterial {
 
     return 0.0;
   }
+
+  bool get isClientPaymentComplete {
+    if (isFullPaymentStatus) {
+      return true;
+    }
+
+    final paid = resolvedAmountPaidForUi;
+    final outstanding = resolvedOutstandingForUi;
+    return paid > 0 && outstanding <= 0.01;
+  }
 }
 
 class User {
