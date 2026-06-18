@@ -117,38 +117,14 @@ class WorkCard extends StatelessWidget {
                           textAlign: TextAlign.left,
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
+                      if (isVerified) ...[
+                        const SizedBox(width: 10),
+                        Icon(
+                          Icons.verified_rounded,
+                          color: planColor,
+                          size: 22,
                         ),
-                        decoration: BoxDecoration(
-                          color:
-                              isVerified
-                                  ? planColor.withValues(alpha: 0.14)
-                                  : AppColors.surfaceMuted,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.verified_rounded,
-                              color: isVerified ? planColor : Colors.grey,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            CustomText(
-                              isVerified
-                                  ? "${planName[0].toUpperCase()}${planName.substring(1)}"
-                                  : "Free",
-                              fontSize: 11,
-                              color: isVerified ? planColor : Colors.grey,
-                            ),
-                          ],
-                        ),
-                      ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 10),

@@ -2,22 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  static const Color ink = Color(0xFF172033);
-  static const Color subtext = Color(0xFF5F6980);
+  static const Color ink = Color(0xFF201711);
+  static const Color subtext = Color(0xFF6F6258);
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceMuted = Color(0xFFF3F6FF);
-  static const Color canvas = Color(0xFFEEF3FB);
-  static const Color accent = Color(0xFF4169E1);
-  static const Color accentDeep = Color(0xFF1F3F99);
-  static const Color accentSoft = Color(0xFFE2EAFF);
-  static const Color secondary = Color(0xFFC58A1D);
-  static const Color secondarySoft = Color(0xFFF7E7C2);
-  static const Color secondaryDeep = Color(0xFF8A6505);
-  static const Color success = Color(0xFF0F9D69);
+  static const Color surfaceMuted = Color(0xFFFFF4E6);
+  static const Color canvas = Color(0xFFFCF4E8);
+  static const Color accent = Color(0xFF153B2F);
+  static const Color accentDeep = Color(0xFF08231C);
+  static const Color accentSoft = Color(0xFFE4F2E6);
+  static const Color secondary = Color(0xFFD28A19);
+  static const Color secondarySoft = Color(0xFFFFE8B8);
+  static const Color secondaryDeep = Color(0xFF8A4D08);
+  static const Color success = Color(0xFF177A4D);
   static const Color warning = secondary;
-  static const Color danger = Color(0xFFD64545);
-  static const Color border = Color(0xFFD7E0F0);
-  static const Color shadow = Color(0x1A10213F);
+  static const Color danger = Color(0xFFC33A2B);
+  static const Color border = Color(0xFFE5D4BD);
+  static const Color shadow = Color(0x1F3B2617);
 }
 
 class AppTheme {

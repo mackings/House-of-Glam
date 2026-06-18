@@ -193,117 +193,125 @@ class _HomeState extends ConsumerState<Home> {
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [Color(0xFFFEFBFF), Color(0xFFF0E9FB)],
+                      colors: [Color(0xFFFFFCF6), Color(0xFFFFE7BD)],
                     ),
                     border: Border.all(color: AppColors.border),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  clipBehavior: Clip.antiAlias,
+                  child: Stack(
                     children: [
-                      const CustomText(
-                        "Discover Africa's finest designers and fashion drops.",
-                        textAlign: TextAlign.left,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      const SizedBox(height: 6),
-                      const CustomText(
-                        "Discover designers, explore collections, and manage your journey seamlessly.",
-                        textAlign: TextAlign.left,
-                        color: AppColors.subtext,
-                        fontSize: 12,
-                      ),
-                      const SizedBox(height: 12),
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final stackActions = constraints.maxWidth < 320;
-                          final primaryAction = SizedBox(
-                            height: 46,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Nav.push(
-                                  context,
-                                  Alltailors(tailors: _tailors),
+                      const Positioned.fill(child: _MudclothAccent()),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const CustomText(
+                            "Discover Africa's finest designers and fashion drops.",
+                            textAlign: TextAlign.left,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          const SizedBox(height: 6),
+                          const CustomText(
+                            "Discover designers, explore collections, and manage your journey seamlessly.",
+                            textAlign: TextAlign.left,
+                            color: AppColors.subtext,
+                            fontSize: 12,
+                          ),
+                          const SizedBox(height: 12),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final stackActions = constraints.maxWidth < 320;
+                              final primaryAction = SizedBox(
+                                height: 46,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Nav.push(
+                                      context,
+                                      Alltailors(tailors: _tailors),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.accent,
+                                    foregroundColor: Colors.white,
+                                    elevation: 1,
+                                    shadowColor: AppColors.shadow,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 10,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    "Explore Designers",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              );
+                              final secondaryAction = OutlinedButton(
+                                onPressed: () {
+                                  Nav.push(context, const FeatureHub());
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppColors.accent,
+                                  minimumSize: const Size.fromHeight(46),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 10,
+                                  ),
+                                  side: const BorderSide(
+                                    color: AppColors.border,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Style Studio",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              );
+
+                              if (stackActions) {
+                                return Column(
+                                  children: [
+                                    primaryAction,
+                                    const SizedBox(height: 10),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 46,
+                                      child: secondaryAction,
+                                    ),
+                                  ],
                                 );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.accent,
-                                foregroundColor: Colors.white,
-                                elevation: 1,
-                                shadowColor: AppColors.shadow,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 10,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                              ),
-                              child: const Text(
-                                "Explore Designers",
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          );
-                          final secondaryAction = OutlinedButton(
-                            onPressed: () {
-                              Nav.push(context, const FeatureHub());
+                              }
+
+                              return Row(
+                                children: [
+                                  Expanded(child: primaryAction),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: SizedBox(
+                                      height: 46,
+                                      child: secondaryAction,
+                                    ),
+                                  ),
+                                ],
+                              );
                             },
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.accent,
-                              minimumSize: const Size.fromHeight(46),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 10,
-                              ),
-                              side: const BorderSide(color: AppColors.border),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                            ),
-                            child: const Text(
-                              "Style Studio",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          );
-
-                          if (stackActions) {
-                            return Column(
-                              children: [
-                                primaryAction,
-                                const SizedBox(height: 10),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 46,
-                                  child: secondaryAction,
-                                ),
-                              ],
-                            );
-                          }
-
-                          return Row(
-                            children: [
-                              Expanded(child: primaryAction),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: SizedBox(
-                                  height: 46,
-                                  child: secondaryAction,
-                                ),
-                              ),
-                            ],
-                          );
-                        },
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -350,8 +358,8 @@ class _HomeState extends ConsumerState<Home> {
                       subtitle: "Agbada that rocks every footwear.",
                       ctaLabel: "Shop Now",
                       imageAsset: "assets/Img/category_agbada.jpg",
-                      background: Color(0xFFF1F4FF),
-                      accent: Color(0xFF3159D9),
+                      background: Color(0xFFFFF4E6),
+                      accent: Color(0xFF153B2F),
                     ),
                     CarouselItemWidget(
                       eyebrow: "Women's top choice",
@@ -359,8 +367,8 @@ class _HomeState extends ConsumerState<Home> {
                       subtitle: "Statement styles made for women.",
                       ctaLabel: "Explore Styles",
                       imageAsset: "assets/Img/category_iro_buba.jpg",
-                      background: Color(0xFFFFF1F4),
-                      accent: Color(0xFFC85372),
+                      background: Color(0xFFFFEEE9),
+                      accent: Color(0xFFB33F2F),
                     ),
                     CarouselItemWidget(
                       eyebrow: "Women's glam",
@@ -368,8 +376,8 @@ class _HomeState extends ConsumerState<Home> {
                       subtitle: "Professionally made and measurement based.",
                       ctaLabel: "View Collection",
                       imageAsset: "assets/Img/category_kaftan.jpg",
-                      background: Color(0xFFF3F8F2),
-                      accent: Color(0xFF397A50),
+                      background: Color(0xFFEAF4E6),
+                      accent: Color(0xFF2E6A3E),
                     ),
                     CarouselItemWidget(
                       eyebrow: "Best selling",
@@ -377,8 +385,8 @@ class _HomeState extends ConsumerState<Home> {
                       subtitle: "For business and formal occasions.",
                       ctaLabel: "Try It Out",
                       imageAsset: "assets/Img/category_ankara_fusion.jpg",
-                      background: Color(0xFFFFF4E8),
-                      accent: Color(0xFFD86618),
+                      background: Color(0xFFFFF0CF),
+                      accent: Color(0xFFD28A19),
                     ),
                   ],
                 ),
@@ -550,4 +558,49 @@ class _SectionHeader extends StatelessWidget {
       ],
     );
   }
+}
+
+class _MudclothAccent extends StatelessWidget {
+  const _MudclothAccent();
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(child: CustomPaint(painter: _MudclothAccentPainter()));
+  }
+}
+
+class _MudclothAccentPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = AppColors.secondary.withValues(alpha: 0.16)
+          ..strokeWidth = 1.3
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
+    final fill =
+        Paint()
+          ..color = AppColors.accent.withValues(alpha: 0.05)
+          ..style = PaintingStyle.fill;
+
+    for (double x = size.width - 98; x < size.width + 28; x += 24) {
+      canvas.drawLine(Offset(x, 0), Offset(x - 58, size.height), paint);
+    }
+
+    for (double y = 18; y < size.height; y += 28) {
+      canvas.drawCircle(Offset(size.width - 24, y), 2.2, fill);
+      canvas.drawCircle(Offset(size.width - 52, y + 10), 1.8, fill);
+    }
+
+    final triangle =
+        Path()
+          ..moveTo(size.width - 62, size.height - 18)
+          ..lineTo(size.width - 42, size.height - 18)
+          ..lineTo(size.width - 52, size.height - 34)
+          ..close();
+    canvas.drawPath(triangle, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _MudclothAccentPainter oldDelegate) => false;
 }

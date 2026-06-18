@@ -4,9 +4,7 @@ import 'package:hog/components/texts.dart';
 import 'package:hog/theme/app_theme.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-
 class TailorMaterialCard extends StatelessWidget {
-  
   final TailorMaterialItem material;
   final VoidCallback onTap;
 
@@ -182,7 +180,7 @@ class TailorMaterialCard extends StatelessWidget {
                         width: 34,
                         height: 34,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE8F6F0),
+                          color: AppColors.accentSoft,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
@@ -298,42 +296,89 @@ class _FallbackImage extends StatelessWidget {
       width: double.infinity,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFFEADDFE), Color(0xFFF7F2FF)],
+          colors: [Color(0xFFFFE8B8), Color(0xFFE4F2E6)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Stack(
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.84),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: const Icon(
-              Icons.checkroom_rounded,
-              color: AppColors.accent,
-              size: 28,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: CustomText(
-              attireType.isEmpty ? "Project material" : attireType,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: AppColors.ink,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+          const Positioned.fill(child: _MaterialFallbackPattern()),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.84),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: AppColors.secondary.withValues(alpha: 0.24),
+                  ),
+                ),
+                child: const Icon(
+                  Icons.checkroom_rounded,
+                  color: AppColors.accent,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: CustomText(
+                  attireType.isEmpty ? "Project material" : attireType,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.ink,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
+  }
+}
+
+class _MaterialFallbackPattern extends StatelessWidget {
+  const _MaterialFallbackPattern();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(painter: _MaterialFallbackPatternPainter());
+  }
+}
+
+class _MaterialFallbackPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final linePaint =
+        Paint()
+          ..color = AppColors.accent.withValues(alpha: 0.08)
+          ..strokeWidth = 1.4
+          ..style = PaintingStyle.stroke;
+    final dotPaint =
+        Paint()
+          ..color = AppColors.secondary.withValues(alpha: 0.12)
+          ..style = PaintingStyle.fill;
+
+    for (double y = 18; y < size.height; y += 28) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y + 18), linePaint);
+    }
+
+    for (double x = 14; x < size.width; x += 34) {
+      for (double y = 12; y < size.height; y += 34) {
+        canvas.drawCircle(Offset(x, y), 2.2, dotPaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _MaterialFallbackPatternPainter oldDelegate) {
+    return false;
   }
 }

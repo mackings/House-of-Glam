@@ -233,22 +233,64 @@ class _TailorCardState extends State<TailorCard> {
     return Container(
       height: imageHeight,
       width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFFF0ECF8), Color(0xFFE7F1F8)],
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFF0CF), Color(0xFFE4F2E6)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        initials,
-        style: TextStyle(
-          fontSize: imageHeight * 0.28,
-          fontWeight: FontWeight.w700,
-          color: AppColors.subtext,
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.secondary.withValues(alpha: 0.18),
+          ),
         ),
+      ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          CustomPaint(painter: _TailorPlaceholderPattern()),
+          Center(
+            child: Text(
+              initials,
+              style: TextStyle(
+                fontSize: imageHeight * 0.28,
+                fontWeight: FontWeight.w800,
+                color: AppColors.accentDeep.withValues(alpha: 0.72),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+class _TailorPlaceholderPattern extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = AppColors.secondary.withValues(alpha: 0.13)
+          ..strokeWidth = 1.2
+          ..style = PaintingStyle.stroke;
+
+    for (double x = -size.height; x < size.width; x += 22) {
+      canvas.drawLine(
+        Offset(x, size.height),
+        Offset(x + size.height, 0),
+        paint,
+      );
+    }
+
+    final blockPaint =
+        Paint()
+          ..color = AppColors.accent.withValues(alpha: 0.07)
+          ..style = PaintingStyle.fill;
+    for (double x = 12; x < size.width; x += 42) {
+      canvas.drawRect(Rect.fromLTWH(x, 10, 10, 10), blockPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _TailorPlaceholderPattern oldDelegate) => false;
 }
