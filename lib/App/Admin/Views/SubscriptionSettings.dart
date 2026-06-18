@@ -43,169 +43,24 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
   }
 
   Future<void> _showCreateOrEditSheet({SubscriptionPlan? plan}) async {
-    final nameCtrl = TextEditingController(text: plan?.name ?? "Standard");
-    final amountCtrl = TextEditingController(
-      text: plan != null ? plan.amount.toString() : "",
-    );
-    final descCtrl = TextEditingController(text: plan?.description ?? "");
-    String duration = plan?.duration ?? "monthly";
-
-    await showModalBottomSheet(
+    final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 16,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+      builder:
+          (_) => _PlanEditorSheet(
+            plan: plan,
+            service: _service,
+            planNames: _planNames,
+            durations: _durations,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 48,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 14),
-              CustomText(
-                plan == null ? "Create Subscription Plan" : "Update Plan",
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-              const SizedBox(height: 4),
-              CustomText(
-                "Define plan tier, duration, and secure backend amount.",
-                fontSize: 12,
-                color: Colors.black54,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: nameCtrl.text,
-                items:
-                    _planNames
-                        .map(
-                          (name) =>
-                              DropdownMenuItem(value: name, child: Text(name)),
-                        )
-                        .toList(),
-                onChanged: (v) => nameCtrl.text = v ?? nameCtrl.text,
-                decoration: const InputDecoration(
-                  labelText: "Plan Name",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 10),
-              DropdownButtonFormField<String>(
-                value: duration,
-                items:
-                    _durations
-                        .map(
-                          (d) => DropdownMenuItem(
-                            value: d,
-                            child: Text(
-                              "${d[0].toUpperCase()}${d.substring(1)}",
-                            ),
-                          ),
-                        )
-                        .toList(),
-                onChanged: (v) => duration = v ?? duration,
-                decoration: const InputDecoration(
-                  labelText: "Duration",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: amountCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: "Amount (NGN)",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: descCtrl,
-                maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: "Description",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final amount = int.tryParse(amountCtrl.text.trim());
-                    if (amount == null || amount <= 0) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Enter a valid amount")),
-                      );
-                      return;
-                    }
-
-                    Map<String, dynamic>? result;
-                    if (plan == null) {
-                      result = await _service.createSubscriptionPlan(
-                        name: nameCtrl.text.trim(),
-                        amount: amount,
-                        duration: duration,
-                        description: descCtrl.text.trim(),
-                      );
-                    } else {
-                      result = await _service.updateSubscriptionPlan(
-                        id: plan.id,
-                        name: nameCtrl.text.trim(),
-                        amount: amount,
-                        duration: duration,
-                        description: descCtrl.text.trim(),
-                      );
-                    }
-
-                    if (!mounted) return;
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          result != null
-                              ? (plan == null
-                                  ? "Plan created successfully"
-                                  : "Plan updated successfully")
-                              : "Operation failed",
-                        ),
-                      ),
-                    );
-                    if (result != null) _fetchPlans();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                  ),
-                  child: Text(
-                    plan == null ? "Create Plan" : "Update Plan",
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-            ],
-          ),
-        );
-      },
     );
+    if (saved == true) {
+      await _fetchPlans();
+    }
   }
 
   Future<void> _deletePlan(SubscriptionPlan plan) async {
@@ -402,6 +257,42 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
                                 fontSize: 13,
                                 color: Colors.black87,
                               ),
+                              if (plan.benefits.isNotEmpty) ...[
+                                const SizedBox(height: 12),
+                                const CustomText(
+                                  "Benefits",
+                                  fontSize: 12,
+                                  color: AppColors.subtext,
+                                  fontWeight: FontWeight.w700,
+                                  textAlign: TextAlign.left,
+                                ),
+                                const SizedBox(height: 6),
+                                ...plan.benefits.map(
+                                  (benefit) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 6),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Icon(
+                                          Icons.check_circle_rounded,
+                                          size: 17,
+                                          color: AppColors.success,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: CustomText(
+                                            benefit,
+                                            fontSize: 12,
+                                            textAlign: TextAlign.left,
+                                            color: AppColors.ink,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                               const SizedBox(height: 8),
                               Wrap(
                                 alignment: WrapAlignment.end,
@@ -457,6 +348,321 @@ class _SubscriptionSettingsState extends State<SubscriptionSettings> {
           textAlign: TextAlign.center,
         ),
       ],
+    );
+  }
+}
+
+class _PlanEditorSheet extends StatefulWidget {
+  final SubscriptionPlan? plan;
+  final SubscriptionService service;
+  final List<String> planNames;
+  final List<String> durations;
+
+  const _PlanEditorSheet({
+    required this.plan,
+    required this.service,
+    required this.planNames,
+    required this.durations,
+  });
+
+  @override
+  State<_PlanEditorSheet> createState() => _PlanEditorSheetState();
+}
+
+class _PlanEditorSheetState extends State<_PlanEditorSheet> {
+  late final TextEditingController _amountController;
+  late final TextEditingController _descriptionController;
+  late String _name;
+  late String _duration;
+  late List<TextEditingController> _benefitControllers;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _name = widget.plan?.name ?? widget.planNames.first;
+    _duration = widget.plan?.duration ?? widget.durations.first;
+    _amountController = TextEditingController(
+      text: widget.plan == null ? '' : widget.plan!.amount.toString(),
+    );
+    _descriptionController = TextEditingController(
+      text: widget.plan?.description ?? '',
+    );
+    final benefits = widget.plan?.benefits ?? const <String>[];
+    _benefitControllers =
+        (benefits.isEmpty ? const [''] : benefits)
+            .map((benefit) => TextEditingController(text: benefit))
+            .toList();
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _descriptionController.dispose();
+    for (final controller in _benefitControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: AppColors.danger),
+    );
+  }
+
+  Future<void> _save() async {
+    final amount = int.tryParse(_amountController.text.trim());
+    if (amount == null || amount <= 0) {
+      _showError('Enter a valid amount in NGN');
+      return;
+    }
+
+    final benefits =
+        _benefitControllers
+            .map((controller) => controller.text.trim())
+            .where((benefit) => benefit.isNotEmpty)
+            .toList();
+    if (benefits.isEmpty) {
+      _showError('Add at least one plan benefit');
+      return;
+    }
+    if (benefits.any((benefit) => benefit.length > 160)) {
+      _showError('Each benefit must be 160 characters or fewer');
+      return;
+    }
+    final uniqueBenefits =
+        benefits.map((benefit) => benefit.toLowerCase()).toSet();
+    if (uniqueBenefits.length != benefits.length) {
+      _showError('Plan benefits cannot contain duplicates');
+      return;
+    }
+
+    setState(() => _saving = true);
+    final result =
+        widget.plan == null
+            ? await widget.service.createSubscriptionPlan(
+              name: _name,
+              amount: amount,
+              duration: _duration,
+              description: _descriptionController.text.trim(),
+              benefits: benefits,
+            )
+            : await widget.service.updateSubscriptionPlan(
+              id: widget.plan!.id,
+              name: _name,
+              amount: amount,
+              duration: _duration,
+              description: _descriptionController.text.trim(),
+              benefits: benefits,
+            );
+    if (!mounted) return;
+    setState(() => _saving = false);
+    if (result == null) {
+      _showError('Unable to save the subscription plan');
+      return;
+    }
+    final messenger = ScaffoldMessenger.of(context);
+    Navigator.pop(context, true);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          widget.plan == null
+              ? 'Plan created successfully'
+              : 'Plan updated successfully',
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              CustomText(
+                widget.plan == null
+                    ? 'Create Subscription Plan'
+                    : 'Update Plan',
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                textAlign: TextAlign.left,
+              ),
+              const SizedBox(height: 4),
+              const CustomText(
+                'Prices are stored in NGN. The backend converts international checkout amounts to USD.',
+                fontSize: 12,
+                color: AppColors.subtext,
+                textAlign: TextAlign.left,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: _name,
+                isExpanded: true,
+                items:
+                    widget.planNames
+                        .map(
+                          (name) =>
+                              DropdownMenuItem(value: name, child: Text(name)),
+                        )
+                        .toList(),
+                onChanged: (value) => _name = value ?? _name,
+                decoration: const InputDecoration(labelText: 'Plan name'),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: _duration,
+                isExpanded: true,
+                items:
+                    widget.durations
+                        .map(
+                          (duration) => DropdownMenuItem(
+                            value: duration,
+                            child: Text(
+                              '${duration[0].toUpperCase()}${duration.substring(1)}',
+                            ),
+                          ),
+                        )
+                        .toList(),
+                onChanged: (value) => _duration = value ?? _duration,
+                decoration: const InputDecoration(labelText: 'Duration'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _amountController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Amount (NGN)'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _descriptionController,
+                maxLines: 3,
+                decoration: const InputDecoration(labelText: 'Description'),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  const Expanded(
+                    child: CustomText(
+                      'Benefits checklist',
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                  CustomText(
+                    '${_benefitControllers.length}/7',
+                    fontSize: 12,
+                    color: AppColors.subtext,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              const CustomText(
+                'Add 1–7 unique benefits in the order designers should see them.',
+                fontSize: 12,
+                color: AppColors.subtext,
+                textAlign: TextAlign.left,
+              ),
+              const SizedBox(height: 10),
+              ...List.generate(_benefitControllers.length, (index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          key: ValueKey('subscription_benefit_$index'),
+                          controller: _benefitControllers[index],
+                          maxLength: 160,
+                          decoration: InputDecoration(
+                            labelText: 'Benefit ${index + 1}',
+                            counterText: '',
+                          ),
+                        ),
+                      ),
+                      if (_benefitControllers.length > 1) ...[
+                        const SizedBox(width: 8),
+                        IconButton(
+                          tooltip: 'Remove benefit',
+                          onPressed: () {
+                            final controller = _benefitControllers.removeAt(
+                              index,
+                            );
+                            controller.dispose();
+                            setState(() {});
+                          },
+                          icon: const Icon(
+                            Icons.remove_circle_outline,
+                            color: AppColors.danger,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              }),
+              if (_benefitControllers.length < 7)
+                TextButton.icon(
+                  key: const ValueKey('add_subscription_benefit'),
+                  onPressed: () {
+                    setState(() {
+                      _benefitControllers.add(TextEditingController());
+                    });
+                  },
+                  icon: const Icon(Icons.add_rounded),
+                  label: const Text('Add benefit'),
+                ),
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  key: const ValueKey('save_subscription_plan'),
+                  onPressed: _saving ? null : _save,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accent,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(52),
+                  ),
+                  child:
+                      _saving
+                          ? const SizedBox.square(
+                            dimension: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                          : Text(
+                            widget.plan == null ? 'Create Plan' : 'Update Plan',
+                          ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

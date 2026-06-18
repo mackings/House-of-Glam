@@ -31,9 +31,13 @@ class SubscriptionPlan {
   final int amount;
   final String duration;
   final String description;
+  final List<String> benefits;
+  final int benefitCount;
+  final String baseCurrency;
   final String displayCurrency;
   final double displayAmount;
   final double exchangeRate;
+  final String paymentProvider;
 
   SubscriptionPlan({
     required this.id,
@@ -41,9 +45,13 @@ class SubscriptionPlan {
     required this.amount,
     required this.duration,
     required this.description,
+    this.benefits = const [],
+    this.benefitCount = 0,
+    this.baseCurrency = 'NGN',
     this.displayCurrency = 'NGN',
     this.displayAmount = 0,
     this.exchangeRate = 0,
+    this.paymentProvider = '',
   });
 
   factory SubscriptionPlan.fromJson(Map<String, dynamic> json) {
@@ -71,15 +79,29 @@ class SubscriptionPlan {
             ? rawRate.toDouble()
             : double.tryParse(rawRate?.toString() ?? '') ?? 0;
 
+    final benefits =
+        json['benefits'] is List
+            ? (json['benefits'] as List)
+                .map((benefit) => parseString(benefit))
+                .where((benefit) => benefit.isNotEmpty)
+                .toList()
+            : const <String>[];
+    final parsedBenefitCount = parseInt(json['benefitCount']);
+
     return SubscriptionPlan(
       id: parseString(json['_id']),
       name: parseString(json['name']),
       amount: parseInt(json['amount']),
       duration: parseString(json['duration']),
       description: parseString(json['description']),
+      benefits: benefits,
+      benefitCount:
+          parsedBenefitCount > 0 ? parsedBenefitCount : benefits.length,
+      baseCurrency: parseString(json['baseCurrency'], fallback: 'NGN'),
       displayCurrency: parseString(json['displayCurrency'], fallback: 'NGN'),
       displayAmount: parsedDisplay,
       exchangeRate: parsedRate,
+      paymentProvider: parseString(json['paymentProvider']),
     );
   }
 }

@@ -20,7 +20,33 @@ class _SubscriptionState extends State<Subscription> {
   String? currentPlan;
   String? subscriptionStartDate;
   String? subscriptionEndDate;
+  String? subscribingPlanId;
   bool isLoading = true;
+
+  String _planLabel(String? value) {
+    final raw = (value ?? '').trim();
+    if (raw.isEmpty) return 'Free Plan';
+
+    final withoutSuffix = raw.replaceFirst(
+      RegExp(r'\s+plans?$', caseSensitive: false),
+      '',
+    );
+    final words = withoutSuffix
+        .split(RegExp(r'\s+'))
+        .where((word) => word.isNotEmpty)
+        .map(
+          (word) =>
+              '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}',
+        )
+        .join(' ');
+    return '${words.isEmpty ? 'Free' : words} Plan';
+  }
+
+  String _planKey(String? value) {
+    return _planLabel(
+      value,
+    ).replaceFirst(RegExp(r'\s+plan$', caseSensitive: false), '').toLowerCase();
+  }
 
   String formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return "-";
@@ -41,7 +67,7 @@ class _SubscriptionState extends State<Subscription> {
 
   Future<void> loadCurrentPlan() async {
     final userData = await SecurePrefs.getUserData();
-    if (userData != null) {
+    if (userData != null && mounted) {
       setState(() {
         currentPlan = userData["subscriptionPlan"]?.toString();
         subscriptionStartDate = userData["subscriptionStartDate"]?.toString();
@@ -53,16 +79,20 @@ class _SubscriptionState extends State<Subscription> {
   Future<void> fetchPlans() async {
     try {
       final response = await _service.getSubscriptionPlans();
+      if (!mounted) return;
       setState(() {
         plans = response.data;
         isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => isLoading = false);
     }
   }
 
   Future<void> subscribe(SubscriptionPlan plan) async {
+    if (subscribingPlanId != null) return;
+    setState(() => subscribingPlanId = plan.id);
     try {
       final response = await _service.subscribeToPlan(planId: plan.id);
       final checkoutLink =
@@ -71,16 +101,33 @@ class _SubscriptionState extends State<Subscription> {
               : response.checkoutUrl;
 
       if (checkoutLink.isNotEmpty && mounted) {
-        Navigator.push(
+        final activated = await Navigator.push<bool>(
           context,
-          MaterialPageRoute(builder: (_) => WebViewScreen(url: checkoutLink)),
+          MaterialPageRoute(
+            builder:
+                (_) => WebViewScreen(
+                  url: checkoutLink,
+                  paymentReference: response.data.paymentReference,
+                ),
+          ),
         );
+        if (activated == true) {
+          await loadCurrentPlan();
+        }
+      } else if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(response.message)));
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Unable to start subscription: $e")),
       );
+    } finally {
+      if (mounted) {
+        setState(() => subscribingPlanId = null);
+      }
     }
   }
 
@@ -195,7 +242,7 @@ class _SubscriptionState extends State<Subscription> {
                                         ),
                                         const SizedBox(height: 2),
                                         CustomText(
-                                          currentPlan!,
+                                          _planLabel(currentPlan),
                                           fontSize: 20,
                                           fontWeight: FontWeight.w800,
                                           color: AppColors.ink,
@@ -283,6 +330,37 @@ class _SubscriptionState extends State<Subscription> {
                             ],
                           ),
                         ),
+                      if (groupedPlans.isEmpty)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: Column(
+                            children: [
+                              const Icon(
+                                Icons.workspace_premium_outlined,
+                                color: AppColors.subtext,
+                              ),
+                              const SizedBox(height: 8),
+                              const CustomText(
+                                "No subscription plans are available right now.",
+                                color: AppColors.subtext,
+                              ),
+                              const SizedBox(height: 10),
+                              TextButton(
+                                onPressed: () {
+                                  setState(() => isLoading = true);
+                                  fetchPlans();
+                                },
+                                child: const Text("Try again"),
+                              ),
+                            ],
+                          ),
+                        ),
                       ...groupedPlans.entries.map((entry) {
                         final planName = entry.key;
                         final planList = entry.value;
@@ -299,7 +377,7 @@ class _SubscriptionState extends State<Subscription> {
                             Padding(
                               padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
                               child: CustomText(
-                                "$planName Plans",
+                                _planLabel(planName),
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
                                 color: AppColors.ink,
@@ -309,8 +387,7 @@ class _SubscriptionState extends State<Subscription> {
                             ...planList.map((plan) {
                               final isActive =
                                   currentPlan != null &&
-                                  plan.name.toLowerCase() ==
-                                      currentPlan!.toLowerCase();
+                                  _planKey(plan.name) == _planKey(currentPlan);
                               final currencyCode =
                                   plan.displayCurrency.isNotEmpty
                                       ? plan.displayCurrency.toUpperCase()
@@ -325,6 +402,12 @@ class _SubscriptionState extends State<Subscription> {
                                   currencyCode == "USD"
                                       ? formatter2.format(amountToShow)
                                       : formatter.format(amountToShow);
+                              final provider =
+                                  plan.paymentProvider.toLowerCase() == "stripe"
+                                      ? "Stripe"
+                                      : "Paystack";
+                              final isSubscribing =
+                                  subscribingPlanId == plan.id;
 
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 14),
@@ -406,6 +489,36 @@ class _SubscriptionState extends State<Subscription> {
                                       color: AppColors.subtext,
                                       textAlign: TextAlign.left,
                                     ),
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 7,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.accentSoft,
+                                        borderRadius: BorderRadius.circular(
+                                          999,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.lock_outline_rounded,
+                                            size: 14,
+                                            color: AppColors.accentDeep,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          CustomText(
+                                            "Secure checkout with $provider",
+                                            fontSize: 11,
+                                            color: AppColors.accentDeep,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                     const SizedBox(height: 14),
                                     Container(
                                       width: double.infinity,
@@ -421,6 +534,44 @@ class _SubscriptionState extends State<Subscription> {
                                         color: AppColors.ink,
                                       ),
                                     ),
+                                    if (plan.benefits.isNotEmpty) ...[
+                                      const SizedBox(height: 16),
+                                      const CustomText(
+                                        "What’s included",
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w800,
+                                        color: AppColors.ink,
+                                        textAlign: TextAlign.left,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      ...plan.benefits.map(
+                                        (benefit) => Padding(
+                                          padding: const EdgeInsets.only(
+                                            bottom: 9,
+                                          ),
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const Icon(
+                                                Icons.check_circle_rounded,
+                                                size: 18,
+                                                color: AppColors.success,
+                                              ),
+                                              const SizedBox(width: 9),
+                                              Expanded(
+                                                child: CustomText(
+                                                  benefit,
+                                                  fontSize: 13,
+                                                  color: AppColors.ink,
+                                                  textAlign: TextAlign.left,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                     const SizedBox(height: 16),
                                     SizedBox(
                                       width: double.infinity,
@@ -461,14 +612,31 @@ class _SubscriptionState extends State<Subscription> {
                                                   elevation: 0,
                                                 ),
                                                 onPressed:
-                                                    () => subscribe(plan),
-                                                icon: const Icon(
-                                                  Icons.arrow_forward_rounded,
-                                                  size: 18,
-                                                ),
-                                                label: const Text(
-                                                  "Continue to Subscribe",
-                                                  style: TextStyle(
+                                                    subscribingPlanId == null
+                                                        ? () => subscribe(plan)
+                                                        : null,
+                                                icon:
+                                                    isSubscribing
+                                                        ? const SizedBox.square(
+                                                          dimension: 18,
+                                                          child:
+                                                              CircularProgressIndicator(
+                                                                strokeWidth: 2,
+                                                                color:
+                                                                    Colors
+                                                                        .white,
+                                                              ),
+                                                        )
+                                                        : const Icon(
+                                                          Icons
+                                                              .arrow_forward_rounded,
+                                                          size: 18,
+                                                        ),
+                                                label: Text(
+                                                  isSubscribing
+                                                      ? "Opening Checkout"
+                                                      : "Continue to Subscribe",
+                                                  style: const TextStyle(
                                                     fontWeight: FontWeight.w700,
                                                   ),
                                                 ),

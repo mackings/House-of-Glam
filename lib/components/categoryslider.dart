@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:hog/App/Home/Model/category.dart';
 
 class CategorySlider extends StatelessWidget {
   final List<Map<String, String>> categories; // title + imageUrl
   final Function(int index)? onCategoryTap;
 
-  const CategorySlider({Key? key, required this.categories, this.onCategoryTap})
-    : super(key: key);
+  const CategorySlider({
+    super.key,
+    required this.categories,
+    this.onCategoryTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +22,7 @@ class CategorySlider extends StatelessWidget {
         separatorBuilder: (context, index) => const SizedBox(width: 16),
         itemBuilder: (context, index) {
           final category = categories[index];
+          final imageUrl = category['imageUrl'] ?? '';
           return GestureDetector(
             onTap: () => onCategoryTap?.call(index),
             child: Column(
@@ -25,8 +30,22 @@ class CategorySlider extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 35,
-                  backgroundImage: NetworkImage(category['imageUrl']!),
                   backgroundColor: Colors.grey[200],
+                  backgroundImage:
+                      imageUrl.isEmpty || Category.isAssetImage(imageUrl)
+                          ? null
+                          : NetworkImage(imageUrl),
+                  child:
+                      Category.isAssetImage(imageUrl)
+                          ? ClipOval(
+                            child: Image.asset(
+                              imageUrl,
+                              width: 70,
+                              height: 70,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                          : null,
                 ),
                 const SizedBox(height: 8),
                 Text(

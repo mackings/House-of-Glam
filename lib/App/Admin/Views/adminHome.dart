@@ -5,6 +5,7 @@ import 'package:hog/App/Admin/Views/PricingSettings.dart';
 import 'package:hog/App/Admin/Views/SubscriptionSettings.dart';
 import 'package:hog/App/Admin/Views/analytics.dart';
 import 'package:hog/App/Admin/Views/admin_profile.dart';
+import 'package:hog/App/Admin/Views/admin_invitation.dart';
 import 'package:hog/App/Admin/Views/billing.dart';
 import 'package:hog/App/Admin/Widgets/moderationHistoryTab.dart';
 import 'package:hog/App/Admin/Widgets/moderationListingsTab.dart';
@@ -192,6 +193,13 @@ class _AdminHomeState extends State<AdminHome> {
                             onOpenDisputes:
                                 () =>
                                     _openScreen(context, const AdminDisputes()),
+                            onOpenInvite:
+                                () => _openScreen(
+                                  context,
+                                  AdminInvitationPage(
+                                    isSuperAdmin: _isSuperAdmin,
+                                  ),
+                                ),
                           ),
                         ),
                       ),
@@ -250,6 +258,7 @@ class _AdminQuickAccess extends StatefulWidget {
   final VoidCallback onOpenPricing;
   final VoidCallback onOpenSubscriptions;
   final VoidCallback onOpenDisputes;
+  final VoidCallback onOpenInvite;
 
   const _AdminQuickAccess({
     required this.onOpenAnalytics,
@@ -259,6 +268,7 @@ class _AdminQuickAccess extends StatefulWidget {
     required this.onOpenPricing,
     required this.onOpenSubscriptions,
     required this.onOpenDisputes,
+    required this.onOpenInvite,
   });
 
   @override
@@ -276,6 +286,12 @@ class _AdminQuickAccessState extends State<_AdminQuickAccess> {
         icon: Icons.analytics_outlined,
         tint: AppColors.accent,
         onTap: widget.onOpenAnalytics,
+      ),
+      (
+        label: 'Invite',
+        icon: Icons.person_add_alt_1_rounded,
+        tint: const Color(0xFF7C3AED),
+        onTap: widget.onOpenInvite,
       ),
       (
         label: 'Billing',

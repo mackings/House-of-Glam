@@ -14,14 +14,10 @@ class SubscriptionService {
       final token = await SecurePrefs.getToken();
       final url = Uri.parse("$baseUrl/getSubscriptionPlans");
 
-      print("➡️ GET Request: $url");
-
       final response = await http.get(
         url,
         headers: {"Authorization": "Bearer $token"},
       );
-
-      print("⬅️ Response [${response.statusCode}]: ${response.body}");
 
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
@@ -30,7 +26,6 @@ class SubscriptionService {
         throw Exception("Failed to fetch subscription plans: ${response.body}");
       }
     } catch (e) {
-      print("❌ Error fetching subscription plans: $e");
       rethrow;
     }
   }
@@ -51,8 +46,6 @@ class SubscriptionService {
         if (planId == null && billTerm != null) "billTerm": billTerm,
       };
 
-      print("➡️ POST Request: $url with body $body");
-
       final response = await http.post(
         url,
         headers: {
@@ -62,8 +55,6 @@ class SubscriptionService {
         body: jsonEncode(body),
       );
 
-      print("⬅️ Response [${response.statusCode}]: ${response.body}");
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         final jsonData = jsonDecode(response.body);
         return SubscriptionPaymentResponse.fromJson(jsonData);
@@ -71,7 +62,6 @@ class SubscriptionService {
         throw Exception("Failed to subscribe: ${response.body}");
       }
     } catch (e) {
-      print("❌ Error subscribing: $e");
       rethrow;
     }
   }
@@ -81,6 +71,7 @@ class SubscriptionService {
     required int amount,
     required String duration,
     required String description,
+    required List<String> benefits,
   }) async {
     try {
       final token = await SecurePrefs.getToken();
@@ -90,6 +81,7 @@ class SubscriptionService {
         "amount": amount,
         "duration": duration,
         "description": description,
+        "benefits": benefits,
       };
 
       final response = await http.post(
@@ -115,6 +107,7 @@ class SubscriptionService {
     int? amount,
     String? duration,
     String? description,
+    List<String>? benefits,
   }) async {
     try {
       final token = await SecurePrefs.getToken();
@@ -124,6 +117,7 @@ class SubscriptionService {
         if (amount != null) "amount": amount,
         if (duration != null) "duration": duration,
         if (description != null) "description": description,
+        if (benefits != null) "benefits": benefits,
       };
 
       final response = await http.put(
@@ -176,5 +170,28 @@ class SubscriptionService {
     } catch (_) {
       return null;
     }
+  }
+
+  Future<Map<String, dynamic>> verifySubscriptionPayment(
+    String paymentReference,
+  ) async {
+    final token = await SecurePrefs.getToken();
+    final url = Uri.parse(
+      "$baseUrl/verifySubscriptionPayment/$paymentReference",
+    );
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+    );
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map<String, dynamic>) {
+      throw Exception('Invalid subscription verification response');
+    }
+    if (response.statusCode != 200 || decoded['success'] != true) {
+      throw Exception(
+        decoded['message']?.toString() ?? 'Unable to verify subscription',
+      );
+    }
+    return decoded;
   }
 }

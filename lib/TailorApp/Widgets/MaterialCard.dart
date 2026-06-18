@@ -4,7 +4,9 @@ import 'package:hog/components/texts.dart';
 import 'package:hog/theme/app_theme.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+
 class TailorMaterialCard extends StatelessWidget {
+  
   final TailorMaterialItem material;
   final VoidCallback onTap;
 

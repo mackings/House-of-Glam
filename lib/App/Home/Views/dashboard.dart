@@ -349,7 +349,7 @@ class _HomeState extends ConsumerState<Home> {
                       title: "Spice up your Owambe with Agbada",
                       subtitle: "Agbada that rocks every footwear.",
                       ctaLabel: "Shop Now",
-                      icon: Icons.accessibility_new_rounded,
+                      imageAsset: "assets/Img/category_agbada.jpg",
                       background: Color(0xFFF1F4FF),
                       accent: Color(0xFF3159D9),
                     ),
@@ -358,7 +358,7 @@ class _HomeState extends ConsumerState<Home> {
                       title: "Beautifully made Blouse and Gele",
                       subtitle: "Statement styles made for women.",
                       ctaLabel: "Explore Styles",
-                      icon: Icons.auto_awesome_rounded,
+                      imageAsset: "assets/Img/category_iro_buba.jpg",
                       background: Color(0xFFFFF1F4),
                       accent: Color(0xFFC85372),
                     ),
@@ -367,7 +367,7 @@ class _HomeState extends ConsumerState<Home> {
                       title: "Ready-to-wear Kaftans",
                       subtitle: "Professionally made and measurement based.",
                       ctaLabel: "View Collection",
-                      icon: Icons.checkroom_rounded,
+                      imageAsset: "assets/Img/category_kaftan.jpg",
                       background: Color(0xFFF3F8F2),
                       accent: Color(0xFF397A50),
                     ),
@@ -376,7 +376,7 @@ class _HomeState extends ConsumerState<Home> {
                       title: "Tailored premium suits",
                       subtitle: "For business and formal occasions.",
                       ctaLabel: "Try It Out",
-                      icon: Icons.business_center_rounded,
+                      imageAsset: "assets/Img/category_ankara_fusion.jpg",
                       background: Color(0xFFFFF4E8),
                       accent: Color(0xFFD86618),
                     ),
@@ -417,22 +417,33 @@ class _HomeState extends ConsumerState<Home> {
                                     Expanded(
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(14),
-                                        child: Image.network(
-                                          cat.image.isNotEmpty
-                                              ? cat.image
-                                              : "https://via.placeholder.com/150",
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (_, __, ___) => Container(
-                                                color: AppColors.surfaceMuted,
-                                                alignment: Alignment.center,
-                                                child: const Icon(
-                                                  Icons.image_outlined,
-                                                  color: AppColors.subtext,
+                                        child:
+                                            Category.isAssetImage(cat.image)
+                                                ? Image.asset(
+                                                  cat.image,
+                                                  width: double.infinity,
+                                                  fit: BoxFit.cover,
+                                                )
+                                                : Image.network(
+                                                  cat.image.isNotEmpty
+                                                      ? cat.image
+                                                      : "https://via.placeholder.com/150",
+                                                  width: double.infinity,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder:
+                                                      (_, __, ___) => Container(
+                                                        color:
+                                                            AppColors
+                                                                .surfaceMuted,
+                                                        alignment:
+                                                            Alignment.center,
+                                                        child: const Icon(
+                                                          Icons.image_outlined,
+                                                          color:
+                                                              AppColors.subtext,
+                                                        ),
+                                                      ),
                                                 ),
-                                              ),
-                                        ),
                                       ),
                                     ),
                                     const SizedBox(height: 6),

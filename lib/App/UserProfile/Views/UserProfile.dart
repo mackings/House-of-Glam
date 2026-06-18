@@ -280,7 +280,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                                 Expanded(
                                   child: _QuickAction(
                                     icon: Icons.receipt_long_outlined,
-                                    label: "Transaction History",
+                                    label: "Transactions",
                                     onTap: () {
                                       Nav.push(context, Transactions());
                                     },

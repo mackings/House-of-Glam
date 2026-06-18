@@ -5,7 +5,7 @@ class CarouselItemWidget extends StatelessWidget {
   final String subtitle;
   final String eyebrow;
   final String ctaLabel;
-  final IconData icon;
+  final String imageAsset;
   final Color background;
   final Color accent;
   final double borderRadius;
@@ -16,7 +16,7 @@ class CarouselItemWidget extends StatelessWidget {
     required this.subtitle,
     required this.eyebrow,
     required this.ctaLabel,
-    required this.icon,
+    required this.imageAsset,
     required this.background,
     required this.accent,
     this.borderRadius = 16,
@@ -96,10 +96,11 @@ class CarouselItemWidget extends StatelessWidget {
             width: 72,
             height: 96,
             decoration: BoxDecoration(
-              color: accent,
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: accent.withValues(alpha: 0.2)),
             ),
-            child: Icon(icon, color: Colors.white, size: 34),
+            clipBehavior: Clip.antiAlias,
+            child: Image.asset(imageAsset, fit: BoxFit.cover),
           ),
         ],
       ),
