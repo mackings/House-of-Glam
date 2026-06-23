@@ -161,6 +161,7 @@ class _AdminInvitationPageState extends State<AdminInvitationPage> {
                   key: const ValueKey('invite_role'),
                   initialValue: _role,
                   isExpanded: true,
+                  menuMaxHeight: 320,
                   decoration: const InputDecoration(labelText: 'Role'),
                   items: [
                     const DropdownMenuItem(

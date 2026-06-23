@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:hog/theme/app_theme.dart';
+import 'package:hog/utils/ui_label_formatter.dart';
 
 final obscureTextProvider = StateProvider.family<bool, String>(
   (ref, fieldKey) => true,
@@ -98,6 +99,8 @@ class CustomTextField extends ConsumerWidget {
           dropdownItems != null
               ? DropdownButtonFormField<String>(
                 initialValue: selectedValue,
+                menuMaxHeight: 320,
+                isExpanded: true,
                 decoration: InputDecoration(
                   hintText: hintText,
                   prefixIcon:
@@ -110,7 +113,7 @@ class CustomTextField extends ConsumerWidget {
                         .map(
                           (item) => DropdownMenuItem<String>(
                             value: item,
-                            child: Text(item),
+                            child: Text(formatUiLabel(item)),
                           ),
                         )
                         .toList(),
@@ -165,6 +168,7 @@ class CustomTextField extends ConsumerWidget {
                           child: DropdownButtonFormField<String>(
                             initialValue:
                                 selectedCountryCode ?? countryCodes.first,
+                            menuMaxHeight: 320,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.symmetric(
                                 vertical: 15,

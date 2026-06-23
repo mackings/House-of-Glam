@@ -7,8 +7,8 @@ import 'package:hog/App/Home/Api/home.dart';
 import 'package:hog/App/Home/Model/category.dart';
 import 'package:hog/TailorApp/Home/Api/publishservice.dart';
 import 'package:hog/components/button.dart';
-import 'package:hog/components/formfields.dart';
 import 'package:hog/theme/app_theme.dart';
+import 'package:hog/utils/ui_label_formatter.dart';
 import 'package:image_picker/image_picker.dart';
 
 class PublishMaterial extends StatefulWidget {
@@ -249,6 +249,9 @@ class _PublishMaterialState extends State<PublishMaterial> {
     final hasCustomCategory =
         selectedCategoryName == "Others" && showCustomCategoryField;
     final hasCustomColor = selectedColor == "Others" && showCustomColorField;
+    final width = MediaQuery.sizeOf(context).width;
+    final horizontalPadding = width < 380 ? 14.0 : 20.0;
+    final sectionGap = width < 380 ? 12.0 : 16.0;
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
@@ -272,12 +275,17 @@ class _PublishMaterialState extends State<PublishMaterial> {
               )
               : SafeArea(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    8,
+                    horizontalPadding,
+                    24,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildHeaderCard(),
-                      const SizedBox(height: 18),
+                      SizedBox(height: sectionGap),
                       _buildSectionCard(
                         icon: Icons.checkroom_outlined,
                         title: "Material basics",
@@ -326,39 +334,35 @@ class _PublishMaterialState extends State<PublishMaterial> {
                               },
                             ),
                             if (hasCustomCategory) ...[
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 10),
                               _buildAssistCard(
                                 title: "Custom category",
                                 subtitle:
                                     "Name the material group exactly as you want it to appear.",
-                                child: CustomTextField(
-                                  title: "",
+                                child: _buildCompactTextField(
                                   hintText: "e.g Bespoke Gown, Bridal Wear",
-                                  fieldKey: "customCategory",
                                   controller: customCategoryController,
                                 ),
                               ),
                             ],
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 14),
                             _buildFieldLabel("Attire Type", true),
-                            CustomTextField(
-                              title: "",
+                            _buildCompactTextField(
                               hintText: "e.g Agbada, Senator, Kaftan",
-                              fieldKey: "attireType",
                               controller: attireTypeController,
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 18),
+                      SizedBox(height: sectionGap),
                       _buildSectionCard(
                         icon: Icons.palette_outlined,
                         title: "Appearance and brand",
                         subtitle:
-                            "Keep the listing easy to scan with a clear color and recognizable brand.",
+                            "Keep the listing easy to scan with a clear colour and recognizable brand.",
                         child: Column(
                           children: [
-                            _buildFieldLabel("Color", true),
+                            _buildFieldLabel("Colour", true),
                             _buildStyledDropdown(
                               hint: "Select colour",
                               value: selectedColor,
@@ -374,41 +378,37 @@ class _PublishMaterialState extends State<PublishMaterial> {
                               },
                             ),
                             if (hasCustomColor) ...[
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 10),
                               _buildAssistCard(
-                                title: "Custom color",
+                                title: "Custom colour",
                                 subtitle:
                                     "Use the exact shade name if it helps buyers identify the fabric faster.",
-                                child: CustomTextField(
-                                  title: "",
+                                child: _buildCompactTextField(
                                   hintText:
                                       "e.g Navy Blue, Burgundy, Turquoise",
-                                  fieldKey: "customColor",
                                   controller: customColorController,
                                 ),
                               ),
                             ],
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 14),
                             _buildFieldLabel("Brand", true),
-                            CustomTextField(
-                              title: "",
+                            _buildCompactTextField(
                               hintText: "e.g Gucci, Versace, Louis Vuitton",
-                              fieldKey: "brand",
                               controller: brandController,
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 18),
+                      SizedBox(height: sectionGap),
                       _buildSectionCard(
                         icon: Icons.photo_library_outlined,
                         title: "Preview gallery",
                         subtitle:
-                            "Upload sharp images that show texture, fit, and color properly.",
+                            "Upload sharp images that show texture, fit, and colour properly.",
                         trailing: _buildCountBadge("${sampleImages.length}/5"),
                         child: _buildImagePickerGrid(),
                       ),
-                      const SizedBox(height: 18),
+                      SizedBox(height: sectionGap),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(18),
@@ -460,9 +460,11 @@ class _PublishMaterialState extends State<PublishMaterial> {
   }
 
   Widget _buildHeaderCard() {
+    final compact = MediaQuery.sizeOf(context).width < 380;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(22),
+      padding: EdgeInsets.all(compact ? 18 : 22),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFFF7F1FF), Color(0xFFFFFFFF)],
@@ -504,7 +506,7 @@ class _PublishMaterialState extends State<PublishMaterial> {
                     Text(
                       "List a new material",
                       style: GoogleFonts.poppins(
-                        fontSize: 20,
+                        fontSize: compact ? 18 : 20,
                         fontWeight: FontWeight.w700,
                         color: AppColors.ink,
                       ),
@@ -523,21 +525,6 @@ class _PublishMaterialState extends State<PublishMaterial> {
               ),
             ],
           ),
-          const SizedBox(height: 18),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              _buildMiniInfoChip(
-                icon: Icons.style_outlined,
-                text: "Category, Type, Colour",
-              ),
-              _buildMiniInfoChip(
-                icon: Icons.image_outlined,
-                text: "Up to 5 gallery images",
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -550,9 +537,11 @@ class _PublishMaterialState extends State<PublishMaterial> {
     required Widget child,
     Widget? trailing,
   }) {
+    final compact = MediaQuery.sizeOf(context).width < 380;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(compact ? 16 : 20),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(26),
@@ -607,7 +596,7 @@ class _PublishMaterialState extends State<PublishMaterial> {
               if (trailing != null) ...[const SizedBox(width: 12), trailing],
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: compact ? 14 : 18),
           child,
         ],
       ),
@@ -621,7 +610,7 @@ class _PublishMaterialState extends State<PublishMaterial> {
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.surfaceMuted,
         borderRadius: BorderRadius.circular(20),
@@ -653,7 +642,7 @@ class _PublishMaterialState extends State<PublishMaterial> {
               color: AppColors.subtext,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           child,
         ],
       ),
@@ -670,12 +659,13 @@ class _PublishMaterialState extends State<PublishMaterial> {
       initialValue: value,
       icon: const Icon(Icons.keyboard_arrow_down_rounded),
       isExpanded: true,
+      menuMaxHeight: 320,
       decoration: InputDecoration(
         hintText: hint,
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 18,
-          vertical: 18,
+          horizontal: 16,
+          vertical: 14,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
@@ -701,7 +691,7 @@ class _PublishMaterialState extends State<PublishMaterial> {
                 (option) => DropdownMenuItem<String>(
                   value: option,
                   child: Text(
-                    option,
+                    formatUiLabel(option),
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: 14,
@@ -712,6 +702,40 @@ class _PublishMaterialState extends State<PublishMaterial> {
               )
               .toList(),
       onChanged: onChanged,
+    );
+  }
+
+  Widget _buildCompactTextField({
+    required String hintText,
+    required TextEditingController controller,
+  }) {
+    return TextFormField(
+      controller: controller,
+      style: GoogleFonts.poppins(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: AppColors.ink,
+      ),
+      decoration: InputDecoration(
+        hintText: hintText,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: AppColors.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: AppColors.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: AppColors.accent, width: 1.4),
+        ),
+      ),
     );
   }
 
@@ -843,32 +867,6 @@ class _PublishMaterialState extends State<PublishMaterial> {
           },
         ),
       ],
-    );
-  }
-
-  Widget _buildMiniInfoChip({required IconData icon, required String text}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: AppColors.accent),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppColors.ink,
-            ),
-          ),
-        ],
-      ),
     );
   }
 

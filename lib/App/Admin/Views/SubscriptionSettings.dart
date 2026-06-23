@@ -3,6 +3,7 @@ import 'package:hog/TailorApp/Home/Api/subservice.dart';
 import 'package:hog/TailorApp/Home/Model/submodel.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/theme/app_theme.dart';
+import 'package:hog/utils/ui_label_formatter.dart';
 import 'package:intl/intl.dart';
 
 class SubscriptionSettings extends StatefulWidget {
@@ -519,11 +520,14 @@ class _PlanEditorSheetState extends State<_PlanEditorSheet> {
               DropdownButtonFormField<String>(
                 initialValue: _name,
                 isExpanded: true,
+                menuMaxHeight: 320,
                 items:
                     widget.planNames
                         .map(
-                          (name) =>
-                              DropdownMenuItem(value: name, child: Text(name)),
+                          (name) => DropdownMenuItem(
+                            value: name,
+                            child: Text(formatUiLabel(name)),
+                          ),
                         )
                         .toList(),
                 onChanged: (value) => _name = value ?? _name,
@@ -533,6 +537,7 @@ class _PlanEditorSheetState extends State<_PlanEditorSheet> {
               DropdownButtonFormField<String>(
                 initialValue: _duration,
                 isExpanded: true,
+                menuMaxHeight: 320,
                 items:
                     widget.durations
                         .map(

@@ -9,6 +9,7 @@ import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/constants/currencyHelper.dart';
 import 'package:hog/theme/app_theme.dart';
+import 'package:hog/utils/ui_label_formatter.dart';
 import 'package:image_picker/image_picker.dart';
 
 class DesignerGrowthHub extends StatefulWidget {
@@ -341,6 +342,8 @@ class _PortfolioManagerTabState extends State<PortfolioManagerTab> {
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _category,
+                menuMaxHeight: 320,
+                isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Work section'),
                 items: const [
                   DropdownMenuItem(value: 'bridal', child: Text('Bridal')),
@@ -1715,6 +1718,8 @@ class _CreateWorkflowSheetState extends State<_CreateWorkflowSheet> {
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
           initialValue: _status,
+          menuMaxHeight: 320,
+          isExpanded: true,
           decoration: const InputDecoration(labelText: 'Starting status'),
           items:
               _workflowStatuses
@@ -1808,6 +1813,8 @@ class _UpdateWorkflowSheetState extends State<_UpdateWorkflowSheet> {
         DropdownButtonFormField<String>(
           initialValue:
               _workflowStatuses.contains(_status) ? _status : 'not_started',
+          menuMaxHeight: 320,
+          isExpanded: true,
           decoration: const InputDecoration(labelText: 'Status'),
           items:
               _workflowStatuses
@@ -2125,10 +2132,17 @@ class _SmallDropdown extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: DropdownButtonFormField<String>(
         initialValue: value,
+        menuMaxHeight: 320,
+        isExpanded: true,
         decoration: InputDecoration(labelText: label),
         items:
             values
-                .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+                .map(
+                  (item) => DropdownMenuItem(
+                    value: item,
+                    child: Text(formatUiLabel(item)),
+                  ),
+                )
                 .toList(),
         onChanged: onChanged,
       ),

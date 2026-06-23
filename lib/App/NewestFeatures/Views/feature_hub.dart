@@ -12,6 +12,7 @@ import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/theme/app_theme.dart';
+import 'package:hog/utils/ui_label_formatter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -232,7 +233,7 @@ class _DiscoveryTabState extends State<DiscoveryTab> {
                         Expanded(
                           child: CustomTextField(
                             title: '',
-                            hintText: 'Category/designer specialty',
+                            hintText: 'Category',
                             fieldKey: 'discovery_category',
                             controller: TextEditingController(text: _category),
                             isCompact: true,
@@ -289,7 +290,8 @@ class MeasurementsTab extends StatefulWidget {
 
 class _MeasurementsTabState extends State<MeasurementsTab> {
   late Future<ApiResult> _future;
-  final _profileName = TextEditingController(text: 'Native fit');
+  final _profileName = TextEditingController();
+  final _customFitType = TextEditingController();
   final Map<String, TextEditingController> _fields = {
     'chest': TextEditingController(),
     'waist': TextEditingController(),
@@ -312,6 +314,7 @@ class _MeasurementsTabState extends State<MeasurementsTab> {
   @override
   void dispose() {
     _profileName.dispose();
+    _customFitType.dispose();
     for (final controller in _fields.values) {
       controller.dispose();
     }
@@ -319,10 +322,22 @@ class _MeasurementsTabState extends State<MeasurementsTab> {
   }
 
   Future<void> _save() async {
+    if (_profileName.text.trim().isEmpty) {
+      _showResult(context, ApiResult.failure('Please enter a profile name.'));
+      return;
+    }
+
+    final fitType =
+        _fitType == 'others' ? _customFitType.text.trim() : _fitType;
+    if (fitType.isEmpty) {
+      _showResult(context, ApiResult.failure('Please enter a fit type.'));
+      return;
+    }
+
     setState(() => _saving = true);
     final body = {
       'profileName': _profileName.text.trim(),
-      'fitType': _fitType,
+      'fitType': fitType,
       'measurements': {
         for (final entry in _fields.entries)
           if (!['agbadaLength', 'capSize'].contains(entry.key))
@@ -382,10 +397,28 @@ class _MeasurementsTabState extends State<MeasurementsTab> {
                   _ChoiceField(
                     label: 'Fit type',
                     value: _fitType,
-                    values: const ['casual', 'fitted', 'native', 'custom'],
+                    values: const [
+                      'casual',
+                      'fitted',
+                      'native',
+                      'custom',
+                      'others',
+                    ],
                     onChanged:
-                        (value) => setState(() => _fitType = value ?? 'native'),
+                        (value) => setState(() {
+                          _fitType = value ?? 'native';
+                          if (_fitType != 'others') {
+                            _customFitType.clear();
+                          }
+                        }),
                   ),
+                  if (_fitType == 'others')
+                    CustomTextField(
+                      title: 'Custom fit type',
+                      hintText: 'e.g. Bridal fit',
+                      fieldKey: 'custom_fit_type',
+                      controller: _customFitType,
+                    ),
                   const SizedBox(height: 12),
                   const _GuideStrip(),
                   const SizedBox(height: 14),
@@ -2170,16 +2203,28 @@ class _ChoiceField extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: DropdownButtonFormField<String>(
         initialValue: normalizedValue,
+        menuMaxHeight: 320,
+        isExpanded: true,
         decoration: InputDecoration(labelText: label),
         items:
             values
                 .map(
                   (item) => DropdownMenuItem(
                     value: item,
-                    child: Text(item.isEmpty ? 'Any' : item),
+                    child: Text(item.isEmpty ? 'Any' : formatUiLabel(item)),
                   ),
                 )
                 .toList(),
+        selectedItemBuilder:
+            (context) =>
+                values
+                    .map(
+                      (item) => Text(
+                        item.isEmpty ? 'Any' : formatUiLabel(item),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    )
+                    .toList(),
         onChanged: onChanged,
       ),
     );

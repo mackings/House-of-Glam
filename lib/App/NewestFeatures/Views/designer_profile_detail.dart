@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hog/App/NewestFeatures/Api/newest_feature_service.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/theme/app_theme.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DesignerProfileDetail extends StatefulWidget {
   final String designerId;
@@ -25,6 +26,27 @@ class _DesignerProfileDetailState extends State<DesignerProfileDetail> {
   void initState() {
     super.initState();
     _future = NewestFeatureService.getDesignerProfile(widget.designerId);
+  }
+
+  Future<void> _launchWhatsApp(String phone) async {
+    final normalizedPhone = phone.replaceAll(RegExp(r'\D'), '');
+    if (normalizedPhone.isEmpty) {
+      _showSnackBar('No WhatsApp number is available for this designer.');
+      return;
+    }
+
+    final url = Uri.parse('https://wa.me/$normalizedPhone');
+    final launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+    if (!launched && mounted) {
+      _showSnackBar('Could not open WhatsApp');
+    }
+  }
+
+  void _showSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -64,6 +86,7 @@ class _DesignerProfileDetailState extends State<DesignerProfileDetail> {
           final socialProof = apiMap(profile['socialProof']);
           final gallery = _portfolioGallery(profile);
           final sections = apiMap(profile['categorizedWorkSections']);
+          final phone = _profilePhone(profile);
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -169,6 +192,18 @@ class _DesignerProfileDetailState extends State<DesignerProfileDetail> {
                 ),
               ),
               const SizedBox(height: 14),
+              if (phone != null) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    key: const ValueKey('designer_whatsapp_button'),
+                    onPressed: () => _launchWhatsApp(phone),
+                    icon: const Icon(Icons.chat_bubble_outline_rounded),
+                    label: const Text('Chat on WhatsApp'),
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ],
               _SocialProof(socialProof: socialProof),
               const SizedBox(height: 14),
               SizedBox(
@@ -225,6 +260,29 @@ class _DesignerProfileDetailState extends State<DesignerProfileDetail> {
           .toList();
     }
     return const [];
+  }
+
+  String? _profilePhone(Map<String, dynamic> profile) {
+    final nestedUser = apiMap(profile['user']);
+    final candidates = [
+      profile['whatsappNumber'],
+      profile['whatsAppNumber'],
+      profile['businessPhone'],
+      profile['phoneNumber'],
+      profile['phone'],
+      profile['contactPhone'],
+      nestedUser['phoneNumber'],
+      nestedUser['phone'],
+    ];
+
+    for (final candidate in candidates) {
+      final value = candidate?.toString().trim() ?? '';
+      if (value.replaceAll(RegExp(r'\D'), '').isNotEmpty) {
+        return value;
+      }
+    }
+
+    return null;
   }
 
   String _sectionLabel(String key) {

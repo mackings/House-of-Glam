@@ -842,6 +842,7 @@ class _FilterDropdown extends StatelessWidget {
     return DropdownButtonFormField<String>(
       initialValue: value,
       isExpanded: true,
+      menuMaxHeight: 320,
       decoration: InputDecoration(labelText: label),
       items: [
         const DropdownMenuItem(value: null, child: Text('All')),

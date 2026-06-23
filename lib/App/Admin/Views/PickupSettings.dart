@@ -457,6 +457,7 @@ class _PickupSettingsState extends State<PickupSettings> {
                         DropdownButtonFormField<CountryOption>(
                           initialValue: _selectedCountry,
                           isExpanded: true,
+                          menuMaxHeight: 320,
                           decoration: const InputDecoration(
                             labelText: "Country",
                             prefixIcon: Icon(Icons.public_rounded),

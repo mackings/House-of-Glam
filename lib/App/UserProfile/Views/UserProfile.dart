@@ -27,10 +27,10 @@ class _UserProfileViewState extends State<UserProfileView> {
   bool _loading = true;
 
   Future<void> _launchWhatsApp(String phone) async {
-    final url = Uri.parse("https://wa.me/$phone");
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else if (mounted) {
+    final normalizedPhone = phone.replaceAll(RegExp(r'\D'), '');
+    final url = Uri.parse("https://wa.me/$normalizedPhone");
+    final launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+    if (!launched && mounted) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Could not open WhatsApp")));
@@ -100,6 +100,14 @@ class _UserProfileViewState extends State<UserProfileView> {
     if (normalized.isEmpty) return fallback;
     if (normalized.toLowerCase() == 'tailor') return 'Designer';
     return "${normalized[0].toUpperCase()}${normalized.substring(1)}";
+  }
+
+  String _formatPlanLabel(String? value) {
+    final label = _formatCapitalized(value);
+    if (RegExp(r'\s+plans?$', caseSensitive: false).hasMatch(label)) {
+      return label;
+    }
+    return '$label Plan';
   }
 
   @override
@@ -256,7 +264,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                                 if (isDesigner)
                                   _StatusChip(
                                     icon: Icons.workspace_premium_outlined,
-                                    label: _formatCapitalized(
+                                    label: _formatPlanLabel(
                                       profile.subscriptionPlan,
                                     ),
                                     foreground: AppColors.accent,

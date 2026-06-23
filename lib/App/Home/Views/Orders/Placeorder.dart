@@ -469,7 +469,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
 
               const SizedBox(height: 10),
 
-              // UPDATED: Color dropdown with "Others" option
+              // UPDATED: Colour dropdown with "Others" option
               CustomDropdown(
                 label: "Preferred Colour *",
                 options: [...colors, "Others"],
@@ -479,8 +479,8 @@ class _PlaceOrderState extends State<PlaceOrder> {
               if (selectedColor == "Others") ...[
                 const SizedBox(height: 10),
                 CustomTextField(
-                  title: "Specify Color *",
-                  hintText: "Enter color name",
+                  title: "Specify Colour *",
+                  hintText: "Enter colour name",
                   fieldKey: "customColor",
                   controller: customColorController,
                 ),

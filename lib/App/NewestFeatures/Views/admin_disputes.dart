@@ -154,6 +154,8 @@ class _AdminDisputesState extends State<AdminDisputes> {
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         initialValue: _status,
+                        menuMaxHeight: 320,
+                        isExpanded: true,
                         decoration: const InputDecoration(labelText: 'Status'),
                         items: const [
                           DropdownMenuItem(value: 'open', child: Text('Open')),

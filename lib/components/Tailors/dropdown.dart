@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
+import 'package:hog/utils/ui_label_formatter.dart';
 
 class CustomDropdown extends StatelessWidget {
   final String label;
@@ -24,10 +24,17 @@ class CustomDropdown extends StatelessWidget {
         CustomText(label, fontSize: 16, fontWeight: FontWeight.w500),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: selectedValue,
+          initialValue: selectedValue,
+          menuMaxHeight: 320,
+          isExpanded: true,
           items:
               options
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .map(
+                    (e) => DropdownMenuItem(
+                      value: e,
+                      child: Text(formatUiLabel(e)),
+                    ),
+                  )
                   .toList(),
           onChanged: onChanged,
           decoration: InputDecoration(
@@ -50,11 +57,11 @@ class MeasurementField extends StatelessWidget {
   final bool isNumeric;
 
   const MeasurementField({
-    Key? key,
+    super.key,
     required this.label,
     required this.controller,
     this.isNumeric = true, // default to numeric
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
