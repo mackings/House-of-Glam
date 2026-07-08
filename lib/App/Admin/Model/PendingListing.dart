@@ -94,7 +94,7 @@ class SellerModerationListing {
   final bool isApproved;
   final double price;
   final List<String> images;
-  final List<String> yards;
+  final List<YardMeasurement> yards;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final SellerUser user;
@@ -145,7 +145,7 @@ class SellerModerationListing {
       isApproved: json['isApproved'] == true,
       price: _asDouble(json['price']),
       images: _asStringList(json['images']),
-      yards: _asStringList(json['yards']),
+      yards: _asYardsList(json['yards']),
       createdAt: _asDateTime(json['createdAt']),
       updatedAt: _asDateTime(json['updatedAt']),
       user: SellerUser.fromJson(_asMap(json['userId']) ?? const {}),
@@ -405,4 +405,36 @@ DateTime? _asDateTime(dynamic value) {
     return DateTime.tryParse(value);
   }
   return null;
+}
+
+class YardMeasurement {
+  final double length;
+  final double width;
+
+  const YardMeasurement({required this.length, required this.width});
+
+  factory YardMeasurement.fromJson(Map<String, dynamic> json) {
+    return YardMeasurement(
+      length: _asDouble(json['length']),
+      width: _asDouble(json['width']),
+    );
+  }
+
+  String get label {
+    String trim(double value) =>
+        value == value.roundToDouble()
+            ? value.toStringAsFixed(0)
+            : value.toString();
+    return '${trim(length)} × ${trim(width)} yds';
+  }
+}
+
+List<YardMeasurement> _asYardsList(dynamic value) {
+  if (value is! List) return const [];
+  return value
+      .map((item) => _asMap(item))
+      .whereType<Map<String, dynamic>>()
+      .map(YardMeasurement.fromJson)
+      .where((yard) => yard.length > 0 || yard.width > 0)
+      .toList();
 }

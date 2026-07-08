@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
+import 'package:hog/App/Legal/Views/legal_document_view.dart';
 import 'package:hog/TailorApp/Home/Api/TailorHomeservice.dart';
 import 'package:hog/TailorApp/Home/Api/business.dart';
 import 'package:hog/components/Navigator.dart';
@@ -46,6 +48,57 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
     descriptionController.dispose();
     businessRegNoController.dispose();
     super.dispose();
+  }
+
+  Widget _buildTermsConsent(BuildContext context) {
+    final baseStyle =
+        Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: AppColors.subtext,
+          height: 1.5,
+        ) ??
+        const TextStyle(color: AppColors.subtext, fontSize: 12, height: 1.5);
+    final linkStyle = baseStyle.copyWith(
+      color: AppColors.accent,
+      fontWeight: FontWeight.w700,
+      decoration: TextDecoration.underline,
+      decorationColor: AppColors.accent,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Text.rich(
+        TextSpan(
+          style: baseStyle,
+          children: [
+            const TextSpan(
+              text: "By submitting, you agree to House of GLAME's ",
+            ),
+            TextSpan(
+              text: "Designer Terms",
+              style: linkStyle,
+              recognizer:
+                  TapGestureRecognizer()
+                    ..onTap = () => Nav.push(
+                      context,
+                      const LegalDocumentPage(slug: "designer-terms"),
+                    ),
+            ),
+            const TextSpan(text: " and "),
+            TextSpan(
+              text: "Privacy Policy",
+              style: linkStyle,
+              recognizer:
+                  TapGestureRecognizer()
+                    ..onTap = () => Nav.push(
+                      context,
+                      const LegalDocumentPage(slug: "privacy-policy"),
+                    ),
+            ),
+            const TextSpan(text: "."),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _pickImage() async {
@@ -544,6 +597,7 @@ class _TailorRegistrationPageState extends State<TailorRegistrationPage> {
                 ),
               ),
               const SizedBox(height: 12),
+              _buildTermsConsent(context),
               CustomButton(
                 title: "Submit Registration",
                 isOutlined: false,

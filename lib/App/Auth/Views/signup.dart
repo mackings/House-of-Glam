@@ -1,4 +1,5 @@
 import 'package:country_picker/country_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Auth/Api/authclass.dart';
@@ -6,6 +7,7 @@ import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
 import 'package:hog/App/Auth/Views/verify.dart';
 import 'package:hog/App/Auth/widgets/password_requirements.dart';
+import 'package:hog/App/Legal/Views/legal_document_view.dart';
 import 'package:hog/TailorApp/Home/Views/Tailorbusiness.dart';
 import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/authShell.dart';
@@ -146,6 +148,58 @@ class _SignupState extends ConsumerState<Signup> {
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildTermsConsent(BuildContext context) {
+    final baseStyle =
+        Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: AppColors.subtext,
+          height: 1.5,
+        ) ??
+        const TextStyle(color: AppColors.subtext, fontSize: 12, height: 1.5);
+    final linkStyle = baseStyle.copyWith(
+      color: AppColors.accent,
+      fontWeight: FontWeight.w700,
+      decoration: TextDecoration.underline,
+      decorationColor: AppColors.accent,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Text.rich(
+        TextSpan(
+          style: baseStyle,
+          children: [
+            const TextSpan(
+              text:
+                  "By creating an account, you agree to House of GLAME's ",
+            ),
+            TextSpan(
+              text: "Terms & Conditions",
+              style: linkStyle,
+              recognizer:
+                  TapGestureRecognizer()
+                    ..onTap = () => Nav.push(
+                      context,
+                      const LegalDocumentPage(slug: "terms-conditions"),
+                    ),
+            ),
+            const TextSpan(text: " and "),
+            TextSpan(
+              text: "Privacy Policy",
+              style: linkStyle,
+              recognizer:
+                  TapGestureRecognizer()
+                    ..onTap = () => Nav.push(
+                      context,
+                      const LegalDocumentPage(slug: "privacy-policy"),
+                    ),
+            ),
+            const TextSpan(text: "."),
+          ],
+        ),
+      ),
     );
   }
 
@@ -334,6 +388,7 @@ class _SignupState extends ConsumerState<Signup> {
                 },
               ),
               const SizedBox(height: 18),
+              _buildTermsConsent(context),
               CustomButton(
                 title: "Create My Account",
                 onPressed: _handleSignup,

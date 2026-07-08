@@ -5,6 +5,7 @@ import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
 import 'package:hog/App/Banks/View/userBanks.dart';
 import 'package:hog/App/Home/Views/Orders/Transactions/TransactionHistory.dart';
+import 'package:hog/App/Legal/Views/legal_hub.dart';
 import 'package:hog/App/UserProfile/Api/profileViewS.dart';
 import 'package:hog/App/UserProfile/model/profileViewModel.dart';
 import 'package:hog/App/UserProfile/widgets/ProfileCards.dart';
@@ -352,6 +353,19 @@ class _UserProfileViewState extends State<UserProfileView> {
                           icon: Icons.support_agent_outlined,
                           title: "Email Support",
                           value: "Email Support Team",
+                          showArrow: true,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const _SectionTitle("Legal & Policies"),
+                      GestureDetector(
+                        onTap: () {
+                          Nav.push(context, const LegalPoliciesHome());
+                        },
+                        child: const ProfileInfoCard(
+                          icon: Icons.gavel_outlined,
+                          title: "Legal & Policies",
+                          value: "Terms, Privacy & more",
                           showArrow: true,
                         ),
                       ),

@@ -191,7 +191,10 @@ class _ModerationListingDetailSheetState
                             if (listing.yards.isNotEmpty)
                               _DetailRow(
                                 label: 'Yards',
-                                value: listing.yards.join(', '),
+                                value:
+                                    listing.yards
+                                        .map((yard) => yard.label)
+                                        .join(', '),
                               ),
                             if (listing.description.isNotEmpty)
                               _DetailRow(

@@ -10,7 +10,6 @@ import 'package:hog/App/Admin/Views/billing.dart';
 import 'package:hog/App/Admin/Widgets/moderationHistoryTab.dart';
 import 'package:hog/App/Admin/Widgets/moderationListingsTab.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
-import 'package:hog/App/NewestFeatures/Views/admin_disputes.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/theme/app_theme.dart';
 
@@ -190,9 +189,6 @@ class _AdminHomeState extends State<AdminHome> {
                                   context,
                                   const SubscriptionSettings(),
                                 ),
-                            onOpenDisputes:
-                                () =>
-                                    _openScreen(context, const AdminDisputes()),
                             onOpenInvite:
                                 () => _openScreen(
                                   context,
@@ -257,7 +253,6 @@ class _AdminQuickAccess extends StatefulWidget {
   final VoidCallback onOpenPickup;
   final VoidCallback onOpenPricing;
   final VoidCallback onOpenSubscriptions;
-  final VoidCallback onOpenDisputes;
   final VoidCallback onOpenInvite;
 
   const _AdminQuickAccess({
@@ -267,7 +262,6 @@ class _AdminQuickAccess extends StatefulWidget {
     required this.onOpenPickup,
     required this.onOpenPricing,
     required this.onOpenSubscriptions,
-    required this.onOpenDisputes,
     required this.onOpenInvite,
   });
 
@@ -322,12 +316,6 @@ class _AdminQuickAccessState extends State<_AdminQuickAccess> {
         icon: Icons.workspace_premium_outlined,
         tint: const Color(0xFFEC4899),
         onTap: widget.onOpenSubscriptions,
-      ),
-      (
-        label: 'Disputes',
-        icon: Icons.support_agent_rounded,
-        tint: AppColors.danger,
-        onTap: widget.onOpenDisputes,
       ),
     ];
     final visibleShortcuts = _showAll ? shortcuts : shortcuts.take(2).toList();
