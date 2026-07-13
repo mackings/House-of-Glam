@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hog/App/Admin/Api/admin_invitation_service.dart';
+import 'package:hog/App/Admin/Model/admin_role.dart';
 import 'package:hog/App/Admin/Views/admin_invitation.dart';
 
 void main() {
-  testWidgets('admin invitation form hides super admin role from admins', (
+  testWidgets('admin can only invite finance, customer service, and listing manager', (
     tester,
   ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: AdminInvitationPage(
-          isSuperAdmin: false,
+          inviterRole: AdminRole.admin,
           invitationSender: _successfulSender,
         ),
       ),
@@ -20,11 +21,28 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Super Admin'), findsNothing);
-    expect(
-      find.text('Only a Super Admin can invite another Super Admin.'),
-      findsOneWidget,
-    );
+    expect(find.text('Admin'), findsNothing);
+    expect(find.text('Finance'), findsWidgets);
+    expect(find.text('Customer Service'), findsWidgets);
+    expect(find.text('Listing Manager'), findsWidgets);
   });
+
+  testWidgets(
+    'roles without invite permission see a blocked state instead of the form',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AdminInvitationPage(
+            inviterRole: AdminRole.finance,
+            invitationSender: _successfulSender,
+          ),
+        ),
+      );
+
+      expect(find.text('You cannot invite team members'), findsOneWidget);
+      expect(find.byKey(const ValueKey('invite_role')), findsNothing);
+    },
+  );
 
   testWidgets('super admin can send invitation with responsibilities', (
     tester,
@@ -59,7 +77,10 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: AdminInvitationPage(isSuperAdmin: true, invitationSender: sender),
+        home: AdminInvitationPage(
+          inviterRole: AdminRole.superAdmin,
+          invitationSender: sender,
+        ),
       ),
     );
 

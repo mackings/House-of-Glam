@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hog/App/Admin/Model/admin_role.dart';
 import 'package:hog/App/Auth/Api/secure.dart';
 import 'package:hog/App/Auth/Views/signin.dart';
 import 'package:hog/components/Navigator.dart';
@@ -45,7 +46,9 @@ class _AdminProfileState extends State<AdminProfile> {
               'Administrator';
           final email = _firstText(profile, const ['email']) ?? 'No email';
           final role =
-              (_firstText(profile, const ['role']) ?? 'admin').toUpperCase();
+              AdminRole.fromString(
+                _firstText(profile, const ['role']),
+              ).label.toUpperCase();
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),

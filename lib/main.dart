@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hog/App/Auth/Views/app_entry.dart';
-import 'package:hog/App/Legal/Views/legal_hub.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:hog/constants/navcontroller.dart';
 import 'package:hog/theme/app_theme.dart';

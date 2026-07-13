@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hog/App/Admin/Model/admin_role.dart';
 import 'package:hog/App/Admin/Views/DeliverySettings.dart';
 import 'package:hog/App/Admin/Views/PickupSettings.dart';
 import 'package:hog/App/Admin/Views/PricingSettings.dart';
@@ -25,7 +26,9 @@ class _AdminHomeState extends State<AdminHome> {
   String? _userId;
   bool _loadingIdentity = true;
 
-  bool get _isSuperAdmin => (_userRole ?? '').toLowerCase() == 'superadmin';
+  AdminRole get _role => AdminRole.fromString(_userRole);
+
+  bool get _isSuperAdmin => _role == AdminRole.superAdmin;
 
   @override
   void initState() {
@@ -107,7 +110,7 @@ class _AdminHomeState extends State<AdminHome> {
                         ),
                         const SizedBox(width: 6),
                         CustomText(
-                          _isSuperAdmin ? 'Super Admin' : 'Admin',
+                          _role.label,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                           color: AppColors.accent,
@@ -165,6 +168,7 @@ class _AdminHomeState extends State<AdminHome> {
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
                           child: _AdminQuickAccess(
+                            canInvite: _role.canInviteTeamMembers,
                             onOpenAnalytics:
                                 () => _openScreen(context, const Analytics()),
                             onOpenBilling:
@@ -192,9 +196,7 @@ class _AdminHomeState extends State<AdminHome> {
                             onOpenInvite:
                                 () => _openScreen(
                                   context,
-                                  AdminInvitationPage(
-                                    isSuperAdmin: _isSuperAdmin,
-                                  ),
+                                  AdminInvitationPage(inviterRole: _role),
                                 ),
                           ),
                         ),
@@ -247,6 +249,7 @@ class _AdminHomeState extends State<AdminHome> {
 }
 
 class _AdminQuickAccess extends StatefulWidget {
+  final bool canInvite;
   final VoidCallback onOpenAnalytics;
   final VoidCallback onOpenBilling;
   final VoidCallback onOpenDelivery;
@@ -256,6 +259,7 @@ class _AdminQuickAccess extends StatefulWidget {
   final VoidCallback onOpenInvite;
 
   const _AdminQuickAccess({
+    required this.canInvite,
     required this.onOpenAnalytics,
     required this.onOpenBilling,
     required this.onOpenDelivery,
@@ -281,12 +285,13 @@ class _AdminQuickAccessState extends State<_AdminQuickAccess> {
         tint: AppColors.accent,
         onTap: widget.onOpenAnalytics,
       ),
-      (
-        label: 'Invite',
-        icon: Icons.person_add_alt_1_rounded,
-        tint: const Color(0xFF7C3AED),
-        onTap: widget.onOpenInvite,
-      ),
+      if (widget.canInvite)
+        (
+          label: 'Invite',
+          icon: Icons.person_add_alt_1_rounded,
+          tint: const Color(0xFF7C3AED),
+          onTap: widget.onOpenInvite,
+        ),
       (
         label: 'Billing',
         icon: Icons.percent_rounded,

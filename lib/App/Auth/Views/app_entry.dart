@@ -46,7 +46,14 @@ class _AppEntryGateState extends State<AppEntryGate> {
           );
         }
 
-        if (role == 'admin' || role == 'superadmin') {
+        const staffRoles = {
+          'admin',
+          'superadmin',
+          'finance',
+          'customerservice',
+          'listingmanager',
+        };
+        if (staffRoles.contains(role)) {
           return _EntryState.home(screen: const AdminHome());
         }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Admin/Api/admin_invitation_service.dart';
+import 'package:hog/App/Admin/Model/admin_role.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/theme/app_theme.dart';
 
@@ -15,12 +16,12 @@ typedef AdminInvitationSender =
     });
 
 class AdminInvitationPage extends StatefulWidget {
-  final bool isSuperAdmin;
+  final AdminRole inviterRole;
   final AdminInvitationSender invitationSender;
 
   const AdminInvitationPage({
     super.key,
-    required this.isSuperAdmin,
+    required this.inviterRole,
     this.invitationSender = AdminInvitationService.sendInvitation,
   });
 
@@ -36,8 +37,17 @@ class _AdminInvitationPageState extends State<AdminInvitationPage> {
   final _country = TextEditingController(text: 'Nigeria');
   final _address = TextEditingController();
   final List<TextEditingController> _responsibilities = [];
-  String _role = 'admin';
+  late String _role;
   bool _sending = false;
+
+  List<AdminRole> get _invitableRoles => widget.inviterRole.invitableRoles;
+
+  @override
+  void initState() {
+    super.initState();
+    _role =
+        _invitableRoles.isNotEmpty ? _invitableRoles.first.apiValue : '';
+  }
 
   @override
   void dispose() {
@@ -123,15 +133,19 @@ class _AdminInvitationPageState extends State<AdminInvitationPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_invitableRoles.isEmpty) {
+      return _NoInvitePermissionView(role: widget.inviterRole);
+    }
+
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Invite Administrator')),
+      appBar: AppBar(title: const Text('Invite Team Member')),
       body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
           children: [
-            _InvitationHero(isSuperAdmin: widget.isSuperAdmin),
+            _InvitationHero(invitableRoles: _invitableRoles),
             const SizedBox(height: 14),
             _FormPanel(
               title: 'Account details',
@@ -164,28 +178,24 @@ class _AdminInvitationPageState extends State<AdminInvitationPage> {
                   menuMaxHeight: 320,
                   decoration: const InputDecoration(labelText: 'Role'),
                   items: [
-                    const DropdownMenuItem(
-                      value: 'admin',
-                      child: Text('Admin'),
-                    ),
-                    if (widget.isSuperAdmin)
-                      const DropdownMenuItem(
-                        value: 'superAdmin',
-                        child: Text('Super Admin'),
+                    for (final role in _invitableRoles)
+                      DropdownMenuItem(
+                        value: role.apiValue,
+                        child: Text(role.label),
                       ),
                   ],
                   onChanged:
-                      (value) => setState(() => _role = value ?? 'admin'),
+                      (value) => setState(
+                        () => _role = value ?? _invitableRoles.first.apiValue,
+                      ),
                 ),
-                if (!widget.isSuperAdmin) ...[
-                  const SizedBox(height: 8),
-                  const CustomText(
-                    'Only a Super Admin can invite another Super Admin.',
-                    fontSize: 11,
-                    color: AppColors.subtext,
-                    textAlign: TextAlign.left,
-                  ),
-                ],
+                const SizedBox(height: 8),
+                CustomText(
+                  'You can invite: ${_invitableRoles.map((r) => r.label).join(', ')}.',
+                  fontSize: 11,
+                  color: AppColors.subtext,
+                  textAlign: TextAlign.left,
+                ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _phone,
@@ -296,9 +306,9 @@ class _AdminInvitationPageState extends State<AdminInvitationPage> {
 }
 
 class _InvitationHero extends StatelessWidget {
-  final bool isSuperAdmin;
+  final List<AdminRole> invitableRoles;
 
-  const _InvitationHero({required this.isSuperAdmin});
+  const _InvitationHero({required this.invitableRoles});
 
   @override
   Widget build(BuildContext context) {
@@ -331,16 +341,14 @@ class _InvitationHero extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const CustomText(
-                  'Invite a privileged account',
+                  'Invite a team member',
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                   textAlign: TextAlign.left,
                 ),
                 const SizedBox(height: 5),
                 CustomText(
-                  isSuperAdmin
-                      ? 'Invite an Admin or Super Admin. Credentials are delivered by email.'
-                      : 'Invite an Admin. Credentials are delivered by email.',
+                  'Invite ${invitableRoles.map((r) => r.label).join(', ')}. Credentials are delivered by email.',
                   fontSize: 12,
                   color: AppColors.subtext,
                   textAlign: TextAlign.left,
@@ -349,6 +357,57 @@ class _InvitationHero extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _NoInvitePermissionView extends StatelessWidget {
+  final AdminRole role;
+
+  const _NoInvitePermissionView({required this.role});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.canvas,
+      appBar: AppBar(title: const Text('Invite Team Member')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(
+                  Icons.lock_outline_rounded,
+                  color: AppColors.subtext,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const CustomText(
+                'You cannot invite team members',
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              CustomText(
+                'Your ${role.label} role does not include permission to invite new team members. Contact an Admin or Super Admin.',
+                fontSize: 12,
+                color: AppColors.subtext,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
