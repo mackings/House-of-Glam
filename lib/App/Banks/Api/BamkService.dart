@@ -514,17 +514,21 @@ class BankApiService {
     }
   }
 
-  /// 💳 Stripe Checkout Payment for Review/Quotation
+  /// 💳 Stripe Checkout Payment for Review/Quotation. Covers both full and
+  /// part payment via `paymentStatus` ("full payment" / "part payment") —
+  /// there's no separate part-payment endpoint the way Paystack has one.
+  /// `shipmentMethod` and `ngnToUsdRate` are no longer part of this contract:
+  /// the backend gets a live Fez quote itself from `weight` and converts it
+  /// using the review's own stored exchange rate, not a client-supplied one.
   static Future<Map<String, dynamic>> stripeCheckoutPayment({
     required String reviewId,
-    required String shipmentMethod,
     required String paymentStatus, // "full payment" or "part payment"
-    String? amount, // For part payment
-    String? address, // For full payment
+    String? amount,
+    String? address,
+    double? weight,
     String? pickupCountryId,
     String? pickupStateId,
     String? pickupLocationId,
-    double? exchangeRate, // Exchange rate for currency conversion
   }) async {
     final endpoint = "$baseUrl/api/v1/stripe/make-payment/$reviewId";
 
@@ -543,13 +547,12 @@ class BankApiService {
       // Build request body
       final body = {
         "paymentStatus": paymentStatus,
-        "shipmentMethod": shipmentMethod,
         if (amount != null) "amount": amount,
         if (address != null) "address": address,
+        if (weight != null) "weight": weight,
         if (pickupCountryId != null) "pickupCountryId": pickupCountryId,
         if (pickupStateId != null) "pickupStateId": pickupStateId,
         if (pickupLocationId != null) "pickupLocationId": pickupLocationId,
-        if (exchangeRate != null) "ngnToUsdRate": exchangeRate,
       };
 
       _logRequest(

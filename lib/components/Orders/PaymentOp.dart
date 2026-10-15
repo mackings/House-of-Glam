@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hog/App/Banks/Api/BamkService.dart';
 import 'package:hog/App/Home/Api/paymentService.dart';
+import 'package:hog/App/Home/Model/carrierRateModel.dart';
 import 'package:hog/App/Home/Model/reviewModel.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/formfields.dart';
 import 'package:hog/components/texts.dart';
-import 'package:hog/constants/country_list.dart';
 import 'package:hog/constants/currency.dart';
 import 'package:hog/constants/currencyHelper.dart';
 import 'package:hog/theme/app_theme.dart';
@@ -33,20 +33,24 @@ class PaymentOptionsModal extends StatefulWidget {
 }
 
 class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
+  // Sent to both the carrier-rates preview and the payment-creation
+  // endpoints so the quote shown to the buyer matches what actually gets
+  // charged. Matches PaymentService._defaultPackages' weight.
+  static const double _shipmentWeightKg = 1.5;
+
   String paymentType = "part";
   String shipment = "Regular";
   String deliveryMode = "address";
 
   final TextEditingController amountController = TextEditingController();
+  // Collected as separate fields for a clean input experience, then joined
+  // into the single `address` string the payment endpoints actually take.
+  // That string only labels the shipment for dispatch — Fez prices delivery
+  // off the country/state already saved on the buyer's account, not these.
+  final TextEditingController countryController = TextEditingController();
   final TextEditingController addressLine1Controller = TextEditingController();
-  final TextEditingController addressLine2Controller = TextEditingController();
   final TextEditingController cityController = TextEditingController();
   final TextEditingController regionController = TextEditingController();
-  final TextEditingController postalCodeController = TextEditingController();
-  CountryOption? selectedCountry = allCountries.firstWhere(
-    (country) => country.isoCode == 'NG',
-    orElse: () => allCountries.first,
-  );
   bool isLoading = false;
   bool isCalculatingDelivery = false;
   bool showCountryError = false;
@@ -65,6 +69,20 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
   Timer? _deliveryQuoteDebounce;
   String? _deliveryCostLabel;
   String? _confirmedDeliveryQuoteKey;
+
+  // The quote key we last actually fetched (successfully or not), separate
+  // from _confirmedDeliveryQuoteKey (which only gets set once the buyer
+  // explicitly accepts the fee sheet). Lets _refreshDeliveryCost short-
+  // circuit when it's asked to re-fetch a quote it just fetched — e.g. the
+  // debounced field-edit trigger and the "Proceed to Payment" confirmation
+  // check both firing back-to-back for the same address.
+  String? _lastFetchedDeliveryQuoteKey;
+  bool _isFetchingDeliveryQuote = false;
+
+  List<CarrierRate> _carrierRates = [];
+  CarrierRate? _selectedCarrierRate;
+  String? _carrierErrorReason;
+  bool _isLoadingCarrierRates = false;
 
   bool _isUserInNigeria = true;
 
@@ -137,16 +155,12 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
         userCountry?.toUpperCase() == 'NIGERIA' ||
         userCountry?.toUpperCase() == 'NG';
     if (!mounted) return;
-    final matchedCountry =
-        allCountries.where((country) {
-          final normalized = userCountry?.trim().toUpperCase() ?? '';
-          return country.name.toUpperCase() == normalized ||
-              country.isoCode.toUpperCase() == normalized;
-        }).toList();
     setState(() {
       _isUserInNigeria = isNigeria;
-      if (matchedCountry.isNotEmpty) {
-        selectedCountry = matchedCountry.first;
+      if (countryController.text.trim().isEmpty &&
+          userCountry != null &&
+          userCountry.trim().isNotEmpty) {
+        countryController.text = userCountry;
       }
     });
     if (paymentType == "part") {
@@ -155,15 +169,15 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
   }
 
   void _autoFillHalfPayment() {
-    // Checkout APIs receive NGN for Nigerian users, including Stripe orders.
-    // Use the accepted offer total when available so the deposit matches the
-    // amount shown on the quotation card.
+    // Gateway (and therefore currency) is resolved from the BUYER's
+    // country: Nigerian buyers pay NGN via Paystack, everyone else pays USD
+    // via Stripe — regardless of which country the designer is in. Use the
+    // accepted offer total when available so the deposit matches the amount
+    // shown on the quotation card.
     final totalToPay =
         _isUserInNigeria
             ? widget.review.userPayableTotal ?? widget.review.totalCost
-            : widget.review.isInternationalVendor
-            ? widget.review.totalCostUSD
-            : widget.review.userPayableTotal ?? widget.review.totalCost;
+            : widget.review.totalCostUSD;
     final halfAmount = totalToPay / 2;
     amountController.text = _formatAmount(halfAmount);
   }
@@ -185,268 +199,6 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     );
   }
 
-  bool _matchesCountryQuery(CountryOption country, String query) {
-    final normalized = query.trim().toLowerCase();
-    if (normalized.isEmpty) return true;
-    return country.name.toLowerCase().contains(normalized) ||
-        country.isoCode.toLowerCase().contains(normalized);
-  }
-
-  Future<void> _showCountrySelector() async {
-    final selected = await showModalBottomSheet<CountryOption>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        var searchQuery = '';
-
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            final filteredCountries =
-                allCountries.where((country) {
-                  return _matchesCountryQuery(country, searchQuery);
-                }).toList();
-
-            return SafeArea(
-              child: FractionallySizedBox(
-                heightFactor: 0.82,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(28),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 12),
-                      Container(
-                        width: 52,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: AppColors.border,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 42,
-                              height: 42,
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceMuted,
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: AppColors.border),
-                              ),
-                              child: const Icon(
-                                Icons.public_rounded,
-                                size: 18,
-                                color: AppColors.ink,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  CustomText(
-                                    "Select Country",
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w800,
-                                    textAlign: TextAlign.left,
-                                  ),
-                                  SizedBox(height: 2),
-                                  CustomText(
-                                    "Search and choose your delivery country.",
-                                    fontSize: 12,
-                                    color: AppColors.subtext,
-                                    textAlign: TextAlign.left,
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            GestureDetector(
-                              onTap: () => Navigator.of(sheetContext).pop(),
-                              behavior: HitTestBehavior.opaque,
-                              child: Container(
-                                width: 42,
-                                height: 42,
-                                decoration: BoxDecoration(
-                                  color: AppColors.surfaceMuted,
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(color: AppColors.border),
-                                ),
-                                child: const Icon(
-                                  Icons.close_rounded,
-                                  size: 18,
-                                  color: AppColors.ink,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                        child: TextField(
-                          autofocus: true,
-                          onChanged:
-                              (value) =>
-                                  setSheetState(() => searchQuery = value),
-                          decoration: const InputDecoration(
-                            hintText: "Search country",
-                            prefixIcon: Icon(Icons.search_rounded),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child:
-                            filteredCountries.isEmpty
-                                ? const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 24,
-                                    ),
-                                    child: CustomText(
-                                      "No country matches your search.",
-                                      fontSize: 13,
-                                      color: AppColors.subtext,
-                                    ),
-                                  ),
-                                )
-                                : ListView.separated(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    20,
-                                    0,
-                                    20,
-                                    24,
-                                  ),
-                                  itemCount: filteredCountries.length,
-                                  separatorBuilder:
-                                      (_, __) => const SizedBox(height: 10),
-                                  itemBuilder: (context, index) {
-                                    final country = filteredCountries[index];
-                                    final isSelected =
-                                        selectedCountry?.isoCode ==
-                                        country.isoCode;
-
-                                    return GestureDetector(
-                                      onTap:
-                                          () => Navigator.of(
-                                            sheetContext,
-                                          ).pop(country),
-                                      behavior: HitTestBehavior.opaque,
-                                      child: AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 180,
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14,
-                                          vertical: 14,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              isSelected
-                                                  ? AppColors.accentSoft
-                                                  : Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            18,
-                                          ),
-                                          border: Border.all(
-                                            color:
-                                                isSelected
-                                                    ? AppColors.accent
-                                                    : AppColors.border,
-                                            width: isSelected ? 1.4 : 1,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: 42,
-                                              height: 42,
-                                              alignment: Alignment.center,
-                                              decoration: BoxDecoration(
-                                                color:
-                                                    isSelected
-                                                        ? Colors.white
-                                                        : AppColors
-                                                            .surfaceMuted,
-                                                borderRadius:
-                                                    BorderRadius.circular(14),
-                                              ),
-                                              child: Text(
-                                                country.flagEmoji,
-                                                style: const TextStyle(
-                                                  fontSize: 20,
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 12),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  CustomText(
-                                                    country.name,
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w700,
-                                                    textAlign: TextAlign.left,
-                                                  ),
-                                                  const SizedBox(height: 2),
-                                                  CustomText(
-                                                    country.isoCode,
-                                                    fontSize: 11,
-                                                    color: AppColors.subtext,
-                                                    textAlign: TextAlign.left,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Icon(
-                                              isSelected
-                                                  ? Icons.check_circle_rounded
-                                                  : Icons
-                                                      .keyboard_arrow_right_rounded,
-                                              color:
-                                                  isSelected
-                                                      ? AppColors.accent
-                                                      : AppColors.subtext,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-
-    if (!mounted || selected == null) return;
-
-    setState(() {
-      selectedCountry = selected;
-      if (showCountryError) {
-        showCountryError = false;
-      }
-    });
-    _scheduleDeliveryCostRefresh();
-  }
-
   void _clearDeliveryQuote() {
     _deliveryQuoteDebounce?.cancel();
     if (!mounted) return;
@@ -454,11 +206,15 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
       isCalculatingDelivery = false;
       _deliveryCostLabel = null;
       _confirmedDeliveryQuoteKey = null;
+      _lastFetchedDeliveryQuoteKey = null;
+      _carrierRates = [];
+      _selectedCarrierRate = null;
+      _carrierErrorReason = null;
     });
   }
 
   bool _hasValidAddressSelection() {
-    return selectedCountry != null &&
+    return countryController.text.trim().isNotEmpty &&
         addressLine1Controller.text.trim().isNotEmpty &&
         cityController.text.trim().isNotEmpty &&
         regionController.text.trim().isNotEmpty;
@@ -470,24 +226,22 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
         selectedPickupLocation != null;
   }
 
+  // Collected as separate fields for a clean input experience, then joined
+  // into the single free-text `address` string the payment endpoints take
+  // (e.g. "12 Aba Road, Port Harcourt, Rivers State, Nigeria"). That string
+  // only labels the shipment for dispatch — it does not price delivery.
   String _buildAddressForQuote() {
-    final selected = selectedCountry;
-    if (selected == null) return '';
-
-    final addressLine1 = addressLine1Controller.text.trim();
-    final addressLine2 = addressLine2Controller.text.trim();
+    final street = addressLine1Controller.text.trim();
     final city = cityController.text.trim();
     final region = regionController.text.trim();
-    final postalCode = postalCodeController.text.trim();
+    final country = countryController.text.trim();
 
     return [
-      addressLine1,
-      if (addressLine2.isNotEmpty) addressLine2,
+      street,
       city,
       region,
-      if (postalCode.isNotEmpty) postalCode,
-      selected.name,
-    ].join(', ');
+      country,
+    ].where((part) => part.isNotEmpty).join(', ');
   }
 
   double? _extractDeliveryCost(Map<String, dynamic> payload) {
@@ -524,6 +278,16 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     return null;
   }
 
+  String? _extractDeliveryCurrency(Map<String, dynamic> payload) {
+    final candidate =
+        payload['currency'] ??
+        (payload['data'] is Map<String, dynamic>
+            ? (payload['data'] as Map<String, dynamic>)['currency']
+            : null);
+    final value = candidate?.toString().trim();
+    return (value == null || value.isEmpty) ? null : value;
+  }
+
   void _scheduleDeliveryCostRefresh() {
     _deliveryQuoteDebounce?.cancel();
 
@@ -556,12 +320,11 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     return [
       shipment,
       deliveryMode,
-      selectedCountry?.isoCode ?? '',
+      countryController.text.trim(),
       addressLine1Controller.text.trim(),
-      addressLine2Controller.text.trim(),
       cityController.text.trim(),
       regionController.text.trim(),
-      postalCodeController.text.trim(),
+      _selectedCarrierRate?.serviceType ?? '',
     ].join('|');
   }
 
@@ -641,32 +404,116 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
       return;
     }
 
+    final quoteKey = _currentDeliveryQuoteKey();
+
+    // Already fetching, or already have a fresh quote for this exact
+    // address/shipment/carrier combination — skip the redundant network
+    // round-trip. This is what stops the debounced field-edit refresh and
+    // the "Proceed to Payment" confirmation check from both hitting the
+    // carrier-rates/delivery-cost endpoints back-to-back for the same quote.
+    if (_isFetchingDeliveryQuote) return;
+    if (quoteKey == _lastFetchedDeliveryQuoteKey && _deliveryCostLabel != null) {
+      return;
+    }
+
+    // Fez Delivery handles every route where at least one party is in
+    // Nigeria (domestic, export, or import — it auto-detects which from the
+    // vendor/buyer country fields), so it's used for every address-mode
+    // order. The distance-based estimate is reserved for pickup-point
+    // orders only, which don't involve a carrier at all. If Fez can't quote
+    // a route (unsupported country, missing buyer state, etc.), checkout is
+    // blocked with the reason instead of silently substituting an estimate.
+    final usesCarrierRates = deliveryMode == "address";
+
+    _isFetchingDeliveryQuote = true;
     if (mounted) {
       setState(() {
         isCalculatingDelivery = true;
+        _isLoadingCarrierRates = usesCarrierRates;
       });
     }
 
-    final response = await PaymentService.calculateDeliveryCost(
-      reviewId: widget.review.id,
-      shipmentMethod: shipment,
-      address: deliveryMode == "address" ? _buildAddressForQuote() : null,
-      pickupCountryId:
-          deliveryMode == "pickup" ? selectedPickupCountry?.id : null,
-      pickupStateId: deliveryMode == "pickup" ? selectedPickupState?.id : null,
-      pickupLocationId:
-          deliveryMode == "pickup" ? selectedPickupLocation?.id : null,
-    );
+    try {
+      if (usesCarrierRates) {
+        final carrierResult = await PaymentService.getCarrierRates(
+          reviewId: widget.review.id,
+        );
+        if (!mounted) return;
 
-    if (!mounted) return;
+        if (carrierResult.hasRates) {
+          final previousServiceType = _selectedCarrierRate?.serviceType;
+          final chosen = carrierResult.rates.firstWhere(
+            (r) => r.serviceType == previousServiceType,
+            orElse: () => carrierResult.rates.first,
+          );
 
-    final cost = response == null ? null : _extractDeliveryCost(response);
+          setState(() {
+            isCalculatingDelivery = false;
+            _isLoadingCarrierRates = false;
+            _carrierRates = carrierResult.rates;
+            _carrierErrorReason = null;
+            _selectedCarrierRate = chosen;
+            _deliveryCostLabel = CurrencyHelper.formatAmount(
+              chosen.amount,
+              currencyCode: chosen.currency,
+            );
+          });
+          _lastFetchedDeliveryQuoteKey = quoteKey;
+          return;
+        }
 
-    setState(() {
-      isCalculatingDelivery = false;
-      _deliveryCostLabel =
-          cost != null ? CurrencyHelper.formatAmount(cost) : null;
-    });
+        // Fez couldn't quote this route (unsupported country, missing
+        // buyer state, both parties foreign, etc.) — block checkout with
+        // the reason instead of silently substituting a non-carrier estimate.
+        setState(() {
+          isCalculatingDelivery = false;
+          _isLoadingCarrierRates = false;
+          _carrierRates = [];
+          _selectedCarrierRate = null;
+          _carrierErrorReason = carrierResult.displayError;
+          _deliveryCostLabel = null;
+        });
+        _lastFetchedDeliveryQuoteKey = quoteKey;
+        return;
+      }
+
+      // Pickup-point order — no carrier involved, use the distance-based
+      // estimate directly.
+      setState(() {
+        _carrierRates = [];
+        _selectedCarrierRate = null;
+        _carrierErrorReason = null;
+      });
+
+      final response = await PaymentService.calculateDeliveryCost(
+        reviewId: widget.review.id,
+        shipmentMethod: shipment,
+        address: deliveryMode == "address" ? _buildAddressForQuote() : null,
+        pickupCountryId:
+            deliveryMode == "pickup" ? selectedPickupCountry?.id : null,
+        pickupStateId:
+            deliveryMode == "pickup" ? selectedPickupState?.id : null,
+        pickupLocationId:
+            deliveryMode == "pickup" ? selectedPickupLocation?.id : null,
+      );
+
+      if (!mounted) return;
+
+      final cost = response == null ? null : _extractDeliveryCost(response);
+      final currency =
+          response == null ? null : _extractDeliveryCurrency(response);
+
+      setState(() {
+        isCalculatingDelivery = false;
+        _deliveryCostLabel =
+            cost != null
+                ? CurrencyHelper.formatAmount(cost, currencyCode: currency)
+                : null;
+      });
+      _lastFetchedDeliveryQuoteKey = quoteKey;
+    } finally {
+      _isFetchingDeliveryQuote = false;
+    }
   }
 
   Future<bool> _showDeliveryFeeBeforePaymentIfNeeded() async {
@@ -709,11 +556,10 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
   void dispose() {
     _deliveryQuoteDebounce?.cancel();
     amountController.dispose();
+    countryController.dispose();
     addressLine1Controller.dispose();
-    addressLine2Controller.dispose();
     cityController.dispose();
     regionController.dispose();
-    postalCodeController.dispose();
     super.dispose();
   }
 
@@ -751,14 +597,10 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
       return true;
     }
 
-    final hasValidAddress =
-        selectedCountry != null &&
-        addressLine1Controller.text.trim().isNotEmpty &&
-        cityController.text.trim().isNotEmpty &&
-        regionController.text.trim().isNotEmpty;
+    final hasValidAddress = _hasValidAddressSelection();
 
     setState(() {
-      showCountryError = selectedCountry == null;
+      showCountryError = countryController.text.trim().isEmpty;
       showAddressLine1Error = addressLine1Controller.text.trim().isEmpty;
       showCityError = cityController.text.trim().isEmpty;
       showRegionError = regionController.text.trim().isEmpty;
@@ -788,6 +630,24 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     await _processPayment();
   }
 
+  /// The backend recomputes the delivery fee itself (in the correct payment
+  /// currency, converting from whatever currency Fez quoted it in) and
+  /// returns the real total in `breakdown.total`/`breakdown.currency` on a
+  /// successful payment-creation response. Used only to tell the buyer what
+  /// they're actually about to be charged — never to compute a request
+  /// payload, since the app never does currency conversion itself.
+  String? _formatBackendBreakdownTotal(dynamic breakdown) {
+    if (breakdown is! Map) return null;
+    final rawTotal = breakdown['total'];
+    final total =
+        rawTotal is num ? rawTotal.toDouble() : double.tryParse('$rawTotal');
+    if (total == null) return null;
+    return CurrencyHelper.formatAmount(
+      total,
+      currencyCode: breakdown['currency']?.toString(),
+    );
+  }
+
   Future<void> _processPayment() async {
     setState(() => isLoading = true);
 
@@ -797,30 +657,19 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
       print('🔥 PAYMENT PROCESSING STARTED');
       print('═══════════════════════════════════════════════════════════');
 
-      final vendorCountry = widget.review.user.country?.toUpperCase() ?? '';
-      final isInternationalVendor =
-          vendorCountry == 'UNITED STATES' ||
-          vendorCountry == 'US' ||
-          vendorCountry == 'USA' ||
-          vendorCountry == 'UNITED KINGDOM' ||
-          vendorCountry == 'UK' ||
-          vendorCountry == 'GB';
-
-      print('📋 VENDOR INFO:');
-      print('   Vendor Country: $vendorCountry');
-      print('   Is International Vendor: $isInternationalVendor');
-      print('   Vendor Name: ${widget.review.user.fullName}');
-      print('');
-
-      // Get user's country
+      // Gateway is resolved from the BUYER's country, not the vendor's:
+      // Nigeria buyers pay via Paystack/NGN, every other buyer pays via
+      // Stripe/USD. Do not key this off the vendor/designer's country.
       final userCountry = await CurrencyHelper.getUserCountry();
       final isUserInNigeria =
           userCountry?.toUpperCase() == 'NIGERIA' ||
           userCountry?.toUpperCase() == 'NG';
+      final useStripe = !isUserInNigeria;
 
-      print('👤 USER INFO:');
-      print('   User Country: $userCountry');
-      print('   Is User in Nigeria: $isUserInNigeria');
+      print('👤 BUYER INFO:');
+      print('   Buyer Country: $userCountry');
+      print('   Is Buyer in Nigeria: $isUserInNigeria');
+      print('   Gateway: ${useStripe ? "Stripe (USD)" : "Paystack (NGN)"}');
       print('   User Currency Symbol: $currencySymbol');
       print('');
 
@@ -896,41 +745,21 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
           });
         }
       } else {
-        final selected = selectedCountry;
-        final addressLine1 = addressLine1Controller.text.trim();
-        final addressLine2 = addressLine2Controller.text.trim();
-        final city = cityController.text.trim();
-        final region = regionController.text.trim();
-        final postalCode = postalCodeController.text.trim();
+        addressToSend = _buildAddressForQuote();
 
-        addressToSend =
-            selected == null
-                ? ''
-                : [
-                  addressLine1,
-                  if (addressLine2.isNotEmpty) addressLine2,
-                  city,
-                  region,
-                  if (postalCode.isNotEmpty) postalCode,
-                  selected.name,
-                ].join(', ');
-
-        if (selected == null ||
-            addressLine1.isEmpty ||
-            city.isEmpty ||
-            region.isEmpty) {
+        if (!_hasValidAddressSelection()) {
           setState(() {
             isLoading = false;
-            showCountryError = selected == null;
-            showAddressLine1Error = addressLine1.isEmpty;
-            showCityError = city.isEmpty;
-            showRegionError = region.isEmpty;
+            showCountryError = countryController.text.trim().isEmpty;
+            showAddressLine1Error = addressLine1Controller.text.trim().isEmpty;
+            showCityError = cityController.text.trim().isEmpty;
+            showRegionError = regionController.text.trim().isEmpty;
           });
           print('❌ ERROR: Delivery address fields are incomplete');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
-                "Please complete country, address line 1, city and state/region",
+                "Please complete country, street address, city and state/region",
               ),
             ),
           );
@@ -949,26 +778,19 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
         }
       }
 
-      // ✅ FOR INTERNATIONAL VENDORS - Use Stripe
-      if (isInternationalVendor) {
-        print('🌍 INTERNATIONAL VENDOR DETECTED - Using Stripe');
+      // Buyer is outside Nigeria — use Stripe. Per the new contract, Stripe
+      // always charges in USD regardless of which non-Nigerian country the
+      // buyer is in (no GBP branch), and `amount` must be the total the
+      // buyer is paying now, including delivery — sent for both full and
+      // installment payments.
+      if (useStripe) {
+        print('🌍 BUYER OUTSIDE NIGERIA - Using Stripe (USD)');
         print('');
 
-        String? amountToSend;
-
-        // Determine vendor's target currency
-        final targetCurrency =
-            vendorCountry.contains('UNITED STATES') ||
-                    vendorCountry == 'US' ||
-                    vendorCountry == 'USA'
-                ? 'USD'
-                : 'GBP';
-
-        print('💱 TARGET CURRENCY: $targetCurrency');
-        print('');
+        String amountToSend;
 
         if (paymentType == "part") {
-          print('📝 PART PAYMENT PROCESSING:');
+          print('📝 INSTALLMENT PROCESSING:');
 
           if (amountController.text.trim().isEmpty) {
             setState(() => isLoading = false);
@@ -979,51 +801,29 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
             return;
           }
 
-          // ✅ NEW: User enters in THEIR currency, but BACKEND expects NGN
+          // Buyer is not in Nigeria, so the amount field is already labelled
+          // and entered in USD — send as-is, no conversion needed.
           final userEnteredAmount = double.parse(
             amountController.text.replaceAll(",", ""),
           );
-          print('   User Entered Amount: $userEnteredAmount');
-          print(
-            '   User Currency: ${isUserInNigeria ? "NGN" : targetCurrency}',
-          );
-          print('');
-
-          if (isUserInNigeria) {
-            // ✅ Nigerian user entering NGN - send as-is, backend handles conversion
-            amountToSend = userEnteredAmount.toString();
-            print('✅ NO CONVERSION NEEDED - Backend will convert');
-            print('   User entered: ₦$userEnteredAmount');
-            print('   Sending to backend: $amountToSend NGN');
-            print('   Backend will convert: NGN → USD for Stripe');
-          } else {
-            // ✅ International user entering USD/GBP - convert to NGN first
-            print('🔄 CONVERSION NEEDED: $targetCurrency → NGN');
-            print('   Amount to Convert: \$$userEnteredAmount');
-            print('');
-
-            final ngnAmount = await CurrencyHelper.convertToNGN(
-              userEnteredAmount,
-            );
-            amountToSend = ngnAmount.toString();
-
-            print('✅ CONVERSION SUCCESS');
-            print('   From: \$$userEnteredAmount');
-            print('   To: ₦$ngnAmount');
-            print('   Sending to backend: $amountToSend NGN');
-            print('   Backend will convert: NGN → USD for Stripe');
-          }
-          print('');
+          amountToSend = userEnteredAmount.toString();
+          print('   User Entered Amount: USD $userEnteredAmount');
         } else {
-          // ✅ Full payment - backend uses review.amountToPay, NO amount needed
           print('💰 FULL PAYMENT PROCESSING:');
 
-          print('   Total Cost (stored): ${widget.review.totalCost}');
-          print('   Amount Paid (stored): ${widget.review.amountPaid}');
-          print('   Amount To Pay (stored): ${widget.review.amountToPay}');
+          final remainingUSD =
+              widget.review.amountToPayUSD > 0
+                  ? widget.review.amountToPayUSD
+                  : (widget.review.totalCostUSD - widget.review.amountPaidUSD);
+
+          print('   Total Cost USD (stored): ${widget.review.totalCostUSD}');
+          print(
+            '   Amount Paid USD (stored): ${widget.review.amountPaidUSD}',
+          );
+          print('   Remaining Balance USD: $remainingUSD');
           print('');
 
-          if (widget.review.amountToPay <= 0) {
+          if (remainingUSD <= 0) {
             setState(() => isLoading = false);
             print('❌ ERROR: No balance remaining');
             ScaffoldMessenger.of(context).showSnackBar(
@@ -1032,12 +832,15 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
             return;
           }
 
-          // ✅ For full payment, send NULL - backend uses review.amountToPay
-          amountToSend = null;
-
-          print('✅ FULL PAYMENT - No amount sent');
-          print('   Backend will use: review.amountToPay from database');
-          print('   Delivery Address: $addressToSend');
+          // Do NOT add the delivery fee here — the currencies can genuinely
+          // differ (e.g. a Fez export quote comes back in NGN even though
+          // this buyer pays in USD via Stripe) and the app has no business
+          // converting between them. The backend already re-derives the
+          // delivery fee for this shipmentMethod/address and adds it, in
+          // USD, when it builds the checkout session — that's what
+          // response.data.breakdown.total reflects after this call succeeds.
+          amountToSend = remainingUSD.toString();
+          print('   Order Balance (USD, delivery added server-side): $amountToSend');
           print('');
         }
 
@@ -1045,19 +848,18 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
         print('───────────────────────────────────────────────────────────');
         print('📤 SENDING TO STRIPE CHECKOUT:');
         print('   Review ID: ${widget.review.id}');
-        print('   Shipment Method: $shipment');
-        print('   Amount: $targetCurrency $amountToSend');
+        print('   Amount: USD $amountToSend');
+        print('   Weight: $_shipmentWeightKg kg');
         print('   Address: $addressToSend');
         print('───────────────────────────────────────────────────────────');
         print('');
 
         final resp = await BankApiService.stripeCheckoutPayment(
           reviewId: widget.review.id,
-          shipmentMethod: shipment,
-          paymentStatus:
-              paymentType == "part" ? "part payment" : "full payment",
+          paymentStatus: paymentType == "part" ? "part payment" : "full payment",
           amount: amountToSend,
           address: addressToSend,
+          weight: _shipmentWeightKg,
           pickupCountryId: pickupCountryId,
           pickupStateId: pickupStateId,
           pickupLocationId: pickupLocationId,
@@ -1077,11 +879,26 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
         if (resp["success"] == true) {
           final url = resp["checkoutUrl"];
           if (url != null) {
+            final data = resp["data"];
+            final confirmedTotal = _formatBackendBreakdownTotal(
+              data is Map ? data["breakdown"] : null,
+            );
             print('✅ PAYMENT INITIATED SUCCESSFULLY');
+            if (confirmedTotal != null) {
+              print('   Backend-confirmed total (incl. delivery): $confirmedTotal');
+            }
             print(
               '═══════════════════════════════════════════════════════════',
             );
             print('');
+            if (confirmedTotal != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("You'll be charged $confirmedTotal, including delivery"),
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
             Navigator.of(context).pop();
             widget.onCheckout(url);
           }
@@ -1096,14 +913,17 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
         return;
       }
 
-      // ✅ FOR NIGERIAN VENDORS - Use Paystack
-      print('🇳🇬 NIGERIAN VENDOR DETECTED - Using Paystack');
+      // Buyer is in Nigeria — use Paystack (NGN). As with Stripe above, the
+      // client never converts currency itself; the backend adds its own
+      // delivery fee (which may have been quoted in a foreign currency for
+      // an import route) in NGN when it creates the transaction.
+      print('🇳🇬 BUYER IN NIGERIA - Using Paystack (NGN)');
       print('');
 
       String amountToSend;
 
       if (paymentType == "part") {
-        print('📝 PART PAYMENT PROCESSING:');
+        print('📝 INSTALLMENT PROCESSING:');
 
         if (amountController.text.trim().isEmpty) {
           setState(() => isLoading = false);
@@ -1114,49 +934,20 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
           return;
         }
 
-        // User enters in THEIR currency
         final userEnteredAmount = double.parse(
           amountController.text.replaceAll(",", ""),
         );
-        print('   User Entered Amount: $userEnteredAmount');
-        print('   User Currency: ${isUserInNigeria ? "NGN" : "USD/GBP"}');
-        print('');
-
-        if (isUserInNigeria) {
-          // Nigerian user entering NGN - send as-is (vendor expects NGN)
-          amountToSend = userEnteredAmount.toString();
-          print('✅ NO CONVERSION NEEDED');
-          print('   Both user and vendor are in Nigeria');
-          print('   Amount to Send to Paystack: NGN $amountToSend');
-        } else {
-          // International user entering USD/GBP - convert to NGN
-          print('🔄 CONVERSION NEEDED: USD/GBP → NGN');
-          print('   Amount to Convert: $userEnteredAmount');
-          print('');
-
-          print('📞 Calling CurrencyHelper.convertToNGN...');
-          final ngnAmount = await CurrencyHelper.convertToNGN(
-            userEnteredAmount,
-          );
-          amountToSend = ngnAmount.toString();
-
-          print('✅ CONVERSION SUCCESS');
-          print('   From: \$$userEnteredAmount');
-          print('   To: ₦$ngnAmount');
-          print('   Amount to Send to Paystack: NGN $amountToSend');
-        }
+        amountToSend = userEnteredAmount.toString();
+        print('   Amount to Send to Paystack: NGN $amountToSend');
         print('');
       } else {
-        // Full payment
         print('💰 FULL PAYMENT PROCESSING:');
 
-        // Amounts are stored in NGN (vendor currency)
         final remainingNGN = widget.review.totalCost - widget.review.amountPaid;
 
         print('   Total Cost (stored): ${widget.review.totalCost}');
         print('   Amount Paid (stored): ${widget.review.amountPaid}');
         print('   Remaining Balance: $remainingNGN');
-        print('   Storage Currency: NGN (vendor currency)');
         print('');
 
         if (remainingNGN <= 0) {
@@ -1168,17 +959,22 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
           return;
         }
 
-        // Send remaining balance in NGN
+        // Do NOT add the delivery fee here — the currencies can genuinely
+        // differ (e.g. a Fez import quote comes back in GBP/USD even though
+        // this buyer pays in NGN via Paystack) and the app has no business
+        // converting between them. The backend already re-derives the
+        // delivery fee for this shipmentMethod/address and adds it, in NGN,
+        // when it creates the transaction — that's what response.breakdown.total
+        // reflects after this call succeeds.
         amountToSend = remainingNGN.toString();
-        print('✅ FULL PAYMENT AMOUNT');
-        print('   Amount to Send to Paystack: NGN $amountToSend');
+        print('   Order Balance (NGN, delivery added server-side): $amountToSend');
         print('');
       }
 
       print('───────────────────────────────────────────────────────────');
       print('📤 SENDING TO PAYSTACK:');
       print('   Review ID: ${widget.review.id}');
-      print('   Shipment Method: $shipment');
+      print('   Weight: $_shipmentWeightKg kg');
       print('   Amount: NGN $amountToSend');
       print('───────────────────────────────────────────────────────────');
       print('');
@@ -1188,7 +984,6 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
               ? await PaymentService.createPartPayment(
                 reviewId: widget.review.id,
                 amount: amountToSend,
-                shipmentMethod: shipment,
                 address: addressToSend,
                 pickupCountryId: pickupCountryId,
                 pickupStateId: pickupStateId,
@@ -1197,7 +992,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
               : await PaymentService.createFullPayment(
                 reviewId: widget.review.id,
                 amount: amountToSend,
-                shipmentMethod: shipment,
+                weight: _shipmentWeightKg,
                 address: addressToSend,
                 pickupCountryId: pickupCountryId,
                 pickupStateId: pickupStateId,
@@ -1216,9 +1011,23 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
       if (resp != null && resp["success"]) {
         final url = resp["authorizationUrl"];
         if (url != null) {
+          final confirmedTotal = _formatBackendBreakdownTotal(
+            resp["breakdown"],
+          );
           print('✅ PAYMENT INITIATED SUCCESSFULLY');
+          if (confirmedTotal != null) {
+            print('   Backend-confirmed total (incl. delivery): $confirmedTotal');
+          }
           print('═══════════════════════════════════════════════════════════');
           print('');
+          if (confirmedTotal != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("You'll be charged $confirmedTotal, including delivery"),
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
           Navigator.of(context).pop();
           widget.onCheckout(url);
         }
@@ -1249,14 +1058,9 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
 
   @override
   Widget build(BuildContext context) {
-    final vendorCountry = widget.review.user.country?.toUpperCase() ?? '';
-    final isInternationalVendor =
-        vendorCountry == 'UNITED STATES' ||
-        vendorCountry == 'US' ||
-        vendorCountry == 'USA' ||
-        vendorCountry == 'UNITED KINGDOM' ||
-        vendorCountry == 'UK' ||
-        vendorCountry == 'GB';
+    // Gateway shown to the buyer mirrors the same buyer-country rule used
+    // in _processPayment — not the vendor's country.
+    final useStripe = !_isUserInNigeria;
 
     return Stack(
       children: [
@@ -1317,7 +1121,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  _buildSummaryCard(isInternationalVendor),
+                  _buildSummaryCard(useStripe),
                   if (widget.allowPaymentTypeSwitch) ...[
                     const SizedBox(height: 18),
                     const CustomText(
@@ -1378,38 +1182,6 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                     ),
                   ],
                   const SizedBox(height: 18),
-                  const CustomText(
-                    "Shipment Method",
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    textAlign: TextAlign.left,
-                  ),
-                  const SizedBox(height: 10),
-                  _buildDropdownField<String>(
-                    value: shipment,
-                    hintText: "Select shipment method",
-                    icon: Icons.local_shipping_outlined,
-                    items: const [
-                      DropdownMenuItem(
-                        value: "Regular",
-                        child: Text("Standard Delivery (1–8 days)"),
-                      ),
-                      DropdownMenuItem(
-                        value: "Express",
-                        child: Text("Express (1–4 days)"),
-                      ),
-                      DropdownMenuItem(
-                        value: "Cargo",
-                        child: Text("Cargo (1–15 days)"),
-                      ),
-                    ],
-                    onChanged: (val) {
-                      if (val == null) return;
-                      setState(() => shipment = val);
-                      _scheduleDeliveryCostRefresh();
-                    },
-                  ),
-                  const SizedBox(height: 18),
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -1465,12 +1237,143 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                           ],
                         ),
                         const SizedBox(height: 16),
+                        CustomText(
+                          // Fez returns exactly one rate per route — there's
+                          // no selectable speed tier the way FedEx had, so
+                          // only label this as a "method" for pickup orders,
+                          // which still use the manual distance-based
+                          // estimate below.
+                          deliveryMode == "pickup"
+                              ? "Shipment Method"
+                              : "Delivery Fee",
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          textAlign: TextAlign.left,
+                        ),
+                        const SizedBox(height: 10),
+                        if (deliveryMode == "pickup")
+                          // Pickup-point orders don't involve a carrier at
+                          // all — this manual tier feeds the distance-based
+                          // estimate.
+                          _buildDropdownField<String>(
+                            value: shipment,
+                            hintText: "Select shipment method",
+                            icon: Icons.local_shipping_outlined,
+                            items: const [
+                              DropdownMenuItem(
+                                value: "Regular",
+                                child: Text("Standard Delivery (1–8 days)"),
+                              ),
+                              DropdownMenuItem(
+                                value: "Express",
+                                child: Text("Express (1–4 days)"),
+                              ),
+                              DropdownMenuItem(
+                                value: "Cargo",
+                                child: Text("Cargo (1–15 days)"),
+                              ),
+                            ],
+                            onChanged: (val) {
+                              if (val == null) return;
+                              setState(() => shipment = val);
+                              _scheduleDeliveryCostRefresh();
+                            },
+                          )
+                        else if (_isLoadingCarrierRates)
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceMuted,
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: const Row(
+                              children: [
+                                SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: CustomText(
+                                    "Checking live Fez delivery rates...",
+                                    fontSize: 12,
+                                    color: AppColors.subtext,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else if (_carrierRates.isNotEmpty)
+                          Column(
+                            children:
+                                _carrierRates
+                                    .map((rate) => _buildCarrierRateTile(rate))
+                                    .toList(),
+                          )
+                        else if (_carrierErrorReason != null)
+                          // A quote was actually attempted and Fez rejected
+                          // it — this is a real error, worth surfacing.
+                          _buildCarrierUnavailableCard()
+                        else
+                          // Nothing has been quoted yet because the address
+                          // form below isn't filled in — this is the normal
+                          // starting state, not a failure, so it shouldn't
+                          // look like one.
+                          _buildFillAddressPrompt(),
+                        const SizedBox(height: 16),
                         if (deliveryMode == "address") ...[
-                          _buildCountrySelectorField(
-                            hintText: "Select country",
+                          // These fields are joined into the single
+                          // free-text `address` string the payment endpoints
+                          // take. That string only labels the shipment for
+                          // dispatch — Fez prices delivery off the country
+                          // and state already saved on the buyer's account,
+                          // not what's typed here.
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            margin: const EdgeInsets.only(bottom: 12),
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceMuted,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.info_outline_rounded,
+                                  size: 16,
+                                  color: AppColors.subtext,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: CustomText(
+                                    "This is where your order ships to. Your delivery fee is priced off the country and state saved on your account, not this address.",
+                                    fontSize: 11,
+                                    color: AppColors.subtext,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          _buildTextField(
+                            controller: countryController,
+                            hintText: "Country",
                             icon: Icons.public_rounded,
                             errorText:
                                 showCountryError ? "Country is required" : null,
+                            onChanged: (value) {
+                              if (showCountryError &&
+                                  value.trim().isNotEmpty) {
+                                setState(() => showCountryError = false);
+                              }
+                              _scheduleDeliveryCostRefresh();
+                            },
                           ),
                           const SizedBox(height: 12),
                           _buildTextField(
@@ -1488,13 +1391,6 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                               }
                               _scheduleDeliveryCostRefresh();
                             },
-                          ),
-                          const SizedBox(height: 12),
-                          _buildTextField(
-                            controller: addressLine2Controller,
-                            hintText: "Apartment, suite, etc. (optional)",
-                            icon: Icons.pin_drop_outlined,
-                            onChanged: (_) => _scheduleDeliveryCostRefresh(),
                           ),
                           const SizedBox(height: 12),
                           Row(
@@ -1535,13 +1431,6 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                                 ),
                               ),
                             ],
-                          ),
-                          const SizedBox(height: 12),
-                          _buildTextField(
-                            controller: postalCodeController,
-                            hintText: "Postal / ZIP code (Optional)",
-                            icon: Icons.markunread_mailbox_outlined,
-                            onChanged: (_) => _scheduleDeliveryCostRefresh(),
                           ),
                         ] else ...[
                           if (isLoadingPickupHierarchy)
@@ -1701,64 +1590,71 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
                             ],
                           ],
                         ],
-                        const SizedBox(height: 12),
-                        if (isCalculatingDelivery)
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: AppColors.surfaceMuted,
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: Row(
-                              children: [
-                                const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                        // For "address" mode the Fez rate tile shown above
+                        // (right under the toggle) already displays the fee —
+                        // this recap is only needed for pickup orders, where
+                        // the section above is just a manual method picker
+                        // with no amount of its own.
+                        if (deliveryMode == "pickup") ...[
+                          const SizedBox(height: 12),
+                          if (isCalculatingDelivery)
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceMuted,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: Row(
+                                children: [
+                                  const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: CustomText(
-                                    "Estimating delivery fee...",
-                                    fontSize: 12,
-                                    color: AppColors.subtext,
-                                    textAlign: TextAlign.left,
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: CustomText(
+                                      "Estimating delivery fee...",
+                                      fontSize: 12,
+                                      color: AppColors.subtext,
+                                      textAlign: TextAlign.left,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          )
-                        else if (_deliveryCostLabel != null)
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: AppColors.accentSoft,
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.local_shipping_outlined,
-                                  color: AppColors.accent,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: CustomText(
-                                    "Estimated delivery fee: $_deliveryCostLabel",
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
+                                ],
+                              ),
+                            )
+                          else if (_deliveryCostLabel != null)
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: AppColors.accentSoft,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.local_shipping_outlined,
                                     color: AppColors.accent,
-                                    textAlign: TextAlign.left,
+                                    size: 18,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: CustomText(
+                                      "Estimated delivery fee: $_deliveryCostLabel",
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.accent,
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+                        ],
                         const SizedBox(height: 10),
                         CustomText(
                           deliveryMode == "pickup"
@@ -1838,10 +1734,13 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     );
   }
 
-  Widget _buildSummaryCard(bool isInternationalVendor) {
-    final total = widget.review.userPayableTotal ?? widget.review.totalCost;
+  Widget _buildSummaryCard(bool useStripe) {
+    final total =
+        useStripe
+            ? widget.review.totalCostUSD
+            : widget.review.userPayableTotal ?? widget.review.totalCost;
     final subtitle =
-        isInternationalVendor
+        useStripe
             ? "Checkout will continue with Stripe"
             : "You'll complete payment securely via Paystack.";
 
@@ -1867,7 +1766,7 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
-              isInternationalVendor
+              useStripe
                   ? Icons.language_rounded
                   : Icons.account_balance_wallet_outlined,
               color: AppColors.accent,
@@ -1895,6 +1794,172 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCarrierUnavailableCard() {
+    final reason = _carrierErrorReason ?? "This route isn't supported yet.";
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFDECEC),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.error_outline_rounded,
+                color: AppColors.danger,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: CustomText(
+                  "Couldn't get a delivery quote for this address",
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.danger,
+                  textAlign: TextAlign.left,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          CustomText(
+            reason,
+            fontSize: 11,
+            color: AppColors.subtext,
+            textAlign: TextAlign.left,
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () {
+              _lastFetchedDeliveryQuoteKey = null;
+              _scheduleDeliveryCostRefresh();
+            },
+            icon: const Icon(Icons.refresh_rounded, size: 16),
+            label: const Text("Try again"),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.danger,
+              side: const BorderSide(color: AppColors.danger),
+              minimumSize: const Size(double.infinity, 44),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Shown before the buyer has filled in a valid address — no quote has
+  // been requested yet, so this must read as "nothing to show yet", not as
+  // an error. Deliberately neutral styling, no retry button (there's
+  // nothing to retry).
+  Widget _buildFillAddressPrompt() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.local_shipping_outlined,
+            size: 18,
+            color: AppColors.subtext,
+          ),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: CustomText(
+              "Fill in your delivery address below to see your delivery fee.",
+              fontSize: 12,
+              color: AppColors.subtext,
+              textAlign: TextAlign.left,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCarrierRateTile(CarrierRate rate) {
+    final selected = _selectedCarrierRate?.serviceType == rate.serviceType;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _selectedCarrierRate = rate;
+            _deliveryCostLabel = CurrencyHelper.formatAmount(
+              rate.amount,
+              currencyCode: rate.currency,
+            );
+          });
+        },
+        borderRadius: BorderRadius.circular(18),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.accentSoft : Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: selected ? AppColors.accent : AppColors.border,
+              width: selected ? 1.4 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.local_shipping_outlined,
+                size: 20,
+                color: selected ? AppColors.accent : AppColors.subtext,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomText(
+                      rate.serviceName,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      textAlign: TextAlign.left,
+                    ),
+                    const SizedBox(height: 2),
+                    CustomText(
+                      "${rate.carrier.toUpperCase()} · ${rate.routeLabel}",
+                      fontSize: 11,
+                      color: AppColors.subtext,
+                      textAlign: TextAlign.left,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              CustomText(
+                CurrencyHelper.formatAmount(
+                  rate.amount,
+                  currencyCode: rate.currency,
+                ),
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: selected ? AppColors.accent : AppColors.ink,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1970,55 +2035,18 @@ class _PaymentOptionsModalState extends State<PaymentOptionsModal> {
     );
   }
 
-  Widget _buildCountrySelectorField({
-    required String hintText,
-    required IconData icon,
-    String? errorText,
-  }) {
-    final hasValue = selectedCountry != null;
-
-    return GestureDetector(
-      onTap: _showCountrySelector,
-      behavior: HitTestBehavior.opaque,
-      child: InputDecorator(
-        isEmpty: !hasValue,
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon, size: 20, color: AppColors.subtext),
-          suffixIcon: const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 22,
-            color: AppColors.subtext,
-          ),
-          errorText: errorText,
-        ),
-        child: Text(
-          hasValue
-              ? '${selectedCountry!.flagEmoji} ${selectedCountry!.name}'
-              : hintText,
-          style:
-              hasValue
-                  ? Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.ink,
-                    fontWeight: FontWeight.w600,
-                  )
-                  : Theme.of(context).inputDecorationTheme.hintStyle?.copyWith(
-                    color: AppColors.subtext,
-                  ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
     required ValueChanged<String> onChanged,
     required IconData icon,
     String? errorText,
+    int maxLines = 1,
   }) {
     return TextFormField(
       controller: controller,
       onChanged: onChanged,
+      maxLines: maxLines,
       decoration: InputDecoration(
         hintText: hintText,
         prefixIcon: Icon(icon, size: 20, color: AppColors.subtext),

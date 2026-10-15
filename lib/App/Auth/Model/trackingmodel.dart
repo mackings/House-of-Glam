@@ -32,6 +32,14 @@ class TrackingRecord {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  // Populated once a real Fez shipment has been created for this order via
+  // POST /tracking/createCarrierShipment. Null for orders dispatched before
+  // that existed, or that haven't been shipped yet — the UI falls back to
+  // the legacy numeric trackingNumber display in that case.
+  final String? carrier;
+  final String? carrierTrackingNumber;
+  final String? serviceType;
+
   TrackingRecord({
     required this.id,
     required this.userId,
@@ -41,6 +49,9 @@ class TrackingRecord {
     required this.isDelivered,
     required this.createdAt,
     required this.updatedAt,
+    this.carrier,
+    this.carrierTrackingNumber,
+    this.serviceType,
   });
 
   factory TrackingRecord.fromJson(Map<String, dynamic> json) {
@@ -53,8 +64,19 @@ class TrackingRecord {
       isDelivered: json['isDelivered'] ?? false,
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
+      carrier: json['carrier']?.toString(),
+      carrierTrackingNumber:
+          (json['carrierTrackingNumber'] ?? json['waybillNumber'])
+              ?.toString(),
+      serviceType: json['serviceType']?.toString(),
     );
   }
+
+  bool get hasCarrierShipment =>
+      carrier != null &&
+      carrier!.isNotEmpty &&
+      carrierTrackingNumber != null &&
+      carrierTrackingNumber!.isNotEmpty;
 }
 
 class MaterialInfo {

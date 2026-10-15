@@ -159,7 +159,10 @@ class CurrencyHelper {
       case 'CAD':
         return 'C\$';
       default:
-        return '$code ';
+        // Some carrier responses (e.g. Fez import rates) send a currency
+        // symbol directly instead of an ISO code — use it as-is rather
+        // than echoing it back as "£ " with a redundant trailing space.
+        return RegExp(r'^[A-Za-z]{3}$').hasMatch(code) ? '$code ' : code;
     }
   }
 }

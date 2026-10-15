@@ -1,15 +1,33 @@
+import Link from "next/link";
+
 const columns = [
   {
     title: "Customers",
-    links: ["Custom Orders", "Ready-to-Wear", "Pre-Loved", "Track an Order"],
+    links: [
+      { label: "Custom Orders", href: "/designers" },
+      { label: "Ready-to-Wear", href: "/designers" },
+      { label: "Pre-Loved", href: "/designers" },
+      { label: "Track an Order", href: "/track" },
+    ],
   },
   {
     title: "Designers",
-    links: ["Apply as a Designer", "Subscription Plans", "Growth Analytics", "Designer Support"],
+    links: [
+      { label: "Apply as a Designer", href: "/#designers" },
+      { label: "Subscription Plans", href: "#" },
+      { label: "Growth Analytics", href: "#" },
+      { label: "Designer Support", href: "#" },
+    ],
   },
   {
     title: "Company",
-    links: ["About Us", "Payment Protection", "Help Center", "Contact"],
+    links: [
+      { label: "About Us", href: "/#top" },
+      { label: "Payment Protection", href: "/#protection" },
+      { label: "Help Center", href: "#" },
+      { label: "Contact", href: "#" },
+      { label: "Delete My Account", href: "/delete-account" },
+    ],
   },
 ];
 
@@ -35,13 +53,13 @@ export default function Footer() {
                 <h4 className="text-sm font-bold text-ink">{col.title}</h4>
                 <ul className="mt-4 space-y-3">
                   {col.links.map((link) => (
-                    <li key={link}>
-                      <a
-                        href="#"
+                    <li key={link.label}>
+                      <Link
+                        href={link.href}
                         className="text-sm text-subtext transition-colors hover:text-accent"
                       >
-                        {link}
-                      </a>
+                        {link.label}
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -55,7 +73,7 @@ export default function Footer() {
             © {new Date().getFullYear()} House of GLAME. All rights reserved.
           </p>
           <div className="flex gap-5 text-xs text-subtext">
-            <a href="#" className="hover:text-accent">Privacy Policy</a>
+            <Link href="/privacy" className="hover:text-accent">Privacy Policy</Link>
             <a href="#" className="hover:text-accent">Terms of Service</a>
           </div>
         </div>

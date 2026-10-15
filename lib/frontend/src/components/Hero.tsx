@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { images } from "@/lib/images";
 
 const badges = ["Custom-Made", "Ready-to-Wear", "Pre-Loved"];
@@ -33,12 +34,12 @@ export default function Hero() {
         </p>
 
         <div className="mt-10 flex flex-wrap items-center gap-4 animate-fade-up">
-          <a
-            href="#offerings"
+          <Link
+            href="/designers"
             className="rounded-full bg-secondary px-7 py-3.5 text-sm font-bold text-accent-deep shadow-lg shadow-black/20 transition-transform hover:-translate-y-0.5"
           >
-            Explore the Collection
-          </a>
+            Explore Designers
+          </Link>
           <a
             href="#designers"
             className="rounded-full border border-white/40 px-7 py-3.5 text-sm font-bold text-white transition-colors hover:bg-white/10"

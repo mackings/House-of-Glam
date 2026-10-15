@@ -6,6 +6,7 @@ import 'package:hog/App/Auth/Views/signin.dart';
 import 'package:hog/App/Banks/View/userBanks.dart';
 import 'package:hog/App/Home/Views/Orders/Transactions/TransactionHistory.dart';
 import 'package:hog/App/Legal/Views/legal_hub.dart';
+import 'package:hog/App/Support/Views/live_chat.dart';
 import 'package:hog/App/UserProfile/Api/profileViewS.dart';
 import 'package:hog/App/UserProfile/model/profileViewModel.dart';
 import 'package:hog/App/UserProfile/widgets/ProfileCards.dart';
@@ -338,13 +339,30 @@ class _UserProfileViewState extends State<UserProfileView> {
                       const SizedBox(height: 10),
                       const _SectionTitle("Support"),
                       GestureDetector(
-                        onTap: () => _launchWhatsApp("2348137159066"),
+                        onTap: () {
+                          Nav.push(
+                            context,
+                            LiveChatPage(
+                              visitorName: profile.fullName,
+                              visitorEmail: profile.email,
+                            ),
+                          );
+                        },
                         child: const ProfileInfoCard(
                           icon: Icons.chat_bubble_outline_rounded,
-                          title: "WhatsApp Support",
+                          title: "Live Chat",
                           value: "Chat with Support",
                           showArrow: true,
                           accent: true,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => _launchWhatsApp("2348137159066"),
+                        child: const ProfileInfoCard(
+                          icon: Icons.phone_in_talk_outlined,
+                          title: "WhatsApp Support",
+                          value: "Chat on WhatsApp",
+                          showArrow: true,
                         ),
                       ),
                       GestureDetector(

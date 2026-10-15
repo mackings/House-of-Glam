@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hog/App/Home/Views/Orders/CarrierTrackingView.dart';
 import 'package:hog/TailorApp/Home/Api/Delivery.dart';
 import 'package:hog/TailorApp/Home/Model/deliveryModel.dart';
 import 'package:hog/components/Navigator.dart';
@@ -97,7 +98,9 @@ void showDeliveryDetails(
                                     _InfoChip(
                                       icon: Icons.confirmation_number_outlined,
                                       label:
-                                          "Tracking ID: ${tracking.trackingNumber}",
+                                          tracking.hasCarrierShipment
+                                              ? "Waybill: ${tracking.carrierTrackingNumber}"
+                                              : "Tracking ID: ${tracking.trackingNumber}",
                                     ),
                                     _InfoChip(
                                       icon:
@@ -223,6 +226,39 @@ void showDeliveryDetails(
                                     ),
                                   ),
                                 ],
+                                if (tracking.hasCarrierShipment) ...[
+                                  const SizedBox(height: 20),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: FilledButton.icon(
+                                      onPressed: () {
+                                        Nav.push(
+                                          modalContext,
+                                          CarrierTrackingView(
+                                            carrierTrackingNumber:
+                                                tracking.carrierTrackingNumber!,
+                                            carrier: tracking.carrier!,
+                                          ),
+                                        );
+                                      },
+                                      icon: const Icon(
+                                        Icons.local_shipping_rounded,
+                                      ),
+                                      label: const Text("Track Live"),
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor: AppColors.accent,
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 16,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            18,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                                 const SizedBox(height: 20),
                                 Container(
                                   width: double.infinity,
@@ -240,9 +276,11 @@ void showDeliveryDetails(
                                         color: AppColors.accent,
                                       ),
                                       const SizedBox(width: 10),
-                                      const Expanded(
+                                      Expanded(
                                         child: CustomText(
-                                          "Copy tracking number",
+                                          tracking.hasCarrierShipment
+                                              ? "Copy waybill number"
+                                              : "Copy tracking number",
                                           fontSize: 13,
                                           fontWeight: FontWeight.w700,
                                           color: AppColors.ink,
@@ -254,18 +292,25 @@ void showDeliveryDetails(
                                           Clipboard.setData(
                                             ClipboardData(
                                               text:
-                                                  tracking.trackingNumber
-                                                      .toString(),
+                                                  tracking.hasCarrierShipment
+                                                      ? tracking
+                                                          .carrierTrackingNumber!
+                                                      : tracking.trackingNumber
+                                                          .toString(),
                                             ),
                                           );
                                           ScaffoldMessenger.of(
                                             modalContext,
                                           ).showSnackBar(
-                                            const SnackBar(
+                                            SnackBar(
                                               content: Text(
-                                                "Tracking ID copied",
+                                                tracking.hasCarrierShipment
+                                                    ? "Waybill number copied"
+                                                    : "Tracking ID copied",
                                               ),
-                                              duration: Duration(seconds: 1),
+                                              duration: const Duration(
+                                                seconds: 1,
+                                              ),
                                             ),
                                           );
                                         },

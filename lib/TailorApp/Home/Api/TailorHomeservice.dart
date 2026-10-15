@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/App/Home/Model/carrierShipmentModel.dart';
 import 'package:hog/constants/api_config.dart';
 import 'package:hog/TailorApp/Home/Model/AssignedMaterial.dart';
 import 'package:hog/TailorApp/Home/Model/materialModel.dart';
@@ -192,6 +193,64 @@ class TailorHomeService {
     } catch (e) {
       final friendlyMessage = ErrorHandler.getUserFriendlyMessage(e);
       throw Exception(friendlyMessage);
+    }
+  }
+
+  /// Creates a real Fez shipment for a material order and returns its
+  /// waybill number, via POST /tracking/createCarrierShipment. Fez
+  /// auto-detects domestic/export/import from the vendor's and buyer's
+  /// country profile fields — no carrier or service type to choose. Unlike
+  /// [deliverAssignedMaterial] (the legacy self-reported tracking number),
+  /// this is a real, trackable shipment.
+  Future<CarrierShipmentResult> createCarrierShipment({
+    required String materialId,
+    required double weightKg,
+    String? contentDescription,
+  }) async {
+    final token = await SecurePrefs.getToken();
+    final url = Uri.parse("$baseUrl/tracking/createCarrierShipment");
+
+    final body = {
+      "materialId": materialId,
+      "packages": [
+        {"weight": weightKg},
+      ],
+      if (contentDescription != null && contentDescription.trim().isNotEmpty)
+        "contentDescription": contentDescription.trim(),
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode(body),
+      );
+
+      print("➡️ POST Request: $url");
+      print("📦 Payload: $body");
+      print("⬅️ Response [${response.statusCode}]: ${response.body}");
+
+      if (response.body.isEmpty) {
+        return const CarrierShipmentResult(
+          success: false,
+          message: "Shipment service returned an empty response.",
+        );
+      }
+
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        return CarrierShipmentResult.fromJson(decoded);
+      }
+      return const CarrierShipmentResult(
+        success: false,
+        message: "Unable to create shipment.",
+      );
+    } catch (e) {
+      final friendlyMessage = ErrorHandler.getUserFriendlyMessage(e);
+      return CarrierShipmentResult(success: false, message: friendlyMessage);
     }
   }
 

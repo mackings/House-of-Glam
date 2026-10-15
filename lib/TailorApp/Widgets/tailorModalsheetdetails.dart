@@ -7,6 +7,97 @@ import 'package:hog/constants/currencyHelper.dart';
 import 'package:hog/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
+class _ShipmentDetails {
+  final double weightKg;
+  final String? contentDescription;
+
+  const _ShipmentDetails({required this.weightKg, this.contentDescription});
+}
+
+/// Fez needs a package weight to price and create the shipment, and that's
+/// not collected anywhere earlier in the order flow — so ask for it right
+/// before dispatch instead of blocking checkout on it.
+Future<_ShipmentDetails?> _promptForShipmentDetails(BuildContext context) {
+  final weightController = TextEditingController();
+  final descriptionController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
+
+  return showDialog<_ShipmentDetails>(
+    context: context,
+    builder:
+        (dialogContext) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: const Text("Package Details"),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CustomText(
+                  "Fez needs the package weight to calculate and create the shipment.",
+                  fontSize: 12,
+                  color: AppColors.subtext,
+                  textAlign: TextAlign.left,
+                ),
+                const SizedBox(height: 14),
+                TextFormField(
+                  controller: weightController,
+                  autofocus: true,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: "Package weight (kg)",
+                  ),
+                  validator: (value) {
+                    final parsed = double.tryParse((value ?? '').trim());
+                    if (parsed == null || parsed <= 0) {
+                      return "Enter a valid weight in kg";
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: "Contents (optional)",
+                    hintText: "e.g. Ankara fabric and tailored suit",
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text("Cancel"),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (formKey.currentState?.validate() != true) return;
+                final description = descriptionController.text.trim();
+                Navigator.pop(
+                  dialogContext,
+                  _ShipmentDetails(
+                    weightKg: double.parse(weightController.text.trim()),
+                    contentDescription:
+                        description.isEmpty ? null : description,
+                  ),
+                );
+              },
+              style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
+              child: const Text("Create Shipment"),
+            ),
+          ],
+        ),
+  ).whenComplete(() {
+    weightController.dispose();
+    descriptionController.dispose();
+  });
+}
+
 void showTailorMaterialDetails(
   BuildContext parentContext,
   TailorAssignedMaterial item,
@@ -65,11 +156,38 @@ void showTailorMaterialDetails(
                         : "Unpaid";
 
                 Future<void> deliverAttire() async {
+                  // Fez needs a package weight to price and create the
+                  // shipment — ask for it before calling the API rather
+                  // than blocking on it earlier in the order flow.
+                  final details = await _promptForShipmentDetails(
+                    modalContext,
+                  );
+                  if (details == null) return;
+
                   try {
                     setState(() => isLoading = true);
-                    final message = await service.deliverAssignedMaterial(
-                      material.id,
+                    final result = await service.createCarrierShipment(
+                      materialId: material.id,
+                      weightKg: details.weightKg,
+                      contentDescription: details.contentDescription,
                     );
+
+                    if (!result.success) {
+                      if (!parentContext.mounted) {
+                        return;
+                      }
+                      setState(() => isLoading = false);
+                      // Leave the modal open — Fez failures here are
+                      // usually fixable (missing buyer state, unsupported
+                      // country) rather than a reason to abandon dispatch.
+                      ScaffoldMessenger.of(parentContext).showSnackBar(
+                        SnackBar(
+                          content: Text(result.message),
+                          backgroundColor: AppColors.danger,
+                        ),
+                      );
+                      return;
+                    }
 
                     final refreshed = await service.fetchAssignedMaterials();
                     TailorAssignedMaterial? updatedItem;
@@ -95,17 +213,20 @@ void showTailorMaterialDetails(
                     if (Navigator.of(modalContext).canPop()) {
                       Navigator.of(modalContext).pop();
                     }
-                    ScaffoldMessenger.of(
-                      parentContext,
-                    ).showSnackBar(SnackBar(content: Text(message)));
+                    ScaffoldMessenger.of(parentContext).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          result.hasWaybill
+                              ? "${result.message} — Waybill: ${result.carrierTrackingNumber}"
+                              : result.message,
+                        ),
+                      ),
+                    );
                   } catch (e) {
                     if (!parentContext.mounted) {
                       return;
                     }
                     setState(() => isLoading = false);
-                    if (Navigator.of(modalContext).canPop()) {
-                      Navigator.of(modalContext).pop();
-                    }
                     ScaffoldMessenger.of(
                       parentContext,
                     ).showSnackBar(SnackBar(content: Text("❌ $e")));

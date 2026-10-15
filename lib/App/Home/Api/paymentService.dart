@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:hog/App/Auth/Api/secure.dart';
+import 'package:hog/App/Home/Model/carrierRateModel.dart';
+import 'package:hog/App/Home/Model/carrierTrackingModel.dart';
 import 'package:hog/constants/api_config.dart';
 import 'package:http/http.dart' as http;
 
@@ -147,7 +149,7 @@ class PaymentService {
     );
 
     final payload = {
-      "shipmentMethod": shipmentMethod,
+      "shipmentMethod": shipmentMethod.toLowerCase(),
       if (address != null && address.isNotEmpty) "address": address,
       if (pickupCountryId != null) "pickupCountryId": pickupCountryId,
       if (pickupStateId != null) "pickupStateId": pickupStateId,
@@ -184,6 +186,120 @@ class PaymentService {
     }
   }
 
+  /// Default single-package dimensions used when the caller doesn't have
+  /// real garment weight/size on hand yet. Matches the backend doc's own
+  /// example package so live carrier rates are still representative.
+  static const List<Map<String, dynamic>> _defaultPackages = [
+    {
+      "weight": 1.5,
+      "dimensions": {"length": 35, "width": 25, "height": 5},
+    },
+  ];
+
+  /// Get live Fez Delivery rates for a review. Fez auto-detects domestic vs.
+  /// export vs. import from the vendor/buyer country profile fields, so
+  /// there's no carrier list to pick from — just package weight/dimensions.
+  ///
+  /// Returns an empty [CarrierRatesResult] with [CarrierRatesResult.displayError]
+  /// set on failure (never null), since Fez reports things like an
+  /// unsupported route or a missing buyer state as 4xx responses with a
+  /// useful `message` — that message is parsed regardless of status code so
+  /// the UI can always explain why to the buyer instead of a generic error.
+  static Future<CarrierRatesResult> getCarrierRates({
+    required String reviewId,
+    double? weight,
+    List<Map<String, dynamic>>? packages,
+  }) async {
+    final token = await SecurePrefs.getToken();
+    final url = Uri.parse(
+      "$localBaseURL/deliveryRate/carrier-rates/$reviewId",
+    );
+
+    final payload = <String, dynamic>{
+      if (weight != null) "weight": weight,
+      if (weight == null) "packages": packages ?? _defaultPackages,
+    };
+
+    try {
+      final headers = _buildHeaders(token);
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode(payload),
+      );
+
+      _logPaymentResponse(
+        label: "Carrier Rates",
+        url: url,
+        payload: payload,
+        headers: headers,
+        response: response,
+      );
+
+      if (response.body.isEmpty) {
+        return const CarrierRatesResult(
+          errorMessage: "Delivery service returned an empty response.",
+        );
+      }
+
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        return CarrierRatesResult.fromJson(decoded);
+      }
+      return const CarrierRatesResult();
+    } catch (e) {
+      print("❌ Error Carrier Rates: $e");
+      return const CarrierRatesResult(
+        errorMessage: "Unable to reach the delivery service. Please try again.",
+      );
+    }
+  }
+
+  /// Live tracking for a Fez waybill, via
+  /// GET /tracking/carrier/:carrierTrackingNumber?carrier=fez. Callable by
+  /// both the buyer and the designer for the same shipment.
+  static Future<CarrierTrackingResult> trackCarrierShipment({
+    required String carrierTrackingNumber,
+    String carrier = "fez",
+  }) async {
+    final token = await SecurePrefs.getToken();
+    final url = Uri.parse(
+      "$localBaseURL/tracking/carrier/$carrierTrackingNumber?carrier=$carrier",
+    );
+
+    try {
+      final headers = _buildHeaders(token);
+      final response = await http.get(url, headers: headers);
+
+      _logPaymentResponse(
+        label: "Carrier Tracking",
+        url: url,
+        payload: const {},
+        headers: headers,
+        response: response,
+      );
+
+      if (response.body.isEmpty) {
+        return const CarrierTrackingResult(
+          errorMessage: "Tracking service returned an empty response.",
+        );
+      }
+
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        return CarrierTrackingResult.fromJson(decoded);
+      }
+      return const CarrierTrackingResult(
+        errorMessage: "Unable to fetch tracking info.",
+      );
+    } catch (e) {
+      print("❌ Error Carrier Tracking: $e");
+      return const CarrierTrackingResult(
+        errorMessage: "Unable to reach the tracking service. Please try again.",
+      );
+    }
+  }
+
   /// Get full pickup hierarchy (country -> state -> locations)
   static Future<List<PickupCountryOption>> getPickupHierarchy() async {
     final token = await SecurePrefs.getToken();
@@ -216,11 +332,13 @@ class PaymentService {
     }
   }
 
-  /// Create Part Payment (Using unified endpoint with paymentStatus)
+  /// Create Part Payment — Paystack. This is a dedicated endpoint, distinct
+  /// from [createFullPayment]: no delivery fee is charged at this stage
+  /// (deliveryFee: 0 in the response), no shipmentMethod, no paymentStatus
+  /// field — the URL itself is what marks this as a part payment.
   static Future<Map<String, dynamic>?> createPartPayment({
     required String reviewId,
     required String amount,
-    required String shipmentMethod,
     String? address,
     String? pickupCountryId,
     String? pickupStateId,
@@ -228,13 +346,11 @@ class PaymentService {
   }) async {
     final token = await SecurePrefs.getToken();
     final url = Uri.parse(
-      "$localBaseURL/material/createPaymentOnline/$reviewId",
+      "$localBaseURL/material/createPartPaymentOnline/$reviewId",
     );
 
     final payload = {
       "amount": amount,
-      "shipmentMethod": shipmentMethod,
-      "paymentStatus": "part payment",
       if (address != null) "address": address,
       if (pickupCountryId != null) "pickupCountryId": pickupCountryId,
       if (pickupStateId != null) "pickupStateId": pickupStateId,
@@ -271,11 +387,13 @@ class PaymentService {
     }
   }
 
-  /// Create Full Payment (Using unified endpoint with paymentStatus)
+  /// Create Full Payment — Paystack. `shipmentMethod` is no longer part of
+  /// this contract (the backend gets a live Fez quote itself from `weight`
+  /// and adds it to `amount`); `weight` replaces it.
   static Future<Map<String, dynamic>?> createFullPayment({
     required String reviewId,
     required String amount,
-    required String shipmentMethod,
+    double? weight,
     String? address,
     String? pickupCountryId,
     String? pickupStateId,
@@ -288,8 +406,8 @@ class PaymentService {
 
     final payload = {
       "amount": amount,
-      "shipmentMethod": shipmentMethod,
       "paymentStatus": "full payment",
+      if (weight != null) "weight": weight,
       if (address != null) "address": address,
       if (pickupCountryId != null) "pickupCountryId": pickupCountryId,
       if (pickupStateId != null) "pickupStateId": pickupStateId,

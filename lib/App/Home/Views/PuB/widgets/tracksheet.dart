@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hog/App/Auth/Api/tracking.dart';
 import 'package:hog/App/Auth/Model/trackingmodel.dart';
+import 'package:hog/App/Home/Views/Orders/CarrierTrackingView.dart';
+import 'package:hog/components/Navigator.dart';
 import 'package:hog/components/button.dart';
 import 'package:hog/components/texts.dart';
 import 'package:hog/theme/app_theme.dart';
@@ -125,7 +127,9 @@ class _TrackingDetailSheetState extends State<TrackingDetailSheet> {
                               ),
                               const SizedBox(height: 2),
                               CustomText(
-                                "Tracking ID: ${record.trackingNumber}",
+                                record.hasCarrierShipment
+                                    ? "Waybill: ${record.carrierTrackingNumber}"
+                                    : "Tracking ID: ${record.trackingNumber}",
                                 fontSize: 12,
                                 color: AppColors.subtext,
                                 textAlign: TextAlign.left,
@@ -283,6 +287,33 @@ class _TrackingDetailSheetState extends State<TrackingDetailSheet> {
                         (m) => Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: _MeasurementCard(measurement: m),
+                        ),
+                      ),
+                    ],
+                    if (record.hasCarrierShipment) ...[
+                      const SizedBox(height: 22),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: () {
+                            Nav.push(
+                              context,
+                              CarrierTrackingView(
+                                carrierTrackingNumber:
+                                    record.carrierTrackingNumber!,
+                                carrier: record.carrier!,
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.local_shipping_rounded),
+                          label: const Text("Track Live"),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.accent,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                          ),
                         ),
                       ),
                     ],

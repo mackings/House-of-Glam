@@ -1,4 +1,4 @@
-package com.example.hog
+package com.hog.houseofglame
 
 import io.flutter.embedding.android.FlutterActivity
 
